@@ -3,3 +3,6 @@ databaseChangeLog:
   - preConditions:
     - runningAs:
         username: collectionexercisesvc
+
+  - include:
+      file: database/changes/release-10.37.0/changelog.yml

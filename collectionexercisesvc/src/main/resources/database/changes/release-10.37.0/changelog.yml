@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.37.0-1
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Collection Exercise foundation schema
+            path: collectionexercisefoundation_schema.sql
+            relativeToChangelogFile: true
+            splitStatements: false
