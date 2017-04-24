@@ -1,0 +1,59 @@
+# Created by https://www.gitignore.io
+
+*~
+
+### Eclipse ###
+*.pydevproject
+.factorypath
+.metadata
+.gradle
+bin/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# Eclipse Core
+.project
+
+# IntelliJ
+*.iml
+.idea/
+out/
+tools/addend/target/classes/
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# TeXlipse plugin
+.texlipse
+
+# IntelliJ
+*.iml
+.idea/
+out/
+tools/addend/target/classes/
+
+target
+*.log
+*.data
+*.redo
+*.backup

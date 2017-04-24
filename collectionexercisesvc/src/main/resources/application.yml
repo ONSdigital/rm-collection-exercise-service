@@ -1,0 +1,110 @@
+info:
+  contactEmail: martin.humphrey@ons.gov.uk
+  version: ${project.version}
+  commit: ${buildNumber}
+  branch: ${scmBranch}
+  buildTime: ${timestamp}
+
+# logging config here as a reminder as to how to override logback from cmd line
+# ie -Dlogging.level.org.springframework=DEBUG
+logging:
+  level:
+    uk.gov.ons.ctp: INFO
+    org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanExtractor: ERROR
+    org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
+
+liquibase:
+  user: collectionexercisesvc
+  password: collectionexercisesvc
+  default-schema: collectionexercise
+  url: jdbc:postgresql://localhost:5432/postgres
+  changeLog: classpath:/database/changelog-master.yml
+
+management:
+  port: 8245
+  context-path: /mgmt
+  security:
+    role: SUPERUSER
+    enabled: true
+  health:
+    mongo:
+      enabled: true
+    rabbit:
+      enabled: false
+
+server:
+  port: 8145
+  servlet-path: /
+
+endpoints:
+  autoconfig:
+    enabled: true
+    sensitive: true
+  beans:
+    enabled: true
+    sensitive: true
+  configprops:
+    enabled: true
+    sensitive: true
+  dump:
+    enabled: true
+    sensitive: true
+  env:
+    enabled: true
+    sensitive: true
+  info:
+    enabled: true
+    sensitive: true
+  metrics:
+    enabled: true
+    sensitive: true
+  mappings:
+    enabled: true
+    sensitive: true
+  shutdown:
+    enabled: true
+    sensitive: true
+  trace:
+    enabled: true
+    sensitive: true
+
+spring:
+  output:
+    ansi:
+      enabled: never
+
+  application:
+    name: ONS CollectionExerciseSvc
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: collectionexercisesvc
+    password: collectionexercisesvc
+    driverClassName: org.postgresql.Driver
+    tomcat:
+      initial-size: 5
+      max-active: 10
+      max-idle: 5
+      min-idle: 3
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        ddl-auto: update
+        default_schema: collectionexercise
+
+  sleuth:
+    sampler:
+      percentage: 10
+
+data-grid:
+  address: localhost:6379
+  lock-time-to-live-seconds: 3600
+
+rabbitmq:
+  username: guest
+  password: guest
+  host: localhost
+  virtualhost: /
