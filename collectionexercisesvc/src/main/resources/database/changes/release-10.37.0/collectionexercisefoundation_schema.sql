@@ -43,6 +43,16 @@ CREATE SEQUENCE sampleunitgroupidseq
   CACHE 1;
 
 
+-- Sequence:   exerciseidseq
+-- DROP SEQUENCE   exerciseidseq;
+
+CREATE SEQUENCE exerciseidseq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 999999999999
+  START 1
+  CACHE 1;
+
 -- Table: survey
 CREATE TABLE survey
 (
@@ -98,8 +108,7 @@ ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN K
 -- Table: CollectionExercise
 CREATE TABLE CollectionExercise
 (
-exerciseid                 integer NOT NULL,
-scheduleddatetime          timestamp with time zone,
+exerciseid                 bigint NOT NULL DEFAULT nextval('exerciseidseq'::regclass),
 scheduledstartdatetime     timestamp with time zone,
 scheduledexecutiondatetime timestamp with time zone,
 scheduledreturndatetime    timestamp with time zone,
@@ -130,7 +139,7 @@ ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exerciseid_fkey         FOREI
 
 CREATE TABLE ExerciseSampleUnitGroup
 (
-sampleunitgroupid     bigint NOT NULL DEFAULT nextval('  sampleunitgroupidseq'::regclass),
+sampleunitgroupid     bigint NOT NULL DEFAULT nextval('sampleunitgroupidseq'::regclass),
 exerciseid            integer NOT NULL,
 formtype              character varying(10) NOT NULL, -- census questionset
 state                 character varying(20) NOT NULL,
