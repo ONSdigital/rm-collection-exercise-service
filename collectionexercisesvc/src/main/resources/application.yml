@@ -108,3 +108,10 @@ rabbitmq:
   password: guest
   host: localhost
   virtualhost: /
+
+messaging:
+  consumingThreads: 1
+  pubMaxAttempts: 3
+  conMaxAttempts: 1
+  prefetchCount: 10
+  txSize: 1

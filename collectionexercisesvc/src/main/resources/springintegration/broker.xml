@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+  http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.6.xsd">
+
+	<rabbit:connection-factory id="connectionFactory" 
+	                           host="${rabbitmq.host}" 
+	                           username="${rabbitmq.username}" 
+	                           password="${rabbitmq.password}"/>
+
+	<rabbit:template id="amqpTemplate" connection-factory="connectionFactory"  retry-template="retryTemplate"/>
+	
+	<!-- Retry policy for a failed publish -->
+	<bean id="retryTemplate" class="org.springframework.retry.support.RetryTemplate">
+      <property name="backOffPolicy">
+        <bean class="org.springframework.retry.backoff.ExponentialBackOffPolicy">
+          <property name="initialInterval" value="1000" />
+          <property name="multiplier" value="3" />
+          <property name="maxInterval" value="30000" />
+        </bean>
+      </property>
+      <property name="retryPolicy">
+        <bean class="org.springframework.retry.policy.SimpleRetryPolicy">
+          <property name="maxAttempts" value="${messaging.pubMaxAttempts}" />
+        </bean>
+      </property>
+   </bean>
+
+	<!-- Start of Queues -->
+	<rabbit:queue name="Sample.SampleDelivery" durable="true">
+		<rabbit:queue-arguments value-type="java.lang.String">
+			<entry key="x-dead-letter-exchange" value="sample-deadletter-exchange" />
+			<entry key="x-dead-letter-routing-key" value="Sample.SampleDelivery.binding" />
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+
+	<rabbit:queue name="Sample.SampleDeliveryDLQ" durable="true" />
+
+	<rabbit:queue name="Sample.InvalidSampleInstructions" durable="true" />
+	<!-- End of Queues -->
+
+	<!-- Start of Exchanges -->
+	<rabbit:direct-exchange name="sample-outbound-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Sample.SampleDelivery" key="Sample.SampleDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="sample-deadletter-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Sample.SampleDeliveryDLQ" key="Sample.SampleDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="sample-invalid-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Sample.InvalidSampleInstructions" key="Sample.SampleDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+	<!-- End of Exchanges -->
+
+</beans>
