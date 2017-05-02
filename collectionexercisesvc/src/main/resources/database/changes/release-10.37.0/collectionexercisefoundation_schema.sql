@@ -22,16 +22,6 @@ CREATE TABLE messagelog
 );
 
 
--- Sequence:   SampleUnitidseq
--- DROP SEQUENCE   SampleUnitidseq;
-
-CREATE SEQUENCE SampleUnitidseq
-  INCREMENT 1
-  MINVALUE 1
-  MAXVALUE 999999999999
-  START 1
-  CACHE 1;
-
 -- Sequence:   sampleunitgroupidseq
 -- DROP SEQUENCE   sampleunitgroupidseq;
 
@@ -155,7 +145,7 @@ ALTER TABLE ONLY   ExerciseSampleUnitGroup ADD CONSTRAINT state_fkey            
 -- Table: ExerciseSampleUnit
 CREATE TABLE ExerciseSampleUnit
 (
-sampleunitid        bigint NOT NULL DEFAULT nextval('  sampleunitidseq'::regclass),
+sampleunitid        bigint NOT NULL,
 sampleunitgroupid   integer NOT NULL, 
 sampleunitref       character varying(20) NOT NULL,
 sampleunittype      character varying(2) NOT NULL -- example 'H','C','B' 'BI'
