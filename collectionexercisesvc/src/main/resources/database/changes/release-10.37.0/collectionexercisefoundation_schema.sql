@@ -1,7 +1,6 @@
 set schema 'collectionexercise';
 
 -- Create Sequences
-
 CREATE SEQUENCE messageseq
     START WITH 1
     INCREMENT BY 1
@@ -24,7 +23,6 @@ CREATE TABLE messagelog
 
 -- Sequence:   sampleunitgroupidseq
 -- DROP SEQUENCE   sampleunitgroupidseq;
-
 CREATE SEQUENCE sampleunitgroupidseq
   INCREMENT 1
   MINVALUE 1
@@ -35,13 +33,14 @@ CREATE SEQUENCE sampleunitgroupidseq
 
 -- Sequence:   exerciseidseq
 -- DROP SEQUENCE   exerciseidseq;
-
 CREATE SEQUENCE exerciseidseq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 999999999999
   START 1
   CACHE 1;
+
+
 
 -- Table: survey
 CREATE TABLE survey
@@ -51,6 +50,7 @@ CREATE TABLE survey
 );
 
 ALTER TABLE ONLY survey ADD CONSTRAINT surveyid_pkey PRIMARY KEY (surveyid);
+
 
 
 -- Table: state
@@ -81,6 +81,7 @@ INSERT INTO   sampleunittype(sampleunittype) VALUES('B');
 INSERT INTO   sampleunittype(sampleunittype) VALUES('BI');
 
 
+
 -- Table: CaseTypeDefault
 CREATE TABLE CaseTypeDefault
 (
@@ -93,6 +94,7 @@ actionplanid           integer NOT NULL
 ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT casetypedefaultid_pkey PRIMARY KEY (casetypedefaultid);
 ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT surveyid_fkey          FOREIGN KEY (surveyid)       REFERENCES survey(surveyid);
 ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN KEY (sampleunittype) REFERENCES sampleunittype(sampleunittype);
+
 
 
 -- Table: CollectionExercise
@@ -117,7 +119,7 @@ ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exerciseid_pkey PRIMARY KEY
 CREATE TABLE CaseTypeOverride
 (
 casetypeoverrideid     integer NOT NULL,
-exerciseid             integer NOT NULL,
+exerciseid             bigint NOT NULL,
 sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
 actionplanid           integer NOT NULL
 );
@@ -125,34 +127,37 @@ actionplanid           integer NOT NULL
 ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT casetypeoverrideid_pkey PRIMARY KEY (casetypeoverrideid);
 ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exerciseid_fkey         FOREIGN KEY (exerciseid) REFERENCES collectionexercise(exerciseid);
 
--- Table: ExerciseSampleUnitGroup
 
-CREATE TABLE ExerciseSampleUnitGroup
+
+-- Table: SampleUnitGroup
+CREATE TABLE SampleUnitGroup
 (
 sampleunitgroupid     bigint NOT NULL DEFAULT nextval('sampleunitgroupidseq'::regclass),
-exerciseid            integer NOT NULL,
+exerciseid            bigint NOT NULL,
 formtype              character varying(10) NOT NULL, -- census questionset
 state                 character varying(20) NOT NULL,
 createddatetime       timestamp with time zone,
 modifieddatetime      timestamp with time zone
 );
 
-ALTER TABLE ONLY   ExerciseSampleUnitGroup ADD CONSTRAINT sampleunitgroupid_pkey PRIMARY KEY (sampleunitgroupid);
-ALTER TABLE ONLY   ExerciseSampleUnitGroup ADD CONSTRAINT exerciseid_fkey        FOREIGN KEY (exerciseid) REFERENCES collectionexercise(exerciseid);
-ALTER TABLE ONLY   ExerciseSampleUnitGroup ADD CONSTRAINT state_fkey             FOREIGN KEY (state)      REFERENCES state(state);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT sampleunitgroupid_pkey PRIMARY KEY (sampleunitgroupid);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT exerciseid_fkey        FOREIGN KEY (exerciseid) REFERENCES collectionexercise(exerciseid);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT state_fkey             FOREIGN KEY (state)      REFERENCES state(state);
 
 
--- Table: ExerciseSampleUnit
-CREATE TABLE ExerciseSampleUnit
+
+-- Table: SampleUnit
+CREATE TABLE SampleUnit
 (
 sampleunitid        bigint NOT NULL,
-sampleunitgroupid   integer NOT NULL, 
+sampleunitgroupid   bigint NOT NULL, 
 sampleunitref       character varying(20) NOT NULL,
 sampleunittype      character varying(2) NOT NULL -- example 'H','C','B' 'BI'
 );
 
-ALTER TABLE ONLY   ExerciseSampleUnit ADD CONSTRAINT sampleunitid_pkey       PRIMARY KEY (sampleunitid);
-ALTER TABLE ONLY   ExerciseSampleUnit ADD CONSTRAINT sampleunitgroupid_fkey  FOREIGN KEY (sampleunitgroupid) REFERENCES ExerciseSampleUnitGroup(sampleunitgroupid);
-ALTER TABLE ONLY   ExerciseSampleUnit ADD CONSTRAINT sampleunittype_fkey     FOREIGN KEY (sampleunittype)    REFERENCES sampleunittype(sampleunittype);
+ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitid_pkey       PRIMARY KEY (sampleunitid);
+ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitgroupid_fkey  FOREIGN KEY (sampleunitgroupid) REFERENCES SampleUnitGroup(sampleunitgroupid);
+ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunittype_fkey     FOREIGN KEY (sampleunittype)    REFERENCES sampleunittype(sampleunittype);
+
 
 
