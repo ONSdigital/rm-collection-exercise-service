@@ -127,7 +127,7 @@
 							<artifactId>framework</artifactId>
 						</dependency>
 					</requiresUnpack>
-					<mainClass>uk.gov.ons.ctp.response.collection.CollectionexercisesvcApplication</mainClass>
+					<mainClass>uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>
