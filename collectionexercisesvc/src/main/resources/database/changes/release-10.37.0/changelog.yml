@@ -9,3 +9,13 @@ databaseChangeLog:
             path: collectionexercisefoundation_schema.sql
             relativeToChangelogFile: true
             splitStatements: false
+
+  - changeSet:
+      id: 10.37.0-2
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Collection Exercise seed data
+            path: BRES_CollectionExercise_seeddata.sql
+            relativeToChangelogFile: true
+            splitStatements: false
