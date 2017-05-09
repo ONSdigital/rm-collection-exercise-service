@@ -46,7 +46,7 @@ CREATE SEQUENCE exerciseidseq
 CREATE TABLE survey
 (
   surveyid integer NOT NULL,
-  name character varying(100) NOT NULL
+  surveyref character varying(100) NOT NULL
 );
 
 ALTER TABLE ONLY survey ADD CONSTRAINT surveyid_pkey PRIMARY KEY (surveyid);
