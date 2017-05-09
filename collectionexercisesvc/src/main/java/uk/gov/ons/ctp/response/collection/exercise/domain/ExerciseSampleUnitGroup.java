@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,19 +17,26 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Domain model object.
+ * Domain model object for sample unit groups.
  */
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "exercisesampleunitgroup", schema = "collectionexercise")
-public class SampleUnitGroup {
+@Table(name = "sampleunitgroup", schema = "collectionexercise")
+public class ExerciseSampleUnitGroup {
+
+  /**
+   * enum for sample unit group state
+   */
+  public enum SampleUnitGroupState {
+    INIT,
+    VALIDATED,
+    PUBLISHED;
+  }
 
   @Id
   @GenericGenerator(name = "sampleunitgroupseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
@@ -45,7 +54,8 @@ public class SampleUnitGroup {
   @Column(name = "formtype")
   private String formType;
 
-  private String state;
+  @Enumerated(EnumType.STRING)
+  private SampleUnitGroupState state;
 
   @Column(name = "createddatetime")
   private Timestamp createdDateTime;

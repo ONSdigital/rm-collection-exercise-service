@@ -99,6 +99,23 @@ spring:
     sampler:
       percentage: 10
 
+  zipkin:
+    enabled: false
+
+sample-svc:
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8171
+    # how many times should we attempt connection on failure
+    retry-attempts: 10
+    # sleep between retries
+    retry-pause-milli-seconds: 5000
+    # time to estab connection
+    connect-timeout-milli-seconds: 5000
+    # time to read response
+    read-timeout-milli-seconds: 5000
+
 data-grid:
   address: localhost:6379
   lock-time-to-live-seconds: 3600

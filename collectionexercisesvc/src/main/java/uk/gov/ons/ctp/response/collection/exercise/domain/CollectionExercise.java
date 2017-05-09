@@ -5,11 +5,11 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -28,6 +28,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "collectionexercise", schema = "collectionexercise")
 public class CollectionExercise {
+
+  /**
+   * enum for collection exercise state
+   */
+  public enum CollectionExerciseState {
+    PENDING,
+    EXECUTED,
+    VALIDATED,
+    PUBLISHED;
+  }
 
   @Id
   @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
@@ -59,8 +69,7 @@ public class CollectionExercise {
   @Column(name = "executedby")
   private String executedBy;
 
-  @OneToOne
-  @JoinColumn(name = "state", referencedColumnName = "state")
-  private State state;
+  @Enumerated(EnumType.STRING)
+  private CollectionExerciseState state;
 
 }
