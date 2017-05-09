@@ -101,6 +101,7 @@ ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN K
 CREATE TABLE CollectionExercise
 (
 exerciseid                 bigint NOT NULL DEFAULT nextval('exerciseidseq'::regclass),
+surveyid                   integer NOT NULL,
 scheduledstartdatetime     timestamp with time zone,
 scheduledexecutiondatetime timestamp with time zone,
 scheduledreturndatetime    timestamp with time zone,
@@ -113,6 +114,7 @@ state                      character varying(20) NOT NULL
 );
 
 ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exerciseid_pkey PRIMARY KEY (exerciseid);
+ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT surveyid_fkey   FOREIGN KEY (surveyid) REFERENCES survey(surveyid);
 
 
 -- Table: CaseTypeOverride
