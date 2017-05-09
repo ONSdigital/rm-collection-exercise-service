@@ -66,7 +66,7 @@ INSERT INTO   state(state) VALUES('PENDING');
 INSERT INTO   state(state) VALUES('EXECUTED');
 INSERT INTO   state(state) VALUES('VALIDATED');
 INSERT INTO   state(state) VALUES('PUBLISHED');
-INSERT INTO   state(state) VALUES('FAILED_VALIDATION');
+INSERT INTO   state(state) VALUES('FAILEDVALIDATION');
 
 
 -- Table: sampleunittype
