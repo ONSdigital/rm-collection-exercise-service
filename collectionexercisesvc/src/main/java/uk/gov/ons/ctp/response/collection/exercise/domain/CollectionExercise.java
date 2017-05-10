@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -10,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -33,6 +34,7 @@ public class CollectionExercise {
    * enum for collection exercise state
    */
   public enum CollectionExerciseState {
+    INIT,
     PENDING,
     EXECUTED,
     VALIDATED,
@@ -46,7 +48,11 @@ public class CollectionExercise {
   })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exerciseseq_gen")
   @Column(name = "exerciseid")
-  private BigInteger exerciseId;
+  private Integer exerciseId;
+
+  @ManyToOne
+  @JoinColumn(name = "surveyid", referencedColumnName = "surveyid")
+  private Survey survey;
 
   @Column(name = "scheduledstartdatetime")
   private Timestamp scheduledStartDateTime;

@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -11,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.rest.RestClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
@@ -19,6 +19,8 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /**
@@ -30,6 +32,9 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 public class SampleServiceImpl implements SampleService {
 
   private static final int TRANSACTION_TIMEOUT = 60;
+
+  @Autowired
+  private AppConfig appConfig;
 
   @Autowired
   private RestClient sampleRestClient;
@@ -44,9 +49,23 @@ public class SampleServiceImpl implements SampleService {
   private CollectionExerciseRepository collectRepo;
 
   @Override
-  public Integer requestSampleUnits(final Integer exerciseId) {
+  public SampleUnitsRequestDTO requestSampleUnits(final Integer exerciseId) {
 
-    return new Integer(1);
+    SampleUnitsRequestDTO replyDTO = null;
+
+    CollectionExercise collectionExercise = collectRepo
+        .findOne(exerciseId);
+    // Check collection exercise exists
+    if (collectionExercise != null) {
+      CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
+      requestDTO.setCollectionExerciseId(collectionExercise.getExerciseId());
+      requestDTO.setSurveyRef(collectionExercise.getSurvey().getSurveyRef());
+      requestDTO.setExerciseDateTime(collectionExercise.getScheduledStartDateTime());
+      replyDTO = sampleRestClient.postResource(
+          appConfig.getSampleSvc().getRequestSampleUnitsPath(),
+          requestDTO, SampleUnitsRequestDTO.class);
+    }
+    return replyDTO;
   }
 
   /**
@@ -64,14 +83,13 @@ public class SampleServiceImpl implements SampleService {
     ExerciseSampleUnit exerciseSampleUnit = null;
 
     CollectionExercise collectionExercise = collectRepo
-        .findOne(BigInteger.valueOf(sampleUnit.getCollectionExerciseId()));
+        .findOne(sampleUnit.getCollectionExerciseId());
 
     // Check collection exercise exists
     if (collectionExercise != null) {
 
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(collectionExercise.getExerciseId(),
-          BigInteger.valueOf(sampleUnit.getSampleId()))) {
+      if (!sampleUnitRepo.tupleExists(collectionExercise.getExerciseId(), sampleUnit.getSampleId())) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
@@ -81,7 +99,7 @@ public class SampleServiceImpl implements SampleService {
         sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
         exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitId(BigInteger.valueOf(sampleUnit.getSampleId()));
+        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleId());
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         exerciseSampleUnit.setSampleUnitType(sampleUnit.getSampleUnitType());

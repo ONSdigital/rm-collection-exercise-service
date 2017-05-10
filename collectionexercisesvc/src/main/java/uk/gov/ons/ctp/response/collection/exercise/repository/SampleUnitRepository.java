@@ -1,7 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
-import java.math.BigInteger;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +11,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
  * JPA repository for SampleUnit entities
  */
 @Repository
-public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, BigInteger> {
+public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, Integer> {
 
   /**
    * Check repository for sampleUnitId existence. May exist in different
@@ -29,6 +27,6 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "collectionexercise.collectionexercise ce "
       + "where su.sampleunitgroupid = sug.sampleunitgroupid and sug.exerciseid = ce.exerciseid and "
       + "ce.exerciseid = :p_exerciseid and su.sampleunitgroupid = :p_sampleunitid);", nativeQuery = true)
-  boolean tupleExists(@Param("p_exerciseid") BigInteger exerciseId, @Param("p_sampleunitid") BigInteger sampleUnitId);
+  boolean tupleExists(@Param("p_exerciseid") Integer exerciseId, @Param("p_sampleunitid") Integer sampleUnitId);
 
 }

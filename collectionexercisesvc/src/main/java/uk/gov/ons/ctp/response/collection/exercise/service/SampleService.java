@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /**
@@ -17,7 +18,7 @@ public interface SampleService {
    *          units.
    * @return the total number of sample units in the collection exercise.
    */
-  Integer requestSampleUnits(final Integer exerciseId);
+  SampleUnitsRequestDTO requestSampleUnits(final Integer exerciseId);
 
   /**
    * Save a SampleUnit

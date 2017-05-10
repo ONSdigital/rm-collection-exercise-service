@@ -8,8 +8,9 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.rest.RestClient;
-import uk.gov.ons.ctp.response.collection.exercise.config.Appconfig;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
 /**
  * The main entry point into the Collection Exercise Service SpringBoot
@@ -22,7 +23,17 @@ import uk.gov.ons.ctp.response.collection.exercise.config.Appconfig;
 public class CollectionExerciseApplication {
 
   @Autowired
-  private Appconfig appConfig;
+  private AppConfig appConfig;
+
+  /**
+   * Bean used to map exceptions for endpoints
+   *
+   * @return the service client
+   */
+  @Bean
+  public RestExceptionHandler restExceptionHandler() {
+    return new RestExceptionHandler();
+  }
 
   /**
    * Bean used to access Sample service through REST calls

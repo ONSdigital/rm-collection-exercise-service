@@ -11,4 +11,5 @@ import uk.gov.ons.ctp.common.rest.RestClientConfig;
 @Data
 public class SampleSvc {
   private RestClientConfig connectionConfig;
+  private String requestSampleUnitsPath;
 }

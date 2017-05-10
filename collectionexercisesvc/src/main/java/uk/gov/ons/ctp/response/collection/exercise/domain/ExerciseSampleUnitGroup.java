@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -45,7 +44,7 @@ public class ExerciseSampleUnitGroup {
   })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sampleunitgroupseq_gen")
   @Column(name = "sampleunitgroupid")
-  private BigInteger sampleUnitGroupId;
+  private Integer sampleUnitGroupId;
 
   @ManyToOne
   @JoinColumn(name = "exerciseid", referencedColumnName = "exerciseid")

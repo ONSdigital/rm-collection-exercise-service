@@ -1,7 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.math.BigInteger;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,7 +21,7 @@ public class ExerciseSampleUnit {
 
   @Id
   @Column(name = "sampleunitid")
-  private BigInteger sampleUnitId;
+  private Integer sampleUnitId;
 
   @ManyToOne
   @JoinColumn(name = "sampleunitgroupid", referencedColumnName = "sampleunitgroupid")

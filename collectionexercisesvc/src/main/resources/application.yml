@@ -20,6 +20,13 @@ liquibase:
   url: jdbc:postgresql://localhost:5432/postgres
   changeLog: classpath:/database/changelog-master.yml
 
+security:
+  basic:
+    enabled: false
+  user:
+    name: collectionexercise
+    password: ctp
+
 management:
   port: 8245
   context-path: /mgmt
@@ -103,10 +110,11 @@ spring:
     enabled: false
 
 sample-svc:
+  request-sample-units-path: /samples/sampleunitrequests
   connection-config:
     scheme: http
     host: localhost
-    port: 8171
+    port: 8125
     # how many times should we attempt connection on failure
     retry-attempts: 10
     # sleep between retries
