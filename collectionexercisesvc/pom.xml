@@ -7,7 +7,7 @@
 	<artifactId>collectionexercisesvc</artifactId>
 	<packaging>jar</packaging>
 
-	<name>collectionexercisesvc</name>
+	<name>CTP : CollectionExerciseSvc</name>
 	<description>CTP : CollectionExerciseSvc</description>
 
 	<parent>
@@ -88,18 +88,18 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>uk.gov.ons.ctp.common</groupId>
 			<artifactId>framework</artifactId>
 			<version>${common.version}</version>
 		</dependency>
 
 		<!-- API dependencies -->
+		<dependency>
+			<groupId>uk.gov.ons.ctp.product</groupId>
+			<artifactId>collectionexercisesvc-api</artifactId>
+			<version>10.37.0-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>uk.gov.ons.ctp.product</groupId>
 			<artifactId>samplesvc-api</artifactId>

@@ -24,6 +24,7 @@
 
 	<modules>
 		<module>collectionexercisesvc</module>
+		<module>collectionexercisesvc-api</module>
 	</modules>
 
 	<dependencyManagement>
@@ -52,6 +53,13 @@
     </scm>
 
 	<dependencies>
+
+        <!--  Used by API and entity objects -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Provides JUnit, Spring Test, AssertJ, Hamcrest, Mockito, JSONassert, 
 			JsonPath -->
