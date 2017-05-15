@@ -43,7 +43,7 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
 ## Execute Collection Exercise
-* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will execute the collection execise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will execute the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
 
 ### Example JSON  Response
 ```json
