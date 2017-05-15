@@ -35,8 +35,18 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     "completionFor": null,
     "scheduledReturn": "2017-06-30T00:00:00Z",
     "scheduledEnd": null,
+    "executedBy": "Fred Bloggs",
     "state": "EXECUTED",
-    "executedBy": "Fred Bloggs"
+    "caseTypes": [
+      {
+        "sampleUnitType": "B",
+        "actionPlan": "60df56d9-f491-4ac8-b256-a10154290a8b"
+      },
+      {
+        "sampleUnitType": "BI",
+        "actionPlan": "b1f46e33-a3ef-4e50-939d-c18f8a9f11bb"
+      }
+    ]
 }
 ```
 
