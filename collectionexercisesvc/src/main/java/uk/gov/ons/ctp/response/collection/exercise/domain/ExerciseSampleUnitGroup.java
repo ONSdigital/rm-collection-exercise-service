@@ -18,6 +18,7 @@ import org.hibernate.annotations.Parameter;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
 /**
  * Domain model object for sample unit groups.
@@ -27,15 +28,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "sampleunitgroup", schema = "collectionexercise")
 public class ExerciseSampleUnitGroup {
-
-  /**
-   * enum for sample unit group state
-   */
-  public enum SampleUnitGroupState {
-    INIT,
-    VALIDATED,
-    PUBLISHED;
-  }
 
   @Id
   @GenericGenerator(name = "sampleunitgroupseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {

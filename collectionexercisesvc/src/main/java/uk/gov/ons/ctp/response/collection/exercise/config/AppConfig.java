@@ -14,7 +14,8 @@ import lombok.Data;
 @ConfigurationProperties
 @Data
 public class AppConfig {
-	
+
   private SampleSvc sampleSvc;
-  
+  private RedissonConfig redissonConfig;
+
 }

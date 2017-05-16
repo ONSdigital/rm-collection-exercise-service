@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.common.state.BasicStateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
-import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
 /**
  * State transition manager factory for the collection exercise service.
@@ -38,12 +38,12 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
 
     StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupStateTransitionManager =
         createSampleUnitGroupStateTransitionManager();
-    managers.put(COLLLECTIONEXERCISE_ENTITY, sampleUnitGroupStateTransitionManager);
+    managers.put(SAMPLEUNITGROUP_ENTITY, sampleUnitGroupStateTransitionManager);
 
   }
 
   /**
-   * Create and initalise the factory with the concrete StateTransitionManager
+   * Create and initialise the factory with the concrete StateTransitionManager
    * for the CollectionExercise entity
    *
    * @return StateTransitionManager
@@ -54,36 +54,36 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     Map<CollectionExerciseState, Map<CollectionExerciseEvent, CollectionExerciseState>> transitions = new HashMap<>();
 
     // INIT
-    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForInit =
-        new HashMap<CollectionExerciseEvent, CollectionExerciseState>();
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForInit = new HashMap<>();
     transitionForInit.put(CollectionExerciseEvent.REQUEST, CollectionExerciseState.PENDING);
     transitions.put(CollectionExerciseState.INIT, transitionForInit);
 
     // PENDING
-    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForPending =
-        new HashMap<CollectionExerciseEvent, CollectionExerciseState>();
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForPending = new HashMap<>();
     transitionForPending.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTED);
+    transitionForPending.put(CollectionExerciseEvent.REQUEST, CollectionExerciseState.PENDING);
     transitions.put(CollectionExerciseState.PENDING, transitionForPending);
 
     // EXECUTED
-    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForExecuted =
-        new HashMap<CollectionExerciseEvent, CollectionExerciseState>();
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForExecuted = new HashMap<>();
     transitionForExecuted.put(CollectionExerciseEvent.VALIDATE, CollectionExerciseState.VALIDATED);
     transitionForExecuted.put(CollectionExerciseEvent.INVALIDATED, CollectionExerciseState.FAILEDVALIDATION);
     transitions.put(CollectionExerciseState.EXECUTED, transitionForExecuted);
 
     // VALIDATED
-    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForValidated =
-        new HashMap<CollectionExerciseEvent, CollectionExerciseState>();
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForValidated = new HashMap<>();
     transitionForValidated.put(CollectionExerciseEvent.PUBLISH, CollectionExerciseState.PUBLISHED);
     transitions.put(CollectionExerciseState.VALIDATED, transitionForValidated);
 
-    return new BasicStateTransitionManager<>(transitions);
+    StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionManager =
+        new BasicStateTransitionManager<>(transitions);
+
+    return collectionExerciseTransitionManager;
 
   }
 
   /**
-   * Create and initalise the factory with the concrete StateTransitionManager
+   * Create and initialise the factory with the concrete StateTransitionManager
    * for the SampleUnitGroup entity
    *
    * @return StateTransitionManager
@@ -94,20 +94,22 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     Map<SampleUnitGroupState, Map<SampleUnitGroupEvent, SampleUnitGroupState>> transitions = new HashMap<>();
 
     // INIT
-    Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForInit =
-        new HashMap<SampleUnitGroupEvent, SampleUnitGroupState>();
+    Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForInit = new HashMap<>();
     transitionForInit.put(SampleUnitGroupEvent.VALIDATE, SampleUnitGroupState.VALIDATED);
     transitions.put(SampleUnitGroupState.INIT, transitionForInit);
 
     // VALIDATED
-    Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForValidated =
-        new HashMap<SampleUnitGroupEvent, SampleUnitGroupState>();
+    Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForValidated = new HashMap<>();
     transitionForValidated.put(SampleUnitGroupEvent.PUBLISH, SampleUnitGroupState.PUBLISHED);
     transitions.put(SampleUnitGroupState.VALIDATED, transitionForValidated);
 
-    return new BasicStateTransitionManager<>(transitions);
+    StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitTransitionManager =
+        new BasicStateTransitionManager<>(transitions);
+
+    return sampleUnitTransitionManager;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public StateTransitionManager<?, ?> getStateTransitionManager(String entity) {
     return managers.get(entity);

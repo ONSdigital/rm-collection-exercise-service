@@ -124,9 +124,9 @@ sample-svc:
     # time to read response
     read-timeout-milli-seconds: 5000
 
-data-grid:
+redisson-config:
   address: localhost:6379
-  lock-time-to-live-seconds: 3600
+  time-to-live-seconds: 300
 
 rabbitmq:
   username: guest

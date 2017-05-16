@@ -19,6 +19,7 @@ import org.hibernate.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 
 /**
  * Domain model object.
@@ -29,17 +30,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "collectionexercise", schema = "collectionexercise")
 public class CollectionExercise {
-
-  /**
-   * enum for collection exercise state
-   */
-  public enum CollectionExerciseState {
-    INIT,
-    PENDING,
-    EXECUTED,
-    VALIDATED,
-    PUBLISHED;
-  }
 
   @Id
   @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
@@ -76,6 +66,9 @@ public class CollectionExercise {
   private String executedBy;
 
   @Enumerated(EnumType.STRING)
-  private CollectionExerciseState state;
+  private CollectionExerciseDTO.CollectionExerciseState state;
+
+  @Column(name = "samplesize")
+  private Integer sampleSize;
 
 }

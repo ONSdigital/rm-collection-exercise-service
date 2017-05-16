@@ -4,8 +4,10 @@ import java.text.ParseException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,9 +18,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.rest.RestClient;
+import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.message.impl.SendToCaseImpl;
-
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 
 /**
  * The main entry point into the Collection Exercise Service SpringBoot
@@ -35,6 +41,10 @@ public class CollectionExerciseApplication {
 
   @Autowired
   private SendToCaseImpl sendToCase;
+
+  private StateTransitionManagerFactory collectionExerciseStateTransitionManagerFactory;
+
+
   /**
    * Bean used to map exceptions for endpoints
    *
@@ -52,8 +62,7 @@ public class CollectionExerciseApplication {
    * @return the service client
    */
   @Bean
-  @Qualifier("SampleClient")
-  public RestClient SampleClient() {
+  public RestClient sampleSvcClientRestTemplate() {
     RestClient restHelper = new RestClient(appConfig.getSampleSvc().getConnectionConfig());
     return restHelper;
   }
@@ -67,6 +76,31 @@ public class CollectionExerciseApplication {
       };
 
   }
+  /**
+   * Bean to allow controlled state transitions of CollectionExercises.
+   *
+   * @return the state transition manager specifically for CollectionExercises
+   */
+  @SuppressWarnings("unchecked")
+  @Bean
+  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseSvcStateTransitionManager() {
+    return collectionExerciseStateTransitionManagerFactory
+        .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
+  }
+
+  /**
+   * Bean for access to all Redisson distributed objects.
+   *
+   * @return RedissonClient
+   */
+  @Bean
+  public RedissonClient redissonClient() {
+    Config config = new Config();
+    config.useSingleServer()
+        .setAddress(appConfig.getRedissonConfig().getAddress());
+    return Redisson.create(config);
+  }
+
   /**
    * Spring boot start-up
  * @throws ParseException 

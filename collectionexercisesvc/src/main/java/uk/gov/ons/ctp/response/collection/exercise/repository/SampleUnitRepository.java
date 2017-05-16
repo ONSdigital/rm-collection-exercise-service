@@ -29,4 +29,9 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "ce.exerciseid = :p_exerciseid and su.sampleunitgroupid = :p_sampleunitid);", nativeQuery = true)
   boolean tupleExists(@Param("p_exerciseid") Integer exerciseId, @Param("p_sampleunitid") Integer sampleUnitId);
 
+  @Query(value = "select count(*) from "
+      + "collectionexercise.sampleunit su, "
+      + "collectionexercise.sampleunitgroup sg "
+      + "where su.sampleunitgroupid = sg.sampleunitgroupid and sg.exerciseid = :p_exerciseid;", nativeQuery = true)
+  int countByExerciseId(@Param("p_exerciseid") Integer exerciseId);
 }
