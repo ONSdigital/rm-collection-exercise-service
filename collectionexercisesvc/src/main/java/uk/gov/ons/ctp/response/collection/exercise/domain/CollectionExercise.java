@@ -59,6 +59,9 @@ public class CollectionExercise {
   @Column(name = "scheduledsurveydate")
   private Timestamp scheduledSurveyDate;
 
+  @Column(name = "actualexecutiondatetime")
+  private Timestamp actualExecutionDateTime;
+
   @Column(name = "actualpublishdatetime")
   private Timestamp actualPublishDateTime;
 

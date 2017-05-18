@@ -23,15 +23,23 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
    */
   @Query(value = "select exists (select 1 from "
       + "collectionexercise.sampleunit su, "
-      + "collectionexercise.sampleunitgroup sug, "
+      + "collectionexercise.sampleunitgroup sg, "
       + "collectionexercise.collectionexercise ce "
-      + "where su.sampleunitgroupid = sug.sampleunitgroupid and sug.exerciseid = ce.exerciseid and "
+      + "where su.sampleunitgroupid = sg.sampleunitgroupid and sg.exerciseid = ce.exerciseid and "
       + "ce.exerciseid = :p_exerciseid and su.sampleunitgroupid = :p_sampleunitid);", nativeQuery = true)
   boolean tupleExists(@Param("p_exerciseid") Integer exerciseId, @Param("p_sampleunitid") Integer sampleUnitId);
 
+  /**
+   * Count the number of SampleUnits for the collection exercise.
+   *
+   * @param exerciseId collection exercise for which to count sample units.
+   * @return int sample unit total for given exerciseId.
+   */
   @Query(value = "select count(*) from "
       + "collectionexercise.sampleunit su, "
       + "collectionexercise.sampleunitgroup sg "
-      + "where su.sampleunitgroupid = sg.sampleunitgroupid and sg.exerciseid = :p_exerciseid;", nativeQuery = true)
-  int countByExerciseId(@Param("p_exerciseid") Integer exerciseId);
+      + "where sg.exerciseid = :p_exerciseid and "
+      + "su.sampleunitgroupid = sg.sampleunitgroupid;", nativeQuery = true)
+  int totalByExerciseId(@Param("p_exerciseid") Integer exerciseId);
+
 }

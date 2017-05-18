@@ -103,18 +103,18 @@ public class SampleServiceImpl implements SampleService {
         sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
         exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleId());
+        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleUnitId());
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         exerciseSampleUnit.setSampleUnitType(sampleUnit.getSampleUnitType());
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.countByExerciseId(collectionExercise.getExerciseId()) == collectionExercise
+        if (sampleUnitRepo.totalByExerciseId(collectionExercise.getExerciseId()) == collectionExercise
             .getSampleSize()) {
           collectionExercise.setState(collectionTransitionState.transition(collectionExercise.getState(),
               CollectionExerciseEvent.EXECUTE));
-          collectionExercise.setScheduledExecutionDateTime(new Timestamp(new Date().getTime()));
+          collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
           collectRepo.saveAndFlush(collectionExercise);
         }
 
