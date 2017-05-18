@@ -9,5 +9,6 @@
     <int:annotation-config/>
 
     <import resource="sample-sampleunit-inbound-flow.xml"/>
+	<import resource="case-outbound-flow.xml"/>
 
 </beans>

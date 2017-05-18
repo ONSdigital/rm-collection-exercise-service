@@ -1,62 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:int="http://www.springframework.org/schema/integration"
-       xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
-       xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+	xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
   http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
   http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp.xsd
   http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd">
-    
-    <bean id="sampleUnitListenerContainer" class="org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer">
-        <property name="connectionFactory" ref="connectionFactory" />
-        <property name="queueNames" value="Sample.SampleDelivery" />
-        <property name="concurrentConsumers" value="${messaging.consumingThreads}" />
-        <property name="prefetchCount" value="${messaging.prefetchCount}" />
-        <property name="txSize" value="${messaging.txSize}" />
-        <property name="channelTransacted" value="true" />
-    </bean>
 
-    <int:channel id="sampleUnitXml" />
-    <bean id="simpleMessageConverter" class="org.springframework.amqp.support.converter.SimpleMessageConverter" />
-    <int-amqp:inbound-channel-adapter id="sampleUnitInboundAmqp" listener-container="sampleUnitListenerContainer"
-                                      message-converter="simpleMessageConverter" channel="sampleUnitXml" />
+	<bean id="sampleUnitListenerContainer"
+		class="org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="queueNames" value="Sample.SampleDelivery" />
+		<property name="concurrentConsumers" value="${messaging.consumingThreads}" />
+		<property name="prefetchCount" value="${messaging.prefetchCount}" />
+		<property name="txSize" value="${messaging.txSize}" />
+		<property name="channelTransacted" value="true" />
+	</bean>
 
-    <!-- Xml validated against the inbound schema -->
-    <int:channel id="sampleUnitInvalidXml" />
-    <int-amqp:outbound-channel-adapter id="invalidsampleUnitOutboundAmqp" channel="sampleUnitInvalidXml" exchange-name="sample-invalid-exchange" routing-key="Sample.SampleDelivery.binding" />
-    <!-- Option to be used in Debug/Test: throw-exception-on-rejection="true" -->
-    <int-xml:validating-filter id="sampleUnitValidator" input-channel="sampleUnitXml"
-                               output-channel="sampleUnitXmlValid" schema-location="classpath:xsd/sample-unit.xsd" discard-channel="sampleUnitInvalidXml"/>
+	<int:channel id="sampleUnitXml" />
+	<bean id="simpleMessageConverter"
+		class="org.springframework.amqp.support.converter.SimpleMessageConverter" />
+	<int-amqp:inbound-channel-adapter id="sampleUnitInboundAmqp"
+		listener-container="sampleUnitListenerContainer" message-converter="simpleMessageConverter"
+		channel="sampleUnitXml" />
 
-    <!-- Validated xml is transformed into the jaxb generated object model -->
-    <int:channel id="sampleUnitTransformed" datatype="uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit" />
-    <int-xml:unmarshalling-transformer
-            input-channel="sampleUnitXmlValid" output-channel="sampleUnitTransformed"
-            unmarshaller="sampleUnitMarshaller" />
+	<!-- Xml validated against the inbound schema -->
+	<int:channel id="sampleUnitInvalidXml" />
+	<int-amqp:outbound-channel-adapter
+		id="invalidsampleUnitOutboundAmqp" channel="sampleUnitInvalidXml"
+		exchange-name="sample-invalid-exchange" routing-key="Sample.SampleDelivery.binding" />
+	<!-- Option to be used in Debug/Test: throw-exception-on-rejection="true" -->
+	<int-xml:validating-filter id="sampleUnitValidator"
+		input-channel="sampleUnitXml" output-channel="sampleUnitXmlValid"
+		schema-location="classpath:xsd/sample-unit.xsd" discard-channel="sampleUnitInvalidXml" />
 
-    <bean id="sampleUnitMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-        <property name="contextPath" value="uk.gov.ons.ctp.response.sampleunit.definition" />
-    </bean>
+	<!-- Validated xml is transformed into the jaxb generated object model -->
+	<int:channel id="sampleUnitTransformed"
+		datatype="uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit" />
+	<int-xml:unmarshalling-transformer
+		input-channel="sampleUnitXmlValid" output-channel="sampleUnitTransformed"
+		unmarshaller="sampleUnitMarshaller" />
 
-    <!-- Finally see the @ServiceActivator(inputChannel = "sampleUnitTransformed", adviceChain = "sampleUnitRetryAdvice") -->
+	<bean id="sampleUnitMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="contextPath"
+			value="uk.gov.ons.ctp.response.sampleunit.definition" />
+	</bean>
 
-    <!-- Start of section to deal with retries and DLQ after max attempts -->
-    <int:channel id="sampleUnitDlqChannel" />
-    <int:handler-retry-advice id="sampleUnitRetryAdvice" recovery-channel="sampleUnitDlqChannel" max-attempts="${messaging.conMaxAttempts}"/>
+	<!-- Finally see the @ServiceActivator(inputChannel = "sampleUnitTransformed", 
+		adviceChain = "sampleUnitRetryAdvice") -->
 
-    <int:channel id="sampleUnitDlqInterimChannel" />
-    <int:transformer input-channel="sampleUnitDlqChannel" output-channel="sampleUnitDlqInterimChannel" expression="payload.failedMessage.payload" />
+	<!-- Start of section to deal with retries and DLQ after max attempts -->
+	<int:channel id="sampleUnitDlqChannel" />
+	<int:handler-retry-advice id="sampleUnitRetryAdvice"
+		recovery-channel="sampleUnitDlqChannel" max-attempts="${messaging.conMaxAttempts}" />
 
-    <int:channel id="sampleUnitDlqChannelXml" />
-    <int-xml:marshalling-transformer
-            input-channel="sampleUnitDlqInterimChannel" output-channel="sampleUnitDlqChannelXml"
-            marshaller="sampleUnitMarshaller"
-            result-transformer="sampleUnitOutboundTransformer"/>
-    <bean id="sampleUnitOutboundTransformer" class="org.springframework.integration.xml.transformer.ResultToStringTransformer" />
+	<int:channel id="sampleUnitDlqInterimChannel" />
+	<int:transformer input-channel="sampleUnitDlqChannel"
+		output-channel="sampleUnitDlqInterimChannel" expression="payload.failedMessage.payload" />
 
-    <int-amqp:outbound-channel-adapter id="sampleUnitDlqAmqp" channel="sampleUnitDlqChannelXml" exchange-name="sample-deadletter-exchange" routing-key="Sample.SampleDelivery.binding" />
-    <!-- End of section to deal with retries and DLQ after max attempts -->
+	<int:channel id="sampleUnitDlqChannelXml" />
+	<int-xml:marshalling-transformer
+		input-channel="sampleUnitDlqInterimChannel" output-channel="sampleUnitDlqChannelXml"
+		marshaller="sampleUnitMarshaller" result-transformer="sampleUnitOutboundTransformer" />
+	<bean id="sampleUnitOutboundTransformer"
+		class="org.springframework.integration.xml.transformer.ResultToStringTransformer" />
+
+	<int-amqp:outbound-channel-adapter
+		id="sampleUnitDlqAmqp" channel="sampleUnitDlqChannelXml"
+		exchange-name="sample-deadletter-exchange" routing-key="Sample.SampleDelivery.binding" />
+	<!-- End of section to deal with retries and DLQ after max attempts -->
 </beans>

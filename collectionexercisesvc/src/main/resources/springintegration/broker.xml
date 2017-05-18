@@ -39,7 +39,23 @@
 	<rabbit:queue name="Sample.SampleDeliveryDLQ" durable="true" />
 
 	<rabbit:queue name="Sample.InvalidSampleInstructions" durable="true" />
+	
+	
+	<rabbit:queue name="Case.CaseDelivery" durable="true">
+		<rabbit:queue-arguments value-type="java.lang.String">
+			<entry key="x-dead-letter-exchange" value="case-deadletter-exchange" />
+			<entry key="x-dead-letter-routing-key" value="Case.CaseDelivery.binding" />
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+
+	<rabbit:queue name="Case.CaseDeliveryDLQ" durable="true" />
+
+	<rabbit:queue name="Case.InvalidCaseInstructions" durable="true" />
+	
 	<!-- End of Queues -->
+	
+	
+	
 
 	<!-- Start of Exchanges -->
 	<rabbit:direct-exchange name="sample-outbound-exchange">
@@ -57,6 +73,24 @@
 	<rabbit:direct-exchange name="sample-invalid-exchange">
 		<rabbit:bindings>
 			<rabbit:binding queue="Sample.InvalidSampleInstructions" key="Sample.SampleDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+	
+   <rabbit:direct-exchange name="collection-outbound-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Case.CaseDelivery" key="Case.CaseDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="case-deadletter-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Case.CaseDeliveryDLQ" key="Case.CaseDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="case-invalid-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Case.InvalidCaseInstructions" key="Case.CaseDelivery.binding" />
 		</rabbit:bindings>
 	</rabbit:direct-exchange>
 	<!-- End of Exchanges -->
