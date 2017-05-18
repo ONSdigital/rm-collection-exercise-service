@@ -4,7 +4,7 @@ This page documents the Collection Exercise service API endpoints. These endpoin
 ## Get Collection Exercises for Survey
 * `GET /collectionexercises/survey/cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87` will return a list of known collection exercises for the survey with an ID of `cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87`.
 
-### Example JSON  Response
+### Example JSON Response
 ```json
 [
   {
@@ -23,7 +23,7 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 ## Get Collection Exercise
 * `GET /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will returns the details of the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
 
-### Example JSON  Response
+### Example JSON Response
 ```json
 {
     "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
@@ -55,7 +55,7 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ## Execute Collection Exercise
 * `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will execute the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
 
-### Example JSON  Response
+### Example JSON Response
 ```json
 {
   "sampleUnitsTotal": "670"
