@@ -110,7 +110,8 @@ scheduledsurveydate        timestamp with time zone,
 actualexecutiondatetime    timestamp with time zone,
 actualpublishdatetime      timestamp with time zone,
 executedby                 character varying(50),
-state                      character varying(20) NOT NULL
+state                      character varying(20) NOT NULL,
+samplesize				   integer
 );
 
 ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exerciseid_pkey PRIMARY KEY (exerciseid);
