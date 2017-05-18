@@ -42,6 +42,7 @@ public class CollectionExerciseApplication {
   @Autowired
   private SendToCaseImpl sendToCase;
 
+  @Autowired
   private StateTransitionManagerFactory collectionExerciseStateTransitionManagerFactory;
 
 
