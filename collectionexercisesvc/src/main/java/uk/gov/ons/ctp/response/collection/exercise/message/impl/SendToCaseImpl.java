@@ -37,16 +37,11 @@ public class SendToCaseImpl implements SendToCase {
 
 		CaseCreation caseDTO = new CaseCreation();
 		//Case Data
-		caseDTO.setCaseId(1);
+
 		caseDTO.setActionPlanId(1);
-		
-		caseDTO.setFormType("HH");
-		caseDTO.setActionPlanId(1);
-		caseDTO.setCreatedDateTime(this.setDate());
-		
-		//CaseGroup data
-		caseDTO.setCaseGroupId(1);
-		//caseDTO.setPartyId("1");
+		caseDTO.setPartyId(1);
+		caseDTO.setCollectionExerciseId(1);
+		caseDTO.setCollectionInstrumentId(1);
 		caseDTO.setSampleUnitRef("str1234");
 		caseDTO.setSampleUnitType("B");
 		
