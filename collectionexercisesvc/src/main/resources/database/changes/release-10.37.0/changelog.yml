@@ -6,7 +6,7 @@ databaseChangeLog:
       changes:
         - sqlFile:
             comment: Collection Exercise foundation schema
-            path: collectionexercisefoundation_schema.sql
+            path: collectionexercise_foundation_schema.sql
             relativeToChangelogFile: true
             splitStatements: false
 
@@ -16,6 +16,6 @@ databaseChangeLog:
       changes:
         - sqlFile:
             comment: Collection Exercise seed data
-            path: BRES_CollectionExercise_seeddata.sql
+            path: BRES_collectionexercise_seeddata.sql
             relativeToChangelogFile: true
             splitStatements: false
