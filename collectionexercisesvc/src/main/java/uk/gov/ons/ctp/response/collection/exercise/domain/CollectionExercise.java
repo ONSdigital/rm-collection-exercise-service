@@ -1,25 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.sql.Timestamp;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+
+import javax.persistence.*;
+import java.sql.Timestamp;
 
 /**
  * Domain model object.
@@ -38,7 +27,7 @@ public class CollectionExercise {
   })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exerciseseq_gen")
   @Column(name = "exerciseid")
-  private Integer exerciseId;
+  private String exerciseId;
 
   @ManyToOne
   @JoinColumn(name = "surveyid", referencedColumnName = "surveyid")

@@ -1,13 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Domain model object for Survey.
@@ -21,7 +21,7 @@ public class Survey {
 
   @Id
   @Column(name = "surveyid")
-  private Integer surveyId;
+  private String surveyId;
 
   @Column(name = "surveyref")
   private String surveyRef;

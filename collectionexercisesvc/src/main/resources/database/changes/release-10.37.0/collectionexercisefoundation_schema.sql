@@ -30,22 +30,10 @@ CREATE SEQUENCE sampleunitgroupidseq
   START 1
   CACHE 1;
 
-
--- Sequence:   exerciseidseq
--- DROP SEQUENCE   exerciseidseq;
-CREATE SEQUENCE exerciseidseq
-  INCREMENT 1
-  MINVALUE 1
-  MAXVALUE 999999999999
-  START 1
-  CACHE 1;
-
-
-
 -- Table: survey
 CREATE TABLE survey
 (
-  surveyid integer NOT NULL,
+  surveyid character varying(36),
   surveyref character varying(100) NOT NULL
 );
 
@@ -86,7 +74,7 @@ INSERT INTO   sampleunittype(sampleunittype) VALUES('BI');
 CREATE TABLE CaseTypeDefault
 (
 casetypedefaultid      integer NOT NULL,
-surveyid               integer NOT NULL,
+surveyid               character varying(36),
 sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
 actionplanid           integer NOT NULL
 );
@@ -100,8 +88,8 @@ ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN K
 -- Table: CollectionExercise
 CREATE TABLE CollectionExercise
 (
-exerciseid                 bigint NOT NULL DEFAULT nextval('exerciseidseq'::regclass),
-surveyid                   integer NOT NULL,
+exerciseid                 character varying(36),
+surveyid                   character varying(36),
 scheduledstartdatetime     timestamp with time zone,
 scheduledexecutiondatetime timestamp with time zone,
 scheduledreturndatetime    timestamp with time zone,
@@ -122,7 +110,7 @@ ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT surveyid_fkey   FOREIGN KEY
 CREATE TABLE CaseTypeOverride
 (
 casetypeoverrideid     integer NOT NULL,
-exerciseid             bigint NOT NULL,
+exerciseid             character varying(36),
 sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
 actionplanid           integer NOT NULL
 );
@@ -136,7 +124,7 @@ ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exerciseid_fkey         FOREI
 CREATE TABLE SampleUnitGroup
 (
 sampleunitgroupid     bigint NOT NULL DEFAULT nextval('sampleunitgroupidseq'::regclass),
-exerciseid            bigint NOT NULL,
+exerciseid            character varying(36),
 formtype              character varying(10) NOT NULL, -- census questionset
 state                 character varying(20) NOT NULL,
 createddatetime       timestamp with time zone,

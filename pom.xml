@@ -11,7 +11,7 @@
 	<description>CTP : CollectionExercise</description>
 
 	<properties>
-		<common.version>10.37.0-SNAPSHOT</common.version>
+		<common.version>10.38.0-SNAPSHOT</common.version>
 		<maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
 		<springboot.version>1.5.2.RELEASE</springboot.version>
 		<postgres.version>9.3-1104-jdbc4</postgres.version>

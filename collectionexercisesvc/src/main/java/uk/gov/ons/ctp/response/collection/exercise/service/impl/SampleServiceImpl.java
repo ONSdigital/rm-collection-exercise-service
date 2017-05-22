@@ -1,14 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -23,6 +19,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
+
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * The implementation of the SampleService
@@ -50,7 +49,7 @@ public class SampleServiceImpl implements SampleService {
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionTransitionState;
 
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(final Integer exerciseId) {
+  public SampleUnitsRequestDTO requestSampleUnits(final String exerciseId) {
 
     SampleUnitsRequestDTO replyDTO = null;
 
@@ -86,8 +85,9 @@ public class SampleServiceImpl implements SampleService {
 
     ExerciseSampleUnit exerciseSampleUnit = null;
 
+    //TODO: Remove .toString()
     CollectionExercise collectionExercise = collectRepo
-        .findOne(sampleUnit.getCollectionExerciseId());
+        .findOne(sampleUnit.getCollectionExerciseId().toString());
 
     // Check collection exercise exists
     if (collectionExercise != null) {

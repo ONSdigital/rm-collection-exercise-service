@@ -18,7 +18,7 @@ public interface SampleService {
    *          units.
    * @return the total number of sample units in the collection exercise.
    */
-  SampleUnitsRequestDTO requestSampleUnits(final Integer exerciseId);
+  SampleUnitsRequestDTO requestSampleUnits(final String exerciseId);
 
   /**
    * Save a SampleUnit

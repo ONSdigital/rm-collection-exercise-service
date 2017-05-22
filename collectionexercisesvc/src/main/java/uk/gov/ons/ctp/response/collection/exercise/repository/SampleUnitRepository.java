@@ -27,7 +27,7 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "collectionexercise.collectionexercise ce "
       + "where su.sampleunitgroupid = sg.sampleunitgroupid and sg.exerciseid = ce.exerciseid and "
       + "ce.exerciseid = :p_exerciseid and su.sampleunitgroupid = :p_sampleunitid);", nativeQuery = true)
-  boolean tupleExists(@Param("p_exerciseid") Integer exerciseId, @Param("p_sampleunitid") Integer sampleUnitId);
+  boolean tupleExists(@Param("p_exerciseid") String exerciseId, @Param("p_sampleunitid") Integer sampleUnitId);
 
   /**
    * Count the number of SampleUnits for the collection exercise.
@@ -40,6 +40,6 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "collectionexercise.sampleunitgroup sg "
       + "where sg.exerciseid = :p_exerciseid and "
       + "su.sampleunitgroupid = sg.sampleunitgroupid;", nativeQuery = true)
-  int totalByExerciseId(@Param("p_exerciseid") Integer exerciseId);
+  int totalByExerciseId(@Param("p_exerciseid") String exerciseId);
 
 }
