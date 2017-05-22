@@ -49,12 +49,12 @@ public class SampleServiceImpl implements SampleService {
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionTransitionState;
 
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(final String exerciseId) {
+  public SampleUnitsRequestDTO requestSampleUnits(final String id) {
 
     SampleUnitsRequestDTO replyDTO = null;
 
     CollectionExercise collectionExercise = collectRepo
-        .findOne(exerciseId);
+        .findOne(id);
     // Check collection exercise exists
     if (collectionExercise != null) {
       replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
@@ -93,7 +93,7 @@ public class SampleServiceImpl implements SampleService {
     if (collectionExercise != null) {
 
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(collectionExercise.getExerciseId(), sampleUnit.getSampleId())) {
+      if (!sampleUnitRepo.tupleExists(collectionExercise.getId(), sampleUnit.getSampleId())) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
@@ -110,7 +110,7 @@ public class SampleServiceImpl implements SampleService {
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.totalByExerciseId(collectionExercise.getExerciseId()) == collectionExercise
+        if (sampleUnitRepo.totalByExerciseId(collectionExercise.getId()) == collectionExercise
             .getSampleSize()) {
           collectionExercise.setState(collectionTransitionState.transition(collectionExercise.getState(),
               CollectionExerciseEvent.EXECUTE));

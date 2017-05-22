@@ -7,6 +7,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 
+import java.util.UUID;
+
 /**
  * The implementation of the SampleService
  *
@@ -19,9 +21,9 @@ public class SurveyServiceImpl implements SurveyService {
   private SurveyRepository surveyRepo;
 
   @Override
-  public Survey requestSurvey(String surveyUUID) {
+  public Survey requestSurvey(UUID id) {
 
-    Survey survey = surveyRepo.findBySurveyId(surveyUUID);
+    Survey survey = surveyRepo.findById(id);
 
     return survey;
   }

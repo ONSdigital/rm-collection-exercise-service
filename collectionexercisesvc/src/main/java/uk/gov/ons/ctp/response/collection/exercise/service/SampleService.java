@@ -14,11 +14,11 @@ public interface SampleService {
    * Request the delivery of sample units from the Sample Service via a message
    * queue.
    *
-   * @param exerciseId the Collection Exercise Id for which to request sample
+   * @param id the Collection Exercise Id for which to request sample
    *          units.
    * @return the total number of sample units in the collection exercise.
    */
-  SampleUnitsRequestDTO requestSampleUnits(final String exerciseId);
+  SampleUnitsRequestDTO requestSampleUnits(final String id);
 
   /**
    * Save a SampleUnit

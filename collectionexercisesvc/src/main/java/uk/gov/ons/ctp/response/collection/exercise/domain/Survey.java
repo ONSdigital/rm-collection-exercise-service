@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.UUID;
 
 /**
  * Domain model object for Survey.
@@ -20,8 +21,11 @@ import javax.persistence.Table;
 public class Survey {
 
   @Id
-  @Column(name = "surveyid")
-  private String surveyId;
+  @Column(name = "surveypk")
+  private Integer surveyPK;
+
+  @Column(name = "id")
+  private UUID id;
 
   @Column(name = "surveyref")
   private String surveyRef;

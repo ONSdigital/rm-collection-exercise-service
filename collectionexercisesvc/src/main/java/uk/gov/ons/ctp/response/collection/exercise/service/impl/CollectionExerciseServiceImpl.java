@@ -26,13 +26,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public List<CollectionExerciseSummary> requestCollectionExerciseSummariesForSurvey(Survey survey) {
 
-    List<CollectionExercise> collectionExerciseList = collectRepo.findBySurveySurveyId(survey.getSurveyId());
+    List<CollectionExercise> collectionExerciseList = collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
 
     List<CollectionExerciseSummary> collectionExerciseSummaryList = new ArrayList<>();
 
     for (CollectionExercise collex : collectionExerciseList) {
       CollectionExerciseSummary collectionExerciseSummary = new CollectionExerciseSummary();
-      collectionExerciseSummary.setId(collex.getExerciseId());
+      collectionExerciseSummary.setId(collex.getId());
       collectionExerciseSummary.setName(survey.getSurveyRef()); //TODO: Where is name taken from?
       collectionExerciseSummary.setScheduledExecution(collex.getScheduledExecutionDateTime());
 
@@ -44,9 +44,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public CollectionExercise requestCollectionExercise(String exerciseId) {
+  public CollectionExercise requestCollectionExercise(String id) {
 
-    CollectionExercise collectionExercise = collectRepo.findOne(exerciseId);
+    CollectionExercise collectionExercise = collectRepo.findOne(id);
 
     return collectionExercise;
   }

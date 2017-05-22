@@ -26,11 +26,11 @@ public interface CollectionExerciseService {
   /**
    * Request a collection exercise associated to a collection exercise Id from the Collection Exercise Service
    *
-   * @param exerciseId the collection exercise Id for which to request collection exercise
+   * @param id the collection exercise Id for which to request collection exercise
    *          units.
    * @return the associated collection exercise.
    */
-  CollectionExercise requestCollectionExercise(final String exerciseId);
+  CollectionExercise requestCollectionExercise(final String id);
 
 
 }

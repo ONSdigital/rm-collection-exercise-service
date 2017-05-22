@@ -11,7 +11,7 @@ public interface SampleUnitReceiver {
   /**
    * Method called with the deserialised message
    *
-   * @param sampleunit The java representation of the message body
+   * @param sampleUnit The java representation of the message body
    */
   void acceptSampleUnit(SampleUnit sampleUnit);
 

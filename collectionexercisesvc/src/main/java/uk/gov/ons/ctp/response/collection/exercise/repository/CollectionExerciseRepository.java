@@ -11,6 +11,6 @@ import java.util.List;
  */
 public interface CollectionExerciseRepository extends JpaRepository<CollectionExercise, String> {
 
-    List<CollectionExercise> findBySurveySurveyId(String surveyId);
+    List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
 
 }

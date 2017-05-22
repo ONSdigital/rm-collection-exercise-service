@@ -10,9 +10,9 @@ CREATE SEQUENCE sampleunitgroupidseq
   CACHE 1;
 
 
--- Sequence: exerciseidseq
--- DROP SEQUENCE exerciseidseq;
-CREATE SEQUENCE exerciseidseq
+-- Sequence: exercisepkseq
+-- DROP SEQUENCE exercisepkseq;
+CREATE SEQUENCE exercisepkseq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 999999999999
@@ -24,12 +24,12 @@ CREATE SEQUENCE exerciseidseq
 -- Table: survey
 CREATE TABLE survey
 ( id        uuid NOT NULL,
-  surveyid  integer NOT NULL,
+  surveypk  integer NOT NULL,
   surveyref character varying(100) NOT NULL
 );
 
 
-ALTER TABLE ONLY survey ADD CONSTRAINT surveyid_pkey PRIMARY KEY (surveyid);
+ALTER TABLE ONLY survey ADD CONSTRAINT surveypk_pkey PRIMARY KEY (surveypk);
 
 -- Add index
 ALTER TABLE survey ADD CONSTRAINT survey_id_uuid_key UNIQUE (id);
@@ -69,13 +69,13 @@ INSERT INTO   sampleunittype(sampleunittype) VALUES('BI');
 CREATE TABLE CaseTypeDefault
 (
 casetypedefaultid      integer NOT NULL,
-surveyid               integer NOT NULL,
+surveyfk               integer NOT NULL,
 sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
 actionplanid           integer NOT NULL
 );
 
 ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT casetypedefaultid_pkey PRIMARY KEY (casetypedefaultid);
-ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT ctd_surveyid_fkey      FOREIGN KEY (surveyid)       REFERENCES survey(surveyid);
+ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT ctd_surveyfk_fkey      FOREIGN KEY (surveyfk)       REFERENCES survey(surveypk);
 ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN KEY (sampleunittype) REFERENCES sampleunittype(sampleunittype);
 
 
@@ -84,8 +84,8 @@ ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN K
 CREATE TABLE CollectionExercise
 (
 id                         uuid    NOT NULL,
-exerciseid                 bigint  NOT NULL DEFAULT nextval('exerciseidseq'::regclass),
-surveyid                   integer NOT NULL,
+exercisepk                 bigint  NOT NULL DEFAULT nextval('exercisepkseq'::regclass),
+surveyfk                   integer NOT NULL,
 name                       character varying(20),
 scheduledstartdatetime     timestamp with time zone,
 scheduledexecutiondatetime timestamp with time zone,
@@ -100,8 +100,8 @@ state                      character varying(20) NOT NULL,
 samplesize	            integer
 );
 
-ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exerciseid_pkey  PRIMARY KEY (exerciseid);
-ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT ce_surveyid_fkey FOREIGN KEY (surveyid) REFERENCES survey(surveyid);
+ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exercisepk_pkey  PRIMARY KEY (exercisepk);
+ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT ce_surveyfk_fkey FOREIGN KEY (surveyfk) REFERENCES survey(surveypk);
 
 -- Add index
 ALTER TABLE collectionexercise ADD CONSTRAINT ce_id_uuid_key UNIQUE (id);
@@ -112,13 +112,13 @@ ALTER TABLE collectionexercise ADD CONSTRAINT ce_id_uuid_key UNIQUE (id);
 CREATE TABLE CaseTypeOverride
 (
 casetypeoverrideid     integer NOT NULL,
-exerciseid             bigint NOT NULL,
+exercisepk             bigint NOT NULL,
 sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
 actionplanid           integer NOT NULL
 );
 
 ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT casetypeoverrideid_pkey PRIMARY KEY (casetypeoverrideid);
-ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exerciseid_fkey         FOREIGN KEY (exerciseid) REFERENCES collectionexercise(exerciseid);
+ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exercisepk_fkey         FOREIGN KEY (exercisepk) REFERENCES collectionexercise(exercisepk);
 
 
 
@@ -126,7 +126,7 @@ ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exerciseid_fkey         FOREI
 CREATE TABLE SampleUnitGroup
 (
 sampleunitgroupid     bigint NOT NULL DEFAULT nextval('sampleunitgroupidseq'::regclass),
-exerciseid            bigint NOT NULL,
+exercisepk            bigint NOT NULL,
 formtype              character varying(10) NOT NULL, -- census questionset
 state                 character varying(20) NOT NULL,
 createddatetime       timestamp with time zone,
@@ -134,7 +134,7 @@ modifieddatetime      timestamp with time zone
 );
 
 ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT sampleunitgroupid_pkey PRIMARY KEY (sampleunitgroupid);
-ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT exerciseid_fkey        FOREIGN KEY (exerciseid) REFERENCES collectionexercise(exerciseid);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT exercisepk_fkey        FOREIGN KEY (exercisepk) REFERENCES collectionexercise(exercisepk);
 ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT state_fkey             FOREIGN KEY (state)      REFERENCES state(state);
 
 

@@ -9,6 +9,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
  * Domain model object.
@@ -20,17 +21,20 @@ import java.sql.Timestamp;
 @Table(name = "collectionexercise", schema = "collectionexercise")
 public class CollectionExercise {
 
+  @Column(name = "id")
+  private UUID id;
+
   @Id
   @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
       @Parameter(name = "sequence_name", value = "collectionexercise.exerciseidseq"),
       @Parameter(name = "increment_size", value = "1")
   })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exerciseseq_gen")
-  @Column(name = "exerciseid")
-  private String exerciseId;
+  @Column(name = "exercisepk")
+  private Integer exercisePK;
 
   @ManyToOne
-  @JoinColumn(name = "surveyid", referencedColumnName = "surveyid")
+  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
   private Survey survey;
 
   @Column(name = "scheduledstartdatetime")
@@ -45,8 +49,8 @@ public class CollectionExercise {
   @Column(name = "scheduledenddatetime")
   private Timestamp scheduledEndDateTime;
 
-  @Column(name = "scheduledsurveydate")
-  private Timestamp scheduledSurveyDate;
+/*  @Column(name = "scheduledsurveydate")
+  private Timestamp scheduledSurveyDate;*/
 
   @Column(name = "actualexecutiondatetime")
   private Timestamp actualExecutionDateTime;
