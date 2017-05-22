@@ -45,7 +45,6 @@ public class SendToCaseImpl implements SendToCase {
 		caseDTO.setSampleUnitRef("str1234");
 		caseDTO.setSampleUnitType("B");
 		
-		
 		log.info("Send to queue");
 		rabbitTemplate.convertAndSend(caseDTO);
 	}
