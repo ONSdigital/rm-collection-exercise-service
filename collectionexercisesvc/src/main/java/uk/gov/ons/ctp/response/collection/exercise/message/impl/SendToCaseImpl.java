@@ -49,21 +49,4 @@ public class SendToCaseImpl implements SendToCase {
 		log.info("Send to queue");
 		rabbitTemplate.convertAndSend(caseDTO);
 	}
-
-	public XMLGregorianCalendar setDate() throws DatatypeConfigurationException, ParseException {
-		Date dob = null;
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		dob = df.parse(" 2012-12-13 12:12:12");
-
-		GregorianCalendar date = new GregorianCalendar();
-
-		date.setTime(dob);
-
-		XMLGregorianCalendar xmlDate2 = DatatypeFactory.newInstance()
-				.newXMLGregorianCalendar(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1,
-						date.get(Calendar.DAY_OF_MONTH), dob.getHours(), dob.getMinutes(), dob.getSeconds(),
-						DatatypeConstants.FIELD_UNDEFINED, date.getTimeZone().LONG)
-				.normalize();
-		return xmlDate2;
-	}
 }
