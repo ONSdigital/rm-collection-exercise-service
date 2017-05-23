@@ -43,11 +43,11 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     "state": "EXECUTED",
     "caseTypes": [
       {
-        "sampleUnitType": "B",
+        "sampleUnitTypeFK": "B",
         "actionPlanId": "60df56d9-f491-4ac8-b256-a10154290a8b"
       },
       {
-        "sampleUnitType": "BI",
+        "sampleUnitTypeFK": "BI",
         "actionPlanId": "b1f46e33-a3ef-4e50-939d-c18f8a9f11bb"
       }
     ]

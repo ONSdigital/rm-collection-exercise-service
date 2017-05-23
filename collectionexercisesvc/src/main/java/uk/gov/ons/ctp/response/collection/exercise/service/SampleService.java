@@ -4,6 +4,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
+import java.util.UUID;
+
 /**
  * Service responsible for dealing with samples
  *
@@ -18,7 +20,7 @@ public interface SampleService {
    *          units.
    * @return the total number of sample units in the collection exercise.
    */
-  SampleUnitsRequestDTO requestSampleUnits(final String id);
+  SampleUnitsRequestDTO requestSampleUnits(final UUID id);
 
   /**
    * Save a SampleUnit

@@ -3,14 +3,17 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExerciseSummary;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The implementation of the SampleService
@@ -23,6 +26,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Autowired
   private CollectionExerciseRepository collectRepo;
 
+  @Autowired
+  private CaseTypeOverrideRepository caseTypeRepo;
+
   @Override
   public List<CollectionExerciseSummary> requestCollectionExerciseSummariesForSurvey(Survey survey) {
 
@@ -30,11 +36,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     List<CollectionExerciseSummary> collectionExerciseSummaryList = new ArrayList<>();
 
-    for (CollectionExercise collex : collectionExerciseList) {
+    for (CollectionExercise collectionExercise : collectionExerciseList) {
       CollectionExerciseSummary collectionExerciseSummary = new CollectionExerciseSummary();
-      collectionExerciseSummary.setId(collex.getId());
-      collectionExerciseSummary.setName(survey.getSurveyRef()); //TODO: Where is name taken from?
-      collectionExerciseSummary.setScheduledExecution(collex.getScheduledExecutionDateTime());
+      collectionExerciseSummary.setId(collectionExercise.getId());
+      collectionExerciseSummary.setName(collectionExercise.getName());
+      collectionExerciseSummary.setScheduledExecution(collectionExercise.getScheduledExecutionDateTime());
 
       collectionExerciseSummaryList.add(collectionExerciseSummary);
 
@@ -44,10 +50,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public CollectionExercise requestCollectionExercise(String id) {
+  public CollectionExercise requestCollectionExercise(UUID id) {
 
-    CollectionExercise collectionExercise = collectRepo.findOne(id);
+    return collectRepo.findOneById(id);
+  }
 
-    return collectionExercise;
+  @Override
+  public List<CaseType> getCaseTypesForCollectionExercise(Integer collectionExercisePK) {
+
+    return caseTypeRepo.findByExerciseFK(collectionExercisePK);
   }
 }

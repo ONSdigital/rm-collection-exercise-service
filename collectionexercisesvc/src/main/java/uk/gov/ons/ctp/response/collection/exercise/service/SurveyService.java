@@ -13,7 +13,7 @@ public interface SurveyService {
   /**
    * Request the delivery of survey from the Survey Service.
    *
-   * @param id the survey Id for which to request sample units.
+   * @param id the survey Id for which to request survey.
    * @return the survey object
    */
   Survey requestSurvey(final UUID id);

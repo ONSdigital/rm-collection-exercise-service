@@ -1,10 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExerciseSummary;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service responsible for dealing with collection exercises
@@ -30,7 +32,10 @@ public interface CollectionExerciseService {
    *          units.
    * @return the associated collection exercise.
    */
-  CollectionExercise requestCollectionExercise(final String id);
+  CollectionExercise requestCollectionExercise(final UUID id);
+
+
+  List<CaseType> getCaseTypesForCollectionExercise(final Integer collectionExercisePK);
 
 
 }

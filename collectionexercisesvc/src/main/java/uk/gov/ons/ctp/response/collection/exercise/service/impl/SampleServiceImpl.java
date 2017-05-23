@@ -22,6 +22,7 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * The implementation of the SampleService
@@ -49,7 +50,7 @@ public class SampleServiceImpl implements SampleService {
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionTransitionState;
 
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(final String id) {
+  public SampleUnitsRequestDTO requestSampleUnits(final UUID id) {
 
     SampleUnitsRequestDTO replyDTO = null;
 
@@ -87,7 +88,7 @@ public class SampleServiceImpl implements SampleService {
 
     //TODO: Remove .toString()
     CollectionExercise collectionExercise = collectRepo
-        .findOne(sampleUnit.getCollectionExerciseId().toString());
+        .findOne(UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
     // Check collection exercise exists
     if (collectionExercise != null) {
