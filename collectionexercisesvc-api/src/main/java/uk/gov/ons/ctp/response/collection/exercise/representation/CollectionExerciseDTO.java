@@ -19,8 +19,6 @@ public class CollectionExerciseDTO {
 
   private UUID id;
 
-  private Integer exercisePK;
-
   private String surveyId;
 
   private String name;
@@ -46,8 +44,6 @@ public class CollectionExerciseDTO {
   private CollectionExerciseDTO.CollectionExerciseState state;
 
   private List<CaseTypeDTO> caseTypes;
-
-  private Integer sampleSize;
 
   /**
    * enum for collection exercise state
