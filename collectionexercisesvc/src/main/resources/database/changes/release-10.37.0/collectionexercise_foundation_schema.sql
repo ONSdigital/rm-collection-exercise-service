@@ -1,8 +1,8 @@
 Set schema 'collectionexercise';
 
--- Sequence: sampleunitgroupidseq
--- DROP SEQUENCE sampleunitgroupidseq;
-CREATE SEQUENCE sampleunitgroupidseq
+-- Sequence: sampleunitgroupPKdseq
+-- DROP SEQUENCE sampleunitgroupPKseq;
+CREATE SEQUENCE sampleunitgroupPKseq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 999999999999
@@ -10,9 +10,9 @@ CREATE SEQUENCE sampleunitgroupidseq
   CACHE 1;
 
 
--- Sequence: exercisepkseq
--- DROP SEQUENCE exercisepkseq;
-CREATE SEQUENCE exercisepkseq
+-- Sequence: exercisePKseq
+-- DROP SEQUENCE exercisePKseq;
+CREATE SEQUENCE exercisePKseq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 999999999999
@@ -24,12 +24,12 @@ CREATE SEQUENCE exercisepkseq
 -- Table: survey
 CREATE TABLE survey
 ( id        uuid NOT NULL,
-  surveypk  integer NOT NULL,
+  surveyPK  integer NOT NULL,
   surveyref character varying(100) NOT NULL
 );
 
 
-ALTER TABLE ONLY survey ADD CONSTRAINT surveypk_pkey PRIMARY KEY (surveypk);
+ALTER TABLE ONLY survey ADD CONSTRAINT surveyPK_pkey PRIMARY KEY (surveyPK);
 
 -- Add index
 ALTER TABLE survey ADD CONSTRAINT survey_id_uuid_key UNIQUE (id);
@@ -39,44 +39,32 @@ ALTER TABLE survey ADD CONSTRAINT survey_id_uuid_key UNIQUE (id);
 -- Table: state
 CREATE TABLE state
 (
-  state character varying(20) NOT NULL
+  statePK character varying(20) NOT NULL
 );
 
-ALTER TABLE ONLY state ADD CONSTRAINT state_pkey PRIMARY KEY (state);
-
-INSERT INTO   state(state) VALUES('INIT');
-INSERT INTO   state(state) VALUES('PENDING');
-INSERT INTO   state(state) VALUES('EXECUTED');
-INSERT INTO   state(state) VALUES('VALIDATED');
-INSERT INTO   state(state) VALUES('PUBLISHED');
-INSERT INTO   state(state) VALUES('FAILEDVALIDATION');
-
+ALTER TABLE ONLY state ADD CONSTRAINT statePK_pkey PRIMARY KEY (statePK);
 
 -- Table: sampleunittype
 CREATE TABLE sampleunittype
 (
-sampleunittype character varying(2) NOT NULL-- example 'H','C','B' 'BI'
+sampleunittypePK character varying(2) NOT NULL-- example 'H','C','B' 'BI'
 );
 
-ALTER TABLE ONLY sampleunittype ADD CONSTRAINT sampleunittype_pkey PRIMARY KEY (sampleunittype);
-
-INSERT INTO   sampleunittype(sampleunittype) VALUES('B');
-INSERT INTO   sampleunittype(sampleunittype) VALUES('BI');
-
+ALTER TABLE ONLY sampleunittype ADD CONSTRAINT sampleunittypePK_pkey PRIMARY KEY (sampleunittypePK);
 
 
 -- Table: CaseTypeDefault
 CREATE TABLE CaseTypeDefault
 (
-casetypedefaultid      integer NOT NULL,
-surveyfk               integer NOT NULL,
-sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
-actionplanid           integer NOT NULL
+casetypedefaultPK      integer NOT NULL,
+surveyFK               integer NOT NULL,
+sampleunittypeFK       character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
+actionplanId           uuid
 );
 
-ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT casetypedefaultid_pkey PRIMARY KEY (casetypedefaultid);
-ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT ctd_surveyfk_fkey      FOREIGN KEY (surveyfk)       REFERENCES survey(surveypk);
-ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN KEY (sampleunittype) REFERENCES sampleunittype(sampleunittype);
+ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT casetypedefaultPK_pkey PRIMARY KEY (casetypedefaultPK);
+ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT ctd_surveyFK_fkey      FOREIGN KEY (surveyFK)         REFERENCES survey(surveyPK);
+ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN KEY (sampleunittypeFK) REFERENCES sampleunittype(sampleunittypePK);
 
 
 
@@ -84,8 +72,8 @@ ALTER TABLE ONLY CaseTypeDefault ADD CONSTRAINT sampleunittype_fkey    FOREIGN K
 CREATE TABLE CollectionExercise
 (
 id                         uuid    NOT NULL,
-exercisepk                 bigint  NOT NULL DEFAULT nextval('exercisepkseq'::regclass),
-surveyfk                   integer NOT NULL,
+exercisePK                 bigint  NOT NULL DEFAULT nextval('exercisePKseq'::regclass),
+surveyFK                   integer NOT NULL,
 name                       character varying(20),
 scheduledstartdatetime     timestamp with time zone,
 scheduledexecutiondatetime timestamp with time zone,
@@ -96,12 +84,13 @@ periodenddatetime          timestamp with time zone,
 actualexecutiondatetime    timestamp with time zone,
 actualpublishdatetime      timestamp with time zone,
 executedby                 character varying(50),
-state                      character varying(20) NOT NULL,
-samplesize	            integer
+stateFK                    character varying(20) NOT NULL,
+samplesize	           integer
 );
 
-ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exercisepk_pkey  PRIMARY KEY (exercisepk);
-ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT ce_surveyfk_fkey FOREIGN KEY (surveyfk) REFERENCES survey(surveypk);
+ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT exercisePK_pkey  PRIMARY KEY (exercisePK);
+ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT surveyFK_fkey    FOREIGN KEY (surveyFK) REFERENCES survey(surveyPK);
+ALTER TABLE ONLY   CollectionExercise ADD CONSTRAINT stateFK_fkey     FOREIGN KEY (stateFK)  REFERENCES state(statePK);
 
 -- Add index
 ALTER TABLE collectionexercise ADD CONSTRAINT ce_id_uuid_key UNIQUE (id);
@@ -111,52 +100,53 @@ ALTER TABLE collectionexercise ADD CONSTRAINT ce_id_uuid_key UNIQUE (id);
 -- Table: CaseTypeOverride
 CREATE TABLE CaseTypeOverride
 (
-casetypeoverrideid     integer NOT NULL,
-exercisepk             bigint NOT NULL,
-sampleunittype         character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
-actionplanid           integer NOT NULL
+casetypeoverridePK     integer NOT NULL,
+exerciseFK             bigint NOT NULL,
+sampleunittypeFK      character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
+actionplanId           uuid
 );
 
-ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT casetypeoverrideid_pkey PRIMARY KEY (casetypeoverrideid);
-ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exercisepk_fkey         FOREIGN KEY (exercisepk) REFERENCES collectionexercise(exercisepk);
+ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT casetypeoverridePK_pkey PRIMARY KEY (casetypeoverridePK);
+ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT exerciseFK_fkey         FOREIGN KEY (exerciseFK) REFERENCES collectionexercise(exercisePK);
+ALTER TABLE ONLY   CaseTypeOverride ADD CONSTRAINT sampleunittypeFK_fkey         FOREIGN KEY (sampleunittypeFK) REFERENCES sampleunittype(sampleunittypePK);
 
 
 
 -- Table: SampleUnitGroup
 CREATE TABLE SampleUnitGroup
 (
-sampleunitgroupid     bigint NOT NULL DEFAULT nextval('sampleunitgroupidseq'::regclass),
-exercisepk            bigint NOT NULL,
+sampleunitgroupPK     bigint NOT NULL DEFAULT nextval('sampleunitgroupPKseq'::regclass),
+exerciseFK            bigint NOT NULL,
 formtype              character varying(10) NOT NULL, -- census questionset
-state                 character varying(20) NOT NULL,
+stateFK               character varying(20) NOT NULL,
 createddatetime       timestamp with time zone,
 modifieddatetime      timestamp with time zone
 );
 
-ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT sampleunitgroupid_pkey PRIMARY KEY (sampleunitgroupid);
-ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT exercisepk_fkey        FOREIGN KEY (exercisepk) REFERENCES collectionexercise(exercisepk);
-ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT state_fkey             FOREIGN KEY (state)      REFERENCES state(state);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT sampleunitgroupPK_pkey PRIMARY KEY (sampleunitgroupPK);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT exerciseFK_fkey        FOREIGN KEY (exerciseFK) REFERENCES collectionexercise(exercisePK);
+ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT stateFK_fkey           FOREIGN KEY (stateFK)    REFERENCES state(statePK);
 
 
 
 -- Table: SampleUnit
 CREATE TABLE SampleUnit
 (
-sampleunitid            bigint  NOT NULL,
-sampleunitgroupid       bigint  NOT NULL, 
-collectioninstrumentid  uuid,
-partyid                 uuid,
+sampleunitPK            bigint  NOT NULL,
+sampleunitgroupFK       bigint  NOT NULL, 
+collectioninstrumentId  uuid,
+partyId                 uuid,
 sampleunitref           character varying(20) NOT NULL,
-sampleunittype          character varying(2) NOT NULL -- example 'H','C','B' 'BI'
+sampleunittypeFK        character varying(2) NOT NULL -- example 'H','C','B' 'BI'
 );
 
-ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitid_pkey       PRIMARY KEY (sampleunitid);
-ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitgroupid_fkey  FOREIGN KEY (sampleunitgroupid) REFERENCES SampleUnitGroup(sampleunitgroupid);
-ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunittype_fkey     FOREIGN KEY (sampleunittype)    REFERENCES sampleunittype(sampleunittype);
+ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitPK_pkey       PRIMARY KEY (sampleunitPK);
+ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitgroupFK_fkey  FOREIGN KEY (sampleunitgroupFK) REFERENCES SampleUnitGroup(sampleunitgroupPK);
+ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunittypeFK_fkey   FOREIGN KEY (sampleunittypeFK)  REFERENCES sampleunittype(sampleunittypePK);
 
 -- Add index
-ALTER TABLE SampleUnit ADD CONSTRAINT collectioninstrumentid_uuid_key UNIQUE (collectioninstrumentid);
-ALTER TABLE SampleUnit ADD CONSTRAINT partyid_uuid_key UNIQUE (partyid);
+ALTER TABLE SampleUnit ADD CONSTRAINT collectioninstrumentId_uuid_key UNIQUE (collectioninstrumentId);
+ALTER TABLE SampleUnit ADD CONSTRAINT partyId_uuid_key UNIQUE (partyId);
 
 
 
