@@ -85,8 +85,7 @@ public class SampleServiceImpl implements SampleService {
   public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) {
 
     ExerciseSampleUnit exerciseSampleUnit = null;
-
-    //TODO: Remove .toString()
+    
     CollectionExercise collectionExercise = collectRepo
         .findOne(UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
