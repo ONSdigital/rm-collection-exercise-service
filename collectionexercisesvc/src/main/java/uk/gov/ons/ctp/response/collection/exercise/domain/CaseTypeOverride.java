@@ -14,7 +14,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "casetypeoverride", schema = "collectionexercise")
-public class CaseType {
+public class CaseTypeOverride {
 
   @Id
   @Column(name = "casetypeoverridepk")

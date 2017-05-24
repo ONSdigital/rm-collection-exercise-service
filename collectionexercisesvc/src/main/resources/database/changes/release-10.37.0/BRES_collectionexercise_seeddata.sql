@@ -18,3 +18,5 @@ VALUES ('14fb3e68-4dca-46db-bf49-04b84e07e77c',1,1,'201601','2017-09-01','2017-0
 INSERT INTO casetypedefault (casetypedefaultPK,surveyFK,sampleunittypeFK,actionplanId) VALUES (1,1,'B' ,'e71002ac-3575-47eb-b87f-cd9db92bf9a7');
 INSERT INTO casetypedefault (casetypedefaultPK,surveyFK,sampleunittypeFK,actionplanId) VALUES (2,1,'BI','0009e978-0932-463b-a2a1-b45cb3ffcb2a');
 
+INSERT INTO collectionexercise.casetypeoverride (casetypeoverridePK,exerciseFK,sampleunittypeFK,actionplanId) VALUES (1,1,'B' ,'e71002ac-3575-47eb-b87f-cd9db92bf9a8');
+INSERT INTO collectionexercise.casetypeoverride (casetypeoverridePK,exerciseFK,sampleunittypeFK,actionplanId) VALUES (2,1,'BI','0009e978-0932-463b-a2a1-b45cb3ffcb2b');
