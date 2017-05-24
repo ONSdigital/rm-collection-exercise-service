@@ -54,7 +54,7 @@ public class CollectionExerciseDTO {
     EXECUTED,
     VALIDATED,
     FAILEDVALIDATION,
-    PUBLISHED;
+    PUBLISHED
   }
 
   /**

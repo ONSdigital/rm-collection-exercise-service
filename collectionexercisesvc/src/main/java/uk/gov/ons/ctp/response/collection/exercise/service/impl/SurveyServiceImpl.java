@@ -22,7 +22,6 @@ public class SurveyServiceImpl implements SurveyService {
 
   @Override
   public Survey requestSurvey(UUID id) {
-
     return surveyRepo.findById(id);
   }
 }

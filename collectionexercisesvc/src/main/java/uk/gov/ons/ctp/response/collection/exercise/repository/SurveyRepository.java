@@ -11,6 +11,12 @@ import java.util.UUID;
  */
 public interface SurveyRepository extends JpaRepository<Survey, String> {
 
+    /**
+     * Query repository for survey by id.
+     *
+     * @param id survey id to find.
+     * @return Survey object.
+     */
     Survey findById(UUID id);
 
 }

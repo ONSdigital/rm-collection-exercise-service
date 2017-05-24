@@ -12,8 +12,20 @@ import java.util.UUID;
  */
 public interface CollectionExerciseRepository extends JpaRepository<CollectionExercise, UUID> {
 
-    CollectionExercise findOneById(UUID id);
+  /**
+   * Query repository for collection exercise by id.
+   *
+   * @param id collection exercise id to find.
+   * @return collection exercise object.
+   */
+  CollectionExercise findOneById(UUID id);
 
-    List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
+  /**
+   * Query repository for list of collection exercises associated to survey fk.
+   *
+   * @param surveyfk survey fk to which collection exercises are associated.
+   * @return List of collection exercises.
+   */
+  List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
 
 }

@@ -35,6 +35,12 @@ public interface CollectionExerciseService {
   CollectionExercise requestCollectionExercise(final UUID id);
 
 
+  /**
+   * Request case types associated to a collection exercise Id from the Collection Exercise Service
+   *
+   * @param collectionExercisePK the collection exercise pk for which to request case types
+   * @return the associated case types.
+   */
   List<CaseType> getCaseTypesForCollectionExercise(final Integer collectionExercisePK);
 
 

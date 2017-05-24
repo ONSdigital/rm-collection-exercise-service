@@ -54,8 +54,8 @@ public class SampleServiceImpl implements SampleService {
 
     SampleUnitsRequestDTO replyDTO = null;
 
-    CollectionExercise collectionExercise = collectRepo
-        .findOne(id);
+    CollectionExercise collectionExercise = collectRepo.findOne(id);
+
     // Check collection exercise exists
     if (collectionExercise != null) {
       replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
@@ -85,7 +85,7 @@ public class SampleServiceImpl implements SampleService {
   public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) {
 
     ExerciseSampleUnit exerciseSampleUnit = null;
-    
+
     CollectionExercise collectionExercise = collectRepo
         .findOne(UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
