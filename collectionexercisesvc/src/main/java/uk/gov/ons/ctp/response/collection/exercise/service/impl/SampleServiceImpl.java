@@ -93,7 +93,7 @@ public class SampleServiceImpl implements SampleService {
     if (collectionExercise != null) {
 
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(collectionExercise.getId(), sampleUnit.getSampleId())) {
+      if (!sampleUnitRepo.tupleExists(collectionExercise.getId(), sampleUnit.getSampleSummaryFK())) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
@@ -103,7 +103,7 @@ public class SampleServiceImpl implements SampleService {
         sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
         exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleUnitId());
+        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleUnitPK());
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         exerciseSampleUnit.setSampleUnitType(sampleUnit.getSampleUnitType());
@@ -119,12 +119,12 @@ public class SampleServiceImpl implements SampleService {
         }
 
       } else {
-        log.warn("SampleUnit {} already exists for CollectionExercise {}", sampleUnit.getSampleUnitId(),
+        log.warn("SampleUnit {} already exists for CollectionExercise {}", sampleUnit.getSampleUnitPK(),
             sampleUnit.getCollectionExerciseId());
       }
     } else {
       log.error("No CollectionExercise {} for SampleUnit {}", sampleUnit.getCollectionExerciseId(),
-          sampleUnit.getSampleUnitId());
+          sampleUnit.getSampleUnitPK());
     }
 
     return exerciseSampleUnit;
