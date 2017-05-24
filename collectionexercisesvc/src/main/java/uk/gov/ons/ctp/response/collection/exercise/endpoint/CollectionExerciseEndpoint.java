@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExerciseSummary;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
@@ -22,7 +21,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -102,18 +100,9 @@ public class CollectionExerciseEndpoint {
               String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, id));
     }
 
+    List<CaseTypeDTO>caseTypeDTOList = collectionExerciseService.getCaseTypesDTOList(collectionExercise);
+
     CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
-
-    List<CaseType> caseTypesList = collectionExerciseService.getCaseTypesForCollectionExercise(collectionExercise.getExercisePK());
-    List<CaseTypeDTO> caseTypeDTOList = new ArrayList<>();
-
-    for (CaseType caseType : caseTypesList) {
-      CaseTypeDTO caseTypeDTO = new CaseTypeDTO();
-      caseTypeDTO.setSampleUnitType(caseType.getSampleUnitTypeFK());
-      caseTypeDTO.setActionPlanId(caseType.getActionPlanId());
-      caseTypeDTOList.add(caseTypeDTO);
-    }
-
     collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
 
     return ResponseEntity.ok(collectionExerciseDTO);
