@@ -1,24 +1,21 @@
-package uk.gov.ons.ctp.response.collection.exercise.domain;
+package uk.gov.ons.ctp.response.collection.exercise.representation;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.sql.Timestamp;
 import java.util.UUID;
 
 /**
- * Domain model object.
+ * CollectionExerciseSummary API representation.
  */
-@Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class CollectionExerciseSummary {
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+public class CollectionExerciseSummaryDTO {
 
-  @Id
   private UUID id;
 
   private String name;

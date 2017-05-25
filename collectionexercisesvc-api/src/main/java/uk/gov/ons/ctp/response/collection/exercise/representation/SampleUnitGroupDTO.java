@@ -17,7 +17,7 @@ public class SampleUnitGroupDTO {
   public enum SampleUnitGroupState {
     INIT,
     VALIDATED,
-    PUBLISHED;
+    PUBLISHED
   }
 
   /**

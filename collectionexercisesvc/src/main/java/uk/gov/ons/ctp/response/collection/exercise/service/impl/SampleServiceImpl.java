@@ -22,6 +22,7 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * The implementation of the SampleService
@@ -49,12 +50,12 @@ public class SampleServiceImpl implements SampleService {
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionTransitionState;
 
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(final String exerciseId) {
+  public SampleUnitsRequestDTO requestSampleUnits(final UUID id) {
 
     SampleUnitsRequestDTO replyDTO = null;
 
-    CollectionExercise collectionExercise = collectRepo
-        .findOne(exerciseId);
+    CollectionExercise collectionExercise = collectRepo.findOne(id);
+
     // Check collection exercise exists
     if (collectionExercise != null) {
       replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
@@ -85,15 +86,14 @@ public class SampleServiceImpl implements SampleService {
 
     ExerciseSampleUnit exerciseSampleUnit = null;
 
-    //TODO: Remove .toString()
     CollectionExercise collectionExercise = collectRepo
-        .findOne(sampleUnit.getCollectionExerciseId().toString());
+        .findOne(UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
     // Check collection exercise exists
     if (collectionExercise != null) {
 
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(collectionExercise.getExerciseId(), sampleUnit.getSampleId())) {
+      if (!sampleUnitRepo.tupleExists(collectionExercise.getId(), sampleUnit.getSampleSummaryFK())) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
@@ -103,14 +103,14 @@ public class SampleServiceImpl implements SampleService {
         sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
         exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleUnitId());
+        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleUnitPK());
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         exerciseSampleUnit.setSampleUnitType(sampleUnit.getSampleUnitType());
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.totalByExerciseId(collectionExercise.getExerciseId()) == collectionExercise
+        if (sampleUnitRepo.totalByExerciseId(collectionExercise.getId()) == collectionExercise
             .getSampleSize()) {
           collectionExercise.setState(collectionTransitionState.transition(collectionExercise.getState(),
               CollectionExerciseEvent.EXECUTE));
@@ -119,12 +119,12 @@ public class SampleServiceImpl implements SampleService {
         }
 
       } else {
-        log.warn("SampleUnit {} already exists for CollectionExercise {}", sampleUnit.getSampleUnitId(),
+        log.warn("SampleUnit {} already exists for CollectionExercise {}", sampleUnit.getSampleUnitPK(),
             sampleUnit.getCollectionExerciseId());
       }
     } else {
       log.error("No CollectionExercise {} for SampleUnit {}", sampleUnit.getCollectionExerciseId(),
-          sampleUnit.getSampleUnitId());
+          sampleUnit.getSampleUnitPK());
     }
 
     return exerciseSampleUnit;

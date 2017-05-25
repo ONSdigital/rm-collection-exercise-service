@@ -1,24 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.sql.Timestamp;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+
+import javax.persistence.*;
+import java.sql.Timestamp;
 
 /**
  * Domain model object for sample unit groups.
@@ -39,7 +28,7 @@ public class ExerciseSampleUnitGroup {
   private Integer sampleUnitGroupId;
 
   @ManyToOne
-  @JoinColumn(name = "exerciseid", referencedColumnName = "exerciseid")
+  @JoinColumn(name = "exerciseFK", referencedColumnName = "exercisePK")
   private CollectionExercise collectionExercise;
 
   @Column(name = "formtype")

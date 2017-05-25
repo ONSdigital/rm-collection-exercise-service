@@ -27,7 +27,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) {
 
     CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
-    requestDTO.setCollectionExerciseId(exercise.getExerciseId());
+    requestDTO.setCollectionExerciseId(exercise.getId());
     requestDTO.setSurveyRef(exercise.getSurvey().getSurveyRef());
     requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
     return sampleSvcClientRestTemplate.postResource(appConfig.getSampleSvc().getRequestSampleUnitsPath(), requestDTO,

@@ -9,6 +9,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
  * Domain model object.
@@ -20,24 +21,42 @@ import java.sql.Timestamp;
 @Table(name = "collectionexercise", schema = "collectionexercise")
 public class CollectionExercise {
 
+  @Column(name = "id")
+  private UUID id;
+
   @Id
   @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-      @Parameter(name = "sequence_name", value = "collectionexercise.exerciseidseq"),
+      @Parameter(name = "sequence_name", value = "collectionexercise.exercisepkseq"),
       @Parameter(name = "increment_size", value = "1")
   })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exerciseseq_gen")
-  @Column(name = "exerciseid")
-  private String exerciseId;
+  @Column(name = "exercisepk")
+  private Integer exercisePK;
 
   @ManyToOne
-  @JoinColumn(name = "surveyid", referencedColumnName = "surveyid")
+  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
   private Survey survey;
+
+  @Column(name = "name")
+  private String name;
+
+  @Column(name = "actualexecutiondatetime")
+  private Timestamp actualExecutionDateTime;
+
+  @Column(name = "scheduledexecutiondatetime")
+  private Timestamp scheduledExecutionDateTime;
 
   @Column(name = "scheduledstartdatetime")
   private Timestamp scheduledStartDateTime;
 
-  @Column(name = "scheduledexecutiondatetime")
-  private Timestamp scheduledExecutionDateTime;
+  @Column(name = "actualpublishdatetime")
+  private Timestamp actualPublishDateTime;
+
+  @Column(name = "periodstartdatetime")
+  private Timestamp periodStartDateTime;
+
+  @Column(name = "periodenddatetime")
+  private Timestamp periodEndDateTime;
 
   @Column(name = "scheduledreturndatetime")
   private Timestamp scheduledreturnDateTime;
@@ -45,19 +64,11 @@ public class CollectionExercise {
   @Column(name = "scheduledenddatetime")
   private Timestamp scheduledEndDateTime;
 
-  @Column(name = "scheduledsurveydate")
-  private Timestamp scheduledSurveyDate;
-
-  @Column(name = "actualexecutiondatetime")
-  private Timestamp actualExecutionDateTime;
-
-  @Column(name = "actualpublishdatetime")
-  private Timestamp actualPublishDateTime;
-
   @Column(name = "executedby")
   private String executedBy;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "stateFK")
   private CollectionExerciseDTO.CollectionExerciseState state;
 
   @Column(name = "samplesize")
