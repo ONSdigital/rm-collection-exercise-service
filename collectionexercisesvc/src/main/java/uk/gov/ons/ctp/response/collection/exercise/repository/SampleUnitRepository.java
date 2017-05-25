@@ -27,9 +27,9 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "collectionexercise.sampleunit su, "
       + "collectionexercise.sampleunitgroup sg, "
       + "collectionexercise.collectionexercise ce "
-      + "where su.sampleunitgroupid = sg.sampleunitgroupid and sg.exerciseid = ce.exerciseid and "
-      + "ce.exerciseid = :p_exerciseid and su.sampleunitgroupid = :p_sampleunitid);", nativeQuery = true)
-  boolean tupleExists(@Param("p_exerciseid") UUID id, @Param("p_sampleunitid") Integer sampleUnitId);
+      + "where su.sampleunitgroupfk = sg.sampleunitgrouppk and sg.exercisefk = ce.exercisepk and "
+      + "ce.exercisepk = :p_exercisepk and su.sampleunitpk = :p_sampleunitpk);", nativeQuery = true)
+  boolean tupleExists(@Param("p_exercisepk") Integer id, @Param("p_sampleunitpk") Integer sampleUnitId);
 
   /**
    * Count the number of SampleUnits for the collection exercise.
@@ -40,8 +40,8 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
   @Query(value = "select count(*) from "
       + "collectionexercise.sampleunit su, "
       + "collectionexercise.sampleunitgroup sg "
-      + "where sg.exerciseid = :p_exerciseid and "
-      + "su.sampleunitgroupid = sg.sampleunitgroupid;", nativeQuery = true)
-  int totalByExerciseId(@Param("p_exerciseid") UUID id);
+      + "where sg.exercisefk = :p_exercisefk and "
+      + "su.sampleunitgroupfk = sg.sampleunitgrouppk;", nativeQuery = true)
+  int totalByExercisePK(@Param("p_exercisefk") Integer id);
 
 }
