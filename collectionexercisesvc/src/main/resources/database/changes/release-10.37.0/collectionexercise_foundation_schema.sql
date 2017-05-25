@@ -102,7 +102,7 @@ CREATE TABLE CaseTypeOverride
 (
 casetypeoverridePK     integer NOT NULL,
 exerciseFK             bigint NOT NULL,
-sampleunittypeFK      character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
+sampleunittypeFK       character varying(2) NOT NULL, -- example 'H','C','B' 'BI'
 actionplanId           uuid
 );
 
@@ -143,10 +143,6 @@ sampleunittypeFK        character varying(2) NOT NULL -- example 'H','C','B' 'BI
 ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitPK_pkey       PRIMARY KEY (sampleunitPK);
 ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunitgroupFK_fkey  FOREIGN KEY (sampleunitgroupFK) REFERENCES SampleUnitGroup(sampleunitgroupPK);
 ALTER TABLE ONLY   SampleUnit ADD CONSTRAINT sampleunittypeFK_fkey   FOREIGN KEY (sampleunittypeFK)  REFERENCES sampleunittype(sampleunittypePK);
-
--- Add index
-ALTER TABLE SampleUnit ADD CONSTRAINT collectioninstrumentId_uuid_key UNIQUE (collectioninstrumentId);
-ALTER TABLE SampleUnit ADD CONSTRAINT partyId_uuid_key UNIQUE (partyId);
 
 
 
