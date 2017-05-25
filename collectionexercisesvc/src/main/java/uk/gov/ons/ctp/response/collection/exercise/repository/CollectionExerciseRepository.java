@@ -10,7 +10,7 @@ import java.util.UUID;
  * Spring JPA Repository for Collection Exercise
  *
  */
-public interface CollectionExerciseRepository extends JpaRepository<CollectionExercise, UUID> {
+public interface CollectionExerciseRepository extends JpaRepository<CollectionExercise, Integer> {
 
   /**
    * Query repository for collection exercise by id.

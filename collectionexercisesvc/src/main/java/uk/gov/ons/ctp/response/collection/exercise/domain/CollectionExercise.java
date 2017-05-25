@@ -1,15 +1,26 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import java.sql.Timestamp;
+import java.util.UUID;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-
-import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.UUID;
 
 /**
  * Domain model object.
@@ -21,7 +32,6 @@ import java.util.UUID;
 @Table(name = "collectionexercise", schema = "collectionexercise")
 public class CollectionExercise {
 
-  @Column(name = "id")
   private UUID id;
 
   @Id
@@ -37,7 +47,6 @@ public class CollectionExercise {
   @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
   private Survey survey;
 
-  @Column(name = "name")
   private String name;
 
   @Column(name = "actualexecutiondatetime")
@@ -68,7 +77,7 @@ public class CollectionExercise {
   private String executedBy;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "stateFK")
+  @Column(name = "statefk")
   private CollectionExerciseDTO.CollectionExerciseState state;
 
   @Column(name = "samplesize")

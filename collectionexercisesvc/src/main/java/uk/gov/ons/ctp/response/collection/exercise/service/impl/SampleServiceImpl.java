@@ -54,7 +54,7 @@ public class SampleServiceImpl implements SampleService {
 
     SampleUnitsRequestDTO replyDTO = null;
 
-    CollectionExercise collectionExercise = collectRepo.findOne(id);
+    CollectionExercise collectionExercise = collectRepo.findOneById(id);
 
     // Check collection exercise exists
     if (collectionExercise != null) {
@@ -87,30 +87,30 @@ public class SampleServiceImpl implements SampleService {
     ExerciseSampleUnit exerciseSampleUnit = null;
 
     CollectionExercise collectionExercise = collectRepo
-        .findOne(UUID.fromString(sampleUnit.getCollectionExerciseId()));
+        .findOneById(UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
     // Check collection exercise exists
     if (collectionExercise != null) {
 
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(collectionExercise.getId(), sampleUnit.getSampleSummaryFK())) {
+      if (!sampleUnitRepo.tupleExists(collectionExercise.getExercisePK(), sampleUnit.getSampleUnitPK())) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
         sampleUnitGroup.setFormType(sampleUnit.getFormType());
-        sampleUnitGroup.setState(SampleUnitGroupState.INIT);
+        sampleUnitGroup.setStateFK(SampleUnitGroupState.INIT);
         sampleUnitGroup.setCreatedDateTime(new Timestamp(new Date().getTime()));
         sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
         exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitId(sampleUnit.getSampleUnitPK());
+        exerciseSampleUnit.setSampleUnitPK(sampleUnit.getSampleUnitPK());
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        exerciseSampleUnit.setSampleUnitType(sampleUnit.getSampleUnitType());
+        exerciseSampleUnit.setSampleUnitTypeFK(sampleUnit.getSampleUnitType());
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.totalByExerciseId(collectionExercise.getId()) == collectionExercise
+        if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK()) == collectionExercise
             .getSampleSize()) {
           collectionExercise.setState(collectionTransitionState.transition(collectionExercise.getState(),
               CollectionExerciseEvent.EXECUTE));
