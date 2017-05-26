@@ -1,8 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 /**
  * CaseType API representation.
@@ -11,8 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class CaseTypeDTO {
 
-  String sampleUnitType;
+  @JsonProperty("sampleUnitType")
+  String sampleUnitTypeFK;
 
-  String actionPlanId;
+  UUID actionPlanId;
 
 }

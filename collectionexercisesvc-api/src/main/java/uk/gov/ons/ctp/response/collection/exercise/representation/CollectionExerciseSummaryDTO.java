@@ -20,6 +20,6 @@ public class CollectionExerciseSummaryDTO {
 
   private String name;
 
-  private Timestamp scheduledExecution;
+  private Timestamp scheduledExecutionDateTime;
 
 }

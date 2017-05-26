@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 
-import java.util.UUID;
-
 /**
  * JPA repository for SampleUnit entities
  */
