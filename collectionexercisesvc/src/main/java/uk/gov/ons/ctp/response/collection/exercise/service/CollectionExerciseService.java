@@ -1,8 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import uk.gov.ons.ctp.response.collection.exercise.domain.*;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +21,7 @@ public interface CollectionExerciseService {
    * @param survey the survey for which to request collection exercises
    * @return the associated surveys.
    */
-  List<CollectionExerciseSummary> requestCollectionExerciseSummariesForSurvey(final Survey survey);
+  List<CollectionExercise> requestCollectionExercisesForSurvey(final Survey survey);
 
 
   /**
@@ -36,7 +38,7 @@ public interface CollectionExerciseService {
    * @param collectionExercise the collection exercise for which to request case types
    * @return the associated case type DTOs.
    */
-  List<CaseTypeDTO> getCaseTypesDTOList(final CollectionExercise collectionExercise);
+  Collection<CaseType> getCaseTypesList(final CollectionExercise collectionExercise);
 
 
 }

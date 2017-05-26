@@ -8,12 +8,9 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRep
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The implementation of the SampleService
@@ -36,23 +33,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private SurveyRepository surveyRepo;
 
   @Override
-  public List<CollectionExerciseSummary> requestCollectionExerciseSummariesForSurvey(Survey survey) {
+  public List<CollectionExercise> requestCollectionExercisesForSurvey(Survey survey) {
 
-    List<CollectionExercise> collectionExerciseList = collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
-
-    List<CollectionExerciseSummary> collectionExerciseSummaryList = new ArrayList<>();
-
-    for (CollectionExercise collectionExercise : collectionExerciseList) {
-      CollectionExerciseSummary collectionExerciseSummary = new CollectionExerciseSummary();
-      collectionExerciseSummary.setId(collectionExercise.getId());
-      collectionExerciseSummary.setName(collectionExercise.getName());
-      collectionExerciseSummary.setScheduledExecution(collectionExercise.getScheduledExecutionDateTime());
-
-      collectionExerciseSummaryList.add(collectionExerciseSummary);
-
-    }
-
-    return collectionExerciseSummaryList;
+    return collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
   }
 
   @Override
@@ -62,7 +45,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public List<CaseTypeDTO> getCaseTypesDTOList(CollectionExercise collectionExercise) {
+  public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
     Survey survey = surveyRepo.findById(collectionExercise.getSurvey().getId());
 
@@ -70,30 +53,22 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo.findByExerciseFK(collectionExercise.getExercisePK());
 
-    List<CaseTypeDTO> caseTypeDTOList = new ArrayList<>();
+    return createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+  }
 
-    //For each caseTypeDefault, loop through each caseTypeOverride and check if sampleUnitTypeFK matches
-    //If so, add caseTypeDTO from caseTypeOverride else add caseTypeDTO from caseTypeDefault.
-    for (CaseTypeDefault caseTypeDefault : caseTypeDefaultList) {
+  Collection<CaseType> createCaseTypeList(List<? extends CaseType> caseTypeDefaultList, List<? extends CaseType> caseTypeOverrideList) {
 
-      CaseTypeDTO caseTypeDTO = new CaseTypeDTO();
-      caseTypeDTO.setSampleUnitType(caseTypeDefault.getSampleUnitTypeFK());
-      caseTypeDTO.setActionPlanId(caseTypeDefault.getActionPlanId());
+    Map<String, CaseType> defaultMap = new HashMap<>();
 
-      for (CaseTypeOverride caseTypeOverride : caseTypeOverrideList) {
-
-        if (caseTypeDefault.getSampleUnitTypeFK().equals(caseTypeOverride.getSampleUnitTypeFK())) {
-          caseTypeDTO.setSampleUnitType(caseTypeOverride.getSampleUnitTypeFK());
-          caseTypeDTO.setActionPlanId(caseTypeOverride.getActionPlanId());
-          break;
-        }
-
-      }
-
-      caseTypeDTOList.add(caseTypeDTO);
-
+    for (CaseType caseTypeDefault : caseTypeDefaultList) {
+      defaultMap.put(caseTypeDefault.getSampleUnitTypeFK(), caseTypeDefault);
     }
 
-    return caseTypeDTOList;
+    for (CaseType caseTypeOverride : caseTypeOverrideList) {
+      defaultMap.put(caseTypeOverride.getSampleUnitTypeFK(), caseTypeOverride);
+    }
+
+    return defaultMap.values();
   }
+
 }
