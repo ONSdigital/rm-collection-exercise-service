@@ -1,10 +1,15 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -19,10 +24,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * The implementation of the SampleService
@@ -93,7 +94,8 @@ public class SampleServiceImpl implements SampleService {
     if (collectionExercise != null) {
 
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(collectionExercise.getExercisePK(), sampleUnit.getSampleUnitPK())) {
+      if (!sampleUnitRepo.tupleExists(collectionExercise.getExercisePK(), sampleUnit.getSampleUnitRef(),
+          sampleUnit.getSampleUnitType())) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
@@ -103,7 +105,6 @@ public class SampleServiceImpl implements SampleService {
         sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
         exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitPK(sampleUnit.getSampleUnitPK());
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         exerciseSampleUnit.setSampleUnitTypeFK(sampleUnit.getSampleUnitType());
@@ -119,12 +120,14 @@ public class SampleServiceImpl implements SampleService {
         }
 
       } else {
-        log.warn("SampleUnit {} already exists for CollectionExercise {}", sampleUnit.getSampleUnitPK(),
-            sampleUnit.getCollectionExerciseId());
+        log.warn("SampleUnitRef {} with  setSampleUnitTypeFK {} already exists for CollectionExercise {}",
+            sampleUnit.getSampleUnitRef(),
+            sampleUnit.getSampleUnitType(), sampleUnit.getCollectionExerciseId());
       }
     } else {
-      log.error("No CollectionExercise {} for SampleUnit {}", sampleUnit.getCollectionExerciseId(),
-          sampleUnit.getSampleUnitPK());
+      log.error("No CollectionExercise {} for SampleUnit Ref: {} Type: {}, FormType: {}",
+          sampleUnit.getCollectionExerciseId(),
+          sampleUnit.getSampleUnitRef(), sampleUnit.getSampleUnitType(), sampleUnit.getFormType());
     }
 
     return exerciseSampleUnit;
