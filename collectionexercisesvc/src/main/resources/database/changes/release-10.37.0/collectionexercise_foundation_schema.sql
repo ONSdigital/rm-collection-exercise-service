@@ -19,7 +19,14 @@ CREATE SEQUENCE exercisePKseq
   START 1
   CACHE 1;
 
-
+-- Sequence: sampleunitPKseq
+-- DROP SEQUENCE sampleunitPKseq;
+CREATE SEQUENCE sampleunitPKseq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 999999999999
+  START 1
+  CACHE 1;
 
 -- Table: survey
 CREATE TABLE survey
@@ -132,7 +139,7 @@ ALTER TABLE ONLY   SampleUnitGroup ADD CONSTRAINT stateFK_fkey           FOREIGN
 -- Table: SampleUnit
 CREATE TABLE SampleUnit
 (
-sampleunitPK            bigint  NOT NULL,
+sampleunitPK            bigint  NOT NULL DEFAULT nextval('sampleunitPKseq'::regclass),
 sampleunitgroupFK       bigint  NOT NULL, 
 collectioninstrumentId  uuid,
 partyId                 uuid,

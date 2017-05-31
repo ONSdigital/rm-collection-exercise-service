@@ -14,20 +14,23 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, Integer> {
 
   /**
-   * Check repository for sampleUnitId existence. May exist in different
+   * Check repository for Sample Unit existence. May exist in different
    * collection exercise.
    *
    * @param id collection exercise id of which the sample unit is a part.
-   * @param sampleUnitId to check for existence.
+   * @param sampleUnitRef to check for existence of sample unit.
+   * @param sampleUnitTypeFK to check for existence of sample unit.
    * @return boolean whether exists
    */
   @Query(value = "select exists (select 1 from "
       + "collectionexercise.sampleunit su, "
-      + "collectionexercise.sampleunitgroup sg, "
-      + "collectionexercise.collectionexercise ce "
-      + "where su.sampleunitgroupfk = sg.sampleunitgrouppk and sg.exercisefk = ce.exercisepk and "
-      + "ce.exercisepk = :p_exercisepk and su.sampleunitpk = :p_sampleunitpk);", nativeQuery = true)
-  boolean tupleExists(@Param("p_exercisepk") Integer id, @Param("p_sampleunitpk") Integer sampleUnitId);
+      + "collectionexercise.sampleunitgroup sg "
+      + "where su.sampleunitgroupfk = sg.sampleunitgrouppk and "
+      + "sg.exercisefk = :p_exercisefk and "
+      + "su.sampleunitref = :p_sampleunitref and "
+      + "su.sampleunittypefk = :p_sampleunittypefk);", nativeQuery = true)
+  boolean tupleExists(@Param("p_exercisefk") Integer id, @Param("p_sampleunitref") String sampleUnitRef,
+      @Param("p_sampleunittypefk") String sampleUnitTypeFK);
 
   /**
    * Count the number of SampleUnits for the collection exercise.
