@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.UUID;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -39,10 +40,10 @@ public class SendToCaseImpl implements SendToCase {
 		//Case Data
 
 		//TODO Integers fixed to Strings to temporarily allow to build.
-		caseDTO.setActionPlanId("1");
-		caseDTO.setPartyId("1");
-		caseDTO.setCollectionExerciseId("1");
-		caseDTO.setCollectionInstrumentId("1");
+		caseDTO.setActionPlanId("7bc5d41b-0549-40b3-ba76-42f6d4cf3991");
+		caseDTO.setPartyId("7bc5d41b-0549-40b3-ba76-42f6d4cf3992");
+		caseDTO.setCollectionExerciseId("7bc5d41b-0549-40b3-ba76-42f6d4cf3993");
+		caseDTO.setCollectionInstrumentId("7bc5d41b-0549-40b3-ba76-42f6d4cf3994");
 		caseDTO.setSampleUnitRef("str1234");
 		caseDTO.setSampleUnitType("B");
 		
