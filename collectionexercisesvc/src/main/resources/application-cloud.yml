@@ -123,6 +123,10 @@ sample-svc:
     # time to read response
     read-timeout-milli-seconds: 5000
 
+redisson-config:
+  address: ${cloud.services.redis.credentials.host}:6379
+  time-to-live-seconds: 300
+
 rabbitmq:
   username: ${cloud.services.rabbitmq.connection.username}
   password: ${cloud.services.rabbitmq.connection.password}
