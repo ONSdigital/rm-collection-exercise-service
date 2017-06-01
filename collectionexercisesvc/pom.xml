@@ -141,6 +141,17 @@
       <artifactId>orika-eclipse-tools</artifactId>
       <version>1.4.6</version>
     </dependency>
+
+    <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-spring-service-connector</artifactId>
+    </dependency>
+    
+    <!-- If you intend to deploy the app on Cloud Foundry, add the following -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-cloudfoundry-connector</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
