@@ -16,7 +16,7 @@ logging:
 liquibase:
   user: ${cloud.services.postgresql.connection.username}
   password: ${cloud.services.postgresql.connection.password}
-  default-schema: collectionexercise
+  default-schema: collectionexercisesvc
   url: ${cloud.services.postgresql.connection.jdbcurl}
   changeLog: classpath:/database/changelog-master.yml
 
