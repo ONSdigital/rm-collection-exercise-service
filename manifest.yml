@@ -3,7 +3,7 @@ applications:
   buildpack: https://github.com/cloudfoundry/java-buildpack.git
   instances: 1
   host: collectionexercisesvc
-  memory: 1024M
+  memory: 512M
   path: collectionexercisesvc/target/collectionexercisesvc.jar
   services:
     - collectionexercisesvc_pg_db
