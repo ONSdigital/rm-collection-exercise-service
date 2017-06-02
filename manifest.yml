@@ -1,0 +1,15 @@
+applications:
+- name: collectionexercisesvc
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+  instances: 1
+  host: collectionexercisesvc
+  memory: 1024M
+  path: collectionexercisesvc/target/collectionexercisesvc.jar
+  services:
+    - collectionexercisesvc_pg_db
+    - redis
+    - rabbitmq
+  env:
+    sampleSvc_connectionConfig_host: samplesvc.apps.mvp.onsclofo.uk
+    sampleSvc_connectionConfig_port: "80"
+    sampleSvc_connectionConfig_scheme: http

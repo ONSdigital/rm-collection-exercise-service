@@ -1,0 +1,142 @@
+info:
+  contactEmail: martin.humphrey@ons.gov.uk
+  version: ${project.version}
+  commit: ${buildNumber}
+  branch: ${scmBranch}
+  buildTime: ${timestamp}
+
+# logging config here as a reminder as to how to override logback from cmd line
+# ie -Dlogging.level.org.springframework=DEBUG
+logging:
+  level:
+    uk.gov.ons.ctp: INFO
+    org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanExtractor: ERROR
+    org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
+
+liquibase:
+  user: ${cloud.services.postgresql.connection.username}
+  password: ${cloud.services.postgresql.connection.password}
+  default-schema: collectionexercise
+  url: ${cloud.services.postgresql.connection.jdbcurl}
+  changeLog: classpath:/database/changelog-master.yml
+
+security:
+  basic:
+    enabled: false
+  user:
+    name: collectionexercise
+    password: ctp
+
+management:
+  port: 8245
+  context-path: /mgmt
+  security:
+    role: SUPERUSER
+    enabled: true
+  health:
+    mongo:
+      enabled: true
+    rabbit:
+      enabled: false
+
+server:
+  port: 8145
+  servlet-path: /
+
+endpoints:
+  autoconfig:
+    enabled: true
+    sensitive: true
+  beans:
+    enabled: true
+    sensitive: true
+  configprops:
+    enabled: true
+    sensitive: true
+  dump:
+    enabled: true
+    sensitive: true
+  env:
+    enabled: true
+    sensitive: true
+  info:
+    enabled: true
+    sensitive: true
+  metrics:
+    enabled: true
+    sensitive: true
+  mappings:
+    enabled: true
+    sensitive: true
+  shutdown:
+    enabled: true
+    sensitive: true
+  trace:
+    enabled: true
+    sensitive: true
+
+spring:
+  output:
+    ansi:
+      enabled: never
+
+  application:
+    name: ONS CollectionExerciseSvc
+
+  datasource:
+    driverClassName: org.postgresql.Driver
+    tomcat:
+      initial-size: 5
+      max-active: 10
+      max-idle: 5
+      min-idle: 3
+    continue-on-error: true
+    schema: classpath:/schema-cloud.sql
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        ddl-auto: update
+        default_schema: collectionexercise
+
+  sleuth:
+    sampler:
+      percentage: 10
+
+  zipkin:
+    enabled: false
+
+sample-svc:
+  request-sample-units-path: /samples/sampleunitrequests
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8125
+    # how many times should we attempt connection on failure
+    retry-attempts: 10
+    # sleep between retries
+    retry-pause-milli-seconds: 5000
+    # time to estab connection
+    connect-timeout-milli-seconds: 5000
+    # time to read response
+    read-timeout-milli-seconds: 5000
+
+redisson-config:
+  address: ${cloud.services.redis.connection.host}:6379
+  time-to-live-seconds: 300
+
+rabbitmq:
+  username: ${cloud.services.rabbitmq.connection.username}
+  password: ${cloud.services.rabbitmq.connection.password}
+  host: ${cloud.services.rabbitmq.connection.host}
+  port: ${cloud.services.rabbitmq.connection.port}
+  virtualhost: /
+
+messaging:
+  consumingThreads: 1
+  pubMaxAttempts: 3
+  conMaxAttempts: 1
+  prefetchCount: 10
+  txSize: 1
