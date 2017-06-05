@@ -1,26 +1,15 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.UUID;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.annotation.MessageEndpoint;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.response.casesvc.definition.CaseCreation;
 import uk.gov.ons.ctp.response.collection.exercise.message.SendToCase;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import java.text.ParseException;
 
 /**
  * The publisher to queues
@@ -40,9 +29,9 @@ public class SendToCaseImpl implements SendToCase {
 		//Case Data
 
 		//TODO Integers fixed to Strings to temporarily allow to build.
-		caseDTO.setActionPlanId("7bc5d41b-0549-40b3-ba76-42f6d4cf3991");
+		caseDTO.setActionPlanId("e71002ac-3575-47eb-b87f-cd9db92bf9a7");
 		caseDTO.setPartyId("7bc5d41b-0549-40b3-ba76-42f6d4cf3992");
-		caseDTO.setCollectionExerciseId("7bc5d41b-0549-40b3-ba76-42f6d4cf3993");
+		caseDTO.setCollectionExerciseId("14fb3e68-4dca-46db-bf49-04b84e07e77c");
 		caseDTO.setCollectionInstrumentId("7bc5d41b-0549-40b3-ba76-42f6d4cf3994");
 		caseDTO.setSampleUnitRef("str1234");
 		caseDTO.setSampleUnitType("B");
