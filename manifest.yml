@@ -2,6 +2,7 @@ applications:
 - name: collectionexercisesvc
   buildpack: https://github.com/cloudfoundry/java-buildpack.git
   instances: 1
+  timeout: 120
   host: collectionexercisesvc
   memory: 1024M
   path: collectionexercisesvc/target/collectionexercisesvc.jar
