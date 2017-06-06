@@ -132,7 +132,7 @@ rabbitmq:
   password: ${cloud.services.rabbitmq.connection.password}
   host: ${cloud.services.rabbitmq.connection.host}
   port: ${cloud.services.rabbitmq.connection.port}
-  virtualhost: /
+  virtualhost: ${cloud.services.rabbitmq.connection.vhost}
 
 messaging:
   consumingThreads: 1
