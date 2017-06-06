@@ -1,14 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
-import java.text.ParseException;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +17,10 @@ import uk.gov.ons.ctp.common.rest.RestClient;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.message.impl.SendToCaseImpl;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 
 /**
@@ -40,11 +37,7 @@ public class CollectionExerciseApplication {
   private AppConfig appConfig;
 
   @Autowired
-  private SendToCaseImpl sendToCase;
-
-  @Autowired
   private StateTransitionManagerFactory collectionExerciseStateTransitionManagerFactory;
-
 
   /**
    * Bean used to map exceptions for endpoints
@@ -55,8 +48,7 @@ public class CollectionExerciseApplication {
   public RestExceptionHandler restExceptionHandler() {
     return new RestExceptionHandler();
   }
-  
-  
+
   /**
    * Bean used to access Sample service through REST calls
    *
@@ -68,25 +60,28 @@ public class CollectionExerciseApplication {
     return restHelper;
   }
 
-  @Bean
-  public CommandLineRunner linkViaActionId(){
-
-      return (args) -> {
-    	 
-    	  sendToCase.send();
-      };
-
-  }
   /**
    * Bean to allow controlled state transitions of CollectionExercises.
    *
    * @return the state transition manager specifically for CollectionExercises
    */
-  @SuppressWarnings("unchecked")
   @Bean
-  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseSvcStateTransitionManager() {
+  @Qualifier("collectionExercise")
+  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
+  }
+
+  /**
+   * Bean to allow controlled state transitions of SampleUnitGroups.
+   *
+   * @return the state transition manager specifically for SampleUnitGroups
+   */
+  @Bean
+  @Qualifier("sampleUnitGroup")
+  public StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupStateTransitionManager() {
+    return collectionExerciseStateTransitionManagerFactory
+        .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
   }
 
   /**
@@ -104,11 +99,10 @@ public class CollectionExerciseApplication {
 
   /**
    * Spring boot start-up
- * @throws ParseException 
- * @throws DatatypeConfigurationException 
+   *
+   * @param args These are the optional command line arguments
    */
-  public static void main(String[] args) throws DatatypeConfigurationException, ParseException {
+  public static void main(String[] args) {
     SpringApplication.run(CollectionExerciseApplication.class, args);
-    
   }
 }

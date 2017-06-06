@@ -8,7 +8,7 @@
   http://www.springframework.org/schema/rabbit/spring-rabbit-1.6.xsd">
 
     <bean id="caseCreationMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-        <property name="contextPath" value="uk.gov.ons.ctp.response.casesvc.definition" />
+        <property name="contextPath" value="uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification" />
     </bean>
 
     <bean id="caseMarshallingMessageConverter" class="org.springframework.amqp.support.converter.MarshallingMessageConverter">

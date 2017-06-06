@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.distribution.SampleUnitDistributor;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
@@ -22,6 +24,8 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
@@ -48,7 +52,14 @@ public class SampleServiceImpl implements SampleService {
   private SampleSvcClient sampleSvcClient;
 
   @Autowired
-  private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionTransitionState;
+  @Qualifier("collectionExercise")
+  private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionState;
+
+  @Autowired
+  private ValidateSampleUnits validate;
+
+  @Autowired
+  private SampleUnitDistributor distributor;
 
   @Override
   public SampleUnitsRequestDTO requestSampleUnits(final UUID id) {
@@ -65,7 +76,7 @@ public class SampleServiceImpl implements SampleService {
 
         collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
 
-        collectionExercise.setState(collectionTransitionState.transition(collectionExercise.getState(),
+        collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
             CollectionExerciseEvent.REQUEST));
         collectRepo.saveAndFlush(collectionExercise);
       }
@@ -107,13 +118,13 @@ public class SampleServiceImpl implements SampleService {
         exerciseSampleUnit = new ExerciseSampleUnit();
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        exerciseSampleUnit.setSampleUnitTypeFK(sampleUnit.getSampleUnitType());
+        exerciseSampleUnit.setSampleUnitType(SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
         if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK()) == collectionExercise
             .getSampleSize()) {
-          collectionExercise.setState(collectionTransitionState.transition(collectionExercise.getState(),
+          collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
               CollectionExerciseEvent.EXECUTE));
           collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
           collectRepo.saveAndFlush(collectionExercise);
@@ -131,6 +142,16 @@ public class SampleServiceImpl implements SampleService {
     }
 
     return exerciseSampleUnit;
-
   }
+
+  @Override
+  public void validateSampleUnits() {
+    validate.validateSampleUnits();
+  }
+
+  @Override
+  public void distributeSampleUnits(CollectionExercise exercise) {
+    distributor.distributeSampleUnits(exercise);
+  }
+
 }

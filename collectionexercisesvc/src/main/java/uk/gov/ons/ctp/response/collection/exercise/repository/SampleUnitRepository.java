@@ -1,11 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
+import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 
 /**
  * JPA repository for SampleUnit entities
@@ -14,10 +17,10 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, Integer> {
 
   /**
-   * Check repository for Sample Unit existence. May exist in different
-   * collection exercise.
+   * Check repository for SampleUnit existence. May exist in different
+   * CollectionExercise.
    *
-   * @param id collection exercise id of which the sample unit is a part.
+   * @param id CollectionExercise id of which the sample unit to check is a part.
    * @param sampleUnitRef to check for existence of sample unit.
    * @param sampleUnitTypeFK to check for existence of sample unit.
    * @return boolean whether exists
@@ -33,10 +36,10 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       @Param("p_sampleunittypefk") String sampleUnitTypeFK);
 
   /**
-   * Count the number of SampleUnits for the collection exercise.
+   * Count the number of SampleUnits for the CollectionExercise.
    *
-   * @param id collection exercise for which to count sample units.
-   * @return int sample unit total for given exercisePK.
+   * @param id of CollectionExercise for which to count SampleUnits.
+   * @return int of SampleUnit total for given exercisePK.
    */
   @Query(value = "select count(*) from "
       + "collectionexercise.sampleunit su, "
@@ -44,5 +47,13 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "where sg.exercisefk = :p_exercisefk and "
       + "su.sampleunitgroupfk = sg.sampleunitgrouppk;", nativeQuery = true)
   int totalByExercisePK(@Param("p_exercisefk") Integer id);
+
+  /**
+   * Query repository for SampleUnits belonging to a SampleUnitGroup.
+   *
+   *  @param sampleUnitGroup to which the SampleUnits belong.
+   *  @return List<ExerciseSampleUnit> SampleUnits belonging to SampleUnitGroup
+   */
+  List<ExerciseSampleUnit> findBySampleUnitGroup(ExerciseSampleUnitGroup sampleUnitGroup);
 
 }

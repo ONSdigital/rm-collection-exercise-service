@@ -1,10 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 
 /**
  * Spring JPA Repository for Collection Exercise
@@ -21,11 +25,34 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   CollectionExercise findOneById(UUID id);
 
   /**
-   * Query repository for list of collection exercises associated to survey fk.
+   * Query repository for list of collection exercises associated to surveyfk.
    *
-   * @param surveyfk survey fk to which collection exercises are associated.
+   * @param surveyfk surveyfk to which collection exercises are associated.
    * @return List of collection exercises.
    */
   List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
 
+  /**
+   * Query repository for list of collection exercises associated with a certain
+   * state.
+   *
+   * @param state for which to return Collection Exercises.
+   * @return collection exercises in the requested state.
+   */
+  List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state);
+
+  /**
+   * Query repository for active actionPlanId (default or override) for SampleUnitType for
+   * Survey of if overridden for SampleUnitType for CollectionExercise.
+   *
+   * @param exercisefk of CollectionExercise.
+   * @param sampleunittypefk of SampleUnitType.
+   * @param surveyfk of Survey.
+   */
+  @Query(value = "SELECT CASE WHEN r.actionplanid IS NULL THEN CAST(df.actionplanid AS VARCHAR) ELSE CAST(r.actionplanid AS VARCHAR) END as to_use "
+      + "FROM (SELECT o.* FROM collectionexercise.casetypeoverride o WHERE o.exercisefk = :p_exercisefk AND o.sampleunittypefk = :p_sampleunittypefk) r "
+      + "RIGHT OUTER JOIN (SELECT d.* FROM collectionexercise.casetypedefault d WHERE d.surveyfk = :p_surveyfk AND d.sampleunittypefk = :p_sampleunittypefk) df "
+      + "ON r.sampleunittypeFK = df.sampleunittypeFK;", nativeQuery = true)
+  String getActiveActionPlanId(@Param("p_exercisefk") Integer exercisefk,
+      @Param("p_sampleunittypefk") String sampleunittypefk, @Param("p_surveyfk") Integer surveyfk);
 }

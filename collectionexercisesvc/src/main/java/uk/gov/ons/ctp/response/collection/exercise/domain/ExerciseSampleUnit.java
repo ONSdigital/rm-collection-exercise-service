@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +18,7 @@ import org.hibernate.annotations.Parameter;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /**
  * Domain model object for sample units.
@@ -48,7 +51,8 @@ public class ExerciseSampleUnit {
   @Column(name = "sampleunitref")
   private String sampleUnitRef;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "sampleunittypefk")
-  private String sampleUnitTypeFK;
+  private SampleUnitDTO.SampleUnitType sampleUnitType;
 
 }

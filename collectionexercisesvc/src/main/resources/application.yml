@@ -126,7 +126,12 @@ sample-svc:
 
 redisson-config:
   address: localhost:6379
-  time-to-live-seconds: 300
+
+schedules:
+  validation-schedule-delay-milli-seconds: 5000
+  validation-schedule-retrieval-max: 10000
+  distribution-schedule-delay-milli-seconds: 10000
+  distribution-schedule-retrieval-max: 10000
 
 rabbitmq:
   username: guest
