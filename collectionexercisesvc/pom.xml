@@ -13,7 +13,7 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>collectionexerciseservice</artifactId>
-    <version>10.39.0-SNAPSHOT</version>
+    <version>10.40.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>casesvc-api</artifactId>
-      <version>10.38.0-SNAPSHOT</version>
+      <version>10.40.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -143,6 +143,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
        <groupId>org.springframework.cloud</groupId>
        <artifactId>spring-cloud-spring-service-connector</artifactId>
     </dependency>
@@ -152,6 +158,7 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-cloudfoundry-connector</artifactId>
     </dependency>
+
   </dependencies>
 
   <build>

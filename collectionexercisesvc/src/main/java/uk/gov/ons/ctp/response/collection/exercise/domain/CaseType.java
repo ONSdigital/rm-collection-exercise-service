@@ -9,8 +9,16 @@ import java.util.UUID;
 
 public interface CaseType {
 
+  /**
+   * Gets SampleUnitType Foreign Key
+   * @return sampleUnitTypeFK
+   */
   String getSampleUnitTypeFK();
 
+  /**
+   * Gets ActionPlan Id
+   * @return actionPlanId
+   */
   UUID getActionPlanId();
 
 }

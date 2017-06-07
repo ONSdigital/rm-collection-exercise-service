@@ -17,5 +17,6 @@ public class AppConfig {
 
   private SampleSvc sampleSvc;
   private RedissonConfig redissonConfig;
+  private ScheduleSettings schedules;
 
 }

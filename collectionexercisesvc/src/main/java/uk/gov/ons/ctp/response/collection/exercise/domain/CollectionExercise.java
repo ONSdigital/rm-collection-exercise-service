@@ -1,7 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.sql.Timestamp;
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,14 +17,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
  * Domain model object.
@@ -35,7 +33,8 @@ public class CollectionExercise {
   private UUID id;
 
   @Id
-  @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
+  @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+          parameters = {
       @Parameter(name = "sequence_name", value = "collectionexercise.exercisepkseq"),
       @Parameter(name = "increment_size", value = "1")
   })

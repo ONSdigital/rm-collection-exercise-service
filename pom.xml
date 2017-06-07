@@ -4,7 +4,7 @@
 
   <groupId>uk.gov.ons.ctp.product</groupId>
   <artifactId>collectionexerciseservice</artifactId>
-  <version>10.39.0-SNAPSHOT</version>
+  <version>10.40.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>CTP : CollectionExerciseService</name>

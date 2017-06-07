@@ -3,14 +3,22 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.ctp.response.collection.exercise.domain.*;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * The implementation of the SampleService
@@ -33,13 +41,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private SurveyRepository surveyRepo;
 
   @Override
-  public List<CollectionExercise> requestCollectionExercisesForSurvey(Survey survey) {
+  public List<CollectionExercise> findCollectionExercisesForSurvey(Survey survey) {
 
     return collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
   }
 
   @Override
-  public CollectionExercise requestCollectionExercise(UUID id) {
+  public CollectionExercise findCollectionExercise(UUID id) {
 
     return collectRepo.findOneById(id);
   }
@@ -51,12 +59,20 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyFK(survey.getSurveyPK());
 
-    List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo.findByExerciseFK(collectionExercise.getExercisePK());
+    List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo
+            .findByExerciseFK(collectionExercise.getExercisePK());
 
     return createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
   }
 
-  Collection<CaseType> createCaseTypeList(List<? extends CaseType> caseTypeDefaultList, List<? extends CaseType> caseTypeOverrideList) {
+  /**
+   * Creates a Collection of CaseTypes
+   * @param caseTypeDefaultList List of caseTypeDefaults
+   * @param caseTypeOverrideList List of caseTypeOverrides
+   * @return Collection<CaseType> Collection of CaseTypes
+   */
+  Collection<CaseType> createCaseTypeList(List<? extends CaseType> caseTypeDefaultList, List<? extends CaseType>
+          caseTypeOverrideList) {
 
     Map<String, CaseType> defaultMap = new HashMap<>();
 

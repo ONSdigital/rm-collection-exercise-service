@@ -54,7 +54,7 @@ public class CollectionExerciseEndpoint {
   private MapperFacade mapperFacade;
 
   /**
-   * GET to request collection exercises from the collection exercise service
+   * GET to find collection exercises from the collection exercise service
    * for the given survey Id.
    *
    * @param id survey Id for which to trigger delivery of collection exercises
@@ -62,10 +62,10 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
-  public ResponseEntity<?> requestCollectionExercisesForSurvey(@PathVariable("id") final UUID id)
+  public ResponseEntity<?> getCollectionExercisesForSurvey(@PathVariable("id") final UUID id)
       throws CTPException {
 
-    Survey survey = surveyService.requestSurvey(id);
+    Survey survey = surveyService.findSurvey(id);
 
     List<CollectionExerciseSummaryDTO> collectionExerciseSummaryDTOList;
 
@@ -75,7 +75,7 @@ public class CollectionExerciseEndpoint {
     } else {
       log.debug("Entering collection exercise fetch with survey Id {}", id);
       List<CollectionExercise> collectionExerciseList = collectionExerciseService
-          .requestCollectionExercisesForSurvey(survey);
+          .findCollectionExercisesForSurvey(survey);
       collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
           CollectionExerciseSummaryDTO.class);
       if (collectionExerciseList.isEmpty()) {
@@ -87,7 +87,7 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * GET to request collection exercise from the collection exercise service for
+   * GET to find collection exercise from the collection exercise service for
    * the given collection exercise Id.
    *
    * @param id collection exercise Id for which to trigger delivery of
@@ -99,7 +99,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<?> getCollectionExercise(@PathVariable("id") final UUID id)
       throws CTPException {
     log.debug("Entering collection exercise fetch with collection exercise Id {}", id);
-    CollectionExercise collectionExercise = collectionExerciseService.requestCollectionExercise(id);
+    CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(id);
     if (collectionExercise == null) {
       throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, id));

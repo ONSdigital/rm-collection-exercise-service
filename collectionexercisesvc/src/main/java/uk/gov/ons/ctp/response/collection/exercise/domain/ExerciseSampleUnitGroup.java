@@ -1,6 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.sql.Timestamp;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,13 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import java.sql.Timestamp;
 
 /**
  * Domain model object for sample unit groups.
@@ -30,7 +28,8 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 public class ExerciseSampleUnitGroup {
 
   @Id
-  @GenericGenerator(name = "sampleunitgroupseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
+  @GenericGenerator(name = "sampleunitgroupseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+          parameters = {
       @Parameter(name = "sequence_name", value = "collectionexercise.sampleunitgrouppkseq"),
       @Parameter(name = "increment_size", value = "1")
   })

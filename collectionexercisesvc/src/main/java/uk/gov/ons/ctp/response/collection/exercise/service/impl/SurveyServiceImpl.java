@@ -21,7 +21,7 @@ public class SurveyServiceImpl implements SurveyService {
   private SurveyRepository surveyRepo;
 
   @Override
-  public Survey requestSurvey(UUID id) {
+  public Survey findSurvey(UUID id) {
     return surveyRepo.findById(id);
   }
 }
