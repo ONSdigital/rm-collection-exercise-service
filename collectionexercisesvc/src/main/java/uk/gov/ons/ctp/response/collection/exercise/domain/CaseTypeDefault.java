@@ -5,7 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
 import java.util.UUID;
 
 /**
@@ -21,26 +25,26 @@ public class CaseTypeDefault implements CaseType {
 
   @Id
   @Column(name = "casetypedefaultpk")
-  Integer caseTypeDefaultPK;
+  private Integer caseTypeDefaultPK;
 
   @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
   @Column(name = "surveyfk")
-  Integer surveyFK;
+  private Integer surveyFK;
 
   @Column(name = "actionplanid")
-  UUID actionPlanId;
+  private UUID actionPlanId;
 
   @Column(name = "sampleunittypefk")
-  String sampleUnitTypeFK;
+  private String sampleUnitTypeFK;
 
   @Override
   public String toString() {
-    return "CaseTypeDefault{" +
-            "sampleUnitTypeFK='" + sampleUnitTypeFK + '\'' +
-            ", actionPlanId=" + actionPlanId +
-            ", caseTypeDefaultPK=" + caseTypeDefaultPK +
-            ", surveyFK=" + surveyFK +
-            '}';
+    return "CaseTypeDefault{"
+            + "sampleUnitTypeFK='" + sampleUnitTypeFK + '\''
+            + ", actionPlanId=" + actionPlanId
+            + ", caseTypeDefaultPK=" + caseTypeDefaultPK
+            + ", surveyFK=" + surveyFK
+            + '}';
   }
 
 

@@ -67,7 +67,8 @@ public class CollectionExerciseApplication {
    */
   @Bean
   @Qualifier("collectionExercise")
-  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseStateTransitionManager() {
+  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+    collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
   }

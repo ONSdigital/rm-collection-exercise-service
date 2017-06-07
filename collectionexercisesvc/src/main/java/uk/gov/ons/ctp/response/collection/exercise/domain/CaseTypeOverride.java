@@ -5,7 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
 import java.util.UUID;
 
 /**
@@ -21,25 +25,25 @@ public class CaseTypeOverride implements CaseType {
 
   @Id
   @Column(name = "casetypeoverridepk")
-  Integer caseTypeOverridePK;
+  private Integer caseTypeOverridePK;
 
   @JoinColumn(name = "exercisefk", referencedColumnName = "exercisepk")
   @Column(name = "exercisefk")
-  Integer exerciseFK;
+  private Integer exerciseFK;
 
   @Column(name = "sampleunittypefk")
-  String sampleUnitTypeFK;
+  private String sampleUnitTypeFK;
 
   @Column(name = "actionplanid")
-  UUID actionPlanId;
+  private UUID actionPlanId;
 
   @Override
   public String toString() {
-    return "CaseTypeOverride{" +
-            "sampleUnitTypeFK='" + sampleUnitTypeFK + '\'' +
-            ", actionPlanId=" + actionPlanId +
-            ", caseTypeOverridePK=" + caseTypeOverridePK +
-            ", exerciseFK=" + exerciseFK +
-            '}';
+    return "CaseTypeOverride{"
+            + "sampleUnitTypeFK='" + sampleUnitTypeFK + '\''
+            + ", actionPlanId=" + actionPlanId
+            + ", caseTypeOverridePK=" + caseTypeOverridePK
+            + ", exerciseFK=" + exerciseFK
+            + '}';
   }
 }
