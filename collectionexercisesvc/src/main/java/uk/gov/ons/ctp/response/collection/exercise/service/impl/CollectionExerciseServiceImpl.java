@@ -33,13 +33,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private SurveyRepository surveyRepo;
 
   @Override
-  public List<CollectionExercise> requestCollectionExercisesForSurvey(Survey survey) {
+  public List<CollectionExercise> findCollectionExercisesForSurvey(Survey survey) {
 
     return collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
   }
 
   @Override
-  public CollectionExercise requestCollectionExercise(UUID id) {
+  public CollectionExercise findCollectionExercise(UUID id) {
 
     return collectRepo.findOneById(id);
   }

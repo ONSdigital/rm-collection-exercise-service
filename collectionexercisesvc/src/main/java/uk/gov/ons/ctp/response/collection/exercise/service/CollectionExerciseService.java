@@ -16,26 +16,26 @@ public interface CollectionExerciseService {
 
 
   /**
-   * Request a list of surveys associated to a collection exercise Id from the Collection Exercise Service
+   * Find a list of surveys associated to a collection exercise Id from the Collection Exercise Service
    *
-   * @param survey the survey for which to request collection exercises
+   * @param survey the survey for which to find collection exercises
    * @return the associated surveys.
    */
-  List<CollectionExercise> requestCollectionExercisesForSurvey(final Survey survey);
+  List<CollectionExercise> findCollectionExercisesForSurvey(final Survey survey);
 
 
   /**
-   * Request a collection exercise associated to a collection exercise Id from the Collection Exercise Service
+   * Find a collection exercise associated to a collection exercise Id from the Collection Exercise Service
    *
-   * @param id the collection exercise Id for which to request collection exercise
+   * @param id the collection exercise Id for which to find collection exercise
    * @return the associated collection exercise.
    */
-  CollectionExercise requestCollectionExercise(final UUID id);
+  CollectionExercise findCollectionExercise(final UUID id);
 
   /**
-   * Request case types associated to a collection exercise from the Collection Exercise Service
+   * Find case types associated to a collection exercise from the Collection Exercise Service
    *
-   * @param collectionExercise the collection exercise for which to request case types
+   * @param collectionExercise the collection exercise for which to find case types
    * @return the associated case type DTOs.
    */
   Collection<CaseType> getCaseTypesList(final CollectionExercise collectionExercise);
