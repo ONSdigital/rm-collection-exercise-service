@@ -5,14 +5,15 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
   http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.6.xsd">
 
-	<rabbit:connection-factory id="connectionFactory" 
-	                           host="${rabbitmq.host}" 
+	<rabbit:connection-factory id="connectionFactory"
+	                           host="${rabbitmq.host}"
 	                           username="${rabbitmq.username}"
 							   port="${rabbitmq.port}"
 							   virtual-host="${rabbitmq.virtualhost}"
 	                           password="${rabbitmq.password}"/>
 
 	<rabbit:template id="amqpTemplate" connection-factory="connectionFactory"  retry-template="retryTemplate"/>
+	<rabbit:admin id="amqpAdmin" connection-factory="connectionFactory"/>
 	
 	<!-- Retry policy for a failed publish -->
 	<bean id="retryTemplate" class="org.springframework.retry.support.RetryTemplate">
@@ -41,8 +42,8 @@
 	<rabbit:queue name="Sample.SampleDeliveryDLQ" durable="true" />
 
 	<rabbit:queue name="Sample.InvalidSampleInstructions" durable="true" />
-	
-	
+
+
 	<rabbit:queue name="Case.CaseDelivery" durable="true">
 		<rabbit:queue-arguments value-type="java.lang.String">
 			<entry key="x-dead-letter-exchange" value="case-deadletter-exchange" />
@@ -53,11 +54,11 @@
 	<rabbit:queue name="Case.CaseDeliveryDLQ" durable="true" />
 
 	<rabbit:queue name="Case.InvalidCaseInstructions" durable="true" />
-	
+
 	<!-- End of Queues -->
-	
-	
-	
+
+
+
 
 	<!-- Start of Exchanges -->
 	<rabbit:direct-exchange name="sample-outbound-exchange">
@@ -77,7 +78,7 @@
 			<rabbit:binding queue="Sample.InvalidSampleInstructions" key="Sample.SampleDelivery.binding" />
 		</rabbit:bindings>
 	</rabbit:direct-exchange>
-	
+
    <rabbit:direct-exchange name="collection-outbound-exchange">
 		<rabbit:bindings>
 			<rabbit:binding queue="Case.CaseDelivery" key="Case.CaseDelivery.binding" />
