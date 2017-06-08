@@ -71,7 +71,7 @@ public class SampleUnitDistributor {
             SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
             exercise, new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
     sampleUnitGroups.forEach((sampleUnitGroup) -> {
-      distributeSampleUnits(sampleUnitGroup, exercise.getExercisePK(), exercise.getSurvey().getSurveyPK());
+      distributeSampleUnits(exercise, sampleUnitGroup);
     });
 
     if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
@@ -86,11 +86,10 @@ public class SampleUnitDistributor {
   /**
    * Distribute SampleUnits for a SampleUnitGroup.
    *
+   * @param exercise CollectionExercise of which sampleUnitGroup is a member.
    * @param sampleUnitGroup for which to distribute sample units.
-   * @param exercisePK of CollectionExercise of which sampleUnitGroup is a member.
-   * @param surveyPK of Survey of which CollectionExercise is a member.
    */
-  private void distributeSampleUnits(ExerciseSampleUnitGroup sampleUnitGroup, Integer exercisePK, Integer surveyPK) {
+  private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
     SampleUnitChild child = null;
     String actionPlanId = null;
@@ -98,13 +97,14 @@ public class SampleUnitDistributor {
     for (ExerciseSampleUnit sampleUnit : sampleUnits) {
       if (sampleUnit.getSampleUnitType().isParent()) {
         parent = new SampleUnitParent();
+        parent.setCollectionExerciseId(exercise.getId().toString());
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         parent.setPartyId(sampleUnit.getPartyId().toString());
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         actionPlanId = collectionExerciseRepo
-            .getActiveActionPlanId(exercisePK, sampleUnit.getSampleUnitType().name(),
-               surveyPK);
+            .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
+                exercise.getSurvey().getSurveyPK());
       } else {
         child = new SampleUnitChild();
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
@@ -113,8 +113,8 @@ public class SampleUnitDistributor {
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(
             collectionExerciseRepo
-                .getActiveActionPlanId(exercisePK, sampleUnit.getSampleUnitType().name(),
-                    surveyPK));
+                .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
+                    exercise.getSurvey().getSurveyPK()));
       }
     }
 
