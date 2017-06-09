@@ -7,7 +7,7 @@ applications:
   memory: 1024M
   path: collectionexercisesvc/target/collectionexercisesvc.jar
   services:
-    - collectionexercisesvc-pg-db
+    - rm-pg-db
     - rm-redis
     - rm-rabbitmq
   env:
