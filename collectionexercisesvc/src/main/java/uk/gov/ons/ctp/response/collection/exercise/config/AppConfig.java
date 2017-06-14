@@ -16,6 +16,7 @@ import lombok.Data;
 public class AppConfig {
 
   private SampleSvc sampleSvc;
+  private SurveySvc surveySvc;
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
 

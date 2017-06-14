@@ -55,8 +55,21 @@ public class CollectionExerciseApplication {
    * @return the service client
    */
   @Bean
+  @Qualifier("sampleSvc")
   public RestClient sampleSvcClientRestTemplate() {
     RestClient restHelper = new RestClient(appConfig.getSampleSvc().getConnectionConfig());
+    return restHelper;
+  }
+
+  /**
+   * Bean used to access Survey service through REST calls
+   *
+   * @return the service client
+   */
+  @Bean
+  @Qualifier("surveySvc")
+  public RestClient surveySvcClientRestTemplate() {
+    RestClient restHelper = new RestClient(appConfig.getSurveySvc().getConnectionConfig());
     return restHelper;
   }
 

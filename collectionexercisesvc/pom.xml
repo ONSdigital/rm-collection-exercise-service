@@ -38,6 +38,12 @@
     </dependency>
 
     <dependency>
+      <groupId>uk.gov.ons.ctp.product</groupId>
+      <artifactId>surveysvc-api</artifactId>
+      <version>10.40.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>

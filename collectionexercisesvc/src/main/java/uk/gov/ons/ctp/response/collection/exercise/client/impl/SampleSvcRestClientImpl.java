@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import uk.gov.ons.ctp.common.rest.RestClient;
@@ -21,6 +22,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   private AppConfig appConfig;
 
   @Autowired
+  @Qualifier("sampleSvc")
   private RestClient sampleSvcClientRestTemplate;
 
   @Override

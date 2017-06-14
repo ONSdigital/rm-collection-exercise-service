@@ -116,7 +116,23 @@ sample-svc:
     host: localhost
     port: 8125
     # how many times should we attempt connection on failure
-    retry-attempts: 10
+    retry-attempts: 5
+    # sleep between retries
+    retry-pause-milli-seconds: 5000
+    # time to estab connection
+    connect-timeout-milli-seconds: 5000
+    # time to read response
+    read-timeout-milli-seconds: 5000
+
+survey-svc:
+  request-classifier-types-list-path: /surveys/{surveyId}/classifiertypeselectors
+  request-classifier-types-path: /surveys/{surveyId}/classifiertypeselectors/{selectorId}
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8080
+    # how many times should we attempt connection on failure
+    retry-attempts: 5
     # sleep between retries
     retry-pause-milli-seconds: 5000
     # time to estab connection
