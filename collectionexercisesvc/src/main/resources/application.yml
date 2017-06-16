@@ -12,6 +12,7 @@ logging:
     uk.gov.ons.ctp: INFO
     org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanExtractor: ERROR
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
+  profile: DEV
 
 liquibase:
   user: collectionexercisesvc
