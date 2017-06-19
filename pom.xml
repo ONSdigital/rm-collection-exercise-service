@@ -23,6 +23,7 @@
     <module>surveysvc-api</module>
     <module>collectionexercisesvc</module>
     <module>collectionexercisesvc-api</module>
+    <module>collectioninstrumentsvc-api</module>
   </modules>
 
   <dependencyManagement>

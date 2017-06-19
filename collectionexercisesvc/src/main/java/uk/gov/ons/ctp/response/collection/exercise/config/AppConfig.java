@@ -17,6 +17,7 @@ public class AppConfig {
 
   private SampleSvc sampleSvc;
   private SurveySvc surveySvc;
+  private CollectionInstrumentSvc collectionInstrumentSvc;
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
 

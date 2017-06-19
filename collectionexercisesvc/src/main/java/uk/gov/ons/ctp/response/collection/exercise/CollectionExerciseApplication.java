@@ -72,6 +72,19 @@ public class CollectionExerciseApplication {
     RestClient restHelper = new RestClient(appConfig.getSurveySvc().getConnectionConfig());
     return restHelper;
   }
+  
+  /**
+   * Bean used to access CollectionInstrument service through REST calls
+   *
+   * @return the service client
+   */
+  @Bean
+  @Qualifier("collectionInstrumentSvc")
+  public RestClient collectionInstrumentSvcClientRestTemplate() {
+    RestClient restHelper = new RestClient(appConfig.getCollectionInstrumentSvc().getConnectionConfig());
+    return restHelper;
+  }
+
 
   /**
    * Bean to allow controlled state transitions of CollectionExercises.

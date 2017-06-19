@@ -140,6 +140,17 @@ survey-svc:
     connect-timeout-milli-seconds: 5000
     # time to read response
     read-timeout-milli-seconds: 5000
+    
+collection-instrument-svc:
+  request-collection-instruments: /collectioninstrument
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 443
+    retry-attempts: 5
+    retry-pause-milli-seconds: 5000
+    connect-timeout-milli-seconds: 5000
+    read-timeout-milli-seconds: 5000
 
 redisson-config:
   address: localhost:6379
