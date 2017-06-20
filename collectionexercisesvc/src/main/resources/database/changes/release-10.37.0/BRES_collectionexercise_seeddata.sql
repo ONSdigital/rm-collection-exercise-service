@@ -10,7 +10,7 @@ INSERT INTO   state(statePK) VALUES('FAILEDVALIDATION');
 INSERT INTO   sampleunittype(sampleunittypePK) VALUES('B');
 INSERT INTO   sampleunittype(sampleunittypePK) VALUES('BI');
 
-INSERT INTO survey(id, surveyPK, surveyref) VALUES('99f6cd6d-880c-4b36-b157-aeda409ec441',1,'221'); 
+INSERT INTO survey(id, surveyPK, surveyref) VALUES('cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87',1,'221'); 
 
 INSERT INTO collectionexercise(id,surveyFK,exercisePK,name,scheduledstartdatetime,scheduledexecutiondatetime,scheduledreturndatetime,scheduledenddatetime,periodstartdatetime,periodenddatetime,stateFK)
 VALUES ('14fb3e68-4dca-46db-bf49-04b84e07e77c',1,1,'BRES_2016','2017-08-30',NULL,'2017-10-06',NULL,'2017-09-08','2017-09-08','INIT');
