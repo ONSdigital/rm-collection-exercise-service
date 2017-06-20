@@ -1,4 +1,4 @@
-FROM openjdk:jdk-8
+FROM openjdk:8-jdk
 MAINTAINER Kieran Wardle <kieran.wardle@ons.gov.uk>
 ARG jar
 VOLUME /tmp
