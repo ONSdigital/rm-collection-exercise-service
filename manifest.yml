@@ -14,3 +14,6 @@ applications:
     sampleSvc_connectionConfig_host: samplesvc.apps.mvp.onsclofo.uk
     sampleSvc_connectionConfig_port: "80"
     sampleSvc_connectionConfig_scheme: http
+    surveySvc_connectionConfig_host: surveysvc.apps.mvp.onsclofo.uk
+    surveySvc_connectionConfig_port: "80"
+    surveySvc_connectionConfig_scheme: http
