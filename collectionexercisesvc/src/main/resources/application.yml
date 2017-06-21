@@ -152,6 +152,22 @@ collection-instrument-svc:
     connect-timeout-milli-seconds: 5000
     read-timeout-milli-seconds: 5000
 
+party-svc:
+  request-party-path: /parties/type/{sampleUnitType}/ref/{sampleUnitRef}
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8080
+    #TODO: update port number
+    # how many times should we attempt connection on failure
+    retry-attempts: 5
+    # sleep between retries
+    retry-pause-milli-seconds: 5000
+    # time to estab connection
+    connect-timeout-milli-seconds: 5000
+    # time to read response
+    read-timeout-milli-seconds: 5000
+
 redisson-config:
   address: localhost:6379
 

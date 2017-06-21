@@ -1,18 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.validation;
 
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -25,11 +17,20 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitReposito
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.PartyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.PartyService;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
+
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Class responsible for business logic to validate SampleUnits.
@@ -62,6 +63,9 @@ public class ValidateSampleUnits {
 
   @Autowired
   private SurveySvcClient surveySvcClient;
+
+  @Autowired
+  private PartyService  partyService;
 
   /**
    * Validate SampleUnits
@@ -114,13 +118,16 @@ public class ValidateSampleUnits {
 
     sampleUnitGroups.forEach((sampleUnitGroup) -> {
 
-      // TODO Call Survey, Party and CollectionInstrument service for
-      // validation, dummy values set for PartyId and CollectionInstrumentId
-      // below
+      // TODO Call Survey and CollectionInstrument service for
+      // validation, dummy value set for CollectionInstrumentId below
+
       List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
       sampleUnits.forEach((sampleUnit) -> {
+
+        PartyDTO party = partyService.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+
         sampleUnit.setCollectionInstrumentId(UUID.randomUUID());
-        sampleUnit.setPartyId(UUID.randomUUID());
+        sampleUnit.setPartyId(party.getId());
         sampleUnitRepo.saveAndFlush(sampleUnit);
       });
 

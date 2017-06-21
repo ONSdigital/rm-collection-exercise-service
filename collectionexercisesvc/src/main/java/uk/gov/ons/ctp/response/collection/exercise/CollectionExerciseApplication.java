@@ -85,6 +85,17 @@ public class CollectionExerciseApplication {
     return restHelper;
   }
 
+  /**
+   * Bean used to access Party service through REST calls
+   *
+   * @return the service client
+   */
+  @Bean
+  @Qualifier("partySvc")
+  public RestClient partySvcClientRestTemplate() {
+    RestClient restHelper = new RestClient(appConfig.getPartySvc().getConnectionConfig());
+    return restHelper;
+  }
 
   /**
    * Bean to allow controlled state transitions of CollectionExercises.
