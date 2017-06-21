@@ -1,19 +1,26 @@
 package uk.gov.ons.ctp.response.collection.exercise.validation;
 
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.casesvc.representation.CaseDetailsDTO;
+import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -28,6 +35,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collectionInstrument.representation.CollectionInstrumentDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
@@ -62,6 +70,9 @@ public class ValidateSampleUnits {
 
   @Autowired
   private SurveySvcClient surveySvcClient;
+  
+  @Autowired
+  private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   /**
    * Validate SampleUnits
@@ -111,6 +122,10 @@ public class ValidateSampleUnits {
     if (classifierTypes == null) {
       return false;
     }
+    Map<String, String> classifiers = new HashMap<>();
+    if(classifierTypes.getClassifierTypes() != null && classifierTypes.getClassifierTypes().contains("COLLECTION_EXERCISE")){
+      classifiers.put("COLLECTION_EXERCISE", exercise.getId().toString());
+    }
 
     sampleUnitGroups.forEach((sampleUnitGroup) -> {
 
@@ -119,7 +134,9 @@ public class ValidateSampleUnits {
       // below
       List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
       sampleUnits.forEach((sampleUnit) -> {
-        sampleUnit.setCollectionInstrumentId(UUID.randomUUID());
+        classifiers.put("RU_REF", sampleUnit.getSampleUnitRef());
+        String searchString = convertToJSON(classifiers);
+        sampleUnit.setCollectionInstrumentId(getCollectionInstrument(searchString));
         sampleUnit.setPartyId(UUID.randomUUID());
         sampleUnitRepo.saveAndFlush(sampleUnit);
       });
@@ -132,6 +149,16 @@ public class ValidateSampleUnits {
       }
     }); // End looping group
     return true;
+  }
+  
+  private UUID getCollectionInstrument(String searchString){
+    List<CollectionInstrumentDTO> requestCollectionInstruments = collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
+    return requestCollectionInstruments.get(0).getId();
+  }
+  
+  private String convertToJSON(Map<String, String> map){
+    JSONObject JSON = new JSONObject(map);
+    return JSON.toString();
   }
 
   /**
@@ -165,4 +192,5 @@ public class ValidateSampleUnits {
 
     return classifierTypes;
   }
+
 }

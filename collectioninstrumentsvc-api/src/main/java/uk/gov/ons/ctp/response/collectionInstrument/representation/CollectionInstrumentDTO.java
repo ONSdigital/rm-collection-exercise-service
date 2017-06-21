@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collectionInstrument.representation;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class CollectionInstrumentDTO {
   private UUID id;
-  private UUID surveyId;
-  private Map<String, String> classifiers;
+  private String surveyId;
+  private Map<String, List<String>> classifiers = new HashMap<>();
 
 }
