@@ -153,12 +153,11 @@ collection-instrument-svc:
     read-timeout-milli-seconds: 5000
 
 party-svc:
-  request-party-path: /parties/type/{sampleUnitType}/ref/{sampleUnitRef}
+  request-party-path: /sdcplatform/party-api/1.0.1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
   connection-config:
     scheme: http
     host: localhost
-    port: 8080
-    #TODO: update port number
+    port: 8086
     # how many times should we attempt connection on failure
     retry-attempts: 5
     # sleep between retries
