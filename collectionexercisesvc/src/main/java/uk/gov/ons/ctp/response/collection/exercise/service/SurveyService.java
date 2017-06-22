@@ -18,4 +18,12 @@ public interface SurveyService {
    */
   Survey findSurvey(final UUID id);
 
+  /**
+   * Request the delivery of survey from the Survey Service.
+   *
+   * @param surveyFK the survey FK for which to request survey.
+   * @return the survey object
+   */
+  Survey findSurveyByFK(int surveyFK);
+
 }
