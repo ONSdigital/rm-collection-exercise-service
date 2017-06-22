@@ -29,7 +29,7 @@ public class ValidatesSampleUnitsTest {
 
     List<PartyDTO> partyJson = FixtureHelper.loadClassFixtures(PartyDTO[].class);
 
-    when(partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, "45297c23-763d-46a9-b4e5-c37ff5b4fbe9")).thenReturn(partyJson.get(0));
+    when(partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, "499000011335")).thenReturn(partyJson.get(0));
 
   }
 

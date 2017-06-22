@@ -153,11 +153,11 @@ collection-instrument-svc:
     read-timeout-milli-seconds: 5000
 
 party-svc:
-  request-party-path: /sdcplatform/party-api/1.0.1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
+  request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
   connection-config:
     scheme: http
-    host: localhost
-    port: 8086
+    host: ras-party-v2-int.apps.mvp.onsclofo.uk
+    port: 80
     # how many times should we attempt connection on failure
     retry-attempts: 5
     # sleep between retries
