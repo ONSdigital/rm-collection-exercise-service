@@ -1,11 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
+import com.google.common.base.Predicates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -14,7 +16,6 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.SwaggerSettings;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseEndpoint;
 
-import java.util.function.Predicate;
 
 
 /**
@@ -41,7 +42,7 @@ public class SwaggerConfig {
             .version(swaggerSettings.getVersion())
             .build();
 
-    Predicate<String> pathSelector;
+    java.util.function.Predicate<String> pathSelector;
 
     if (swaggerSettings.getSwaggerUiActive()) {
       pathSelector = PathSelectors.any()::apply;
@@ -53,6 +54,7 @@ public class SwaggerConfig {
             .groupName(swaggerSettings.getGroupName())
             .apiInfo(apiInfo)
             .select()
+            .apis(Predicates.not(RequestHandlerSelectors.basePackage("org.springframework.boot")))
             .paths(pathSelector::test)
             .build();
   }
