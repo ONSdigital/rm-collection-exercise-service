@@ -135,13 +135,9 @@ public class ValidateSampleUnits {
 
       List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
       sampleUnits.forEach((sampleUnit) -> {
-
         PartyDTO party = partyService.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-
         sampleUnit.setPartyId(party.getId());
-        classifiers.put("RU_REF", sampleUnit.getSampleUnitRef());
-        String searchString = convertToJSON(classifiers);
-        sampleUnit.setCollectionInstrumentId(getCollectionInstrument(searchString));
+        sampleUnit.setCollectionInstrumentId(getCollectionInstrument(classifiers, sampleUnit));
         sampleUnitRepo.saveAndFlush(sampleUnit);
       });
 
@@ -155,7 +151,9 @@ public class ValidateSampleUnits {
     return true;
   }
   
-  private UUID getCollectionInstrument(String searchString){
+  private UUID getCollectionInstrument(Map<String, String> classifiers, ExerciseSampleUnit sampleUnit){
+    classifiers.put("RU_REF", sampleUnit.getSampleUnitRef());
+    String searchString = convertToJSON(classifiers);
     List<CollectionInstrumentDTO> requestCollectionInstruments = collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
     return requestCollectionInstruments.get(0).getId();
   }
