@@ -9,7 +9,7 @@ import java.util.UUID;
  * Spring JPA Repository for Survey
  *
  */
-public interface SurveyRepository extends JpaRepository<Survey, String> {
+public interface SurveyRepository extends JpaRepository<Survey, Integer> {
 
     /**
      * Query repository for survey by id.

@@ -9,7 +9,7 @@ info:
 # ie -Dlogging.level.org.springframework=DEBUG
 logging:
   level:
-    uk.gov.ons.ctp: INFO
+    uk.gov.ons.ctp: DEBUG
     org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanExtractor: ERROR
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
@@ -142,11 +142,11 @@ survey-svc:
     read-timeout-milli-seconds: 5000
     
 collection-instrument-svc:
-  request-collection-instruments: /collectioninstrument
+  request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   connection-config:
     scheme: http
-    host: localhost
-    port: 443
+    host: api-dev.apps.mvp.onsclofo.uk
+    port: 80
     retry-attempts: 5
     retry-pause-milli-seconds: 5000
     connect-timeout-milli-seconds: 5000
