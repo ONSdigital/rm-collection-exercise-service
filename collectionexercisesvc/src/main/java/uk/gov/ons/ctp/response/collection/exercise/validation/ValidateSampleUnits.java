@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
@@ -73,38 +74,39 @@ public class ValidateSampleUnits {
   private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   @Autowired
-  private PartyService  partyService;
+  private PartyService partyService;
 
   /**
    * Validate SampleUnits
    *
    */
   public void validateSampleUnits() {
-
-    List<CollectionExercise> exercises = collectRepo
-        .findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    List<CollectionExercise> exercises = collectRepo.findByState(
+            CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
         .findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeDesc(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
             exercises, new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
 
-    // Not searching DB for individual Collection Exercise above when getting
-    // batch of SampleUnitGroups to process but processing in Collection
-    // Exercise order will save external service calls so sorting them now.
+    // Not searching DB for individual Collection Exercise above when getting batch of SampleUnitGroups to process but
+    // processing in Collection Exercise order will save external service calls so sorting them now.
     Map<CollectionExercise, List<ExerciseSampleUnitGroup>> collections = sampleUnitGroups.stream()
         .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
 
     collections.forEach((exercise, groups) -> {
-
       if (!validateSampleUnits(exercise, groups)) {
         return; // Exit collection forEach as failed validation
       }
 
       if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
           exercise) == 0) {
-        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
-            CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
-        collectRepo.saveAndFlush(exercise);
+        try {
+          exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+                  CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
+          collectRepo.saveAndFlush(exercise);
+        } catch (CTPException e) {
+          log.error(String.format("cause = %s - message = %s", e.getCause(), e.getMessage()));
+        }
       }
     }); // End looping collections
   }
@@ -145,11 +147,14 @@ public class ValidateSampleUnits {
         sampleUnitRepo.saveAndFlush(sampleUnit);
       });
 
-      sampleUnitGroup
-          .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
-      if (sampleUnitGroup.getStateFK() == SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED) {
-        sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-        sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+      try {
+        sampleUnitGroup.setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
+        if (sampleUnitGroup.getStateFK() == SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED) {
+          sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
+          sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+        }
+      } catch (CTPException e) {
+        log.error(String.format("cause = %s - message = %s", e.getCause(), e.getMessage()));
       }
     }); // End looping group
     return true;

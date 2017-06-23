@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.distribution.SampleUnitDistributor;
@@ -62,7 +63,7 @@ public class SampleServiceImpl implements SampleService {
   private SampleUnitDistributor distributor;
 
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(final UUID id) {
+  public SampleUnitsRequestDTO requestSampleUnits(final UUID id) throws CTPException {
 
     SampleUnitsRequestDTO replyDTO = null;
 
@@ -94,16 +95,14 @@ public class SampleServiceImpl implements SampleService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false, timeout = TRANSACTION_TIMEOUT)
   @Override
-  public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) {
-
+  public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
     ExerciseSampleUnit exerciseSampleUnit = null;
 
-    CollectionExercise collectionExercise = collectRepo
-        .findOneById(UUID.fromString(sampleUnit.getCollectionExerciseId()));
+    CollectionExercise collectionExercise = collectRepo.findOneById(
+            UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
     // Check collection exercise exists
     if (collectionExercise != null) {
-
       // Check Sample Unit doesn't already exist for collection exercise
       if (!sampleUnitRepo.tupleExists(collectionExercise.getExercisePK(), sampleUnit.getSampleUnitRef(),
           sampleUnit.getSampleUnitType())) {
@@ -150,7 +149,7 @@ public class SampleServiceImpl implements SampleService {
   }
 
   @Override
-  public void distributeSampleUnits(CollectionExercise exercise) {
+  public void distributeSampleUnits(CollectionExercise exercise) throws CTPException {
     distributor.distributeSampleUnits(exercise);
   }
 

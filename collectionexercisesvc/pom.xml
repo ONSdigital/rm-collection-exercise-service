@@ -34,7 +34,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>samplesvc-api</artifactId>
-      <version>10.40.0-SNAPSHOT</version>
+      <version>10.41.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>
@@ -46,7 +46,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>casesvc-api</artifactId>
-      <version>10.40.0-SNAPSHOT</version>
+      <version>10.41.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
