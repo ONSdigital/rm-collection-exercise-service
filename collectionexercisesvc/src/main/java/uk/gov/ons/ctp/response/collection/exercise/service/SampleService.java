@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import java.util.UUID;
 
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
@@ -19,16 +20,18 @@ public interface SampleService {
    *
    * @param id the Collection Exercise Id for which to request sample units.
    * @return the total number of sample units in the collection exercise.
+   * @throws CTPException when collection exercise state transition error
    */
-  SampleUnitsRequestDTO requestSampleUnits(final UUID id);
+  SampleUnitsRequestDTO requestSampleUnits(final UUID id) throws CTPException;
 
   /**
    * Save a SampleUnit
    *
    * @param sampleUnit the SampleUnit to save.
    * @return the SampleUnit saved.
+   * @throws CTPException when collection exercise state transition error
    */
-  ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit);
+  ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit) throws CTPException;
 
   /**
    * Validate SampleUnits
@@ -40,7 +43,8 @@ public interface SampleService {
    * Distribute Sample Units for a CollectionExercise
    *
    * @param exercise for which to distribute SampleUnits.
+   * @throws CTPException if state transition errors
    */
-  void distributeSampleUnits(CollectionExercise exercise);
+  void distributeSampleUnits(CollectionExercise exercise) throws CTPException;
 
 }

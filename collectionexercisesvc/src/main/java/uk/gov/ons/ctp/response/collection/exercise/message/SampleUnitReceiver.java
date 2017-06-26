@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.message;
 
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /**
@@ -12,7 +13,8 @@ public interface SampleUnitReceiver {
    * Method called with the deserialised message
    *
    * @param sampleUnit The java representation of the message body
+   * @throws CTPException when collection exercise state transition error
    */
-  void acceptSampleUnit(SampleUnit sampleUnit);
+  void acceptSampleUnit(SampleUnit sampleUnit) throws CTPException;
 
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChild;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
@@ -63,16 +64,17 @@ public class SampleUnitDistributor {
    * Distribute SampleUnits for a CollectionExercise.
    *
    * @param exercise for which to distribute sample units.
+   * @throws CTPException if sampleUnitGroup state transition error
    */
-  public void distributeSampleUnits(CollectionExercise exercise) {
+  public void distributeSampleUnits(CollectionExercise exercise) throws CTPException {
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
         .findByStateFKAndCollectionExerciseOrderByModifiedDateTimeDesc(
             SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
             exercise, new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
-    sampleUnitGroups.forEach((sampleUnitGroup) -> {
-      distributeSampleUnits(exercise, sampleUnitGroup);
-    });
+    for (ExerciseSampleUnitGroup anExerciseSampleUnitGroup : sampleUnitGroups) {
+      distributeSampleUnits(exercise, anExerciseSampleUnitGroup);
+    }
 
     if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
         exercise) == 0) {
@@ -88,8 +90,10 @@ public class SampleUnitDistributor {
    *
    * @param exercise CollectionExercise of which sampleUnitGroup is a member.
    * @param sampleUnitGroup for which to distribute sample units.
+   * @throws CTPException if sampleUnitGroup state transition error
    */
-  private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
+  private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup)
+          throws CTPException {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
     SampleUnitChild child = null;
     String actionPlanId = null;
@@ -139,8 +143,10 @@ public class SampleUnitDistributor {
    *
    * @param sampleUnitGroup from which publish message created and for which to transition state.
    * @param sampleUnitMessage to publish.
+   * @throws CTPException if sampleUnitGroup state transition error
    */
-  private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage) {
+  private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage)
+          throws CTPException {
     publisher.sendSampleUnit(sampleUnitMessage);
     sampleUnitGroup
         .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.PUBLISH));
