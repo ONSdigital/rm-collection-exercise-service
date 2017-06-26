@@ -1,6 +1,5 @@
 applications:
 - name: collectionexercisesvc
-  buildpack: https://github.com/cloudfoundry/java-buildpack.git
   instances: 1
   timeout: 180
   host: collectionexercisesvc
