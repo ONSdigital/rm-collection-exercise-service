@@ -1,0 +1,18 @@
+applications:
+- name: collectionexercisesvc-int
+  instances: 1
+  timeout: 180
+  host: collectionexercisesvc-int
+  memory: 1024M
+  path: collectionexercisesvc/target/collectionexercisesvc.jar
+  services:
+    - rm-pg-db
+    - rm-redis
+    - rm-rabbitmq
+  env:
+    sampleSvc_connectionConfig_host: samplesvc-int.apps.mvp.onsclofo.uk
+    sampleSvc_connectionConfig_port: "80"
+    sampleSvc_connectionConfig_scheme: http
+    surveySvc_connectionConfig_host: surveysvc-int.apps.mvp.onsclofo.uk
+    surveySvc_connectionConfig_port: "80"
+    surveySvc_connectionConfig_scheme: http
