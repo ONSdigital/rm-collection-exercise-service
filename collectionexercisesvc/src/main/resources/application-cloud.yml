@@ -183,3 +183,10 @@ messaging:
   conMaxAttempts: 1
   prefetchCount: 10
   txSize: 1
+
+swagger-settings:
+  swagger-ui-active: false
+  group-name: "collectionexerciseservice-api"
+  title: "Collection Exercise Service API"
+  description: "API for the Collection Exercise Service"
+  version: "10.41"
