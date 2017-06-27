@@ -15,8 +15,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -32,7 +34,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.PartyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
-import uk.gov.ons.ctp.response.collection.exercise.service.PartyService;
 import uk.gov.ons.ctp.response.collectionInstrument.representation.CollectionInstrumentDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
@@ -68,43 +69,46 @@ public class ValidateSampleUnits {
 
   @Autowired
   private SurveySvcClient surveySvcClient;
-  
+
   @Autowired
   private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   @Autowired
-  private PartyService  partyService;
+  private PartySvcClient partySvcClinet;
 
   /**
    * Validate SampleUnits
    *
    */
   public void validateSampleUnits() {
-
-    List<CollectionExercise> exercises = collectRepo
-        .findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    List<CollectionExercise> exercises = collectRepo.findByState(
+        CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
         .findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeDesc(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
             exercises, new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
 
     // Not searching DB for individual Collection Exercise above when getting
-    // batch of SampleUnitGroups to process but processing in Collection
-    // Exercise order will save external service calls so sorting them now.
+    // batch of SampleUnitGroups to process but
+    // processing in Collection Exercise order will save external service calls
+    // so sorting them now.
     Map<CollectionExercise, List<ExerciseSampleUnitGroup>> collections = sampleUnitGroups.stream()
         .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
 
     collections.forEach((exercise, groups) -> {
-
       if (!validateSampleUnits(exercise, groups)) {
         return; // Exit collection forEach as failed validation
       }
 
       if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
           exercise) == 0) {
-        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
-            CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
-        collectRepo.saveAndFlush(exercise);
+        try {
+          exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+              CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
+          collectRepo.saveAndFlush(exercise);
+        } catch (CTPException e) {
+          log.error(String.format("cause = %s - message = %s", e.getCause(), e.getMessage()));
+        }
       }
     }); // End looping collections
   }
@@ -124,7 +128,8 @@ public class ValidateSampleUnits {
       return false;
     }
     Map<String, String> classifiers = new HashMap<>();
-    if(classifierTypes.getClassifierTypes() != null && classifierTypes.getClassifierTypes().contains("COLLECTION_EXERCISE")){
+    if (classifierTypes.getClassifierTypes() != null
+        && classifierTypes.getClassifierTypes().contains("COLLECTION_EXERCISE")) {
       classifiers.put("COLLECTION_EXERCISE", exercise.getId().toString());
     }
 
@@ -135,30 +140,35 @@ public class ValidateSampleUnits {
 
       List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
       sampleUnits.forEach((sampleUnit) -> {
-        PartyDTO party = partyService.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+        PartyDTO party = partySvcClinet.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
         sampleUnit.setPartyId(party.getId());
         sampleUnit.setCollectionInstrumentId(getCollectionInstrument(classifiers, sampleUnit));
         sampleUnitRepo.saveAndFlush(sampleUnit);
       });
 
-      sampleUnitGroup
-          .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
-      if (sampleUnitGroup.getStateFK() == SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED) {
-        sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-        sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+      try {
+        sampleUnitGroup
+            .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
+        if (sampleUnitGroup.getStateFK() == SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED) {
+          sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
+          sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+        }
+      } catch (CTPException e) {
+        log.error(String.format("cause = %s - message = %s", e.getCause(), e.getMessage()));
       }
     }); // End looping group
     return true;
   }
-  
-  private UUID getCollectionInstrument(Map<String, String> classifiers, ExerciseSampleUnit sampleUnit){
+
+  private UUID getCollectionInstrument(Map<String, String> classifiers, ExerciseSampleUnit sampleUnit) {
     classifiers.put("RU_REF", sampleUnit.getSampleUnitRef());
     String searchString = convertToJSON(classifiers);
-    List<CollectionInstrumentDTO> requestCollectionInstruments = collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
+    List<CollectionInstrumentDTO> requestCollectionInstruments = collectionInstrumentSvcClient
+        .requestCollectionInstruments(searchString);
     return requestCollectionInstruments.get(0).getId();
   }
-  
-  private String convertToJSON(Map<String, String> map){
+
+  private String convertToJSON(Map<String, String> map) {
     JSONObject JSON = new JSONObject(map);
     return JSON.toString();
   }
@@ -166,7 +176,8 @@ public class ValidateSampleUnits {
   /**
    * Request the classifier type selectors from the Survey service.
    *
-   * @param exercise for which to get collection instrument classifier selectors.
+   * @param exercise for which to get collection instrument classifier
+   *          selectors.
    * @return SurveyClassifierTypeDTO Survey classifier type selectors
    */
   private SurveyClassifierTypeDTO requestSurveyClassifiers(CollectionExercise exercise) {

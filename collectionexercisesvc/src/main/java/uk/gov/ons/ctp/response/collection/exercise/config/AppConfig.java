@@ -21,5 +21,6 @@ public class AppConfig {
   private PartySvc partySvc;
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
+  private SwaggerSettings swaggerSettings;
 
 }
