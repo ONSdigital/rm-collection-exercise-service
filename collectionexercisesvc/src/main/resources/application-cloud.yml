@@ -139,12 +139,12 @@ survey-svc:
     connect-timeout-milli-seconds: 5000
     # time to read response
     read-timeout-milli-seconds: 5000
-    
+
 collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   connection-config:
     scheme: http
-    host: api-dev.apps.mvp.onsclofo.uk
+    host: ras-collection-instrument-int.apps.mvp.onsclofo.uk
     port: 80
     retry-attempts: 5
     retry-pause-milli-seconds: 5000
@@ -155,7 +155,7 @@ party-svc:
   request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
   connection-config:
     scheme: http
-    host: ras-party-v2-int.apps.mvp.onsclofo.uk
+    host: ras-party-service-int.apps.mvp.onsclofo.uk
     port: 80
     # how many times should we attempt connection on failure
     retry-attempts: 5
@@ -165,7 +165,7 @@ party-svc:
     connect-timeout-milli-seconds: 5000
     # time to read response
     read-timeout-milli-seconds: 5000
-    
+
 redisson-config:
   address: ${cloud.services.redis.connection.host}:6379
   time-to-live-seconds: 300
