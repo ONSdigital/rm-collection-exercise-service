@@ -82,7 +82,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   /**
    * Set up of tests
-   * 
+   *
    * @throws Exception exception thrown
    */
   @Before

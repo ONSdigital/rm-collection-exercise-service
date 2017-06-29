@@ -34,9 +34,12 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 @Slf4j
 public class CollectionExerciseEndpoint {
 
-  private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
-  private static final String RETURN_COLLECTIONEXERCISENOTFOUND = "Collection Exercise not found for collection exercise Id";
-  private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
+  private static final String RETURN_SAMPLENOTFOUND = 
+      "Sample not found for collection exercise Id";
+  private static final String RETURN_COLLECTIONEXERCISENOTFOUND = 
+      "Collection Exercise not found for collection exercise Id";
+  private static final String RETURN_SURVEYNOTFOUND = 
+      "Survey not found for survey Id";
 
   @Autowired
   private SampleService sampleService;

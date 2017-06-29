@@ -13,6 +13,10 @@ import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSv
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 
+/**
+ * HTTP RestClient implementation for calls to the CollectionInstrument service
+ *
+ */
 @Component
 public class CollectionInstrumentSvcClientImpl implements CollectionInstrumentSvcClient {
 
