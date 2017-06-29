@@ -11,7 +11,7 @@ import org.springframework.util.MultiValueMap;
 import uk.gov.ons.ctp.common.rest.RestClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collectionInstrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 
 @Component
 public class CollectionInstrumentSvcClientImpl implements CollectionInstrumentSvcClient {

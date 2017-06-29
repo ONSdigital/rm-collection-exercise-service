@@ -1,4 +1,4 @@
-package uk.gov.ons.ctp.response.collectionInstrument.representation;
+package uk.gov.ons.ctp.response.collection.instrument.representation;
 
 import java.util.HashMap;
 import java.util.List;
