@@ -72,7 +72,7 @@ public class CollectionExerciseApplication {
     RestClient restHelper = new RestClient(appConfig.getSurveySvc().getConnectionConfig());
     return restHelper;
   }
-  
+
   /**
    * Bean used to access CollectionInstrument service through REST calls
    *
@@ -104,8 +104,7 @@ public class CollectionExerciseApplication {
    */
   @Bean
   @Qualifier("collectionExercise")
-  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-    collectionExerciseStateTransitionManager() {
+  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
   }

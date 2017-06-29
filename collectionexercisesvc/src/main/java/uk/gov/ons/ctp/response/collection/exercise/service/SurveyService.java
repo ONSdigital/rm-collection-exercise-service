@@ -16,7 +16,7 @@ public interface SurveyService {
    * @param id the survey Id for which to request survey.
    * @return the survey object
    */
-  Survey findSurvey(final UUID id);
+  Survey findSurvey(UUID id);
 
   /**
    * Request the delivery of survey from the Survey Service.

@@ -26,7 +26,7 @@ public class SampleUnitDistributionScheduler {
 
   /**
    * Carry out publish according to configured fixed delay.
-   * @throws if state transition errors
+   * @throws CTPException if state transition errors
    */
   @Scheduled(fixedDelayString = "#{appConfig.schedules.distributionScheduleDelayMilliSeconds}")
   public void scheduleDistribution() throws CTPException {

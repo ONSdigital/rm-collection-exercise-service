@@ -14,12 +14,12 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class PartyDTO {
 
-  String sampleUnitType;
+  private String sampleUnitType;
 
-  String businessRef;
+  private String businessRef;
 
-  UUID id;
+  private UUID id;
 
-  HashMap<String, String> attributes;
+  private HashMap<String, String> attributes;
 
 }
