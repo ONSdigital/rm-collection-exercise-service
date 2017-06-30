@@ -14,12 +14,12 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-public class CollectionExerciseSummaryDTO {
+public class CollectionExerciseSummaryDTO {git status
 
   private UUID id;
 
   private String name;
 
-  private Timestamp scheduledExecution;
+  private Timestamp scheduledExecutionDateTime;
 
 }
