@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-public class CollectionExerciseSummaryDTO {git status
+public class CollectionExerciseSummaryDTO {
 
   private UUID id;
 
