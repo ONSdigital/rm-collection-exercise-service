@@ -16,3 +16,9 @@ applications:
     surveySvc_connectionConfig_host: surveysvc.apps.mvp.onsclofo.uk
     surveySvc_connectionConfig_port: "80"
     surveySvc_connectionConfig_scheme: http
+    collectionInstrumentSvc_connectionConfig_host: ras-collection-instrument.apps.mvp.onsclofo.uk
+    collectionInstrumentSvc_connectionConfig_port: "80"
+    collectionInstrumentSvc_connectionConfig_scheme: http
+    partySvc_connectionConfig_host: ras-party-v2-dev.apps.mvp.onsclofo.uk
+    partySvc_connectionConfig_port: "80"
+    partySvc_connectionConfig_scheme: http

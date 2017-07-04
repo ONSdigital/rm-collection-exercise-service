@@ -52,7 +52,7 @@ public class CollectionExercise {
   private Timestamp actualExecutionDateTime;
 
   @Column(name = "scheduledexecutiondatetime")
-  private Timestamp scheduledExecution;
+  private Timestamp scheduledExecutionDateTime;
 
   @Column(name = "scheduledstartdatetime")
   private Timestamp scheduledStartDateTime;

@@ -1,19 +1,22 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.Assert;
 import org.junit.Test;
+
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
-
-import java.util.*;
 
 /**
  * UnitTests for CollectionExerciseServiceImpl
  */
 
-@Slf4j
 public class CollectionExerciseServiceImplTest {
 
   private static final UUID ACTIONPLANID1 = UUID.fromString("60df56d9-f491-4ac8-b256-a10154290a8b");
@@ -28,7 +31,8 @@ public class CollectionExerciseServiceImplTest {
 
     CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
 
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+        caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.isEmpty());
 
@@ -43,7 +47,8 @@ public class CollectionExerciseServiceImplTest {
 
     CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
 
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+        caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID1));
   }
@@ -57,7 +62,8 @@ public class CollectionExerciseServiceImplTest {
 
     CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
 
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+        caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID3));
   }
@@ -73,7 +79,8 @@ public class CollectionExerciseServiceImplTest {
 
     CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
 
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+        caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID3));
 
@@ -92,7 +99,8 @@ public class CollectionExerciseServiceImplTest {
 
     CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
 
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+        caseTypeOverrideList);
     Iterator<CaseType> i = caseTypeList.iterator();
     Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID1));
     Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID3));
@@ -113,7 +121,8 @@ public class CollectionExerciseServiceImplTest {
 
     CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
 
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
+    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+        caseTypeOverrideList);
 
     Iterator<CaseType> i = caseTypeList.iterator();
     Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID3));

@@ -15,8 +15,8 @@ import java.util.UUID;
 public class CaseTypeDTO {
 
   @JsonProperty("sampleUnitType")
-  String sampleUnitTypeFK;
+  private String sampleUnitTypeFK;
 
-  UUID actionPlanId;
+  private UUID actionPlanId;
 
 }

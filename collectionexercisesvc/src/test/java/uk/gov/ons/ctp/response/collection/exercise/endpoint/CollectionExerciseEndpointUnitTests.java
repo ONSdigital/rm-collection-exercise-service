@@ -1,22 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.ons.ctp.common.MvcHelper.getJson;
-import static uk.gov.ons.ctp.common.MvcHelper.putJson;
-import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
-import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
+import ma.glasnost.orika.MapperFacade;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -27,8 +11,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import ma.glasnost.orika.MapperFacade;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
@@ -41,6 +23,21 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.ons.ctp.common.MvcHelper.getJson;
+import static uk.gov.ons.ctp.common.MvcHelper.putJson;
+import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
+import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
 /**
  * Collection Exercise Endpoint Unit tests
@@ -55,10 +52,9 @@ public class CollectionExerciseEndpointUnitTests {
   private static final String COLLECTIONEXERCISE_STATE = ("EXECUTED");
   private static final UUID ACTIONPLANID = UUID.fromString("2de9d435-7d99-4819-9af8-5942f515500b");
   private static final int SAMPLEUNITSTOTAL = 500;
-  
+
   private static final UUID SURVEY_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff5e");
   private static final UUID COLLECTIONEXERCISE_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff6e");
-
 
   @InjectMocks
   private CollectionExerciseEndpoint colectionExerciseEndpoint;
@@ -83,7 +79,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   /**
    * Set up of tests
-   * 
+   *
    * @throws Exception exception thrown
    */
   @Before
@@ -108,6 +104,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   /**
    * Tests if collection exercise found for survey.
+   * 
    * @throws Exception exception thrown
    */
   @Test
@@ -127,17 +124,19 @@ public class CollectionExerciseEndpointUnitTests {
             containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
         .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
         .andExpect(
-            jsonPath("$[*].scheduledExecution", containsInAnyOrder(COLLECTIONEXERCISE_DATE, COLLECTIONEXERCISE_DATE)));
+            jsonPath("$[*].scheduledExecutionDateTime", containsInAnyOrder(COLLECTIONEXERCISE_DATE, COLLECTIONEXERCISE_DATE)));
 
   }
-  
+
   /**
    * Tests collection exercise not found.
+   * 
    * @throws Exception exception thrown
    */
   @Test
   public void findCollectionExercisesForSurveyNotFound() throws Exception {
-    ResultActions actions = mockMvc.perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_IDNOTFOUND)));
+    ResultActions actions = mockMvc
+        .perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_IDNOTFOUND)));
 
     actions.andExpect(status().isNotFound())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
@@ -147,6 +146,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   /**
    * Tests if collection exercise found for Id.
+   * 
    * @throws Exception exception thrown
    */
   @Test
@@ -172,14 +172,16 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(jsonPath("$.caseTypes[*].actionPlanId", containsInAnyOrder(ACTIONPLANID.toString())));
 
   }
-  
+
   /**
    * Tests collection exercise not found.
+   * 
    * @throws Exception exception thrown
    */
   @Test
   public void findCollectionExerciseNotFound() throws Exception {
-    ResultActions actions = mockMvc.perform(getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_IDNOTFOUND)));
+    ResultActions actions = mockMvc
+        .perform(getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_IDNOTFOUND)));
 
     actions.andExpect(status().isNotFound())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
@@ -189,6 +191,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   /**
    * Tests put request returns sampleUnitsTotal.
+   * 
    * @throws Exception exception thrown
    */
   @Test
