@@ -11,7 +11,7 @@
   <description>CTP : CollectionExerciseService</description>
 
   <properties>
-    <commonbom.version>10.41.0-SNAPSHOT</commonbom.version>
+    <commonbom.version>10.42.0-SNAPSHOT</commonbom.version>
     <skip.integration.tests>true</skip.integration.tests>
     <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
