@@ -184,6 +184,9 @@ rabbitmq:
   virtualhost: /
 
 messaging:
+  backoffInitial: 5000
+  backoffMultiplier: 3
+  backoffMax: 45000
   consumingThreads: 1
   pubMaxAttempts: 3
   conMaxAttempts: 1
