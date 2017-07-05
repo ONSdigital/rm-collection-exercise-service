@@ -122,11 +122,11 @@ public class SampleUnitDistributor {
       }
     }
 
-    if (!(parent == null)) {
-      if (!(child == null)) {
+    if ((parent != null)) {
+      if ((child != null)) {
         parent.setSampleUnitChild(child);
         publishSampleUnit(sampleUnitGroup, parent);
-      } else if (!(actionPlanId == null)) {
+      } else if ((actionPlanId != null)) {
         parent.setActionPlanId(actionPlanId);
         publishSampleUnit(sampleUnitGroup, parent);
       } else {

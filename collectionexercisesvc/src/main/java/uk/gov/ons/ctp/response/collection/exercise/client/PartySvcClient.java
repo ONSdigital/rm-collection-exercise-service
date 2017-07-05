@@ -16,6 +16,6 @@ public interface PartySvcClient {
    * @param sampleUnitRef the sample unit ref for which to request party.
    * @return the party object
    */
-  PartyDTO requestParty(final SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef);
+  PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef);
 
 }

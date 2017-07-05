@@ -71,7 +71,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    * @param caseTypeOverrideList List of caseTypeOverrides
    * @return Collection<CaseType> Collection of CaseTypes
    */
-  Collection<CaseType> createCaseTypeList(List<? extends CaseType> caseTypeDefaultList, List<? extends CaseType>
+  public Collection<CaseType> createCaseTypeList(List<? extends CaseType> caseTypeDefaultList, List<? extends CaseType>
           caseTypeOverrideList) {
 
     Map<String, CaseType> defaultMap = new HashMap<>();

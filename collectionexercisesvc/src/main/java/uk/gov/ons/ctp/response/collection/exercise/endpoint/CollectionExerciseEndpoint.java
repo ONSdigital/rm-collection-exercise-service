@@ -34,11 +34,11 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 @Slf4j
 public class CollectionExerciseEndpoint {
 
-  private static final String RETURN_SAMPLENOTFOUND =
+  private static final String RETURN_SAMPLENOTFOUND = 
       "Sample not found for collection exercise Id";
-  private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
+  private static final String RETURN_COLLECTIONEXERCISENOTFOUND = 
       "Collection Exercise not found for collection exercise Id";
-  private static final String RETURN_SURVEYNOTFOUND =
+  private static final String RETURN_SURVEYNOTFOUND = 
       "Survey not found for survey Id";
 
   @Autowired
@@ -55,8 +55,8 @@ public class CollectionExerciseEndpoint {
   private MapperFacade mapperFacade;
 
   /**
-   * GET to find collection exercises from the collection exercise service
-   * for the given survey Id.
+   * GET to find collection exercises from the collection exercise service for
+   * the given survey Id.
    *
    * @param id survey Id for which to trigger delivery of collection exercises
    * @return list of collection exercises associated to survey
@@ -108,7 +108,7 @@ public class CollectionExerciseEndpoint {
 
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
     List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
-    
+
     Survey survey = surveyService.findSurveyByFK(collectionExercise.getSurvey().getSurveyPK());
 
     CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
