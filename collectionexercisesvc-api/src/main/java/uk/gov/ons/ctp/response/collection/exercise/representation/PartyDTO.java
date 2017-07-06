@@ -16,7 +16,7 @@ public class PartyDTO {
 
   private String sampleUnitType;
 
-  private String businessRef;
+  private String sampleUnitRef;
 
   private UUID id;
 
