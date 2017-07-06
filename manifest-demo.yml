@@ -1,4 +1,4 @@
-  applications:
+applications:
 - name: collectionexercisesvc-demo
   instances: 1
   timeout: 180
