@@ -53,8 +53,36 @@
 
 	<!-- Start of section to deal with retries and DLQ after max attempts -->
 	<int:channel id="sampleUnitDlqChannel" />
-	<int:handler-retry-advice id="sampleUnitRetryAdvice"
-		recovery-channel="sampleUnitDlqChannel" max-attempts="${messaging.conMaxAttempts}" />
+
+	<bean class="org.springframework.integration.handler.advice.RequestHandlerRetryAdvice" id="sampleUnitRetryAdvice">
+		<property name="recoveryCallback">
+			<bean class="org.springframework.integration.handler.advice.ErrorMessageSendingRecoverer">
+				<constructor-arg ref="sampleUnitDlqChannel" />
+			</bean>
+		</property>
+		<property name="retryStateGenerator"> <!-- Important to make it a Stateful Retry -->
+			<bean class="org.springframework.integration.handler.advice.SpelExpressionRetryStateGenerator">
+				<constructor-arg value="headers.ID"/>
+			</bean>
+		</property>
+		<property name="retryTemplate" ref="retryTemplate" />
+	</bean>
+	<bean id="retryTemplate" class="org.springframework.retry.support.RetryTemplate">
+		<property name="backOffPolicy">
+			<bean class="org.springframework.retry.backoff.ExponentialBackOffPolicy">
+				<property name="initialInterval" value="${messaging.backoffInitial}" />
+				<property name="multiplier" value="${messaging.backoffMultiplier}" />
+				<property name="maxInterval" value="${messaging.backoffMax}" />
+			</bean>
+		</property>
+		<property name="retryPolicy">
+			<bean class="uk.gov.ons.ctp.common.retry.CTPRetryPolicy">
+				<constructor-arg type="int">
+					<value>${messaging.conMaxAttempts}</value>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
 
 	<int:channel id="sampleUnitDlqInterimChannel" />
 	<int:transformer input-channel="sampleUnitDlqChannel"
