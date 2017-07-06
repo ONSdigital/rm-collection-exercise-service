@@ -17,6 +17,6 @@ public interface SampleSvcClient {
    *          units.
    * @return the total number of sample units in the collection exercise.
    */
-  SampleUnitsRequestDTO requestSampleUnits(final CollectionExercise exercise);
+  SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise);
 
 }

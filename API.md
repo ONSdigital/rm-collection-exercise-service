@@ -10,12 +10,12 @@ This page documents the Collection Exercise service API endpoints. These endpoin
   {
     "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
     "name": "201601",
-    "scheduledExecution": "2017-05-15T00:00:00Z"
+    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z"
   },
   {
     "id": "e33daf0e-6a27-40cd-98dc-c6231f50e84a",
     "name": "201602",
-    "scheduledExecution": "2017-08-12T00:00:00Z"
+    "scheduledExecutionDateTime": "2017-08-12T00:00:00Z"
   }
 ]
 ```
@@ -31,14 +31,14 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
     "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
     "name": "201601",
-    "actualExecution": "2017-05-15T14:20:24Z",
-    "scheduledExecution": "2017-05-15T00:00:00Z",
-    "scheduledStart": "2017-06-01T00:00:00Z",
-    "actualPublish": null,
-    "periodStart": null,
-    "periodEnd": null,
-    "scheduledReturn": "2017-06-30T00:00:00Z",
-    "scheduledEnd": null,
+    "actualExecutionDateTime": "2017-05-15T14:20:24Z",
+    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z",
+    "scheduledStartDateTime": "2017-06-01T00:00:00Z",
+    "actualPublishDateTime": null,
+    "periodStartDateTime": null,
+    "periodEndDateTime": null,
+    "scheduledReturnDateTime": "2017-06-30T00:00:00Z",
+    "scheduledEndDateTime": null,
     "executedBy": "Fred Bloggs",
     "state": "EXECUTED",
     "caseTypes": [

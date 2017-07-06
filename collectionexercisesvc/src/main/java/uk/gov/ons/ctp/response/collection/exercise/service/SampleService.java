@@ -22,7 +22,7 @@ public interface SampleService {
    * @return the total number of sample units in the collection exercise.
    * @throws CTPException when collection exercise state transition error
    */
-  SampleUnitsRequestDTO requestSampleUnits(final UUID id) throws CTPException;
+  SampleUnitsRequestDTO requestSampleUnits(UUID id) throws CTPException;
 
   /**
    * Save a SampleUnit
@@ -31,7 +31,7 @@ public interface SampleService {
    * @return the SampleUnit saved.
    * @throws CTPException when collection exercise state transition error
    */
-  ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit) throws CTPException;
+  ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException;
 
   /**
    * Validate SampleUnits

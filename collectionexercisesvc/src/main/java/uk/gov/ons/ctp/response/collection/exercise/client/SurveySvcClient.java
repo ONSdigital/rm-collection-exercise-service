@@ -18,7 +18,7 @@ public interface SurveySvcClient {
    * @param surveyId UUID for which to request classifiers.
    * @return List of SurveyClassifierDTO classifier selectors.
    */
-  List<SurveyClassifierDTO> requestClassifierTypeSelectors(final UUID surveyId);
+  List<SurveyClassifierDTO> requestClassifierTypeSelectors(UUID surveyId);
 
   /**
    * Get classifier type selector for Survey UUID and ClassifierType UUID.
@@ -28,6 +28,6 @@ public interface SurveySvcClient {
    * @return SurveyClassifierTypeDTO details of selector type requested.
    *
    */
-  SurveyClassifierTypeDTO requestClassifierTypeSelector(final UUID surveyId, final UUID classifierType);
+  SurveyClassifierTypeDTO requestClassifierTypeSelector(UUID surveyId, UUID classifierType);
 
 }

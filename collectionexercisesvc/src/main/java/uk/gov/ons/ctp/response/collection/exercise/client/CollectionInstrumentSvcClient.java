@@ -2,7 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import java.util.List;
 
-import uk.gov.ons.ctp.response.collectionInstrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 
 /**
  * Service responsible for making client calls to the CollectionInstrument

@@ -1,13 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * CollectionExercise API representation.
@@ -23,21 +23,21 @@ public class CollectionExerciseDTO {
 
   private String name;
 
-  private Timestamp actualExecutionDateTime;
+  private Date actualExecutionDateTime;
 
-  private Timestamp scheduledExecutionDateTime;
+  private Date scheduledExecutionDateTime;
 
-  private Timestamp scheduledStartDateTime;
+  private Date scheduledStartDateTime;
 
-  private Timestamp actualPublishDateTime;
+  private Date actualPublishDateTime;
 
-  private Timestamp periodStartDateTime;
+  private Date periodStartDateTime;
 
-  private Timestamp periodEndDateTime;
+  private Date periodEndDateTime;
 
-  private Timestamp scheduledReturnDateTime;
+  private Date scheduledReturnDateTime;
 
-  private Timestamp scheduledEndDateTime;
+  private Date scheduledEndDateTime;
 
   private String executedBy;
 
