@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 
 import uk.gov.ons.ctp.common.rest.RestClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
@@ -28,13 +29,14 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   private RestClient surveySvcClientRestTemplate;
 
   @Override
-  public List<SurveyClassifierDTO> requestClassifierTypeSelectors(final UUID surveyId) {
+  public List<SurveyClassifierDTO> requestClassifierTypeSelectors(final UUID surveyId) throws RestClientException {
     return surveySvcClientRestTemplate.getResources(appConfig.getSurveySvc().getRequestClassifierTypesListPath(),
         SurveyClassifierDTO[].class, surveyId);
   }
 
   @Override
-  public SurveyClassifierTypeDTO requestClassifierTypeSelector(final UUID surveyId, final UUID classifierType) {
+  public SurveyClassifierTypeDTO requestClassifierTypeSelector(final UUID surveyId, final UUID classifierType)
+      throws RestClientException {
     return surveySvcClientRestTemplate.getResource(appConfig.getSurveySvc().getRequestClassifierTypesPath(),
         SurveyClassifierTypeDTO.class, surveyId, classifierType);
   }

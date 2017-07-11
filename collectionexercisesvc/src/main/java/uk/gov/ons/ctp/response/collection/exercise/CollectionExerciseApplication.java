@@ -106,7 +106,8 @@ public class CollectionExerciseApplication {
    */
   @Bean
   @Qualifier("collectionExercise")
-  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseStateTransitionManager() {
+  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+      collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
   }
@@ -138,9 +139,11 @@ public class CollectionExerciseApplication {
 
   /**
    * The CustomObjectMapper to output dates in the json in our agreed format
+   *
    * @return the CustomObjectMapper
    */
-  @Bean @Primary
+  @Bean
+  @Primary
   public CustomObjectMapper customObjectMapper() {
     return new CustomObjectMapper();
   }

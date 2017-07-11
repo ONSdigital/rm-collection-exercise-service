@@ -17,6 +17,7 @@ public class SampleUnitGroupDTO {
   public enum SampleUnitGroupState {
     INIT,
     VALIDATED,
+    FAILEDVALIDATION,
     PUBLISHED
   }
 
@@ -25,6 +26,7 @@ public class SampleUnitGroupDTO {
    */
   public enum SampleUnitGroupEvent {
     VALIDATE,
+    INVALIDATE,
     PUBLISH
   }
 

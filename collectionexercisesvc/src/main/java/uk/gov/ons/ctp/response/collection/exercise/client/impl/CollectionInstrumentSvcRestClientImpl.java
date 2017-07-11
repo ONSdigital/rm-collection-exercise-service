@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 
 import uk.gov.ons.ctp.common.rest.RestClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
@@ -14,7 +15,8 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 
 /**
- * HTTP RestClient implementation for calls to the Collection Instrument service.
+ * HTTP RestClient implementation for calls to the Collection Instrument
+ * service.
  *
  */
 @Component
@@ -28,7 +30,7 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
   private RestClient collectionInstrumentSvcClientRestTemplate;
 
   @Override
-  public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) {
+  public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) throws RestClientException {
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
