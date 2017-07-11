@@ -16,16 +16,16 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 @Component
 public class PartySvcRestClientImpl implements PartySvcClient {
 
-  @Autowired
-  private AppConfig appConfig;
+	@Autowired
+	private AppConfig appConfig;
 
-  @Autowired
-  @Qualifier("partySvc")
-  private RestClient partySvcClientRestTemplate;
+	@Autowired
+	@Qualifier("partySvc")
+	private RestClient partySvcClientRestTemplate;
 
-  @Override
-  public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef) {
-    return partySvcClientRestTemplate.getResource(appConfig.getPartySvc().getRequestPartyPath(),
-            PartyDTO.class, sampleUnitType, sampleUnitRef);
-  }
+	@Override
+	public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef) {
+		return partySvcClientRestTemplate.getResource(appConfig.getPartySvc().getRequestPartyPath(), PartyDTO.class,
+				sampleUnitType, sampleUnitRef);
+	}
 }
