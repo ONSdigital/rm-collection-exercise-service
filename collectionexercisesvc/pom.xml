@@ -17,6 +17,12 @@
     <relativePath>../</relativePath>
   </parent>
 
+  <scm>
+    <connection>scm:git:git@github.com:ONSdigital/rm-collection-exercise-service.git</connection>
+    <developerConnection>scm:git:git@github.com:ONSdigital/rm-collection-exercise-service.git</developerConnection>
+    <url>git@github.com:ONSdigital/rm-collection-exercise-service.git</url>
+  </scm>
+
   <dependencies>
     <!-- API dependencies -->
     <dependency>

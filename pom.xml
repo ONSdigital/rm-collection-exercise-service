@@ -41,7 +41,7 @@
   <scm>
       <connection>scm:git:git@github.com:ONSdigital/rm-collection-exercise-service.git</connection>
       <developerConnection>scm:git:git@github.com:ONSdigital/rm-collection-exercise-service.git</developerConnection>
-      <url>scm:git:git@github.com:ONSdigital/rm-collection-exercise-service.git</url>
+      <url>git@github.com:ONSdigital/rm-collection-exercise-service.git</url>
   </scm>
 
   <build>
@@ -152,15 +152,14 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <shortRevisionLength>7</shortRevisionLength>
-          <doCheck>false</doCheck>
-          <doUpdate>false</doUpdate>
-          <timestampFormat>{0,time,long} on {0,date,long}</timestampFormat>
-          <items>
-            <item>timestamp</item>
-          </items>
-        </configuration>
+         <configuration>
+           <doCheck>false</doCheck>
+           <doUpdate>false</doUpdate>
+           <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ss'Z'}</timestampFormat>
+           <items>
+             <item>timestamp</item>
+           </items>
+         </configuration>
       </plugin>
     </plugins>
   </build>
