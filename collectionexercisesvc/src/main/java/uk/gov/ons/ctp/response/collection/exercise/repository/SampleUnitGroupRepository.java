@@ -27,24 +27,28 @@ public interface SampleUnitGroupRepository extends JpaRepository<ExerciseSampleU
   Long countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState state, CollectionExercise exercise);
 
   /**
-   * Query repository for SampleUnitGroups by state and belonging to a list of collection exercises.
+   * Query repository for SampleUnitGroups by state and belonging to a list of
+   * collection exercises. Order by ModifiedDateTime ascending.
    *
    * @param state filter criteria.
    * @param exercises for which to return SampleUnitGroups.
-   * @param pageable Spring JPA pageable object used to return required number of results.
+   * @param pageable Spring JPA pageable object used to return required number
+   *          of results.
    * @return returns all SampleUnitGroups for state within requested exercises.
    */
-  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeDesc(
+  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeAsc(
       SampleUnitGroupDTO.SampleUnitGroupState state, List<CollectionExercise> exercises, Pageable pageable);
 
   /**
-   * Query repository for SampleUnitGroups by state and belonging to a collection exercise.
+   * Query repository for SampleUnitGroups by state and belonging to a
+   * collection exercise. Order by ModifiedDateTime ascending.
    *
    * @param state filter criteria.
    * @param exercise for which to return SampleUnitGroups.
-   * @param pageable Spring JPA pageable object used to return required number of results.
+   * @param pageable Spring JPA pageable object used to return required number
+   *          of results.
    * @return returns all SampleUnitGroups for state within requested exercise.
    */
-  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseOrderByModifiedDateTimeDesc(
+  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(
       SampleUnitGroupDTO.SampleUnitGroupState state, CollectionExercise exercise, Pageable pageable);
 }

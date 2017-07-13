@@ -1,9 +1,10 @@
 info:
-  contactEmail: martin.humphrey@ons.gov.uk
+  name: ${project.artifactId}
   version: ${project.version}
+  origin: ${scm.url}
   commit: ${buildNumber}
   branch: ${scmBranch}
-  buildTime: ${timestamp}
+  built: ${timestamp}
 
 # logging config here as a reminder as to how to override logback from cmd line
 # ie -Dlogging.level.org.springframework=DEBUG
@@ -29,8 +30,6 @@ security:
     password: ctp
 
 management:
-  port: 8245
-  context-path: /mgmt
   security:
     role: SUPERUSER
     enabled: true
@@ -62,7 +61,7 @@ endpoints:
     sensitive: true
   info:
     enabled: true
-    sensitive: true
+    sensitive: false
   metrics:
     enabled: true
     sensitive: true
@@ -178,6 +177,9 @@ rabbitmq:
   virtualhost: ${cloud.services.rabbitmq.connection.virtualhost}
 
 messaging:
+  backoffInitial: 5000
+  backoffMultiplier: 3
+  backoffMax: 45000
   consumingThreads: 1
   pubMaxAttempts: 3
   conMaxAttempts: 1

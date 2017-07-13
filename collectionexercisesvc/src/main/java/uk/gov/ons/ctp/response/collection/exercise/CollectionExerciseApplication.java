@@ -9,10 +9,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Primary;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
+import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.common.rest.RestClient;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
@@ -104,7 +106,8 @@ public class CollectionExerciseApplication {
    */
   @Bean
   @Qualifier("collectionExercise")
-  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseStateTransitionManager() {
+  public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+      collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
   }
@@ -132,6 +135,17 @@ public class CollectionExerciseApplication {
     config.useSingleServer()
         .setAddress(appConfig.getRedissonConfig().getAddress());
     return Redisson.create(config);
+  }
+
+  /**
+   * The CustomObjectMapper to output dates in the json in our agreed format
+   *
+   * @return the CustomObjectMapper
+   */
+  @Bean
+  @Primary
+  public CustomObjectMapper customObjectMapper() {
+    return new CustomObjectMapper();
   }
 
   /**
