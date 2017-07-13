@@ -1,6 +1,21 @@
 # Collection Exercise Service API
 This page documents the Collection Exercise service API endpoints. These endpoints will be secured using HTTP basic authentication initially. All endpoints return an `HTTP 200 OK` status code except where noted otherwise.
 
+## Service Information
+* `GET /info` will return information about this service, collated from when it was last built.
+
+### Example JSON Response
+```json
+{
+    "name": "collectionexercisesvc",
+    "version": "10.42.0",
+    "origin": "git@github.com:ONSdigital/rm-collection-exercise-service.git",
+    "commit": "045d26a8bf0663d8e255d3efe9892f65b0cbb9ce",
+    "branch": "master",
+    "built": "2017-07-12T13:40:41Z"
+}
+```
+
 ## Get Collection Exercises for Survey
 * `GET /collectionexercises/survey/cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87` will return a list of known collection exercises for the survey with an ID of `cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87`.
 
