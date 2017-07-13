@@ -1,9 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
+import lombok.extern.slf4j.Slf4j;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import lombok.extern.slf4j.Slf4j;
-import ma.glasnost.orika.MapperFacade;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -25,6 +20,10 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * The REST endpoint controller for Collection Exercises.
@@ -63,7 +62,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
-  public ResponseEntity<?> getCollectionExercisesForSurvey(@PathVariable("id") final UUID id)
+  public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(@PathVariable("id") final UUID id)
       throws CTPException {
 
     Survey survey = surveyService.findSurvey(id);
@@ -97,7 +96,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-  public ResponseEntity<?> getCollectionExercise(@PathVariable("id") final UUID id)
+  public ResponseEntity<CollectionExerciseDTO> getCollectionExercise(@PathVariable("id") final UUID id)
       throws CTPException {
     log.debug("Entering collection exercise fetch with collection exercise Id {}", id);
     CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(id);
@@ -128,7 +127,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-  public ResponseEntity<?> requestSampleUnits(@PathVariable("id") final UUID id)
+  public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
       throws CTPException {
     log.debug("Entering collection exercise fetch with Id {}", id);
     SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);

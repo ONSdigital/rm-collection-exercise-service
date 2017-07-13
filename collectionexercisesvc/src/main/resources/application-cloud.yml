@@ -186,7 +186,7 @@ messaging:
 
 swagger-settings:
   swagger-ui-active: false
-  group-name: "collectionexerciseservice-api"
-  title: "Collection Exercise Service API"
-  description: "API for the Collection Exercise Service"
-  version: "10.41"
+  group-name: collectionexerciseservice-api
+  title: Collection Exercise Service API
+  description: API for ${project.artifactId}
+  version: ${project.version}
