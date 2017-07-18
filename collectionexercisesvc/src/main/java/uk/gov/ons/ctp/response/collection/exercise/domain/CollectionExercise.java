@@ -82,4 +82,7 @@ public class CollectionExercise {
   @Column(name = "samplesize")
   private Integer sampleSize;
 
+  @Column(name = "exerciseref")
+  private String exerciseRef;
+  
 }
