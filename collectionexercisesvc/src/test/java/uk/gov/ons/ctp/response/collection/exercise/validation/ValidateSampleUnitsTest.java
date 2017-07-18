@@ -230,7 +230,7 @@ public class ValidateSampleUnitsTest {
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
       assertTrue(resultCollectionId.contains(exercise.getId().toString()));
-      assertEquals(CollectionExerciseState.VALIDATED, exercise.getStateFK());
+      assertEquals(CollectionExerciseState.VALIDATED, exercise.getState());
     });
   }
 
@@ -331,7 +331,7 @@ public class ValidateSampleUnitsTest {
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
       assertTrue(resultCollectionId.contains(exercise.getId().toString()));
-      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getStateFK());
+      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getState());
     });
   }
 
@@ -381,7 +381,7 @@ public class ValidateSampleUnitsTest {
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
       assertTrue(resultCollectionId.contains(exercise.getId().toString()));
-      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getStateFK());
+      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getState());
     });
   }
 }

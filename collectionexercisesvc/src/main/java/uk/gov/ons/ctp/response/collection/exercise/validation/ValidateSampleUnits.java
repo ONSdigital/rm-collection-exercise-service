@@ -262,12 +262,12 @@ public class ValidateSampleUnits {
     try {
       if (validated == exercise.getSampleSize().longValue()) {
         // All sample units validated, set exercise state to VALIDATED
-        exercise.setStateFK(collectionExerciseTransitionState.transition(exercise.getStateFK(),
+        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
             CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
       } else if (init < 1 && failed > 0) {
         // None left to validate but some failed, set exercise to
         // FAILEDVALIDATION
-        exercise.setStateFK(collectionExerciseTransitionState.transition(exercise.getStateFK(),
+        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
             CollectionExerciseDTO.CollectionExerciseEvent.INVALIDATE));
       }
     } catch (CTPException ex) {

@@ -7,7 +7,7 @@
 		"id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
 		"name": "BRES_2016",
 		"scheduledExecutionDateTime": 1494846000001,
-		"stateFK": "EXECUTED",
+		"state": "EXECUTED",
 		"survey":
            {"surveyPK": 1,
             "id":  "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"
@@ -25,7 +25,7 @@
 		"id": "14fb3e68-4dca-46db-bf49-04b84e07e77d",
 		"name": "BRES_2016",
 		"scheduledExecutionDateTime": 1494846000002,
-		"stateFK": "EXECUTED",
+		"state": "EXECUTED",
 		"survey":
            {"surveyPK": 1,
             "id":  "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"           
@@ -43,7 +43,7 @@
 		"id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
 		"name": "BRES_2016",
 		"scheduledExecutionDateTime": 1494846000001,
-		"stateFK": "EXECUTED",
+		"state": "EXECUTED",
 		"survey":
            {"surveyPK": 1,
             "id":  "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"
@@ -61,7 +61,7 @@
 		"id": "14fb3e68-4dca-46db-bf49-04b84e07e77d",
 		"name": "BRES_2016",
 		"scheduledExecutionDateTime": 1494846000002,
-		"stateFK": "EXECUTED",
+		"state": "EXECUTED",
 		"survey":
            {"surveyPK": 1,
             "id":  "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"           

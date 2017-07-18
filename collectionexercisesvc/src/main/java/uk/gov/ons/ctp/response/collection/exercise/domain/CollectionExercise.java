@@ -77,7 +77,7 @@ public class CollectionExercise {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "statefk")
-  private CollectionExerciseDTO.CollectionExerciseState stateFK;
+  private CollectionExerciseDTO.CollectionExerciseState state;
 
   @Column(name = "samplesize")
   private Integer sampleSize;

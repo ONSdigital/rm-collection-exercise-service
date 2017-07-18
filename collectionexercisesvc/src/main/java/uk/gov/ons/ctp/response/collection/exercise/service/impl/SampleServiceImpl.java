@@ -77,7 +77,7 @@ public class SampleServiceImpl implements SampleService {
 
         collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
 
-        collectionExercise.setStateFK(collectionExerciseTransitionState.transition(collectionExercise.getStateFK(),
+        collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
             CollectionExerciseEvent.REQUEST));
         collectRepo.saveAndFlush(collectionExercise);
       }
@@ -123,7 +123,7 @@ public class SampleServiceImpl implements SampleService {
 
         if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK()) == collectionExercise
             .getSampleSize()) {
-          collectionExercise.setStateFK(collectionExerciseTransitionState.transition(collectionExercise.getStateFK(),
+          collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
               CollectionExerciseEvent.EXECUTE));
           collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
           collectRepo.saveAndFlush(collectionExercise);
