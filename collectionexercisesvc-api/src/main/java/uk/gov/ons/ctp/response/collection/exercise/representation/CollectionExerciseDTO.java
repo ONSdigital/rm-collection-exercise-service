@@ -64,7 +64,7 @@ public class CollectionExerciseDTO {
     REQUEST,
     EXECUTE,
     VALIDATE,
-    INVALIDATED,
+    INVALIDATE,
     PUBLISH
   }
 

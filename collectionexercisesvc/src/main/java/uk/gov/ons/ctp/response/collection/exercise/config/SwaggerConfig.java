@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.config;
 
-import com.google.common.base.Predicates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -52,7 +51,7 @@ public class SwaggerConfig {
             .groupName(swaggerSettings.getGroupName())
             .apiInfo(apiInfo)
             .select()
-            .apis(Predicates.not(RequestHandlerSelectors.basePackage("org.springframework.boot")))
+            .apis(RequestHandlerSelectors.basePackage("uk.gov.ons.ctp.response.collection.exercise.endpoint"))
             .paths(pathSelector::test)
             .build();
   }

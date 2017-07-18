@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.error.CTPException;
@@ -76,7 +78,7 @@ public class ValidateSampleUnits {
   private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   @Autowired
-  private PartySvcClient partySvcClinet;
+  private PartySvcClient partySvcClient;
 
   /**
    * Validate SampleUnits
@@ -87,7 +89,7 @@ public class ValidateSampleUnits {
         CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
-        .findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeDesc(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
+        .findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeAsc(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
             exercises, new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
 
     // Not searching DB for individual Collection Exercise above when getting
@@ -98,20 +100,15 @@ public class ValidateSampleUnits {
         .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
 
     collections.forEach((exercise, groups) -> {
-      if (!validateSampleUnits(exercise, groups)) {
-        return; // Exit collection forEach as failed validation
+      if (validateSampleUnits(exercise, groups)) {
+        log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
+            exercise.getSurvey().getId());
+        return; // Exit collection forEach for exercise as no classifierTypes
+                // for Survey
       }
 
-      if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
-          exercise) == 0) {
-        try {
-          exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
-              CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
-          collectRepo.saveAndFlush(exercise);
-        } catch (CTPException e) {
-          log.error(String.format("cause = %s - message = %s", e.getCause(), e.getMessage()));
-        }
-      }
+      collectRepo.saveAndFlush(collectionExerciseTransitionState(exercise));
+
     }); // End looping collections
   }
 
@@ -120,14 +117,14 @@ public class ValidateSampleUnits {
    *
    * @param exercise for which to validate the SampleUnitGroups
    * @param sampleUnitGroups in exercise.
-   * @return boolean if validation successful.
+   * @return boolean true if exit without validating as no classifierTypes
    */
   private boolean validateSampleUnits(CollectionExercise exercise,
       List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
     if (classifierTypes.isEmpty()) {
-      return false;
+      return true;
     }
 
     sampleUnitGroups.forEach((sampleUnitGroup) -> {
@@ -136,24 +133,23 @@ public class ValidateSampleUnits {
 
       List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
       sampleUnits.forEach((sampleUnit) -> {
-        PartyDTO party = partySvcClinet.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-        sampleUnit.setPartyId(party.getId());
-        sampleUnit.setCollectionInstrumentId(requestCollectionInstrumentId(classifierTypes, sampleUnit));
-        sampleUnitRepo.saveAndFlush(sampleUnit);
-      });
-
-      try {
-        sampleUnitGroup
-            .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
-        if (sampleUnitGroup.getStateFK() == SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED) {
-          sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-          sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+        // Catch RunTimeException from RestClient
+        try {
+          PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+          sampleUnit.setPartyId(party.getId());
+          sampleUnit.setCollectionInstrumentId(requestCollectionInstrumentId(classifierTypes, sampleUnit));
+          sampleUnitRepo.saveAndFlush(sampleUnit);
+        } catch (RestClientException ex) {
+          log.error("Error in validation for SampleUnit PK: {} due to: {}", sampleUnit.getSampleUnitPK(),
+              ex.getMessage());
         }
-      } catch (CTPException e) {
-        log.error("Cause = %s - Message = %s", e.getCause(), e.getMessage());
-      }
+      });
+      sampleUnitGroup = sampleUnitGroupTransitionState(sampleUnitGroup, sampleUnits);
+      sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
+      sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
     }); // End looping group
-    return true;
+
+    return false;
   }
 
   /**
@@ -164,8 +160,10 @@ public class ValidateSampleUnits {
    *          return instrument details matching classifiers.
    * @param sampleUnit to which the collection instrument relates.
    * @return UUID of collection instrument.
+   * @throws RestClientException something went wrong making http call
    */
-  private UUID requestCollectionInstrumentId(List<String> classifierTypes, ExerciseSampleUnit sampleUnit) {
+  private UUID requestCollectionInstrumentId(List<String> classifierTypes, ExerciseSampleUnit sampleUnit)
+      throws RestClientException {
 
     Map<String, String> classifiers = new HashMap<>();
     UUID collectionInstrumentId = null;
@@ -181,7 +179,16 @@ public class ValidateSampleUnits {
     String searchString = convertToJSON(classifiers);
     List<CollectionInstrumentDTO> requestCollectionInstruments = collectionInstrumentSvcClient
         .requestCollectionInstruments(searchString);
-    collectionInstrumentId = requestCollectionInstruments.get(0).getId();
+    if (requestCollectionInstruments.isEmpty()) {
+      log.error("No collection instruments found for: {}", searchString);
+    } else if (requestCollectionInstruments.size() > 1) {
+      log.warn("{} collection instruments found for: {}, taking first", requestCollectionInstruments.size(),
+          searchString);
+      collectionInstrumentId = requestCollectionInstruments.get(0).getId();
+    } else {
+      collectionInstrumentId = requestCollectionInstruments.get(0).getId();
+    }
+
     return collectionInstrumentId;
   }
 
@@ -211,25 +218,89 @@ public class ValidateSampleUnits {
 
     // Call Survey Service
     // Get Classifier types for Collection Instruments
-    List<SurveyClassifierDTO> classifierTypeSelectors = surveySvcClient
-        .requestClassifierTypeSelectors(exercise.getSurvey().getId());
-    SurveyClassifierDTO chosenSelector = classifierTypeSelectors.stream()
-        .filter(claz -> CASE_TYPE_SELECTOR.equals(claz.getName())).findAny().orElse(null);
-    if (chosenSelector != null) {
-      classifierTypeSelector = surveySvcClient
-          .requestClassifierTypeSelector(exercise.getSurvey().getId(), UUID.fromString(chosenSelector.getId()));
-      if (classifierTypeSelector != null) {
-        classifierTypes = classifierTypeSelector.getClassifierTypes();
+    try {
+      List<SurveyClassifierDTO> classifierTypeSelectors = surveySvcClient
+          .requestClassifierTypeSelectors(exercise.getSurvey().getId());
+      SurveyClassifierDTO chosenSelector = classifierTypeSelectors.stream()
+          .filter(claz -> CASE_TYPE_SELECTOR.equals(claz.getName())).findAny().orElse(null);
+      if (chosenSelector != null) {
+        classifierTypeSelector = surveySvcClient
+            .requestClassifierTypeSelector(exercise.getSurvey().getId(), UUID.fromString(chosenSelector.getId()));
+        if (classifierTypeSelector != null) {
+          classifierTypes = classifierTypeSelector.getClassifierTypes();
+        } else {
+          log.error("Error requesting Survey Classifier Types for SurveyId: {},  caseTypeSelectorId: {}",
+              exercise.getSurvey().getId(), chosenSelector.getId());
+        }
       } else {
-        log.error("Error requesting Survey Classifier Types for SurveyId: {},  caseTypeSelectorId: {}",
-            exercise.getSurvey().getId(), chosenSelector.getId());
+        log.error("Error requesting Survey Classifier Types for SurveyId: {}",
+            exercise.getSurvey().getId());
       }
-    } else {
-      log.error("Error requesting Survey Classifier Types for SurveyId: {}",
-          exercise.getSurvey().getId());
+    } catch (RestClientException ex) {
+      log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());
     }
 
     return classifierTypes;
+
+  }
+
+  /**
+   * Transition Collection Exercise state for validation.
+   *
+   * @param exercise to transition.
+   * @return exercise Collection Exercise with new state.
+   */
+  private CollectionExercise collectionExerciseTransitionState(CollectionExercise exercise) {
+
+    long init = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+        SampleUnitGroupDTO.SampleUnitGroupState.INIT, exercise);
+    long validated = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+        SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED, exercise);
+    long failed = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+        SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION, exercise);
+
+    try {
+      if (validated == exercise.getSampleSize().longValue()) {
+        // All sample units validated, set exercise state to VALIDATED
+        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+            CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
+      } else if (init < 1 && failed > 0) {
+        // None left to validate but some failed, set exercise to
+        // FAILEDVALIDATION
+        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+            CollectionExerciseDTO.CollectionExerciseEvent.INVALIDATE));
+      }
+    } catch (CTPException ex) {
+      log.error("Collection Exercise state transition failed: {}", ex.getMessage());
+    }
+    return exercise;
+  }
+
+  /**
+   * Transition Sample Unit Group state for validation.
+   *
+   * @param sampleUnitGroup to be transitioned.
+   * @param sampleUnits in SampleUnitGroup.
+   * @return sampleUnitGroup with new state.
+   */
+  private ExerciseSampleUnitGroup sampleUnitGroupTransitionState(ExerciseSampleUnitGroup sampleUnitGroup,
+      List<ExerciseSampleUnit> sampleUnits) {
+
+    Predicate<ExerciseSampleUnit> stateTest = su -> su.getPartyId() instanceof UUID
+        && su.getCollectionInstrumentId() instanceof UUID;
+    boolean stateValidated = sampleUnits.stream().allMatch(stateTest);
+    try {
+      if (stateValidated) {
+        sampleUnitGroup.setStateFK(
+            sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
+      } else {
+        sampleUnitGroup.setStateFK(
+            sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.INVALIDATE));
+      }
+    } catch (CTPException ex) {
+      log.error("Sample Unit group state transition failed: {}", ex.getMessage());
+    }
+    return sampleUnitGroup;
   }
 
 }

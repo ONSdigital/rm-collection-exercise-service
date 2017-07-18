@@ -69,7 +69,7 @@ public class SampleUnitDistributor {
   public void distributeSampleUnits(CollectionExercise exercise) throws CTPException {
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
-        .findByStateFKAndCollectionExerciseOrderByModifiedDateTimeDesc(
+        .findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(
             SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
             exercise, new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
     for (ExerciseSampleUnitGroup anExerciseSampleUnitGroup : sampleUnitGroups) {

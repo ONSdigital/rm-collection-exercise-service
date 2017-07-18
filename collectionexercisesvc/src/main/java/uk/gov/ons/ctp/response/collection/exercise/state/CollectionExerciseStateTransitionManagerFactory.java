@@ -67,7 +67,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     // EXECUTED
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForExecuted = new HashMap<>();
     transitionForExecuted.put(CollectionExerciseEvent.VALIDATE, CollectionExerciseState.VALIDATED);
-    transitionForExecuted.put(CollectionExerciseEvent.INVALIDATED, CollectionExerciseState.FAILEDVALIDATION);
+    transitionForExecuted.put(CollectionExerciseEvent.INVALIDATE, CollectionExerciseState.FAILEDVALIDATION);
     transitions.put(CollectionExerciseState.EXECUTED, transitionForExecuted);
 
     // VALIDATED
@@ -96,6 +96,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     // INIT
     Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForInit = new HashMap<>();
     transitionForInit.put(SampleUnitGroupEvent.VALIDATE, SampleUnitGroupState.VALIDATED);
+    transitionForInit.put(SampleUnitGroupEvent.INVALIDATE, SampleUnitGroupState.FAILEDVALIDATION);
     transitions.put(SampleUnitGroupState.INIT, transitionForInit);
 
     // VALIDATED
