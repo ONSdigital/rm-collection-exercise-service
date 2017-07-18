@@ -336,7 +336,7 @@ public class ValidateSampleUnitsTest {
   }
 
   /**
-   * Test of collection instrument service failure.
+   * Test of collection instrument client service failure.
    */
   @Test
   public void validateSampleUnitsNoCollectionInstrument() {
