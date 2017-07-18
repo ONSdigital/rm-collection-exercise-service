@@ -1,0 +1,30 @@
+[
+  {
+    "sampleUnitPK": 1,
+    "sampleUnitRef": "50000065975",
+    "sampleUnitType": "B",
+    "sampleUnitGroup":
+      {
+        "sampleUnitGroupPK": 1,
+        "formType": "112",
+        "stateFK": "INIT",
+        "createdDateTime": 1494846000001,
+        "modifiedDateTime":  1494846000001,    
+        "collectionExercise":
+           {
+             "exercisePK": 1,
+             "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
+             "name": "BRES_2016",
+             "scheduledExecutionDateTime": 1494846000001,   
+             "stateFK": "EXECUTED",
+             "sampleSize": 2,
+             "survey":
+               {
+                 "surveyPK": 1,
+                 "id":  "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+                 "surveyRef": "221"
+               }
+	       }
+	  }
+  }
+]

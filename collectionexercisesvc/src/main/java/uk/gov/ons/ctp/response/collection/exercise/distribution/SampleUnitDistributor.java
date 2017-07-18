@@ -78,7 +78,7 @@ public class SampleUnitDistributor {
 
     if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
         exercise) == 0) {
-      exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+      exercise.setStateFK(collectionExerciseTransitionState.transition(exercise.getStateFK(),
           CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
       exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
       collectionExerciseRepo.saveAndFlush(exercise);

@@ -262,12 +262,12 @@ public class ValidateSampleUnits {
     try {
       if (validated == exercise.getSampleSize().longValue()) {
         // All sample units validated, set exercise state to VALIDATED
-        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+        exercise.setStateFK(collectionExerciseTransitionState.transition(exercise.getStateFK(),
             CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
       } else if (init < 1 && failed > 0) {
         // None left to validate but some failed, set exercise to
         // FAILEDVALIDATION
-        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+        exercise.setStateFK(collectionExerciseTransitionState.transition(exercise.getStateFK(),
             CollectionExerciseDTO.CollectionExerciseEvent.INVALIDATE));
       }
     } catch (CTPException ex) {
@@ -288,7 +288,12 @@ public class ValidateSampleUnits {
 
     Predicate<ExerciseSampleUnit> stateTest = su -> su.getPartyId() instanceof UUID
         && su.getCollectionInstrumentId() instanceof UUID;
-    boolean stateValidated = sampleUnits.stream().allMatch(stateTest);
+    boolean stateValidated = false;
+    if (sampleUnits.isEmpty()) {
+      stateValidated = false;
+    } else {
+      stateValidated = sampleUnits.stream().allMatch(stateTest);
+    }
     try {
       if (stateValidated) {
         sampleUnitGroup.setStateFK(
