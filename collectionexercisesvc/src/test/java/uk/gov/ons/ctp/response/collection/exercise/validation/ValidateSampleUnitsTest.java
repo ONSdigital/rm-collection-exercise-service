@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.client.RestClientException;
 
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
@@ -129,6 +130,7 @@ public class ValidateSampleUnitsTest {
    */
   @PostConstruct
   public void initIt() throws Exception {
+
     // Mock data layer domain objects CollectionExercise, SampleUnitGroup,
     // SampleUnit
     List<CollectionExercise> collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
@@ -189,7 +191,8 @@ public class ValidateSampleUnitsTest {
   }
 
   /**
-   * Test Happy path through to validate all SampleUnitGroups and CollectionExercises.
+   * Test happy path through to validate all SampleUnitGroups and
+   * CollectionExercises.
    */
   @Test
   public void validateSampleUnitsOK() {
@@ -225,10 +228,160 @@ public class ValidateSampleUnitsTest {
     verify(TestContext.collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
     assertTrue(exercises.size() == 2);
-    exercises.forEach((exercise) ->  {
+    exercises.forEach((exercise) -> {
       assertTrue(resultCollectionId.contains(exercise.getId().toString()));
       assertEquals(CollectionExerciseState.VALIDATED, exercise.getStateFK());
     });
   }
 
+  /**
+   * Test of survey service client failure to get list of classifier type
+   * selectors.
+   */
+  @Test
+  public void validateSampleUnitsNoSurveyClassifierTypeSelectors() {
+
+    // Override happy path scenario to receive error from survey service client
+    // when requesting list of classifier type selectors.
+    when(TestContext.surveySvcClient.requestClassifierTypeSelectors(any()))
+        .thenThrow(new RestClientException("Test failure of Survey service"));
+
+    validate.validateSampleUnits();
+
+    // Survey classifiers should be set-up once for a survey so always there,
+    // error should not occur. Without them have no chance to get collection
+    // instruments so simply exits validation and tries again on another run.
+    // Does not save any updates or change any states.
+    ArgumentCaptor<ExerciseSampleUnit> sampleUnitSave = ArgumentCaptor.forClass(ExerciseSampleUnit.class);
+    verify(TestContext.sampleUnitRepo, times(0)).saveAndFlush(sampleUnitSave.capture());
+
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
+        .forClass(ExerciseSampleUnitGroup.class);
+    verify(TestContext.sampleUnitGroupRepo, times(0)).saveAndFlush(sampleUnitGroupSave.capture());
+
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(TestContext.collectRepo, times(0)).saveAndFlush(collectionExerciseSave.capture());
+  }
+
+  /**
+   * Test of survey service client failure to get a classifier type selector.
+   */
+  @Test
+  public void validateSampleUnitsNoSurveyClassifierTypeSelector() {
+
+    // Override happy path scenario to receive error from survey service client
+    // when requesting a classifier type selector.
+    when(TestContext.surveySvcClient.requestClassifierTypeSelector(any(), any()))
+        .thenThrow(new RestClientException("Test failure of Survey service"));
+
+    validate.validateSampleUnits();
+
+    // Survey classifiers should be set-up once for a survey so always there,
+    // error should not occur. Without them have no chance to get collection
+    // instruments so simply exits validation and tries again on another run.
+    // Does not save any updates or change any states.
+    ArgumentCaptor<ExerciseSampleUnit> sampleUnitSave = ArgumentCaptor.forClass(ExerciseSampleUnit.class);
+    verify(TestContext.sampleUnitRepo, times(0)).saveAndFlush(sampleUnitSave.capture());
+
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
+        .forClass(ExerciseSampleUnitGroup.class);
+    verify(TestContext.sampleUnitGroupRepo, times(0)).saveAndFlush(sampleUnitGroupSave.capture());
+
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(TestContext.collectRepo, times(0)).saveAndFlush(collectionExerciseSave.capture());
+  }
+
+  /**
+   * Test of party service client failure.
+   */
+  @Test
+  public void validateSampleUnitsNoParty() {
+
+    // Override happy path scenario to receive error from party service client
+    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, "50000065975"))
+        .thenThrow(new RestClientException("Test failure of Party service"));
+    when(TestContext.sampleUnitGroupRepo
+        .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED), any()))
+            .thenReturn(0L);
+    when(TestContext.sampleUnitGroupRepo
+        .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION), any()))
+            .thenReturn(2L);
+
+    validate.validateSampleUnits();
+
+    // Does not save sampleUnit details, leaves for correction and rerun user
+    // story to be decided
+    ArgumentCaptor<ExerciseSampleUnit> sampleUnitSave = ArgumentCaptor.forClass(ExerciseSampleUnit.class);
+    verify(TestContext.sampleUnitRepo, times(0)).saveAndFlush(sampleUnitSave.capture());
+
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
+        .forClass(ExerciseSampleUnitGroup.class);
+    verify(TestContext.sampleUnitGroupRepo, times(4)).saveAndFlush(sampleUnitGroupSave.capture());
+    List<ExerciseSampleUnitGroup> savedSampleUnitGroups = sampleUnitGroupSave.getAllValues();
+    assertTrue(savedSampleUnitGroups.size() == 4);
+    savedSampleUnitGroups.forEach((group) -> {
+      assertTrue(resultCollectionId.contains(group.getCollectionExercise().getId().toString()));
+      assertEquals(SampleUnitGroupState.FAILEDVALIDATION, group.getStateFK());
+      assertEquals("B", group.getFormType());
+    });
+
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(TestContext.collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
+    List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
+    assertTrue(exercises.size() == 2);
+    exercises.forEach((exercise) -> {
+      assertTrue(resultCollectionId.contains(exercise.getId().toString()));
+      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getStateFK());
+    });
+  }
+
+  /**
+   * Test of collection instrument service failure.
+   */
+  @Test
+  public void validateSampleUnitsNoCollectionInstrument() {
+
+    // Override happy path scenario to receive error from collection instrument
+    // service.
+    when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
+        "{\"RU_REF\":\"50000065975\",\"COLLECTION_EXERCISE\":\"14fb3e68-4dca-46db-bf49-04b84e07e77c\"}"))
+            .thenThrow(new RestClientException("Test failure of Collection Instrument service"));
+    when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
+        "{\"RU_REF\":\"50000065975\",\"COLLECTION_EXERCISE\":\"14fb3e68-4dca-46db-bf49-04b84e07e77d\"}"))
+            .thenThrow(new RestClientException("Test failure of Collection Instrument service"));
+
+    when(TestContext.sampleUnitGroupRepo
+        .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED), any()))
+            .thenReturn(0L);
+    when(TestContext.sampleUnitGroupRepo
+        .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION), any()))
+            .thenReturn(2L);
+
+    validate.validateSampleUnits();
+
+    // Does not save sampleUnit details, leaves for correction and rerun user
+    // story to be decided
+    ArgumentCaptor<ExerciseSampleUnit> sampleUnitSave = ArgumentCaptor.forClass(ExerciseSampleUnit.class);
+    verify(TestContext.sampleUnitRepo, times(0)).saveAndFlush(sampleUnitSave.capture());
+
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
+        .forClass(ExerciseSampleUnitGroup.class);
+    verify(TestContext.sampleUnitGroupRepo, times(4)).saveAndFlush(sampleUnitGroupSave.capture());
+    List<ExerciseSampleUnitGroup> savedSampleUnitGroups = sampleUnitGroupSave.getAllValues();
+    assertTrue(savedSampleUnitGroups.size() == 4);
+    savedSampleUnitGroups.forEach((group) -> {
+      assertTrue(resultCollectionId.contains(group.getCollectionExercise().getId().toString()));
+      assertEquals(SampleUnitGroupState.FAILEDVALIDATION, group.getStateFK());
+      assertEquals("B", group.getFormType());
+    });
+
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(TestContext.collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
+    List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
+    assertTrue(exercises.size() == 2);
+    exercises.forEach((exercise) -> {
+      assertTrue(resultCollectionId.contains(exercise.getId().toString()));
+      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getStateFK());
+    });
+  }
 }
