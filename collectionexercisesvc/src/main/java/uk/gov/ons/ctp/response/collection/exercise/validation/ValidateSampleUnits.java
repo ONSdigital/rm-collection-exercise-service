@@ -86,7 +86,7 @@ public class ValidateSampleUnits {
    */
   public void validateSampleUnits() {
     List<CollectionExercise> exercises = collectRepo.findByState(
-        CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+            CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
         .findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeAsc(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
@@ -102,13 +102,11 @@ public class ValidateSampleUnits {
     collections.forEach((exercise, groups) -> {
       if (validateSampleUnits(exercise, groups)) {
         log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
-            exercise.getSurvey().getId());
-        return; // Exit collection forEach for exercise as no classifierTypes
-                // for Survey
+                exercise.getSurvey().getId());
+        return; // Exit collection forEach for exercise as no classifierTypes for Survey
       }
 
       collectRepo.saveAndFlush(collectionExerciseTransitionState(exercise));
-
     }); // End looping collections
   }
 
@@ -127,12 +125,11 @@ public class ValidateSampleUnits {
       return true;
     }
 
-    sampleUnitGroups.forEach((sampleUnitGroup) -> {
-
+    sampleUnitGroups.forEach(sampleUnitGroup -> {
       // TODO Look at enrolled parties returned
 
       List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-      sampleUnits.forEach((sampleUnit) -> {
+      sampleUnits.forEach(sampleUnit -> {
         // Catch RunTimeException from RestClient
         try {
           PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
@@ -207,8 +204,7 @@ public class ValidateSampleUnits {
   /**
    * Request the classifier type selectors from the Survey service.
    *
-   * @param exercise for which to get collection instrument classifier
-   *          selectors.
+   * @param exercise for which to get collection instrument classifier selectors.
    * @return List<String> Survey classifier type selectors for exercise
    */
   private List<String> requestSurveyClassifiers(CollectionExercise exercise) {
@@ -265,8 +261,7 @@ public class ValidateSampleUnits {
         exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
             CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
       } else if (init < 1 && failed > 0) {
-        // None left to validate but some failed, set exercise to
-        // FAILEDVALIDATION
+        // None left to validate but some failed, set exercise to FAILEDVALIDATION
         exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
             CollectionExerciseDTO.CollectionExerciseEvent.INVALIDATE));
       }

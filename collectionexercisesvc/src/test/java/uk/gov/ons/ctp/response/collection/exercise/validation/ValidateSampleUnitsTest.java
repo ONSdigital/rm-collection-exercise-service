@@ -117,8 +117,16 @@ public class ValidateSampleUnitsTest {
 
   private static final Integer DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX = 10;
 
-  private ArrayList<String> resultCollectionId = new ArrayList<String>(
-      Arrays.asList("14fb3e68-4dca-46db-bf49-04b84e07e77c", "14fb3e68-4dca-46db-bf49-04b84e07e77d"));
+  private static final String COLLECTION_EXERCISE_ID_1 = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
+  private static final String COLLECTION_EXERCISE_ID_2 = "14fb3e68-4dca-46db-bf49-04b84e07e77d";
+  private static final String COLLECTION_INSTR_SVC_SEARCH_STRING =
+          "{\"RU_REF\":\"%s\",\"COLLECTION_EXERCISE\":\"%s\"}";
+  private static final String COLLECTION_INSTRUMENT_ID = "5ca1afd6-4d01-4e13-bb73-acae62e2e540";
+  private static final String PARTY_ID = "45297c23-763d-46a9-b4e5-c37ff5b4fbe8";
+  private static final String SAMPLE_UNIT_REF = "50000065975";
+
+  private static final ArrayList<String> resultCollectionId = new ArrayList<>(
+      Arrays.asList(COLLECTION_EXERCISE_ID_1, COLLECTION_EXERCISE_ID_2));
 
   @Autowired
   private ValidateSampleUnits validate;
@@ -131,8 +139,7 @@ public class ValidateSampleUnitsTest {
   @PostConstruct
   public void initIt() throws Exception {
 
-    // Mock data layer domain objects CollectionExercise, SampleUnitGroup,
-    // SampleUnit
+    // Mock data layer domain objects CollectionExercise, SampleUnitGroup, SampleUnit
     List<CollectionExercise> collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     when(TestContext.collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
         .thenReturn(collectionExercises);
@@ -166,16 +173,16 @@ public class ValidateSampleUnitsTest {
         .thenReturn(classifierTypeSelector.get(0));
 
     List<PartyDTO> partyJson = FixtureHelper.loadClassFixtures(PartyDTO[].class);
-    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, "50000065975"))
+    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
         .thenReturn(partyJson.get(0));
 
     List<CollectionInstrumentDTO> collectionInstruments = FixtureHelper
         .loadClassFixtures(CollectionInstrumentDTO[].class);
     when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        "{\"RU_REF\":\"50000065975\",\"COLLECTION_EXERCISE\":\"14fb3e68-4dca-46db-bf49-04b84e07e77c\"}"))
+            String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_1)))
             .thenReturn(collectionInstruments);
     when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        "{\"RU_REF\":\"50000065975\",\"COLLECTION_EXERCISE\":\"14fb3e68-4dca-46db-bf49-04b84e07e77d\"}"))
+            String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_2)))
             .thenReturn(collectionInstruments);
 
     // Mock transition Managers
@@ -191,12 +198,10 @@ public class ValidateSampleUnitsTest {
   }
 
   /**
-   * Test happy path through to validate all SampleUnitGroups and
-   * CollectionExercises.
+   * Test happy path through to validate all SampleUnitGroups and CollectionExercises.
    */
   @Test
   public void validateSampleUnitsOK() {
-
     validate.validateSampleUnits();
 
     // Two collectionExercises with two SampleUnitGroups each with one
@@ -208,9 +213,9 @@ public class ValidateSampleUnitsTest {
     assertTrue(savedSampleUnits.size() == 4);
     savedSampleUnits.forEach((sampleUnit) -> {
       assertTrue(sampleUnit.getSampleUnitPK() == 1);
-      assertEquals("45297c23-763d-46a9-b4e5-c37ff5b4fbe8", sampleUnit.getPartyId().toString());
-      assertEquals("5ca1afd6-4d01-4e13-bb73-acae62e2e540", sampleUnit.getCollectionInstrumentId().toString());
-      assertEquals("50000065975", sampleUnit.getSampleUnitRef());
+      assertEquals(PARTY_ID, sampleUnit.getPartyId().toString());
+      assertEquals(COLLECTION_INSTRUMENT_ID, sampleUnit.getCollectionInstrumentId().toString());
+      assertEquals(SAMPLE_UNIT_REF, sampleUnit.getSampleUnitRef());
     });
 
     ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
@@ -298,7 +303,7 @@ public class ValidateSampleUnitsTest {
   public void validateSampleUnitsNoParty() {
 
     // Override happy path scenario to receive error from party service client
-    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, "50000065975"))
+    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
         .thenThrow(new RestClientException("Test failure of Party service"));
     when(TestContext.sampleUnitGroupRepo
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED), any()))
@@ -344,10 +349,10 @@ public class ValidateSampleUnitsTest {
     // Override happy path scenario to receive error from collection instrument
     // service.
     when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        "{\"RU_REF\":\"50000065975\",\"COLLECTION_EXERCISE\":\"14fb3e68-4dca-46db-bf49-04b84e07e77c\"}"))
+            String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_1)))
             .thenThrow(new RestClientException("Test failure of Collection Instrument service"));
     when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        "{\"RU_REF\":\"50000065975\",\"COLLECTION_EXERCISE\":\"14fb3e68-4dca-46db-bf49-04b84e07e77d\"}"))
+            String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_2)))
             .thenThrow(new RestClientException("Test failure of Collection Instrument service"));
 
     when(TestContext.sampleUnitGroupRepo
