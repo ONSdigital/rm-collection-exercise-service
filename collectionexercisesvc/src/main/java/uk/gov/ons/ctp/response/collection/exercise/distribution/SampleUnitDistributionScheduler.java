@@ -8,6 +8,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import net.sourceforge.cobertura.CoverageIgnore;
+
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ import java.util.List;
  * Schedule Publish of sample units in VALIDATED state
  *
  */
+@CoverageIgnore
 @Component
 public class SampleUnitDistributionScheduler {
 
