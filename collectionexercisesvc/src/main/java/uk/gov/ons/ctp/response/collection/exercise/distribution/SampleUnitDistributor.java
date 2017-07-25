@@ -3,13 +3,17 @@ package uk.gov.ons.ctp.response.collection.exercise.distribution;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.distributed.DistributedListManager;
+import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChild;
@@ -37,6 +41,13 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 @Slf4j
 public class SampleUnitDistributor {
 
+  private static final String DISTRIBUTION_LIST_ID = "group";
+  // this is a bit of a kludge - jpa does not like having an IN clause with an
+  // empty list
+  // it does not return results when you expect it to - so ... always have this
+  // in the list of excluded case ids
+  private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
+
   @Autowired
   private AppConfig appConfig;
 
@@ -60,6 +71,10 @@ public class SampleUnitDistributor {
   @Qualifier("sampleUnitGroup")
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
+  @Autowired
+  @Qualifier("distribution")
+  private DistributedListManager<Integer> sampleDistributionListManager;
+
   /**
    * Distribute SampleUnits for a CollectionExercise.
    *
@@ -68,20 +83,25 @@ public class SampleUnitDistributor {
    */
   public void distributeSampleUnits(CollectionExercise exercise) throws CTPException {
 
-    List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
-        .findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(
-            SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
-            exercise, new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
-    for (ExerciseSampleUnitGroup anExerciseSampleUnitGroup : sampleUnitGroups) {
-      distributeSampleUnits(exercise, anExerciseSampleUnitGroup);
-    }
+    try {
+      List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercise);
 
-    if (sampleUnitGroupRepo.countByStateFKAndCollectionExercise(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
-        exercise) == 0) {
-      exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
-          CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
-      exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
-      collectionExerciseRepo.saveAndFlush(exercise);
+      for (ExerciseSampleUnitGroup anExerciseSampleUnitGroup : sampleUnitGroups) {
+        distributeSampleUnits(exercise, anExerciseSampleUnitGroup);
+      }
+
+      if (!sampleUnitGroups.isEmpty()) {
+        collectionExerciseTransitionState(exercise);
+      }
+
+    } catch (LockingException ex) {
+      log.error("Distribution failed due to {}", ex.getMessage());
+    } finally {
+      try {
+        sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
+      } catch (LockingException ex) {
+        log.error("Failed to release sampleDistributionListManager data - error msg is {}", ex.getMessage());
+      }
     }
   }
 
@@ -93,7 +113,7 @@ public class SampleUnitDistributor {
    * @throws CTPException if sampleUnitGroup state transition error
    */
   private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup)
-          throws CTPException {
+      throws CTPException {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
     SampleUnitChild child = null;
     String actionPlanId = null;
@@ -139,19 +159,83 @@ public class SampleUnitDistributor {
   }
 
   /**
-   * Publish a message to the Case Service for a SampleUnitGroup and transition state
+   * Retrieve SampleUnitGroups to be distributed - state VALIDATED - but do not
+   * retrieve the same SampleUnitGroups as other service instances.
    *
-   * @param sampleUnitGroup from which publish message created and for which to transition state.
+   * @param exercise in VALIDATED state for which to return sampleUnitGroups.
+   * @return list of SampleUnitGroups.
+   * @throws LockingException problem obtaining lock for data shared across
+   *           instances.
+   */
+  private List<ExerciseSampleUnitGroup> retrieveSampleUnitGroups(CollectionExercise exercise)
+      throws LockingException {
+
+    List<ExerciseSampleUnitGroup> sampleUnitGroups;
+
+    List<Integer> excludedGroups = sampleDistributionListManager.findList(DISTRIBUTION_LIST_ID, false);
+    log.debug("DISTRIBUTION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+
+    excludedGroups.add(Integer.valueOf(IMPOSSIBLE_ID));
+    sampleUnitGroups = sampleUnitGroupRepo
+        .findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
+            SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
+            exercise,
+            excludedGroups,
+            new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
+
+    if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
+      log.debug("DISTRIBUTION retrieved sampleUnitGroup PKs {}",
+          sampleUnitGroups.stream().map(group -> group.getSampleUnitGroupPK().toString()).collect(
+              Collectors.joining(",")));
+      sampleDistributionListManager.saveList(DISTRIBUTION_LIST_ID,
+          sampleUnitGroups.stream().map(group -> group.getSampleUnitGroupPK()).collect(Collectors.toList()), true);
+    } else {
+      log.debug("DISTRIBUTION retrieved 0 sampleUnitGroups PKs");
+      sampleDistributionListManager.unlockContainer();
+    }
+    return sampleUnitGroups;
+  }
+
+  /**
+   * Publish a message to the Case Service for a SampleUnitGroup and transition
+   * state
+   *
+   * @param sampleUnitGroup from which publish message created and for which to
+   *          transition state.
    * @param sampleUnitMessage to publish.
    * @throws CTPException if sampleUnitGroup state transition error
    */
   private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage)
-          throws CTPException {
+      throws CTPException {
     publisher.sendSampleUnit(sampleUnitMessage);
-    SampleUnitGroupState sampleUnitGroupState1 = sampleUnitGroup.getStateFK();
-    SampleUnitGroupState sampleUnitGroupState2 = sampleUnitGroupState.transition(sampleUnitGroupState1,
-            SampleUnitGroupEvent.PUBLISH);
-    sampleUnitGroup.setStateFK(sampleUnitGroupState2);
+    sampleUnitGroup
+        .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.PUBLISH));
+    sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
     sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+  }
+
+  /**
+   * Transition Collection Exercise state for distribution.
+   *
+   * @param exercise to transition.
+   * @return exercise Collection Exercise with new state.
+   */
+  private CollectionExercise collectionExerciseTransitionState(CollectionExercise exercise) {
+
+    long published = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+        SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED, exercise);
+
+    try {
+      if (published == exercise.getSampleSize().longValue()) {
+        // All sample units published, set exercise state to PUBLISHED
+        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
+            CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
+        exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
+        collectionExerciseRepo.saveAndFlush(exercise);
+      }
+    } catch (CTPException ex) {
+      log.error("Collection Exercise state transition failed: {}", ex.getMessage());
+    }
+    return exercise;
   }
 }

@@ -28,16 +28,21 @@ public interface SampleUnitGroupRepository extends JpaRepository<ExerciseSampleU
 
   /**
    * Query repository for SampleUnitGroups by state and belonging to a list of
-   * collection exercises. Order by ModifiedDateTime ascending.
+   * collection exercises. Order by CreatedDateTime ascending.
    *
    * @param state filter criteria.
    * @param exercises for which to return SampleUnitGroups.
+   * @param excludedGroups SampleUnitGroupPKs to exclude from results.
    * @param pageable Spring JPA pageable object used to return required number
    *          of results.
-   * @return returns all SampleUnitGroups for state within requested exercises.
+   * @return returns requested number of SampleUnitGroups for state within
+   *         requested exercises.
    */
-  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeAsc(
-      SampleUnitGroupDTO.SampleUnitGroupState state, List<CollectionExercise> exercises, Pageable pageable);
+  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
+      SampleUnitGroupDTO.SampleUnitGroupState state,
+      List<CollectionExercise> exercises,
+      List<Integer> excludedGroups,
+      Pageable pageable);
 
   /**
    * Query repository for SampleUnitGroups by state and belonging to a
@@ -45,10 +50,14 @@ public interface SampleUnitGroupRepository extends JpaRepository<ExerciseSampleU
    *
    * @param state filter criteria.
    * @param exercise for which to return SampleUnitGroups.
+   * @param excludedGroups SampleUnitGroupPKs to exclude from results.
    * @param pageable Spring JPA pageable object used to return required number
    *          of results.
    * @return returns all SampleUnitGroups for state within requested exercise.
    */
-  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(
-      SampleUnitGroupDTO.SampleUnitGroupState state, CollectionExercise exercise, Pageable pageable);
+  List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
+      SampleUnitGroupDTO.SampleUnitGroupState state,
+      CollectionExercise exercise,
+      List<Integer> excludedGroups,
+      Pageable pageable);
 }

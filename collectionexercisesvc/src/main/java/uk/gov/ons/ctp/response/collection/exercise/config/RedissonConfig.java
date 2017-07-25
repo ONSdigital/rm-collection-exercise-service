@@ -11,5 +11,8 @@ import net.sourceforge.cobertura.CoverageIgnore;
 @Data
 public class RedissonConfig {
   private String address;
+  private Integer listTimeToLiveSeconds;
+  private Integer listTimeToWaitSeconds;
+
 }
 

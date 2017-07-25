@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import uk.gov.ons.ctp.common.distributed.DistributedListManager;
+import uk.gov.ons.ctp.common.distributed.DistributedListManagerRedissonImpl;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.common.rest.RestClient;
@@ -36,6 +38,9 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @IntegrationComponentScan
 @ImportResource("springintegration/main.xml")
 public class CollectionExerciseApplication {
+
+  private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
+  private static final String DISTRIBUTION_LIST = "collectionexercisesvc.sample.distribution";
 
   @Autowired
   private AppConfig appConfig;
@@ -109,7 +114,7 @@ public class CollectionExerciseApplication {
   @Bean
   @Qualifier("collectionExercise")
   public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-      collectionExerciseStateTransitionManager() {
+    collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
   }
@@ -117,13 +122,41 @@ public class CollectionExerciseApplication {
   /**
    * Bean to allow controlled state transitions of SampleUnitGroups.
    *
-   * @return the state transition manager specifically for SampleUnitGroups
+   * @return the state transition manager specifically for SampleUnitGroups.
    */
   @Bean
   @Qualifier("sampleUnitGroup")
   public StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
+  }
+
+  /**
+   * The DistributedListManager for sampleUnitGroup validation.
+   * @param redissonClient the redissonClient.
+   * @return the DistributedListManager.
+   */
+  @Bean
+  @Qualifier("validation")
+  public DistributedListManager<Integer> sampleValidationListManager(RedissonClient redissonClient) {
+    return new DistributedListManagerRedissonImpl<Integer>(
+        VALIDATION_LIST, redissonClient,
+        appConfig.getRedissonConfig().getListTimeToWaitSeconds(),
+            appConfig.getRedissonConfig().getListTimeToLiveSeconds());
+  }
+
+  /**
+   * The DistributedListManager for sampleUnitGroup distribution.
+   * @param redissonClient the redissonClient.
+   * @return the DistributedListManager.
+   */
+  @Bean
+  @Qualifier("distribution")
+  public DistributedListManager<Integer> sampleDistributionListManager(RedissonClient redissonClient) {
+    return new DistributedListManagerRedissonImpl<Integer>(
+        DISTRIBUTION_LIST, redissonClient,
+        appConfig.getRedissonConfig().getListTimeToWaitSeconds(),
+            appConfig.getRedissonConfig().getListTimeToLiveSeconds());
   }
 
   /**

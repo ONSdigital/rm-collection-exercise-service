@@ -8,7 +8,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import uk.gov.ons.ctp.common.FixtureHelper;
+import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -57,6 +61,10 @@ public class SampleUnitDistributorTest {
     @Mock
     private SampleUnitPublisher publisher;
 
+    @Mock
+    @Qualifier("distribution")
+    private static DistributedListManager<Integer> sampleDistributionListManager;
+
     @Spy
     private AppConfig appConfig = new AppConfig();
 
@@ -88,6 +96,7 @@ public class SampleUnitDistributorTest {
         exerciseSampleUnitGroup.setStateFK(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED);
         exerciseSampleUnitGroup.setSampleUnitGroupPK(1);
 
+        exerciseSampleUnitGroupNoSurvey.setSampleUnitGroupPK(1);
         exerciseSampleUnitGroupNoSurvey.setCollectionExercise(collectionExercises.get(1));
         exerciseSampleUnitGroupNoSurvey.setStateFK(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED);
 
@@ -107,7 +116,7 @@ public class SampleUnitDistributorTest {
         when(sampleUnitGroupRepository.countByStateFKAndCollectionExercise(any(),any())).thenReturn(ZERO_SAMPLE_GROUPS_EXIST);
         sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
-        verify(collectionExerciseRepository, times(1)).saveAndFlush(any());
+        verify(collectionExerciseRepository, times(0)).saveAndFlush(any());
     }
 
     @Test
@@ -123,11 +132,17 @@ public class SampleUnitDistributorTest {
     @Test
     public void correctNumberOfSampleUnitsDistributed() throws CTPException {
         List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
-        sampleUnitGroups.add(new ExerciseSampleUnitGroup());
-        sampleUnitGroups.add(new ExerciseSampleUnitGroup());
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        ExerciseSampleUnitGroup group1 = new ExerciseSampleUnitGroup();
+        group1.setSampleUnitGroupPK(1);
+        ExerciseSampleUnitGroup group2 = new ExerciseSampleUnitGroup();
+        group2.setSampleUnitGroupPK(2);        
+        sampleUnitGroups.add(group1);
+        sampleUnitGroups.add(group2);
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
-        sampleUnitDistributor.distributeSampleUnits(new CollectionExercise());
+        CollectionExercise exercise = new CollectionExercise();
+        exercise .setSampleSize(2);
+        sampleUnitDistributor.distributeSampleUnits(exercise);
         verify(sampleUnitRepository
                 , times(2)).findBySampleUnitGroup(any());
     }
@@ -145,7 +160,7 @@ public class SampleUnitDistributorTest {
         List<ExerciseSampleUnit> sampleUnits = new ArrayList<>();
         sampleUnits.add(sampleUnitParent);
 
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
         when(sampleUnitRepository.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
 
@@ -165,7 +180,7 @@ public class SampleUnitDistributorTest {
         List<ExerciseSampleUnit> sampleUnits = new ArrayList<>();
         sampleUnits.add(sampleUnitChild);
 
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
         when(sampleUnitRepository.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
 
@@ -186,7 +201,7 @@ public class SampleUnitDistributorTest {
         List<ExerciseSampleUnit> sampleUnits = new ArrayList<>();
         sampleUnits.add(sampleUnitParent);
 
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
         when(sampleUnitRepository.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
         when(collectionExerciseRepository.getActiveActionPlanId(any(),any(),any())).thenReturn("A");
@@ -207,7 +222,7 @@ public class SampleUnitDistributorTest {
         sampleUnits.add(sampleUnitParent);
         sampleUnits.add(sampleUnitChild);
 
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
         when(sampleUnitRepository.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
 
@@ -226,7 +241,7 @@ public class SampleUnitDistributorTest {
         List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
         sampleUnitGroups.add(exerciseSampleUnitGroup);
 
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
 
         sampleUnitDistributor.distributeSampleUnits(collectionExercise);
@@ -244,7 +259,7 @@ public class SampleUnitDistributorTest {
         List<ExerciseSampleUnit> sampleUnits = new ArrayList<>();
         sampleUnits.add(sampleUnitParent);
 
-        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseOrderByModifiedDateTimeAsc(any(),any(),any()))
+        when(sampleUnitGroupRepository.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(any(),any(),any(), any()))
                 .thenReturn(sampleUnitGroups);
         when(sampleUnitRepository.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
 
