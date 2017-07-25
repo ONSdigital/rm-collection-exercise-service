@@ -156,7 +156,7 @@ public class SampleUnitDistributorTest {
     }
 
     @Test
-    public void sampleUnitChildCreatedWhenOfChildType() throws CTPException { //Doesn't really check if it's specifically a child
+    public void sampleUnitChildCreatedWhenOfChildType() throws CTPException {
         CollectionExercise collectionExercise = exerciseSampleUnitGroup.getCollectionExercise();
 
         List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
