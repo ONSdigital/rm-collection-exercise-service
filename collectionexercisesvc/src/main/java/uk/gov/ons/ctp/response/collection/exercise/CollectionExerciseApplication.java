@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -29,6 +30,7 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
  * The main entry point into the Collection Exercise Service SpringBoot
  * Application. Also used for bean configuration.
  */
+@CoverageIgnore
 @SpringBootApplication
 @EnableTransactionManagement
 @IntegrationComponentScan
