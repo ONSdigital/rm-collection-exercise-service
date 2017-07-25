@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
@@ -49,7 +49,10 @@ public class SampleUnitDistributorTest {
     private SampleUnitRepository sampleUnitRepository;
 
     @Mock
-    private StateTransitionManager<SampleUnitGroupState, uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent> sampleUnitGroupState;
+    private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent> sampleUnitGroupState;
+
+    @Mock
+    private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
 
     @Mock
     private SampleUnitPublisher publisher;
@@ -70,7 +73,6 @@ public class SampleUnitDistributorTest {
 
     @Before
     public void setup() throws Exception {
-
         ScheduleSettings scheduleSettings = new ScheduleSettings();
         scheduleSettings.setDistributionScheduleDelayMilliSeconds("10");
         scheduleSettings.setDistributionScheduleRetrievalMax(10);
@@ -81,8 +83,6 @@ public class SampleUnitDistributorTest {
 
         collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
         sampleUnitList = FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class);
-
-
 
         exerciseSampleUnitGroup.setCollectionExercise(collectionExercises.get(0));
         exerciseSampleUnitGroup.setStateFK(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED);
@@ -176,7 +176,7 @@ public class SampleUnitDistributorTest {
 
     }
 
-   /* @Test
+    @Test
     public void sampleUnitPublishedWhenChildIsNull() throws CTPException {
         CollectionExercise collectionExercise = exerciseSampleUnitGroup.getCollectionExercise();
 
@@ -217,7 +217,7 @@ public class SampleUnitDistributorTest {
 
         verify(sampleUnitGroupState, times(1)).transition(any(),any());
         verify(publisher, times(1)).sendSampleUnit(any());
-    }*/
+    }
 
     @Test
     public void NothingPublishedWhenParentIsNull() throws CTPException {

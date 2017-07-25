@@ -148,8 +148,9 @@ public class SampleUnitDistributor {
   private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage)
           throws CTPException {
     publisher.sendSampleUnit(sampleUnitMessage);
-    sampleUnitGroup
-        .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.PUBLISH));
+    SampleUnitGroupState sampleUnitGroupState1 = sampleUnitGroup.getStateFK();
+    SampleUnitGroupState sampleUnitGroupState2 = sampleUnitGroupState.transition(sampleUnitGroupState1, SampleUnitGroupEvent.PUBLISH);
+    sampleUnitGroup.setStateFK(sampleUnitGroupState2);
     sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
   }
 }
