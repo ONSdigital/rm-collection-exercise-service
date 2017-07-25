@@ -220,7 +220,7 @@ public class SampleUnitDistributorTest {
     }
 
     @Test
-    public void NothingPublishedWhenParentIsNull() throws CTPException {
+    public void nothingPublishedWhenParentIsNull() throws CTPException {
         CollectionExercise collectionExercise = exerciseSampleUnitGroupNoSurvey.getCollectionExercise();
 
         List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
@@ -235,7 +235,7 @@ public class SampleUnitDistributorTest {
     }
 
     @Test
-    public void NothingPublishedWhenParentActionPlanIdIsNull() throws CTPException {
+    public void nothingPublishedWhenParentActionPlanIdIsNull() throws CTPException {
         CollectionExercise collectionExercise = exerciseSampleUnitGroup.getCollectionExercise();
 
         List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
