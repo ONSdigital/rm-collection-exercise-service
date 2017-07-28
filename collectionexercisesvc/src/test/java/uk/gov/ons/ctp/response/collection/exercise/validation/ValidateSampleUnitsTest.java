@@ -114,8 +114,7 @@ public class ValidateSampleUnitsTest {
 
     @MockBean
     @Qualifier("collectionExercise")
-    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-      collectionExerciseTransitionState;
+    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionState;
 
     @MockBean
     @Qualifier("sampleUnitGroup")
@@ -398,8 +397,7 @@ public class ValidateSampleUnitsTest {
   @Test
   public void validateSampleUnitsNoneToValidate() {
     // Override happy path scenario to return any empty list querying for
-    // sampleUnitGroups
-    // service.
+    // sampleUnitGroups.
     when(TestContext.sampleUnitGroupRepo
         .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
             SampleUnitGroupDTO.SampleUnitGroupState.INIT,

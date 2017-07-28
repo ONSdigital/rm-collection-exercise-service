@@ -43,8 +43,7 @@ public interface SampleService {
    * Distribute Sample Units for a CollectionExercise
    *
    * @param exercise for which to distribute SampleUnits.
-   * @throws CTPException if state transition errors
    */
-  void distributeSampleUnits(CollectionExercise exercise) throws CTPException;
+  void distributeSampleUnits(CollectionExercise exercise);
 
 }

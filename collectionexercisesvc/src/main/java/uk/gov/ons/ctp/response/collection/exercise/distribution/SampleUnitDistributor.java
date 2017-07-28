@@ -79,9 +79,8 @@ public class SampleUnitDistributor {
    * Distribute SampleUnits for a CollectionExercise.
    *
    * @param exercise for which to distribute sample units.
-   * @throws CTPException if sampleUnitGroup state transition error
    */
-  public void distributeSampleUnits(CollectionExercise exercise) throws CTPException {
+  public void distributeSampleUnits(CollectionExercise exercise) {
 
     try {
       List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercise);
@@ -110,10 +109,8 @@ public class SampleUnitDistributor {
    *
    * @param exercise CollectionExercise of which sampleUnitGroup is a member.
    * @param sampleUnitGroup for which to distribute sample units.
-   * @throws CTPException if sampleUnitGroup state transition error
    */
-  private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup)
-      throws CTPException {
+  private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
     SampleUnitChild child = null;
     String actionPlanId = null;
@@ -198,20 +195,39 @@ public class SampleUnitDistributor {
 
   /**
    * Publish a message to the Case Service for a SampleUnitGroup and transition
-   * state
+   * state.
    *
    * @param sampleUnitGroup from which publish message created and for which to
    *          transition state.
    * @param sampleUnitMessage to publish.
-   * @throws CTPException if sampleUnitGroup state transition error
    */
-  private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage)
+  private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage) {
+
+    try {
+      sampleUnitGroupTransitionState(sampleUnitGroup);
+      publisher.sendSampleUnit(sampleUnitMessage);
+    } catch (
+    CTPException ex) {
+      log.error("Sample Unit group state transition failed: {}", ex.getMessage());
+    }
+  }
+
+  /**
+   * Transition Sample Unit Group state for publish.
+   *
+   * @param sampleUnitGroup to be transitioned.
+   * @return sampleUnitGroup with new state.
+   * @throws CTPException if state transition fails.
+   */
+  private ExerciseSampleUnitGroup sampleUnitGroupTransitionState(ExerciseSampleUnitGroup sampleUnitGroup)
       throws CTPException {
-    publisher.sendSampleUnit(sampleUnitMessage);
+
     sampleUnitGroup
         .setStateFK(sampleUnitGroupState.transition(sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.PUBLISH));
     sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
     sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+
+    return sampleUnitGroup;
   }
 
   /**

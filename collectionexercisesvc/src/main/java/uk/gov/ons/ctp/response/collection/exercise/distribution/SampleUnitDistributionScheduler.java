@@ -1,17 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.common.error.CTPException;
+
+import net.sourceforge.cobertura.CoverageIgnore;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import net.sourceforge.cobertura.CoverageIgnore;
-
-
-import java.util.List;
 
 /**
  * Schedule Publish of sample units in VALIDATED state
@@ -29,10 +28,9 @@ public class SampleUnitDistributionScheduler {
 
   /**
    * Carry out publish according to configured fixed delay.
-   * @throws CTPException if state transition errors
    */
   @Scheduled(fixedDelayString = "#{appConfig.schedules.distributionScheduleDelayMilliSeconds}")
-  public void scheduleDistribution() throws CTPException {
+  public void scheduleDistribution() {
     List<CollectionExercise> exercises = collectRepo
         .findByState(CollectionExerciseDTO.CollectionExerciseState.VALIDATED);
 

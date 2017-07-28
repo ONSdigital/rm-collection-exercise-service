@@ -149,7 +149,7 @@ public class SampleServiceImpl implements SampleService {
   }
 
   @Override
-  public void distributeSampleUnits(CollectionExercise exercise) throws CTPException {
+  public void distributeSampleUnits(CollectionExercise exercise) {
     distributor.distributeSampleUnits(exercise);
   }
 
