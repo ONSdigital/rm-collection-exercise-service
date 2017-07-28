@@ -17,5 +17,5 @@
     </bean>
     
     <rabbit:template id="caseRabbitTemplate"  connection-factory="connectionFactory" exchange="collection-outbound-exchange" routing-key="Case.CaseDelivery.binding"
-                     message-converter="caseMarshallingMessageConverter" channel-transacted="true"/>
+                     message-converter="caseMarshallingMessageConverter" channel-transacted="true" mandatory="true" />
 </beans>

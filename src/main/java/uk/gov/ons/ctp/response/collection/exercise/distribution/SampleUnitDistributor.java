@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
@@ -47,6 +49,7 @@ public class SampleUnitDistributor {
   // it does not return results when you expect it to - so ... always have this
   // in the list of excluded case ids
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
+  private static final int TRANSACTION_TIMEOUT = 60;
 
   @Autowired
   private AppConfig appConfig;
@@ -201,6 +204,7 @@ public class SampleUnitDistributor {
    *          transition state.
    * @param sampleUnitMessage to publish.
    */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false, timeout = TRANSACTION_TIMEOUT)
   private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage) {
 
     try {
