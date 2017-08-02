@@ -84,5 +84,5 @@ public class CollectionExercise {
 
   @Column(name = "exerciseref")
   private String exerciseRef;
-  
+
 }

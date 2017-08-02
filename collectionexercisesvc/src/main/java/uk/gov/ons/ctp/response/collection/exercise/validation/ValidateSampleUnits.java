@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.distributed.DistributedListManager;
+import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
@@ -50,6 +53,12 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 public class ValidateSampleUnits {
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
+  private static final String VALIDATION_LIST_ID = "group";
+  // this is a bit of a kludge - jpa does not like having an IN clause with an
+  // empty list
+  // it does not return results when you expect it to - so ... always have this
+  // in the list of excluded case ids
+  private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
 
   @Autowired
   private AppConfig appConfig;
@@ -80,34 +89,54 @@ public class ValidateSampleUnits {
   @Autowired
   private PartySvcClient partySvcClient;
 
+  @Autowired
+  @Qualifier("validation")
+  private DistributedListManager<Integer> sampleValidationListManager;
+
   /**
    * Validate SampleUnits
    *
    */
   public void validateSampleUnits() {
+
     List<CollectionExercise> exercises = collectRepo.findByState(
-            CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+        CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
-    List<ExerciseSampleUnitGroup> sampleUnitGroups = sampleUnitGroupRepo
-        .findByStateFKAndCollectionExerciseInOrderByCreatedDateTimeAsc(SampleUnitGroupDTO.SampleUnitGroupState.INIT,
-            exercises, new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
+    if (!exercises.isEmpty()) {
 
-    // Not searching DB for individual Collection Exercise above when getting
-    // batch of SampleUnitGroups to process but
-    // processing in Collection Exercise order will save external service calls
-    // so sorting them now.
-    Map<CollectionExercise, List<ExerciseSampleUnitGroup>> collections = sampleUnitGroups.stream()
-        .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
+      try {
 
-    collections.forEach((exercise, groups) -> {
-      if (validateSampleUnits(exercise, groups)) {
-        log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
+        List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercises);
+
+        // Not searching DB for individual Collection Exercise above when
+        // getting batch of SampleUnitGroups to process but processing in
+        // Collection Exercise order will save external service calls so sorting
+        // them now.
+        Map<CollectionExercise, List<ExerciseSampleUnitGroup>> collections = sampleUnitGroups.stream()
+            .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
+
+        collections.forEach((exercise, groups) -> {
+          if (validateSampleUnits(exercise, groups)) {
+            log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
                 exercise.getSurvey().getId());
-        return; // Exit collection forEach for exercise as no classifierTypes for Survey
-      }
+            return; // Exit collection forEach for exercise as no
+                    // classifierTypes for Survey
+          }
 
-      collectRepo.saveAndFlush(collectionExerciseTransitionState(exercise));
-    }); // End looping collections
+          collectRepo.saveAndFlush(collectionExerciseTransitionState(exercise));
+        }); // End looping collections
+
+      } catch (LockingException ex) {
+        log.error("Validation failed due to {}", ex.getMessage());
+      } finally {
+        try {
+          sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
+        } catch (LockingException ex) {
+          log.error("Failed to release sampleValidationListManager data - error msg is {}", ex.getMessage());
+        }
+      }
+    } // End exercises not empty. Just check this to save processing if going
+      // to get empty sampleUnitGroups List to process
   }
 
   /**
@@ -147,6 +176,44 @@ public class ValidateSampleUnits {
     }); // End looping group
 
     return false;
+  }
+
+  /**
+   * Retrieve SampleUnitGroups to be validated - state INIT - but do not
+   * retrieve the same SampleUnitGroups as other service instances.
+   *
+   * @param exercises for which to return sampleUnitGroups.
+   * @return list of SampleUnitGroups.
+   * @throws LockingException problem obtaining lock for data shared across
+   *           instances.
+   */
+  private List<ExerciseSampleUnitGroup> retrieveSampleUnitGroups(List<CollectionExercise> exercises)
+      throws LockingException {
+
+    List<ExerciseSampleUnitGroup> sampleUnitGroups;
+
+    List<Integer> excludedGroups = sampleValidationListManager.findList(VALIDATION_LIST_ID, false);
+    log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+
+    excludedGroups.add(Integer.valueOf(IMPOSSIBLE_ID));
+    sampleUnitGroups = sampleUnitGroupRepo
+        .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
+            SampleUnitGroupDTO.SampleUnitGroupState.INIT,
+            exercises,
+            excludedGroups,
+            new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
+
+    if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
+      log.debug("VALIDATION retrieved sampleUnitGroup PKs {}",
+          sampleUnitGroups.stream().map(group -> group.getSampleUnitGroupPK().toString()).collect(
+              Collectors.joining(",")));
+      sampleValidationListManager.saveList(VALIDATION_LIST_ID,
+          sampleUnitGroups.stream().map(group -> group.getSampleUnitGroupPK()).collect(Collectors.toList()), true);
+    } else {
+      log.debug("VALIDATION retrieved 0 sampleUnitGroup PKs");
+      sampleValidationListManager.unlockContainer();
+    }
+    return sampleUnitGroups;
   }
 
   /**
@@ -204,7 +271,8 @@ public class ValidateSampleUnits {
   /**
    * Request the classifier type selectors from the Survey service.
    *
-   * @param exercise for which to get collection instrument classifier selectors.
+   * @param exercise for which to get collection instrument classifier
+   *          selectors.
    * @return List<String> Survey classifier type selectors for exercise
    */
   private List<String> requestSurveyClassifiers(CollectionExercise exercise) {
@@ -261,7 +329,8 @@ public class ValidateSampleUnits {
         exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
             CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
       } else if (init < 1 && failed > 0) {
-        // None left to validate but some failed, set exercise to FAILEDVALIDATION
+        // None left to validate but some failed, set exercise to
+        // FAILEDVALIDATION
         exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
             CollectionExerciseDTO.CollectionExerciseEvent.INVALIDATE));
       }

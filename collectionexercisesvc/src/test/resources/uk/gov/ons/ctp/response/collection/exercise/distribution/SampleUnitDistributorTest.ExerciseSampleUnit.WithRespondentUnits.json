@@ -1,0 +1,34 @@
+[
+  {
+    "sampleUnitPK": 1,
+    "sampleUnitGroup":
+      {
+        "sampleUnitGroupPK": 1,
+        "collectionExercise":
+          {
+            "exercisePK": 1,
+            "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c"
+          }
+       },
+    "collectionInstrumentId": "a9ed73c3-92b5-44d8-b350-4453729ebcf6",
+    "partyId": "908366c6-a158-4ea0-8c43-cb8199fc2f7f",
+    "sampleUnitRef": "50000065975",
+    "sampleUnitType": "B"
+  },
+  {
+    "sampleUnitPK": 2,
+    "sampleUnitGroup":
+      {
+        "sampleUnitGroupPK": 1,
+        "collectionExercise":
+          {
+            "exercisePK": 1,
+            "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c"
+          }
+       },
+    "collectionInstrumentId": "a9ed73c3-92b5-44d8-b350-4453729ebcf6",
+    "partyId": "e85f3aa9-1559-4406-956a-074d478cbcae",
+    "sampleUnitRef": "50000065975",
+    "sampleUnitType": "BI"
+  }
+]
