@@ -62,8 +62,8 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
-  public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(@PathVariable("id") final UUID id)
-      throws CTPException {
+  public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(
+          @PathVariable("id") final UUID id) throws CTPException {
 
     Survey survey = surveyService.findSurvey(id);
 

@@ -13,27 +13,14 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>collectionexerciseservice</artifactId>
-    <version>10.43.0-SNAPSHOT</version>
+    <version>10.44.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
-  </properties>
 
   <dependencies>
     <dependency>
       <groupId>uk.gov.ons.ctp.common</groupId>
-      <artifactId>test-framework</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
+      <artifactId>framework</artifactId>
     </dependency>
   </dependencies>
 
@@ -76,7 +63,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
 
   </build>
