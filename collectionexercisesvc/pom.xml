@@ -147,12 +147,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>uk.gov.ons.ctp.common</groupId>
       <artifactId>test-framework</artifactId>
       <scope>test</scope>
