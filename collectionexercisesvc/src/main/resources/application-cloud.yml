@@ -100,9 +100,6 @@ spring:
         ddl-auto: update
         default_schema: collectionexercise
 
-  zipkin:
-    enabled: false
-
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
   connection-config:
