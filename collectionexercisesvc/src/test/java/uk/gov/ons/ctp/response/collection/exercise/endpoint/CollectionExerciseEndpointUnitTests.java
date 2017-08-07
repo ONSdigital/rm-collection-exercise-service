@@ -1,6 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import ma.glasnost.orika.MapperFacade;
+import org.hamcrest.core.Is;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -12,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.ons.ctp.common.FixtureHelper;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
@@ -32,6 +35,7 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.common.MvcHelper.getJson;
@@ -140,7 +144,9 @@ public class CollectionExerciseEndpointUnitTests {
 
     actions.andExpect(status().isNotFound())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-        .andExpect(handler().methodName("getCollectionExercisesForSurvey"));
+        .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
+        .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
+
 
   }
 

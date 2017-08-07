@@ -11,7 +11,6 @@ info:
 logging:
   level:
     uk.gov.ons.ctp: DEBUG
-    org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanExtractor: ERROR
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
@@ -102,9 +101,6 @@ spring:
         ddl-auto: update
         default_schema: collectionexercise
 
-  sleuth:
-    sampler:
-      percentage: 10
 
   zipkin:
     enabled: false

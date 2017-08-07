@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.sourceforge.cobertura.CoverageIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
@@ -21,6 +22,7 @@ import java.sql.Timestamp;
 /**
  * Domain model object for sample unit groups.
  */
+@CoverageIgnore
 @Entity
 @Data
 @NoArgsConstructor
