@@ -168,7 +168,7 @@ public class CollectionExerciseEndpointUnitTests {
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercise"))
-        .andExpect(jsonPath("$.*", hasSize(14)))
+        .andExpect(jsonPath("$.*", hasSize(15)))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID.toString())))
         .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
