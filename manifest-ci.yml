@@ -1,6 +1,6 @@
 applications:
 - name: collectionexercisesvc-ci
-  instances: 1
+  instances: 2
   timeout: 180
   host: collectionexercisesvc-ci
   memory: 1024M
