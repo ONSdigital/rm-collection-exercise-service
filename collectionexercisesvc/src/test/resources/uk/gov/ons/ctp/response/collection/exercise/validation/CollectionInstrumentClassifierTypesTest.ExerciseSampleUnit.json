@@ -1,0 +1,13 @@
+{
+  "sampleUnitPK": 1,
+  "sampleUnitGroup":
+    {
+      "sampleUnitGroupPK": 1,
+      "collectionExercise":
+        {
+          "exercisePK": 1,
+          "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c"
+        }
+     },
+  "sampleUnitRef": "50000065975"
+}

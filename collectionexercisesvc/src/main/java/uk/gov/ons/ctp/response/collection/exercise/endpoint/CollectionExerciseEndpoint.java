@@ -33,11 +33,11 @@ import java.util.UUID;
 @Slf4j
 public class CollectionExerciseEndpoint {
 
-  private static final String RETURN_SAMPLENOTFOUND = 
+  private static final String RETURN_SAMPLENOTFOUND =
       "Sample not found for collection exercise Id";
-  private static final String RETURN_COLLECTIONEXERCISENOTFOUND = 
+  private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
       "Collection Exercise not found for collection exercise Id";
-  private static final String RETURN_SURVEYNOTFOUND = 
+  private static final String RETURN_SURVEYNOTFOUND =
       "Survey not found for survey Id";
 
   @Autowired
@@ -62,8 +62,8 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
-  public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(@PathVariable("id") final UUID id)
-      throws CTPException {
+  public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(
+          @PathVariable("id") final UUID id) throws CTPException {
 
     Survey survey = surveyService.findSurvey(id);
 

@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +15,7 @@ import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
  * case service.
  *
  */
+@CoverageIgnore
 @MessageEndpoint
 @Slf4j
 public class SampleUnitPublisherImpl implements SampleUnitPublisher {

@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.config;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -18,6 +19,7 @@ import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseEn
 /**
  * Config POJO for Swagger UI
  */
+@CoverageIgnore
 @Configuration
 @EnableSwagger2
 @ComponentScan(basePackageClasses = {

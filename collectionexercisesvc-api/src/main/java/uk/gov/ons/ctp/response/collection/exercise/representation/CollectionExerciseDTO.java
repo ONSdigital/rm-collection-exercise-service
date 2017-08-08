@@ -44,6 +44,8 @@ public class CollectionExerciseDTO {
   private CollectionExerciseDTO.CollectionExerciseState state;
 
   private List<CaseTypeDTO> caseTypes;
+  
+  private String exerciseRef;
 
   /**
    * enum for collection exercise state

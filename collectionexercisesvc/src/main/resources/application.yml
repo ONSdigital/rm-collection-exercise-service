@@ -11,7 +11,6 @@ info:
 logging:
   level:
     uk.gov.ons.ctp: DEBUG
-    org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanExtractor: ERROR
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
@@ -19,7 +18,7 @@ liquibase:
   user: collectionexercisesvc
   password: collectionexercisesvc
   default-schema: collectionexercise
-  url: jdbc:postgresql://localhost:5432/postgres
+  url: jdbc:postgresql://localhost:6432/postgres
   changeLog: classpath:/database/changelog-master.yml
 
 security:
@@ -84,7 +83,7 @@ spring:
     name: ONS CollectionExerciseSvc
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:6432/postgres
     username: collectionexercisesvc
     password: collectionexercisesvc
     driverClassName: org.postgresql.Driver
@@ -101,13 +100,6 @@ spring:
       hibernate:
         ddl-auto: update
         default_schema: collectionexercise
-
-  sleuth:
-    sampler:
-      percentage: 10
-
-  zipkin:
-    enabled: false
 
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
@@ -167,19 +159,23 @@ party-svc:
     read-timeout-milli-seconds: 5000
 
 redisson-config:
-  address: localhost:6379
+  address: localhost:7379
+  list-time-to-live-seconds: 300
+  list-time-to-wait-seconds: 300
 
 schedules:
-  validation-schedule-delay-milli-seconds: 5000
-  validation-schedule-retrieval-max: 10000
-  distribution-schedule-delay-milli-seconds: 10000
-  distribution-schedule-retrieval-max: 10000
+  validation-schedule-delay-milli-seconds: 60000
+  # total retrieved for all collection exercises each run, does not retrieve for a particular exercise
+  validation-schedule-retrieval-max: 1000
+  distribution-schedule-delay-milli-seconds: 60000
+  # number retrieved for each collection exercise each run, distributes this number for each exercise
+  distribution-schedule-retrieval-max: 1000
 
 rabbitmq:
   username: guest
   password: guest
   host: localhost
-  port: 5672
+  port: 6672
   virtualhost: /
 
 messaging:

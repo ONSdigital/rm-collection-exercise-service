@@ -1,0 +1,17 @@
+[
+  {
+    "id": "5ca1afd6-4d01-4e13-bb73-acae62e2e540",
+    "surveyId":"cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "classifiers":
+      {
+        "COLLECTION_EXERCISE":
+          [
+            "14fb3e68-4dca-46db-bf49-04b84e07e77c"
+          ],
+         "RU_REF":
+           [
+             "49900118846"
+           ]
+       }
+  }
+]

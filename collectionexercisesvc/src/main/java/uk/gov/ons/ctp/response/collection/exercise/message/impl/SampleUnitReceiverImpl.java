@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -14,6 +15,7 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
  * Integration flow for details of inbound queue.
  *
  */
+@CoverageIgnore
 @MessageEndpoint
 public class SampleUnitReceiverImpl implements SampleUnitReceiver {
 
