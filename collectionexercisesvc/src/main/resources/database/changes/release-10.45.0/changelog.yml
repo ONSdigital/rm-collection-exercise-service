@@ -1,0 +1,21 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.45.0-1
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Collection Exercise Database changes
+            path: collectionexercise_schema_changes.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+
+  - changeSet:
+      id: 10.45.0-2
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Collection Exercise Indexes
+            path: index_collection_exercise_schema.sql
+            relativeToChangelogFile: true
+            splitStatements: false
