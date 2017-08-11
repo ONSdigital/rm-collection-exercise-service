@@ -11,14 +11,14 @@ applications:
     - rm-rabbitmq
   env:
     sampleSvc_connectionConfig_host: samplesvc-preprod.apps.prod.cf5.onsclofo.uk
-    sampleSvc_connectionConfig_port: "80"
+    sampleSvc_connectionConfig_port: "443"
     sampleSvc_connectionConfig_scheme: https
     surveySvc_connectionConfig_host: surveysvc-preprod.apps.prod.cf5.onsclofo.uk
-    surveySvc_connectionConfig_port: "80"
+    surveySvc_connectionConfig_port: "443"
     surveySvc_connectionConfig_scheme: https
     collectionInstrumentSvc_connectionConfig_host: ras-collection-instrument-preprod.apps.prod.cf5.onsclofo.uk
-    collectionInstrumentSvc_connectionConfig_port: "80"
+    collectionInstrumentSvc_connectionConfig_port: "443"
     collectionInstrumentSvc_connectionConfig_scheme: https
     partySvc_connectionConfig_host: ras-party-service-preprod.apps.prod.cf5.onsclofo.uk
-    partySvc_connectionConfig_port: "80"
+    partySvc_connectionConfig_port: "443"
     partySvc_connectionConfig_scheme: https
