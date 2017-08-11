@@ -4,7 +4,7 @@ applications:
   timeout: 180
   host: collectionexercisesvc-test
   memory: 1024M
-  path: collectionexercisesvc/target/collectionexercisesvc.jar
+  path: target/collectionexercisesvc.jar
   services:
     - rm-pg-db
     - rm-redis
