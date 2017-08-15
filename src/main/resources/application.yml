@@ -136,7 +136,7 @@ collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   connection-config:
     scheme: http
-    host: ras-collection-instrument-int.apps.devtest.onsclofo.uk
+    host: ras-collection-instrument-test.apps.devtest.onsclofo.uk
     port: 80
     retry-attempts: 5
     retry-pause-milli-seconds: 5000
@@ -147,7 +147,7 @@ party-svc:
   request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
   connection-config:
     scheme: http
-    host: ras-party-service-int.apps.devtest.onsclofo.uk
+    host: ras-party-service-test.apps.devtest.onsclofo.uk
     port: 80
     # how many times should we attempt connection on failure
     retry-attempts: 5
