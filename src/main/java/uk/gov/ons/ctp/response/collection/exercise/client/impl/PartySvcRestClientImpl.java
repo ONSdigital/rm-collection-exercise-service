@@ -8,7 +8,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.rest.RestClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.representation.PartyDTO;
+import uk.gov.ons.ctp.response.party.representation.Party;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /**
@@ -26,9 +26,9 @@ public class PartySvcRestClientImpl implements PartySvcClient {
   private RestClient partySvcClientRestTemplate;
 
   @Override
-  public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef)
+  public Party requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef)
       throws RestClientException {
-    return partySvcClientRestTemplate.getResource(appConfig.getPartySvc().getRequestPartyPath(), PartyDTO.class,
+    return partySvcClientRestTemplate.getResource(appConfig.getPartySvc().getRequestPartyPath(), Party.class,
         sampleUnitType, sampleUnitRef);
   }
 }

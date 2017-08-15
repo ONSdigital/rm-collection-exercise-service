@@ -45,11 +45,11 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitReposito
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.representation.PartyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.party.representation.Party;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
@@ -114,7 +114,8 @@ public class ValidateSampleUnitsTest {
 
     @MockBean
     @Qualifier("collectionExercise")
-    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionState;
+    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+      collectionExerciseTransitionState;
 
     @MockBean
     @Qualifier("sampleUnitGroup")
@@ -184,7 +185,7 @@ public class ValidateSampleUnitsTest {
     when(TestContext.surveySvcClient.requestClassifierTypeSelector(any(), any()))
         .thenReturn(classifierTypeSelector.get(0));
 
-    List<PartyDTO> partyJson = FixtureHelper.loadClassFixtures(PartyDTO[].class);
+    List<Party> partyJson = FixtureHelper.loadClassFixtures(Party[].class);
     when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
         .thenReturn(partyJson.get(0));
 
