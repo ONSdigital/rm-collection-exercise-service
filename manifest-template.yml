@@ -1,0 +1,24 @@
+applications:
+- name: collectionexercisesvc-SPACE
+  instances: INSTANCES
+  timeout: 180
+  host: collectionexercisesvc-SPACE
+  memory: 1024M
+  path: target/collectionexercisesvc.jar
+  services:
+    - DATABASE
+    - rm-redis
+    - rm-rabbitmq
+  env:
+    sampleSvc_connectionConfig_host: samplesvc-SPACE.DOMAIN
+    sampleSvc_connectionConfig_port: "REPLACE_PORT"
+    sampleSvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    surveySvc_connectionConfig_host: surveysvc-SPACE.DOMAIN
+    surveySvc_connectionConfig_port: "REPLACE_PORT"
+    surveySvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    collectionInstrumentSvc_connectionConfig_host: ras-collection-instrument-SPACE.DOMAIN
+    collectionInstrumentSvc_connectionConfig_port: "REPLACE_PORT"
+    collectionInstrumentSvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    partySvc_connectionConfig_host: ras-party-service-SPACE.DOMAIN
+    partySvc_connectionConfig_port: "REPLACE_PORT"
+    partySvc_connectionConfig_scheme: REPLACE_PROTOCOL
