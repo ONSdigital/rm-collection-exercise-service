@@ -13,14 +13,25 @@ applications:
     sampleSvc_connectionConfig_host: samplesvc-SPACE.DOMAIN
     sampleSvc_connectionConfig_port: "REPLACE_PORT"
     sampleSvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    sampleSvc_connectionConfig_username: REPLACE_BA_USERNAME
+    sampleSvc_connectionConfig_password: REPLACE_BA_PASSWORD
     surveySvc_connectionConfig_host: surveysvc-SPACE.DOMAIN
     surveySvc_connectionConfig_port: "REPLACE_PORT"
     surveySvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    surveySvc_connectionConfig_username: REPLACE_BA_USERNAME
+    surveySvc_connectionConfig_password: REPLACE_BA_PASSWORD
     collectionInstrumentSvc_connectionConfig_host: ras-collection-instrument-SPACE.DOMAIN
     collectionInstrumentSvc_connectionConfig_port: "REPLACE_PORT"
     collectionInstrumentSvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    collectionInstrumentSvc_connectionConfig_username: REPLACE_BA_USERNAME
+    collectionInstrumentSvc_connectionConfig_password: REPLACE_BA_PASSWORD
     partySvc_connectionConfig_host: ras-party-service-SPACE.DOMAIN
     partySvc_connectionConfig_port: "REPLACE_PORT"
     partySvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    partySvc_connectionConfig_username: REPLACE_BA_USERNAME
+    partySvc_connectionConfig_password: REPLACE_BA_PASSWORD
     endpoints_enabled: ENDPOINT_ENABLED
     endpoints_info_enabled: true
+    security_user_name: REPLACE_BA_USERNAME
+    security_user_password: REPLACE_BA_PASSWORD
+

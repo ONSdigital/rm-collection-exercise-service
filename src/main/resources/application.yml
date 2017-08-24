@@ -23,10 +23,11 @@ liquibase:
 
 security:
   basic:
-    enabled: false
+    enabled: true
+    realm: sdc
   user:
-    name: collectionexercise
-    password: ctp
+    name: admin
+    password: secret
 
 management:
   security:
@@ -107,6 +108,8 @@ sample-svc:
     scheme: http
     host: localhost
     port: 8125
+    username: admin
+    password: secret
     # how many times should we attempt connection on failure
     retry-attempts: 5
     # sleep between retries
@@ -123,6 +126,8 @@ survey-svc:
     scheme: http
     host: localhost
     port: 8080
+    username: admin
+    password: secret
     # how many times should we attempt connection on failure
     retry-attempts: 5
     # sleep between retries
@@ -138,6 +143,8 @@ collection-instrument-svc:
     scheme: http
     host: ras-collection-instrument-test.apps.devtest.onsclofo.uk
     port: 80
+    username: admin
+    password: secret
     retry-attempts: 5
     retry-pause-milli-seconds: 5000
     connect-timeout-milli-seconds: 5000
@@ -149,6 +156,8 @@ party-svc:
     scheme: http
     host: ras-party-service-test.apps.devtest.onsclofo.uk
     port: 80
+    username: admin
+    password: secret
     # how many times should we attempt connection on failure
     retry-attempts: 5
     # sleep between retries
