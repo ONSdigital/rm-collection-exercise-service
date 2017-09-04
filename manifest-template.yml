@@ -23,4 +23,3 @@ applications:
     partySvc_connectionConfig_port: "REPLACE_PORT"
     partySvc_connectionConfig_scheme: REPLACE_PROTOCOL
     endpoints_enabled: ENDPOINT_ENABLED
-    endpoints_info_enabled: true
