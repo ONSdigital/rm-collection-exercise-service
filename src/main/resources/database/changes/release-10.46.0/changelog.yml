@@ -9,3 +9,13 @@ databaseChangeLog:
             path: collectionexercise_report.sql
             relativeToChangelogFile: true
             splitStatements: false
+
+  - changeSet:
+      id: 10.46.0-2
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Collection Exercise Dates
+            path: collectionexercise_dates.sql
+            relativeToChangelogFile: true
+            splitStatements: false

@@ -34,4 +34,3 @@ applications:
     endpoints_info_enabled: true
     security_user_name: REPLACE_BA_USERNAME
     security_user_password: REPLACE_BA_PASSWORD
-

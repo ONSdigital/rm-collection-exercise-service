@@ -43,38 +43,6 @@ server:
   port: 8145
   servlet-path: /
 
-endpoints:
-  autoconfig:
-    enabled: true
-    sensitive: true
-  beans:
-    enabled: true
-    sensitive: true
-  configprops:
-    enabled: true
-    sensitive: true
-  dump:
-    enabled: true
-    sensitive: true
-  env:
-    enabled: true
-    sensitive: true
-  info:
-    enabled: true
-    sensitive: false
-  metrics:
-    enabled: true
-    sensitive: true
-  mappings:
-    enabled: true
-    sensitive: true
-  shutdown:
-    enabled: true
-    sensitive: true
-  trace:
-    enabled: true
-    sensitive: true
-
 spring:
   output:
     ansi:
