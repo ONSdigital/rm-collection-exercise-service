@@ -23,7 +23,7 @@ liquibase:
 
 security:
   basic:
-    enabled: true
+    enabled: false
     realm: sdc
   user:
     name: admin

@@ -75,7 +75,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>partysvc-api</artifactId>
-      <version>10.45.0-SNAPSHOT</version>
+      <version>10.47.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
