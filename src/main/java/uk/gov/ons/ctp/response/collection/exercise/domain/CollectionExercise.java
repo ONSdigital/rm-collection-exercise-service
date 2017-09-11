@@ -67,7 +67,7 @@ public class CollectionExercise {
   private Timestamp periodEndDateTime;
 
   @Column(name = "scheduledreturndatetime")
-  private Timestamp scheduledreturnDateTime;
+  private Timestamp scheduledReturnDateTime;
 
   @Column(name = "scheduledenddatetime")
   private Timestamp scheduledEndDateTime;
