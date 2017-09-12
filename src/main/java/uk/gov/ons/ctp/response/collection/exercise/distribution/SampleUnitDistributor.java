@@ -1,10 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,8 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
@@ -34,6 +28,11 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class responsible for business logic to distribute SampleUnits.
@@ -98,11 +97,13 @@ public class SampleUnitDistributor {
 
     } catch (LockingException ex) {
       log.error("Distribution failed due to {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     } finally {
       try {
         sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
       } catch (LockingException ex) {
         log.error("Failed to release sampleDistributionListManager data - error msg is {}", ex.getMessage());
+        log.error("Stack trace: " + ex);
       }
     }
   }
@@ -213,6 +214,7 @@ public class SampleUnitDistributor {
     } catch (
     CTPException ex) {
       log.error("Sample Unit group state transition failed: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
   }
 
@@ -255,6 +257,7 @@ public class SampleUnitDistributor {
       }
     } catch (CTPException ex) {
       log.error("Collection Exercise state transition failed: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
     return exercise;
   }
