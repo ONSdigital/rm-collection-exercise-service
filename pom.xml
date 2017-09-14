@@ -4,14 +4,14 @@
 
   <groupId>uk.gov.ons.ctp.product</groupId>
   <artifactId>collectionexercisesvc</artifactId>
-  <version>10.47.1-SNAPSHOT</version>
+  <version>10.47.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>CTP : CollectionExerciseService</name>
   <description>CTP : CollectionExerciseService</description>
 
   <properties>
-    <commonbom.version>10.45.0-SNAPSHOT</commonbom.version>
+    <commonbom.version>10.45.1</commonbom.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -20,7 +20,7 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>rm-common-config</artifactId>
-    <version>10.45.0-SNAPSHOT</version>
+    <version>10.45.1</version>
   </parent>
 
   <dependencyManagement>
@@ -39,13 +39,13 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectionexercisesvc-api</artifactId>
-      <version>10.45.0-SNAPSHOT</version>
+      <version>10.45.0</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>surveysvc-api</artifactId>
-      <version>10.45.0-SNAPSHOT</version>
+      <version>10.47.0</version>
     </dependency>
 
     <dependency>
@@ -57,13 +57,13 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectioninstrumentsvc-api</artifactId>
-      <version>10.45.0-SNAPSHOT</version>
+      <version>10.45.0</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>reportmodule</artifactId>
-      <version>10.45.0-SNAPSHOT</version>
+      <version>10.45.1</version>
     </dependency>
 
     <dependency>
@@ -75,7 +75,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>partysvc-api</artifactId>
-      <version>10.45.0-SNAPSHOT</version>
+      <version>10.45.0</version>
     </dependency>
 
     <dependency>
