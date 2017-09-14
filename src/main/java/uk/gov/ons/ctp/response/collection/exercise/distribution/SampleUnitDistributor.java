@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
@@ -19,6 +22,7 @@ import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChild;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -78,6 +82,20 @@ public class SampleUnitDistributor {
   @Qualifier("distribution")
   private DistributedListManager<Integer> sampleDistributionListManager;
 
+  // single TransactionTemplate shared amongst all methods in this instance
+  private final TransactionTemplate transactionTemplate;
+
+  /**
+   * Constructor into which the Spring PlatformTransactionManager is injected
+   *
+   * @param transactionManager provided by Spring
+   */
+  @Autowired
+  public SampleUnitDistributor(final PlatformTransactionManager transactionManager) {
+    this.transactionTemplate = new TransactionTemplate(transactionManager);
+    this.transactionTemplate.setTimeout(TRANSACTION_TIMEOUT);
+  }
+
   /**
    * Distribute SampleUnits for a CollectionExercise.
    *
@@ -115,7 +133,7 @@ public class SampleUnitDistributor {
    */
   private void distributeSampleUnits(CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-    SampleUnitChild child = null;
+    List<SampleUnitChild> children = new ArrayList<SampleUnitChild>();
     String actionPlanId = null;
     SampleUnitParent parent = null;
     for (ExerciseSampleUnit sampleUnit : sampleUnits) {
@@ -130,7 +148,7 @@ public class SampleUnitDistributor {
             .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
                 exercise.getSurvey().getSurveyPK());
       } else {
-        child = new SampleUnitChild();
+        SampleUnitChild child = new SampleUnitChild();
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         child.setPartyId(sampleUnit.getPartyId().toString());
@@ -139,12 +157,13 @@ public class SampleUnitDistributor {
             collectionExerciseRepo
                 .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
                     exercise.getSurvey().getSurveyPK()));
+        children.add(child);
       }
     }
 
     if ((parent != null)) {
-      if ((child != null)) {
-        parent.setSampleUnitChild(child);
+      if (!children.isEmpty()) {
+        parent.setSampleUnitChildren(new SampleUnitChildren(children));
         publishSampleUnit(sampleUnitGroup, parent);
       } else if ((actionPlanId != null)) {
         parent.setActionPlanId(actionPlanId);
@@ -198,22 +217,27 @@ public class SampleUnitDistributor {
 
   /**
    * Publish a message to the Case Service for a SampleUnitGroup and transition
-   * state.
+   * state. Note this is a transaction boundary but as a private method we
+   * cannot use Spring declarative transaction management but must use a
+   * programmatic transaction.
    *
    * @param sampleUnitGroup from which publish message created and for which to
    *          transition state.
    * @param sampleUnitMessage to publish.
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false, timeout = TRANSACTION_TIMEOUT)
   private void publishSampleUnit(ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage) {
 
-    try {
-      sampleUnitGroupTransitionState(sampleUnitGroup);
-      publisher.sendSampleUnit(sampleUnitMessage);
-    } catch (
-    CTPException ex) {
-      log.error("Sample Unit group state transition failed: {}", ex.getMessage());
-    }
+    transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+      // the code in this method executes in a transaction context
+      protected void doInTransactionWithoutResult(TransactionStatus status) {
+        try {
+          sampleUnitGroupTransitionState(sampleUnitGroup);
+          publisher.sendSampleUnit(sampleUnitMessage);
+        } catch (CTPException ex) {
+          log.error("Sample Unit group state transition failed: {}", ex.getMessage());
+        }
+      }
+    });
   }
 
   /**

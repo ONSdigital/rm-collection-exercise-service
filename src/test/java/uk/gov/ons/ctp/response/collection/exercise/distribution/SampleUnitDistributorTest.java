@@ -25,6 +25,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
@@ -74,6 +75,9 @@ public class SampleUnitDistributorTest {
   private SampleUnitDistributor sampleUnitDistributor;
 
   @Mock
+  private PlatformTransactionManager platformTransactionManager;
+
+  @Mock
   private SampleUnitGroupRepository sampleUnitGroupRepo;
 
   @Mock
@@ -86,8 +90,7 @@ public class SampleUnitDistributorTest {
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent> sampleUnitGroupState;
 
   @Mock
-  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState,
-    CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
+  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
 
   @Mock
   private SampleUnitPublisher publisher;
@@ -181,7 +184,7 @@ public class SampleUnitDistributorTest {
       assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
       assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
       assertEquals(ACTION_PLAN_ID_PARENT, message.getActionPlanId());
-      assertNull(message.getSampleUnitChild());
+      assertNull(message.getSampleUnitChildren());
     });
 
     ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
@@ -231,11 +234,14 @@ public class SampleUnitDistributorTest {
       assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
       assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
       assertNull(message.getActionPlanId());
-      assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitChild().getSampleUnitRef());
-      assertEquals(SAMPLE_UNIT_TYPE_CHILD, message.getSampleUnitChild().getSampleUnitType());
-      assertEquals(PARTY_ID_CHILD, message.getSampleUnitChild().getPartyId());
-      assertEquals(COLLECTION_INSTRUMENT_ID, message.getSampleUnitChild().getCollectionInstrumentId());
-      assertEquals(ACTION_PLAN_ID_CHILD, message.getSampleUnitChild().getActionPlanId());
+      assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitRef());
+      assertEquals(SAMPLE_UNIT_TYPE_CHILD,
+          message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitType());
+      assertEquals(PARTY_ID_CHILD, message.getSampleUnitChildren().getSampleUnitchildren().get(0).getPartyId());
+      assertEquals(COLLECTION_INSTRUMENT_ID,
+          message.getSampleUnitChildren().getSampleUnitchildren().get(0).getCollectionInstrumentId());
+      assertEquals(ACTION_PLAN_ID_CHILD,
+          message.getSampleUnitChildren().getSampleUnitchildren().get(0).getActionPlanId());
     });
 
     ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
@@ -393,7 +399,6 @@ public class SampleUnitDistributorTest {
     } catch (CTPException ex) {
       // Do nothing with it, actually want to catch it in SampleUnitDistributor
     }
-
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 

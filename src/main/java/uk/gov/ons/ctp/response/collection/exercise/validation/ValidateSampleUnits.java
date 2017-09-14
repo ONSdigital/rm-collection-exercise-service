@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,14 +32,14 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
+import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 import uk.gov.ons.ctp.response.party.representation.Party;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
@@ -64,10 +65,10 @@ public class ValidateSampleUnits {
   private AppConfig appConfig;
 
   @Autowired
-  private SampleUnitRepository sampleUnitRepo;
+  private ExerciseSampleUnitService sampleUnitSvc;
 
   @Autowired
-  private SampleUnitGroupRepository sampleUnitGroupRepo;
+  private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
 
   @Autowired
   private CollectionExerciseRepository collectRepo;
@@ -116,11 +117,11 @@ public class ValidateSampleUnits {
             .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
 
         collections.forEach((exercise, groups) -> {
-          if (validateSampleUnits(exercise, groups)) {
+          if (!validateSampleUnits(exercise, groups)) {
             log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
                 exercise.getSurvey().getId());
             return; // Exit collection forEach for exercise as no
-                    // classifierTypes for Survey
+                    // classifierTypes, fatal error.
           }
 
           collectRepo.saveAndFlush(collectionExerciseTransitionState(exercise));
@@ -144,38 +145,51 @@ public class ValidateSampleUnits {
    *
    * @param exercise for which to validate the SampleUnitGroups
    * @param sampleUnitGroups in exercise.
-   * @return boolean true if exit without validating as no classifierTypes
+   * @return boolean false if fatal error validating, for example no
+   *         classifierTypes
    */
   private boolean validateSampleUnits(CollectionExercise exercise,
       List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
     if (classifierTypes.isEmpty()) {
-      return true;
+      return false;
     }
 
-    sampleUnitGroups.forEach(sampleUnitGroup -> {
-      // TODO Look at enrolled parties returned
+    String surveyId = exercise.getSurvey().getId().toString();
+    List<ExerciseSampleUnit> updatedSampleUnitsForGroup = new ArrayList<>();
 
-      List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-      sampleUnits.forEach(sampleUnit -> {
-        // Catch RunTimeException from RestClient
+    for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
+
+      List<ExerciseSampleUnit> sampleUnits = sampleUnitSvc.findBySampleUnitGroup(sampleUnitGroup);
+      for (ExerciseSampleUnit sampleUnitParent : sampleUnits) {
+        if (!sampleUnitParent.getSampleUnitType().isParent()) {
+          log.warn("Validation for SampleUnit PK: {} Is type {}", sampleUnitParent.getSampleUnitPK(),
+              sampleUnitParent.getSampleUnitType());
+          // Skip current sampleUnit as not parent type. Respondent Unit.
+          // Something must have gone wrong before?
+          continue;
+        }
         try {
-          Party party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-          sampleUnit.setPartyId(UUID.fromString(party.getId()));
-          sampleUnit.setCollectionInstrumentId(requestCollectionInstrumentId(classifierTypes, sampleUnit));
-          sampleUnitRepo.saveAndFlush(sampleUnit);
+          UUID collectionInstrumentId = requestCollectionInstrumentId(classifierTypes, sampleUnitParent);
+          updatedSampleUnitsForGroup = requestPartyDetails(sampleUnitParent, sampleUnits, sampleUnitGroup,
+              surveyId);
+          updatedSampleUnitsForGroup.forEach(updatedSampleUnit -> {
+            updatedSampleUnit.setCollectionInstrumentId(collectionInstrumentId);
+          });
         } catch (RestClientException ex) {
-          log.error("Error in validation for SampleUnit PK: {} due to: {}", sampleUnit.getSampleUnitPK(),
+          log.error("Error in validation for SampleUnitGroup PK: {} due to: {}", sampleUnitGroup.getSampleUnitGroupPK(),
               ex.getMessage());
         }
-      });
-      sampleUnitGroup = sampleUnitGroupTransitionState(sampleUnitGroup, sampleUnits);
+      }
+      sampleUnitGroup = sampleUnitGroupTransitionState(sampleUnitGroup, updatedSampleUnitsForGroup);
       sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-      sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
-    }); // End looping group
+      // Update sampleUnits and group in transaction to ensure no inconsistent
+      // state arises between them.
+      sampleUnitGroupSvc.storeExerciseSampleUnitGroup(sampleUnitGroup, updatedSampleUnitsForGroup);
+    } // End looping group
 
-    return false;
+    return true;
   }
 
   /**
@@ -196,7 +210,7 @@ public class ValidateSampleUnits {
     log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
 
     excludedGroups.add(Integer.valueOf(IMPOSSIBLE_ID));
-    sampleUnitGroups = sampleUnitGroupRepo
+    sampleUnitGroups = sampleUnitGroupSvc
         .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
             SampleUnitGroupDTO.SampleUnitGroupState.INIT,
             exercises,
@@ -214,6 +228,54 @@ public class ValidateSampleUnits {
       sampleValidationListManager.unlockContainer();
     }
     return sampleUnitGroups;
+  }
+
+  /**
+   * Request party information from the Party Service. Update reporting unit
+   * with partyId. Create a SampleUnit for each enrolled respondent for the
+   * reporting unit for that survey. Operation is designed to be repeatable by
+   * checking if sampleUnit already exists for partyId.
+   *
+   * @param sampleUnit sampled reporting unit for which to request party
+   *          information.
+   * @param sampleUnits all sampleUnits belonging to this group.
+   * @param sampleUnitGroup group to which sampleUnit belongs.
+   * @param surveyId Survey of which sampleUnit is a member.
+   * @return List<ExerciseSampleUnit> of updated, created sampleUnits
+   * @throws RestClientException something went wrong making http call.
+   */
+  private List<ExerciseSampleUnit> requestPartyDetails(ExerciseSampleUnit sampleUnit,
+      List<ExerciseSampleUnit> sampleUnits, ExerciseSampleUnitGroup sampleUnitGroup, String surveyId)
+      throws RestClientException {
+    List<ExerciseSampleUnit> updatedSampleUnits = new ArrayList<ExerciseSampleUnit>();
+    Party party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    sampleUnit.setPartyId(UUID.fromString(party.getId()));
+    updatedSampleUnits.add(sampleUnit);
+    party.getAssociations().forEach(association -> {
+      association.getEnrolments().forEach(enrolment -> {
+        if (enrolment.getSurveyId().equals(surveyId)) {
+          // Make sure respondent unit doesn't already exist.
+          Optional<ExerciseSampleUnit> match = (sampleUnits.stream().filter(
+              existingSampleUnit -> association.getPartyId().equals(existingSampleUnit.getPartyId().toString()))
+              .findFirst());
+          if (match.isPresent()) {
+            log.warn("Validation for SampleUnit PK: {} Respondent already exists {}", sampleUnit.getSampleUnitPK(),
+                association.getPartyId());
+            updatedSampleUnits.add(match.get());
+          } else {
+            // Doesn't already exist, create new sampleUnit for respondent.
+            ExerciseSampleUnit respondent = new ExerciseSampleUnit();
+            respondent.setSampleUnitGroup(sampleUnitGroup);
+            respondent.setPartyId(UUID.fromString(association.getPartyId()));
+            respondent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+            respondent.setSampleUnitType(sampleUnit.getSampleUnitType().getChild());
+            updatedSampleUnits.add(respondent);
+          }
+        }
+      });
+    });
+    return updatedSampleUnits;
+
   }
 
   /**
@@ -316,11 +378,11 @@ public class ValidateSampleUnits {
    */
   private CollectionExercise collectionExerciseTransitionState(CollectionExercise exercise) {
 
-    long init = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    long init = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         SampleUnitGroupDTO.SampleUnitGroupState.INIT, exercise);
-    long validated = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    long validated = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED, exercise);
-    long failed = sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    long failed = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION, exercise);
 
     try {

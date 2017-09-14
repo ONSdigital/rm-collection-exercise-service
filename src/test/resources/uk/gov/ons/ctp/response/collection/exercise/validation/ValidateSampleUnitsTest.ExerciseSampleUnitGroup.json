@@ -14,7 +14,7 @@
            },
         "sampleSize": 2
 	},
-	"formType": "B",
+	"formType": "0015",
 	"stateFK": "INIT"
   },
   {
@@ -32,7 +32,7 @@
            },
         "sampleSize": 2
        },
-       "formType": "B",
+       "formType": "0015",
        "stateFK": "INIT"
 	},
 	{
@@ -50,7 +50,7 @@
            },
         "sampleSize": 2
 	},
-	"formType": "B",
+	"formType": "0015",
 	"stateFK": "INIT"
   },
   {
@@ -68,7 +68,7 @@
            },
         "sampleSize": 2
        },
-       "formType": "B",
+       "formType": "0015",
        "stateFK": "INIT"
 	}
 ]
