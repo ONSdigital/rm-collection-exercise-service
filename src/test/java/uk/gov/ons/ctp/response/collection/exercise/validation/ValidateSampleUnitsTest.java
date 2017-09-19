@@ -49,7 +49,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
-import uk.gov.ons.ctp.response.party.representation.Party;
+import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
@@ -185,7 +185,7 @@ public class ValidateSampleUnitsTest {
     when(TestContext.surveySvcClient.requestClassifierTypeSelector(any(), any()))
         .thenReturn(classifierTypeSelector.get(0));
 
-    List<Party> partyJson = FixtureHelper.loadClassFixtures(Party[].class);
+    List<PartyDTO> partyJson = FixtureHelper.loadClassFixtures(PartyDTO[].class);
     when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
         .thenReturn(partyJson.get(0));
 

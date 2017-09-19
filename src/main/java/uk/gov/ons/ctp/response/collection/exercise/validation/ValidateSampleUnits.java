@@ -40,7 +40,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
-import uk.gov.ons.ctp.response.party.representation.Party;
+import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
@@ -161,7 +161,7 @@ public class ValidateSampleUnits {
       sampleUnits.forEach(sampleUnit -> {
         // Catch RunTimeException from RestClient
         try {
-          Party party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+          PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
           sampleUnit.setPartyId(UUID.fromString(party.getId()));
           sampleUnit.setCollectionInstrumentId(requestCollectionInstrumentId(classifierTypes, sampleUnit));
           sampleUnitRepo.saveAndFlush(sampleUnit);
