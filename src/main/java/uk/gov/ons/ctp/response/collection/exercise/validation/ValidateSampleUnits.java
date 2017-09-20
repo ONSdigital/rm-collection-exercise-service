@@ -41,7 +41,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
-import uk.gov.ons.ctp.response.party.representation.Party;
+import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
@@ -248,7 +248,7 @@ public class ValidateSampleUnits {
       List<ExerciseSampleUnit> sampleUnits, ExerciseSampleUnitGroup sampleUnitGroup, String surveyId)
       throws RestClientException {
     List<ExerciseSampleUnit> updatedSampleUnits = new ArrayList<ExerciseSampleUnit>();
-    Party party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
     sampleUnit.setPartyId(UUID.fromString(party.getId()));
     updatedSampleUnits.add(sampleUnit);
     party.getAssociations().forEach(association -> {
