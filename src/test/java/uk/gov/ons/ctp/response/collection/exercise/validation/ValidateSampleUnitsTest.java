@@ -69,20 +69,6 @@ public class ValidateSampleUnitsTest {
   static class TestContext {
 
     /**
-     * Test Configuration bean
-     *
-     * @return Appconfig bean for test
-     */
-    @Bean
-    public AppConfig appConfig() {
-      AppConfig appConfig = new AppConfig();
-      ScheduleSettings schedules = new ScheduleSettings();
-      schedules.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
-      appConfig.setSchedules(schedules);
-      return appConfig;
-    }
-
-    /**
      * Validation bean under test
      *
      * @return ValidateSampleUnits bean under test to be autowired with mocks
@@ -116,11 +102,27 @@ public class ValidateSampleUnitsTest {
 
     @MockBean
     @Qualifier("collectionExercise")
-    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionState;
+    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+            collectionExerciseTransitionState;
 
     @MockBean
     @Qualifier("sampleUnitGroup")
     private static StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
+
+    /**
+     * Test Configuration bean
+     *
+     * @return Appconfig bean for test
+     */
+    @Bean
+    public AppConfig appConfig() {
+      AppConfig appConfig = new AppConfig();
+      ScheduleSettings schedules = new ScheduleSettings();
+      schedules.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
+      appConfig.setSchedules(schedules);
+      return appConfig;
+    }
+
   }
 
   private static final Integer DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX = 10;

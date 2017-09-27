@@ -90,7 +90,8 @@ public class SampleUnitDistributorTest {
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent> sampleUnitGroupState;
 
   @Mock
-  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
+  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState,
+      CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
 
   @Mock
   private SampleUnitPublisher publisher;
