@@ -68,15 +68,6 @@ public class ValidateSampleUnitsTest {
   @Configuration
   static class TestContext {
 
-    /**
-     * Validation bean under test
-     *
-     * @return ValidateSampleUnits bean under test to be autowired with mocks
-     */
-    @Bean
-    public ValidateSampleUnits validateSampleUnits() {
-      return new ValidateSampleUnits();
-    }
 
     @MockBean
     @Qualifier("validation")
@@ -103,11 +94,21 @@ public class ValidateSampleUnitsTest {
     @MockBean
     @Qualifier("collectionExercise")
     private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-            collectionExerciseTransitionState;
+        collectionExerciseTransitionState;
 
     @MockBean
     @Qualifier("sampleUnitGroup")
     private static StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
+
+    /**
+     * Validation bean under test
+     *
+     * @return ValidateSampleUnits bean under test to be autowired with mocks
+     */
+    @Bean
+    public ValidateSampleUnits validateSampleUnits() {
+      return new ValidateSampleUnits();
+    }
 
     /**
      * Test Configuration bean

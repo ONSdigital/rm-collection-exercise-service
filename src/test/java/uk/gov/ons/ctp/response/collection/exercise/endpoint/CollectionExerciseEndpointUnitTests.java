@@ -108,7 +108,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   /**
    * Tests if collection exercise found for survey.
-   * 
+   *
    * @throws Exception exception thrown
    */
   @Test
@@ -128,7 +128,8 @@ public class CollectionExerciseEndpointUnitTests {
             containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
         .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
         .andExpect(
-            jsonPath("$[*].scheduledExecutionDateTime", containsInAnyOrder(COLLECTIONEXERCISE_DATE, COLLECTIONEXERCISE_DATE)));
+            jsonPath("$[*].scheduledExecutionDateTime", containsInAnyOrder(COLLECTIONEXERCISE_DATE,
+                COLLECTIONEXERCISE_DATE)));
 
   }
 

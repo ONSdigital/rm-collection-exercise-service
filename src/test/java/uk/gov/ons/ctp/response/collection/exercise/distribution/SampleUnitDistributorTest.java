@@ -114,7 +114,7 @@ public class SampleUnitDistributorTest {
    * @throws Exception from FixtureHelper loading test data flat files.
    */
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
 
     ScheduleSettings scheduleSettings = new ScheduleSettings();
     scheduleSettings.setDistributionScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);

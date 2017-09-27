@@ -40,6 +40,9 @@ public class CollectionExerciseServiceImplTest {
 
   }
 
+  /**
+   * Check that only default are present is Override is empty
+   */
   @Test
   public void givenThatDefaultIsPopulatedAndOverrideIsEmptyExpectDefaultOnly() {
     List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
