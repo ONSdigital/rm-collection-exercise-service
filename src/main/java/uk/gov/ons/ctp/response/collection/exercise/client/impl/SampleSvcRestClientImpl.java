@@ -59,10 +59,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
     HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
 
     log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
-    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
-        String.class);
-
-    restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, SampleUnitsRequestDTO.class);
+    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
 
     SampleUnitsRequestDTO result = null;
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {

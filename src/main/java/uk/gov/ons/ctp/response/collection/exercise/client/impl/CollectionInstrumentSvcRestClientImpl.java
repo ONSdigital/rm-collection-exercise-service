@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -59,12 +58,12 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
 
     HttpEntity<List<CollectionInstrumentDTO>> httpEntity = restUtility.createHttpEntity(null);
 
-    ResponseEntity<List<CollectionInstrumentDTO>> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity,
-        new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {});
+    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
+        String.class);
 
     List<CollectionInstrumentDTO> result = null;
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody().toString();
+      String responseBody = responseEntity.getBody();
       try {
         result = objectMapper.readValue(responseBody, new TypeReference<List<CollectionInstrumentDTO>>() {});
       } catch (IOException e) {

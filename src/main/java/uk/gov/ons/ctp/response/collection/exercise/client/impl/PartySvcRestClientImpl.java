@@ -56,6 +56,10 @@ public class PartySvcRestClientImpl implements PartySvcClient {
 
     ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
+    if (responseEntity != null) {
+      System.out.println(responseEntity.getStatusCodeValue());
+    }
+
     PartyDTO result = null;
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
       String responseBody = responseEntity.getBody();
