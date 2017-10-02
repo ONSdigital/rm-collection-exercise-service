@@ -2,7 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.config;
 
 import lombok.Data;
 import net.sourceforge.cobertura.CoverageIgnore;
-import uk.gov.ons.ctp.common.rest.RestClientConfig;
+import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 
 /**
  * App config POJO for CollectionInstrument service access - host/location and endpoint
@@ -12,7 +12,7 @@ import uk.gov.ons.ctp.common.rest.RestClientConfig;
 @CoverageIgnore
 @Data
 public class CollectionInstrumentSvc {
-  private RestClientConfig connectionConfig;
+  private RestUtilityConfig connectionConfig;
   private String requestCollectionInstruments;
 
 }

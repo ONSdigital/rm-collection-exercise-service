@@ -16,11 +16,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.DistributedListManagerRedissonImpl;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
-import uk.gov.ons.ctp.common.rest.RestClient;
+import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -64,51 +65,105 @@ public class CollectionExerciseApplication {
   }
 
   /**
+   * The restTemplate bean injected in REST client classes
+   *
+   * @return the restTemplate used in REST calls
+   */
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
+
+  /**
    * Bean used to access Sample service through REST calls
    *
    * @return the service client
    */
-  @Bean
+/*  @Bean
   @Qualifier("sampleSvc")
   public RestClient sampleSvcClientRestTemplate() {
     RestClient restHelper = new RestClient(appConfig.getSampleSvc().getConnectionConfig());
     return restHelper;
-  }
+  }*/
 
   /**
    * Bean used to access Survey service through REST calls
    *
    * @return the service client
    */
-  @Bean
+/*  @Bean
   @Qualifier("surveySvc")
   public RestClient surveySvcClientRestTemplate() {
     RestClient restHelper = new RestClient(appConfig.getSurveySvc().getConnectionConfig());
     return restHelper;
-  }
+  }*/
 
   /**
    * Bean used to access CollectionInstrument service through REST calls
    *
    * @return the service client
    */
-  @Bean
+/*  @Bean
   @Qualifier("collectionInstrumentSvc")
   public RestClient collectionInstrumentSvcClientRestTemplate() {
     RestClient restHelper = new RestClient(appConfig.getCollectionInstrumentSvc().getConnectionConfig());
     return restHelper;
-  }
+  }*/
 
   /**
    * Bean used to access Party service through REST calls
    *
    * @return the service client
    */
-  @Bean
+/*  @Bean
   @Qualifier("partySvc")
   public RestClient partySvcClientRestTemplate() {
     RestClient restHelper = new RestClient(appConfig.getPartySvc().getConnectionConfig());
     return restHelper;
+  }*/
+
+  /**
+   * The RestUtility bean for the CollectionInstrument service
+   * @return the RestUtility bean for the CollectionInstrument service
+   */
+  @Bean
+  @Qualifier("collectionInstrumentRestUtility")
+  public RestUtility collectionInstrumentRestUtility() {
+    RestUtility restUtility = new RestUtility(appConfig.getCollectionInstrumentSvc().getConnectionConfig());
+    return restUtility;
+  }
+
+  /**
+   * The RestUtility bean for the Party service
+   * @return the RestUtility bean for the Party service
+   */
+  @Bean
+  @Qualifier("partyRestUtility")
+  public RestUtility partyRestUtility() {
+    RestUtility restUtility = new RestUtility(appConfig.getPartySvc().getConnectionConfig());
+    return restUtility;
+  }
+
+  /**
+   * The RestUtility bean for the Sample service
+   * @return the RestUtility bean for the Sample service
+   */
+  @Bean
+  @Qualifier("sampleRestUtility")
+  public RestUtility sampleRestUtility() {
+    RestUtility restUtility = new RestUtility(appConfig.getSampleSvc().getConnectionConfig());
+    return restUtility;
+  }
+
+  /**
+   * The RestUtility bean for the Survey service
+   * @return the RestUtility bean for the Survey service
+   */
+  @Bean
+  @Qualifier("surveyRestUtility")
+  public RestUtility surveyRestUtility() {
+    RestUtility restUtility = new RestUtility(appConfig.getSurveySvc().getConnectionConfig());
+    return restUtility;
   }
 
   /**
