@@ -129,11 +129,13 @@ public class ValidateSampleUnits {
 
       } catch (LockingException ex) {
         log.error("Validation failed due to {}", ex.getMessage());
+        log.error("Stack trace: " + ex);
       } finally {
         try {
           sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
         } catch (LockingException ex) {
           log.error("Failed to release sampleValidationListManager data - error msg is {}", ex.getMessage());
+          log.error("Stack trace: " + ex);
         }
       }
     } // End exercises not empty. Just check this to save processing if going
@@ -180,6 +182,7 @@ public class ValidateSampleUnits {
         } catch (RestClientException ex) {
           log.error("Error in validation for SampleUnitGroup PK: {} due to: {}", sampleUnitGroup.getSampleUnitGroupPK(),
               ex.getMessage());
+          log.error("Stack trace: " + ex);
         }
       }
       sampleUnitGroup = sampleUnitGroupTransitionState(sampleUnitGroup, updatedSampleUnitsForGroup);
@@ -299,6 +302,7 @@ public class ValidateSampleUnits {
         classifiers.put(classifierType.name(), classifierType.apply(sampleUnit));
       } catch (IllegalArgumentException e) {
         log.error("Classifier cannot be dealt with {}", e.getMessage());
+        log.error("Stack trace: " + e);
         return collectionInstrumentId;
       }
     }
@@ -364,6 +368,7 @@ public class ValidateSampleUnits {
       }
     } catch (RestClientException ex) {
       log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
 
     return classifierTypes;
@@ -398,6 +403,7 @@ public class ValidateSampleUnits {
       }
     } catch (CTPException ex) {
       log.error("Collection Exercise state transition failed: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
     return exercise;
   }
@@ -430,6 +436,7 @@ public class ValidateSampleUnits {
       }
     } catch (CTPException ex) {
       log.error("Sample Unit group state transition failed: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
     return sampleUnitGroup;
   }
