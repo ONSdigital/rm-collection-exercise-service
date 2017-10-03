@@ -11,7 +11,7 @@
   <description>CTP : CollectionExerciseService</description>
 
   <properties>
-    <commonbom.version>10.45.2</commonbom.version>
+    <commonbom.version>10.45.3-SNAPSHOT</commonbom.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -20,7 +20,7 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>rm-common-config</artifactId>
-    <version>10.45.2</version>
+    <version>10.45.3-SNAPSHOT</version>
   </parent>
 
   <dependencyManagement>
