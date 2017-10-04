@@ -30,6 +30,10 @@ public class SwaggerConfig {
   @Autowired
   private AppConfig appConfig;
 
+  /**
+   * Creates Docket for Swagger UI
+   * @return docket detailing Swagger details
+   */
   @Bean
   public Docket postsApi() {
 

@@ -1,17 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import org.junit.Assert;
+import org.junit.Test;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 
 /**
  * UnitTests for CollectionExerciseServiceImpl
@@ -24,6 +23,9 @@ public class CollectionExerciseServiceImplTest {
   private static final UUID ACTIONPLANID3 = UUID.fromString("70df56d9-f491-4ac8-b256-a10154290a8b");
   private static final UUID ACTIONPLANID4 = UUID.fromString("80df56d9-f491-4ac8-b256-a10154290a8b");
 
+  /**
+   * Tests that default and override are empty
+   */
   @Test
   public void givenThatDefaultAndOverrideAreEmptyExpectEmpty() {
     List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
@@ -38,6 +40,9 @@ public class CollectionExerciseServiceImplTest {
 
   }
 
+  /**
+   * Check that only default are present is Override is empty
+   */
   @Test
   public void givenThatDefaultIsPopulatedAndOverrideIsEmptyExpectDefaultOnly() {
     List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
@@ -130,11 +135,24 @@ public class CollectionExerciseServiceImplTest {
 
   }
 
+  /**
+   * Creates a Defualt Case Type
+   * @param actionPlanId actionPlanId to be used
+   * @param sampleUnitTypeFK sampleUnitTypeFK as string
+   * @return CaseTypeDefault
+   */
   private CaseTypeDefault createCaseTypeDefault(UUID actionPlanId, String sampleUnitTypeFK) {
     CaseTypeDefault.builder().caseTypeDefaultPK(1).surveyFK(1);
     return CaseTypeDefault.builder().actionPlanId(actionPlanId).sampleUnitTypeFK(sampleUnitTypeFK).build();
   }
 
+
+  /**
+   * Creates a Default Case Type
+   * @param actionPlanId actionPlanId to be used
+   * @param sampleUnitTypeFK sampleUnitTypeFK as string
+   * @return CaseTypeOverride
+   */
   private CaseTypeOverride createCaseTypeOverride(UUID actionPlanId, String sampleUnitTypeFK) {
     CaseTypeOverride.builder().caseTypeOverridePK(1).exerciseFK(1);
     return CaseTypeOverride.builder().actionPlanId(actionPlanId).sampleUnitTypeFK(sampleUnitTypeFK).build();

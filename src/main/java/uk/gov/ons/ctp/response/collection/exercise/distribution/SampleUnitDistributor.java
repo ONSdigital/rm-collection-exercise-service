@@ -116,11 +116,13 @@ public class SampleUnitDistributor {
 
     } catch (LockingException ex) {
       log.error("Distribution failed due to {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     } finally {
       try {
         sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
       } catch (LockingException ex) {
         log.error("Failed to release sampleDistributionListManager data - error msg is {}", ex.getMessage());
+        log.error("Stack trace: " + ex);
       }
     }
   }
@@ -235,6 +237,7 @@ public class SampleUnitDistributor {
           publisher.sendSampleUnit(sampleUnitMessage);
         } catch (CTPException ex) {
           log.error("Sample Unit group state transition failed: {}", ex.getMessage());
+          log.error("Stack trace: " + ex);
         }
       }
     });
@@ -279,6 +282,7 @@ public class SampleUnitDistributor {
       }
     } catch (CTPException ex) {
       log.error("Collection Exercise state transition failed: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
     return exercise;
   }

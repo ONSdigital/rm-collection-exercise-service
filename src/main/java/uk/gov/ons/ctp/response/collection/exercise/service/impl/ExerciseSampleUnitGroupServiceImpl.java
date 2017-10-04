@@ -1,14 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
@@ -16,6 +13,8 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRep
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
+
+import java.util.List;
 
 /**
  * Implementation to deal with sampleUnitGroups.
@@ -39,7 +38,8 @@ public class ExerciseSampleUnitGroupServiceImpl implements ExerciseSampleUnitGro
   }
 
   @Override
-  public List<ExerciseSampleUnitGroup> findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
+  public List<ExerciseSampleUnitGroup>
+    findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
       SampleUnitGroupDTO.SampleUnitGroupState state,
       List<CollectionExercise> exercises,
       List<Integer> excludedGroups,
