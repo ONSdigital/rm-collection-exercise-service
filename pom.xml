@@ -11,16 +11,29 @@
   <description>CTP : CollectionExerciseService</description>
 
   <properties>
+    <commonbom.version>10.45.2</commonbom.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
-  <!-- Inherit parent BOM to control versions of dependencies and plugin version & config -->
+  <!-- Section below required to inherit plugins version & config -->
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>rm-common-config</artifactId>
     <version>10.45.2</version>
   </parent>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>uk.gov.ons.ctp.product</groupId>
+        <artifactId>rm-common-config</artifactId>
+        <version>${commonbom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
