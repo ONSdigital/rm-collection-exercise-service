@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.49.0-1
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Create sample link table
+            path: create_samplelink_table.sql
+            relativeToChangelogFile: true
+            splitStatements: false
