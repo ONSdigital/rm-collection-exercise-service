@@ -39,6 +39,11 @@ public interface CollectionExerciseService {
    * @return the associated case type DTOs.
    */
   Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise);
+  
+  void linkSampleSummaryToCollectionExercise(UUID collectionExerciseId, UUID sampleSummaryId);
+  
+  void createLink(UUID sampleSummaryId, UUID collectionExerciseId);
+
 
 
 }

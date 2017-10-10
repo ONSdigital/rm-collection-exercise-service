@@ -1,29 +1,38 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import lombok.extern.slf4j.Slf4j;
-import ma.glasnost.orika.MapperFacade;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
+import ma.glasnost.orika.MapperFacade;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * The REST endpoint controller for Collection Exercises.
@@ -136,5 +145,35 @@ public class CollectionExerciseEndpoint {
           String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
     }
     return ResponseEntity.ok(requestDTO);
+  }
+  
+  @RequestMapping(value = "/link/{collectionExerciseId}", method = RequestMethod.PUT, consumes = "application/json")
+  public ResponseEntity<List<LinkSampleSummaryOutputDTO>> linkSampleSummary(@PathVariable("collectionExerciseId") final UUID collectionExerciseId, @RequestBody(required = false) @Valid final LinkSampleSummaryDTO linkSampleSummaryDTO,
+      BindingResult bindingResult) throws InvalidRequestException, CTPException{
+    log.debug("Entering linkSampleSummary with collectionExerciseID {}", collectionExerciseId);
+    
+    if (bindingResult.hasErrors()) {
+      throw new InvalidRequestException("Binding errors for execute action plan: ", bindingResult);
+    }
+    
+    CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(collectionExerciseId);
+    if (collectionExercise == null) {
+      throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
+    }
+    List<LinkSampleSummaryOutputDTO> result = new ArrayList<LinkSampleSummaryOutputDTO>();
+    LinkSampleSummaryOutputDTO linked = new LinkSampleSummaryOutputDTO();
+    
+    List<UUID> sampleSummaryList = linkSampleSummaryDTO.getSampleSummaryList();
+    for (UUID sampleSummaryId : sampleSummaryList) {
+      collectionExerciseService.linkSampleSummaryToCollectionExercise(collectionExerciseId, sampleSummaryId);
+      
+      linked.setCollectionExerciseId(collectionExerciseId);
+      linked.setSampleSummaryId(sampleSummaryId);
+      result.add(linked);
+    }
+    
+    return ResponseEntity.ok(result);
+    
   }
 }
