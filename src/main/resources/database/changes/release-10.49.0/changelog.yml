@@ -9,3 +9,13 @@ databaseChangeLog:
             path: create_samplelink_table.sql
             relativeToChangelogFile: true
             splitStatements: false
+
+  - changeSet:
+      id: 10.49.0-2
+      author: Sarah Radford
+      changes:
+        - sqlFile:
+            comment: Create samplelink pk
+            path: create_samplelinkpk.sql
+            relativeToChangelogFile: true
+            splitStatements: false
