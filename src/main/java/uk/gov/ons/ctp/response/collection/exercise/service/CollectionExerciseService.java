@@ -1,12 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
 
 /**
  * Service responsible for dealing with collection exercises
@@ -40,7 +41,7 @@ public interface CollectionExerciseService {
    */
   Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise);
   
-  void linkSampleSummaryToCollectionExercise(UUID collectionExerciseId, UUID sampleSummaryId);
+  List<LinkSampleSummaryOutputDTO> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId, List<UUID> sampleSummaryId);
   
   void createLink(UUID sampleSummaryId, UUID collectionExerciseId);
 

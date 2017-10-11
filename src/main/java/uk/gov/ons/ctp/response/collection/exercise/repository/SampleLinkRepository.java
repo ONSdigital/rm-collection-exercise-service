@@ -8,6 +8,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 
 public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer>{
   
-  SampleLink findBySampleSummaryId(UUID id);
+  void deleteByCollectionExerciseId(UUID id);
 
 }

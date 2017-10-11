@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -42,12 +41,9 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 @Slf4j
 public class CollectionExerciseEndpoint {
 
-  private static final String RETURN_SAMPLENOTFOUND =
-      "Sample not found for collection exercise Id";
-  private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
-      "Collection Exercise not found for collection exercise Id";
-  private static final String RETURN_SURVEYNOTFOUND =
-      "Survey not found for survey Id";
+  private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
+  private static final String RETURN_COLLECTIONEXERCISENOTFOUND = "Collection Exercise not found for collection exercise Id";
+  private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
 
   @Autowired
   private SampleService sampleService;
@@ -72,7 +68,7 @@ public class CollectionExerciseEndpoint {
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
   public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(
-          @PathVariable("id") final UUID id) throws CTPException {
+      @PathVariable("id") final UUID id) throws CTPException {
 
     Survey survey = surveyService.findSurvey(id);
 
@@ -146,34 +142,27 @@ public class CollectionExerciseEndpoint {
     }
     return ResponseEntity.ok(requestDTO);
   }
-  
+
   @RequestMapping(value = "/link/{collectionExerciseId}", method = RequestMethod.PUT, consumes = "application/json")
-  public ResponseEntity<List<LinkSampleSummaryOutputDTO>> linkSampleSummary(@PathVariable("collectionExerciseId") final UUID collectionExerciseId, @RequestBody(required = false) @Valid final LinkSampleSummaryDTO linkSampleSummaryDTO,
-      BindingResult bindingResult) throws InvalidRequestException, CTPException{
+  public ResponseEntity<List<LinkSampleSummaryOutputDTO>> linkSampleSummary(
+      @PathVariable("collectionExerciseId") final UUID collectionExerciseId,
+      @RequestBody(required = false) @Valid final LinkSampleSummaryDTO linkSampleSummaryDTO,
+      BindingResult bindingResult) throws InvalidRequestException, CTPException {
     log.debug("Entering linkSampleSummary with collectionExerciseID {}", collectionExerciseId);
-    
+
     if (bindingResult.hasErrors()) {
       throw new InvalidRequestException("Binding errors for execute action plan: ", bindingResult);
     }
-    
+
     CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(collectionExerciseId);
     if (collectionExercise == null) {
       throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
     }
-    List<LinkSampleSummaryOutputDTO> result = new ArrayList<LinkSampleSummaryOutputDTO>();
-    LinkSampleSummaryOutputDTO linked = new LinkSampleSummaryOutputDTO();
-    
-    List<UUID> sampleSummaryList = linkSampleSummaryDTO.getSampleSummaryList();
-    for (UUID sampleSummaryId : sampleSummaryList) {
-      collectionExerciseService.linkSampleSummaryToCollectionExercise(collectionExerciseId, sampleSummaryId);
-      
-      linked.setCollectionExerciseId(collectionExerciseId);
-      linked.setSampleSummaryId(sampleSummaryId);
-      result.add(linked);
-    }
-    
+
+    List<LinkSampleSummaryOutputDTO> result = collectionExerciseService.linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO.getSampleSummaryList());
+
     return ResponseEntity.ok(result);
-    
+
   }
 }
