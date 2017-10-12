@@ -202,16 +202,6 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <executable>true</executable>
-          <requiresUnpack>
-            <dependency>
-              <groupId>uk.gov.ons.ctp.common</groupId>
-              <artifactId>framework</artifactId>
-            </dependency>
-            <dependency>
-              <groupId>uk.gov.ons.ctp.product</groupId>
-              <artifactId>reportmodule</artifactId>
-            </dependency>
-          </requiresUnpack>
           <mainClass>uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication</mainClass>
         </configuration>
         <executions>
