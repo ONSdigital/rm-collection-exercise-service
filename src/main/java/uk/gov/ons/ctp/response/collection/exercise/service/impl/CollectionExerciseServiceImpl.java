@@ -61,6 +61,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     return collectRepo.findOneById(id);
   }
+  
+  @Override
+  public List<SampleLink> findLinkedSampleSummaries(UUID id) {
+    return sampleLinkRepository.findByCollectionExerciseId(id);
+  }
 
   @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
@@ -99,19 +104,21 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   /**
-   * check that SampleSummary is not already linked to a CollectionExercise and
-   * if not create link
+   * Delete existing SampleSummary links for input CollectionExercise then link
+   * all SampleSummaries in list to CollectionExercise
    * 
    * @param collectionExerciseId the Id of the CollectionExercise to link to
-   * @param sampleSummaryId the Id of the SampleSummary to be linked
-   * @return LinkSampleSummaryOutputDTO the collection
+   * @param sampleSummaryIds the list of Ids of the SampleSummaries to be linked
+   * @return linkedSummaries the list of CollectionExercises and the linked
+   *         SampleSummaries
    */
   @Transactional
-  public List<LinkSampleSummaryOutputDTO> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId, List<UUID> sampleSummaryIds) {
+  public List<LinkSampleSummaryOutputDTO> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
+      List<UUID> sampleSummaryIds) {
 
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
     List<LinkSampleSummaryOutputDTO> linkedSummaries = new ArrayList<LinkSampleSummaryOutputDTO>();
-    LinkSampleSummaryOutputDTO link= new LinkSampleSummaryOutputDTO();
+    LinkSampleSummaryOutputDTO link = new LinkSampleSummaryOutputDTO();
     link.setCollectionExerciseId(collectionExerciseId);
     for (UUID summaryId : sampleSummaryIds) {
       createLink(summaryId, collectionExerciseId);

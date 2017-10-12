@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
 
@@ -32,6 +33,14 @@ public interface CollectionExerciseService {
    * @return the associated collection exercise.
    */
   CollectionExercise findCollectionExercise(UUID id);
+  
+  /**
+   * find a list of all sample summary linked to a collection exercise
+   * 
+   * @param id the collection exercise Id to find the linked sample summaries for
+   * @return list of linked sample summary
+   */
+  List<SampleLink> findLinkedSampleSummaries(UUID id);
 
   /**
    * Find case types associated to a collection exercise from the Collection Exercise Service
