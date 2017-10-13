@@ -61,10 +61,15 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     return collectRepo.findOneById(id);
   }
-  
+
   @Override
   public List<SampleLink> findLinkedSampleSummaries(UUID id) {
     return sampleLinkRepository.findByCollectionExerciseId(id);
+  }
+
+  @Override
+  public List<CollectionExercise> findAllCollectionExercise() {
+    return collectRepo.findAll();
   }
 
   @Override

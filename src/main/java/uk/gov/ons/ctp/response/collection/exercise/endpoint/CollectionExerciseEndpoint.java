@@ -112,16 +112,27 @@ public class CollectionExerciseEndpoint {
           String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, id));
     }
 
-    Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
-    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
-
-    Survey survey = surveyService.findSurveyByFK(collectionExercise.getSurvey().getSurveyPK());
-
-    CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
-    collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
-    collectionExerciseDTO.setSurveyId(survey.getId().toString());
+    CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseCaseTypesandSurveyId(collectionExercise);
 
     return ResponseEntity.ok(collectionExerciseDTO);
+  }
+
+  /**
+   * GET endpoint to return a list of all collection exercises
+   * 
+   * @return a list of all Collection Exercises
+   */
+  @RequestMapping(value = "/", method = RequestMethod.GET)
+  public ResponseEntity<List<CollectionExerciseDTO>> getAllCollectionExercises() {
+    log.debug("Entering fetch all collection exercise");
+    List<CollectionExercise> collectionExercises = collectionExerciseService.findAllCollectionExercise();
+    List<CollectionExerciseDTO> result = new ArrayList<>();
+
+    for (CollectionExercise collectionExercise : collectionExercises) {
+      CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseCaseTypesandSurveyId(collectionExercise);
+      result.add(collectionExerciseDTO);
+    }
+    return ResponseEntity.ok(result);
   }
 
   /**
@@ -183,6 +194,14 @@ public class CollectionExerciseEndpoint {
 
   }
 
+  /**
+   * return a list of UUIDs for the sample summaries linked to a specific
+   * collection exercise
+   * 
+   * @param collectionExerciseId
+   * @return
+   * @throws CTPException
+   */
   @RequestMapping(value = "link/{collectionExerciseId}", method = RequestMethod.GET)
   public ResponseEntity<List<UUID>> linkedSampleSummaries(
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId) throws CTPException {
@@ -204,5 +223,25 @@ public class CollectionExerciseEndpoint {
       output.add(link.getSampleSummaryId());
     }
     return ResponseEntity.ok(output);
+  }
+
+  /**
+   * adds the case types and surveyId to the CollectionExerciseDTO
+   * 
+   * @param collectionExercise the collection exercise to find the associated
+   *          case types and surveyIds for
+   * @return a CollectionExerciseDTO of the collection exercise with case types
+   *         and surveyId added which is output by the endpoints
+   */
+  private CollectionExerciseDTO getCollectionExerciseCaseTypesandSurveyId(CollectionExercise collectionExercise) {
+    Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
+    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
+
+    Survey survey = surveyService.findSurveyByFK(collectionExercise.getSurvey().getSurveyPK());
+
+    CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
+    collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
+    collectionExerciseDTO.setSurveyId(survey.getId().toString());
+    return collectionExerciseDTO;
   }
 }
