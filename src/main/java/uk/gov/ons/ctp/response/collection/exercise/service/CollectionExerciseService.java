@@ -36,14 +36,14 @@ public interface CollectionExerciseService {
 
   /**
    * Find all Collection Exercises
-   * 
+   *
    * @return a list of all Collection Exercises
    */
   List<CollectionExercise> findAllCollectionExercise();
 
   /**
    * find a list of all sample summary linked to a collection exercise
-   * 
+   *
    * @param id the collection exercise Id to find the linked sample summaries
    *          for
    * @return list of linked sample summary
@@ -60,9 +60,24 @@ public interface CollectionExerciseService {
    */
   Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise);
 
+  /**
+   * Delete existing SampleSummary links for input CollectionExercise then link
+   * all SampleSummaries in list to CollectionExercise
+   *
+   * @param collectionExerciseId the Id of the CollectionExercise to link to
+   * @param sampleSummaryIds the list of Ids of the SampleSummaries to be linked
+   * @return linkedSummaries the list of CollectionExercises and the linked
+   *         SampleSummaries
+   */
   List<LinkSampleSummaryOutputDTO> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
-      List<UUID> sampleSummaryId);
+      List<UUID> sampleSummaryIds);
 
+  /**
+   * Links a sample summary to a collection exercise and stores in db
+   *
+   * @param sampleSummaryId the Id of the Sample summary to be linked
+   * @param collectionExerciseId the Id of the Sample summary to be linked
+   */
   void createLink(UUID sampleSummaryId, UUID collectionExerciseId);
 
 }

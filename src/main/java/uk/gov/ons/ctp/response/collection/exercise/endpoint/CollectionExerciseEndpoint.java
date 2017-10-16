@@ -119,7 +119,7 @@ public class CollectionExerciseEndpoint {
 
   /**
    * GET endpoint to return a list of all collection exercises
-   * 
+   *
    * @return a list of all Collection Exercises
    */
   @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -159,15 +159,15 @@ public class CollectionExerciseEndpoint {
   /**
    * PUT request for linking an array of sample summaries to a collection
    * exercise
-   * 
+   *
    * @param collectionExerciseId the collection exercise to link sample
    *          summaries to
    * @param linkSampleSummaryDTO the array of all sample summaries to link to
    *          the collection exercise, including summaries previously linked as
    *          all currently linked summaries are removed from the table
-   * @param bindingResult
+   * @param bindingResult the bindingResult used to validate requests
    * @return list of the newly linked collection exercises and sample summaries
-   * @throws InvalidRequestException
+   * @throws InvalidRequestException if binding errors
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/link/{collectionExerciseId}", method = RequestMethod.PUT, consumes = "application/json")
@@ -197,10 +197,11 @@ public class CollectionExerciseEndpoint {
   /**
    * return a list of UUIDs for the sample summaries linked to a specific
    * collection exercise
-   * 
-   * @param collectionExerciseId
-   * @return
-   * @throws CTPException
+   *
+   * @param collectionExerciseId the id of the collection exercise to get linked
+   *          sample summaries for
+   * @return list of UUIDs of linked sample summaries
+   * @throws CTPException if no collection exercise found for UUID
    */
   @RequestMapping(value = "link/{collectionExerciseId}", method = RequestMethod.GET)
   public ResponseEntity<List<UUID>> linkedSampleSummaries(
@@ -227,7 +228,7 @@ public class CollectionExerciseEndpoint {
 
   /**
    * adds the case types and surveyId to the CollectionExerciseDTO
-   * 
+   *
    * @param collectionExercise the collection exercise to find the associated
    *          case types and surveyIds for
    * @return a CollectionExerciseDTO of the collection exercise with case types

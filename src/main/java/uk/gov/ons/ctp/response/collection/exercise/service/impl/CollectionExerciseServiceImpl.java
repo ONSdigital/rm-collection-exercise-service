@@ -87,7 +87,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   /**
    * Creates a Collection of CaseTypes
-   * 
+   *
    * @param caseTypeDefaultList List of caseTypeDefaults
    * @param caseTypeOverrideList List of caseTypeOverrides
    * @return Collection<CaseType> Collection of CaseTypes
@@ -111,7 +111,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   /**
    * Delete existing SampleSummary links for input CollectionExercise then link
    * all SampleSummaries in list to CollectionExercise
-   * 
+   *
    * @param collectionExerciseId the Id of the CollectionExercise to link to
    * @param sampleSummaryIds the list of Ids of the SampleSummaries to be linked
    * @return linkedSummaries the list of CollectionExercises and the linked
@@ -135,7 +135,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   /**
    * Links a sample summary to a collection exercise and stores in db
-   * 
+   *
    * @param sampleSummaryId the Id of the Sample summary to be linked
    * @param collectionExerciseId the Id of the Sample summary to be linked
    */

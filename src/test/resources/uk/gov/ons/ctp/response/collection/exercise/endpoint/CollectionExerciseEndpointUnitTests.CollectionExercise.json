@@ -6,7 +6,8 @@
 		"scheduledExecutionDateTime": 1494846000000,
 		"state": "EXECUTED",
 		"survey":
-			{"surveyPK": 1}
+			{"surveyPK": 1},
+		"exerciseRef": "2017"
 	},
 	{
 		"exercisePK": 2,
@@ -15,6 +16,7 @@
 		"scheduledExecutionDateTime": 1494846000000,
 		"state": "EXECUTED",
 		"survey":
-			{"surveyPK": 1}
+			{"surveyPK": 1},
+		"exerciseRef": "2017"
 	}
 ]
