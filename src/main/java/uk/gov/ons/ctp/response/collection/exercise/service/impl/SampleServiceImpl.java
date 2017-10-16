@@ -74,7 +74,7 @@ public class SampleServiceImpl implements SampleService {
       replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
 
       if (replyDTO != null && replyDTO.getSampleUnitsTotal() > 0) {
-
+        log.info("HERE");
         collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
 
         collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),

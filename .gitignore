@@ -57,3 +57,4 @@ target
 *.data
 *.redo
 *.backup
+/.apt_generated/

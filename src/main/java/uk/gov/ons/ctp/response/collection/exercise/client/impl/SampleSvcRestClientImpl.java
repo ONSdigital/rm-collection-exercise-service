@@ -17,10 +17,15 @@ import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * HTTP RestClient implementation for calls to the Sample service
@@ -35,6 +40,9 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
 
   @Autowired
   private RestTemplate restTemplate;
+
+  @Autowired
+  private SampleLinkRepository sampleLinkRepository;
 
   @Qualifier("sampleRestUtility")
   @Autowired
@@ -51,10 +59,17 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
     UriComponents uriComponents = restUtility.createUriComponents(appConfig.getSampleSvc().getRequestSampleUnitsPath(),
         null, exercise);
 
+    List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(exercise.getId());
+    List<UUID> sampleSummaryUUIDList =  new ArrayList<>();
+    for(SampleLink samplelink : sampleLinks) {
+      sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
+    }
+
     CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
     requestDTO.setCollectionExerciseId(exercise.getId());
     requestDTO.setSurveyRef(exercise.getSurvey().getSurveyRef());
     requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
+    requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
 
     HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
 
