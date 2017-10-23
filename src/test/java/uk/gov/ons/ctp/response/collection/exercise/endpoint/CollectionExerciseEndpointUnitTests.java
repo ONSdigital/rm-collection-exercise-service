@@ -40,7 +40,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
@@ -50,7 +50,7 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
  * Collection Exercise Endpoint Unit tests
  */
 public class CollectionExerciseEndpointUnitTests {
-  private static final String LINK_SAMPLE_SUMMARY_JSON = "[\"87043936-4d38-4696-952a-fcd55a51be96\", \"cf23b621-c613-424c-9d0d-53a9cfa82f3a\"]";
+  private static final String LINK_SAMPLE_SUMMARY_JSON = "{\"sampleSummaryIds\": [\"87043936-4d38-4696-952a-fcd55a51be96\", \"cf23b621-c613-424c-9d0d-53a9cfa82f3a\"]}";
   private static final UUID SURVEY_ID = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
   private static final int SURVEY_FK = 1;
   private static final UUID COLLECTIONEXERCISE_ID1 = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
@@ -87,7 +87,7 @@ public class CollectionExerciseEndpointUnitTests {
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
   private Collection<CaseType> caseTypeDefaultResults;
-  private List<LinkSampleSummaryOutputDTO> linkedSampleSummaries;
+  private List<LinkedSampleSummariesDTO> linkedSampleSummaries;
   private List<SampleLink> sampleLink;
 
   /**
@@ -108,7 +108,7 @@ public class CollectionExerciseEndpointUnitTests {
     this.surveyResults = FixtureHelper.loadClassFixtures(Survey[].class);
     this.collectionExerciseResults = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     this.sampleUnitsRequestDTOResults = FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
-    this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkSampleSummaryOutputDTO[].class);
+    this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
     this.sampleLink = FixtureHelper.loadClassFixtures(SampleLink[].class);
     this.caseTypeDefaultResults = new ArrayList<>();
     List<CaseTypeDefault> defaults = FixtureHelper.loadClassFixtures(CaseTypeDefault[].class);
@@ -271,7 +271,7 @@ public class CollectionExerciseEndpointUnitTests {
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
         .thenReturn(collectionExerciseResults.get(0));
     when(collectionExerciseService.linkSampleSummaryToCollectionExercise(COLLECTIONEXERCISE_ID1, sampleSummaries))
-        .thenReturn(linkedSampleSummaries);
+        .thenReturn(sampleLink);
 
     ResultActions actions = mockMvc
         .perform(
@@ -280,10 +280,8 @@ public class CollectionExerciseEndpointUnitTests {
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("linkSampleSummary"))
-        .andExpect(jsonPath("$[0].collectionExerciseId", is(COLLECTIONEXERCISE_ID1.toString())))
-        .andExpect(jsonPath("$[0].sampleSummaryId", is(SAMPLE_SUMARY_ID1.toString())))
-        .andExpect(jsonPath("$[1].collectionExerciseId", is(COLLECTIONEXERCISE_ID1.toString())))
-        .andExpect(jsonPath("$[1].sampleSummaryId", is(SAMPLE_SUMARY_ID2.toString())));
+        .andExpect(jsonPath("$.collectionExerciseId", is(COLLECTIONEXERCISE_ID1.toString())))
+        .andExpect(jsonPath("$.sampleSummaryIds[*]", containsInAnyOrder(SAMPLE_SUMARY_ID1.toString(), SAMPLE_SUMARY_ID2.toString())));
 
   }
 
@@ -303,7 +301,7 @@ public class CollectionExerciseEndpointUnitTests {
 
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-        .andExpect(handler().methodName("linkedSampleSummaries"))
+        .andExpect(handler().methodName("requestLinkedSampleSummaries"))
         .andExpect(jsonPath("$[0]", is(SAMPLE_SUMARY_ID1.toString())))
         .andExpect(jsonPath("$[1]", is(SAMPLE_SUMARY_ID2.toString())));
 

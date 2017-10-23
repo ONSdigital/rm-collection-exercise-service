@@ -8,7 +8,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
 
 /**
  * Service responsible for dealing with collection exercises
@@ -69,15 +68,6 @@ public interface CollectionExerciseService {
    * @return linkedSummaries the list of CollectionExercises and the linked
    *         SampleSummaries
    */
-  List<LinkSampleSummaryOutputDTO> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
+  List<SampleLink> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
       List<UUID> sampleSummaryIds);
-
-  /**
-   * Links a sample summary to a collection exercise and stores in db
-   *
-   * @param sampleSummaryId the Id of the Sample summary to be linked
-   * @param collectionExerciseId the Id of the Sample summary to be linked
-   */
-  void createLink(UUID sampleSummaryId, UUID collectionExerciseId);
-
 }

@@ -29,7 +29,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseSummaryDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
@@ -112,7 +113,7 @@ public class CollectionExerciseEndpoint {
           String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, id));
     }
 
-    CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseCaseTypesandSurveyId(collectionExercise);
+    CollectionExerciseDTO collectionExerciseDTO = addCaseTypesandSurveyId(collectionExercise);
 
     return ResponseEntity.ok(collectionExerciseDTO);
   }
@@ -122,14 +123,14 @@ public class CollectionExerciseEndpoint {
    *
    * @return a list of all Collection Exercises
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(method = RequestMethod.GET)
   public ResponseEntity<List<CollectionExerciseDTO>> getAllCollectionExercises() {
     log.debug("Entering fetch all collection exercise");
     List<CollectionExercise> collectionExercises = collectionExerciseService.findAllCollectionExercise();
     List<CollectionExerciseDTO> result = new ArrayList<>();
 
     for (CollectionExercise collectionExercise : collectionExercises) {
-      CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseCaseTypesandSurveyId(collectionExercise);
+      CollectionExerciseDTO collectionExerciseDTO = addCaseTypesandSurveyId(collectionExercise);
       result.add(collectionExerciseDTO);
     }
     return ResponseEntity.ok(result);
@@ -171,9 +172,9 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/link/{collectionExerciseId}", method = RequestMethod.PUT, consumes = "application/json")
-  public ResponseEntity<List<LinkSampleSummaryOutputDTO>> linkSampleSummary(
+  public ResponseEntity<LinkedSampleSummariesDTO> linkSampleSummary(
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId,
-      @RequestBody(required = false) @Valid final List<UUID> linkSampleSummaryDTO,
+      @RequestBody(required = false) @Valid final LinkSampleSummaryDTO linkSampleSummaryDTO,
       BindingResult bindingResult) throws InvalidRequestException, CTPException {
     log.debug("Entering linkSampleSummary with collectionExerciseID {}", collectionExerciseId);
 
@@ -187,9 +188,19 @@ public class CollectionExerciseEndpoint {
           String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
     }
 
-    List<LinkSampleSummaryOutputDTO> result = collectionExerciseService
-        .linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO);
+    List<SampleLink> linkSampleSummaryToCollectionExercise = collectionExerciseService
+        .linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO.getSampleSummaryIds());
+    LinkedSampleSummariesDTO result = new LinkedSampleSummariesDTO();
 
+    if (linkSampleSummaryToCollectionExercise != null) {
+      List<UUID> summaryIds = new ArrayList<UUID>();
+      for (SampleLink sampleLink : linkSampleSummaryToCollectionExercise) {
+        summaryIds.add(sampleLink.getSampleSummaryId());
+      }
+      result.setSampleSummaryIds(summaryIds);
+
+      result.setCollectionExerciseId(linkSampleSummaryToCollectionExercise.get(0).getCollectionExerciseId());
+    }
     return ResponseEntity.ok(result);
 
   }
@@ -204,7 +215,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException if no collection exercise found for UUID
    */
   @RequestMapping(value = "link/{collectionExerciseId}", method = RequestMethod.GET)
-  public ResponseEntity<List<UUID>> linkedSampleSummaries(
+  public ResponseEntity<List<UUID>> requestLinkedSampleSummaries(
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId) throws CTPException {
     log.debug("Getting sample summaries linked to collectionExerciseId {}", collectionExerciseId);
 
@@ -234,7 +245,7 @@ public class CollectionExerciseEndpoint {
    * @return a CollectionExerciseDTO of the collection exercise with case types
    *         and surveyId added which is output by the endpoints
    */
-  private CollectionExerciseDTO getCollectionExerciseCaseTypesandSurveyId(CollectionExercise collectionExercise) {
+  private CollectionExerciseDTO addCaseTypesandSurveyId(CollectionExercise collectionExercise) {
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
     List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 

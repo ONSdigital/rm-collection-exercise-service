@@ -24,7 +24,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryOutputDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
 /**
@@ -118,18 +117,15 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    *         SampleSummaries
    */
   @Transactional
-  public List<LinkSampleSummaryOutputDTO> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
+  public List<SampleLink> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
       List<UUID> sampleSummaryIds) {
 
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
-    List<LinkSampleSummaryOutputDTO> linkedSummaries = new ArrayList<LinkSampleSummaryOutputDTO>();
-    LinkSampleSummaryOutputDTO link = new LinkSampleSummaryOutputDTO();
-    link.setCollectionExerciseId(collectionExerciseId);
+    List<SampleLink> linkedSummaries = new ArrayList<SampleLink>();
     for (UUID summaryId : sampleSummaryIds) {
-      createLink(summaryId, collectionExerciseId);
-      link.setSampleSummaryId(summaryId);
-      linkedSummaries.add(link);
+      linkedSummaries.add(createLink(summaryId, collectionExerciseId));
     }
+
     return linkedSummaries;
   }
 
@@ -138,12 +134,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    *
    * @param sampleSummaryId the Id of the Sample summary to be linked
    * @param collectionExerciseId the Id of the Sample summary to be linked
+   * @return sampleLink stored in database
    */
-  public void createLink(UUID sampleSummaryId, UUID collectionExerciseId) {
+  private SampleLink createLink(UUID sampleSummaryId, UUID collectionExerciseId) {
     SampleLink sampleLink = new SampleLink();
     sampleLink.setSampleSummaryId(sampleSummaryId);
     sampleLink.setCollectionExerciseId(collectionExerciseId);
-    sampleLinkRepository.saveAndFlush(sampleLink);
+    return sampleLinkRepository.saveAndFlush(sampleLink);
   }
 
 }
