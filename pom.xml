@@ -4,7 +4,7 @@
 
   <groupId>uk.gov.ons.ctp.product</groupId>
   <artifactId>collectionexercisesvc</artifactId>
-  <version>10.49.1-SNAPSHOT</version>
+  <version>10.49.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>CTP : CollectionExerciseService</name>
@@ -19,7 +19,7 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>rm-common-config</artifactId>
-    <version>10.49.0-SNAPSHOT</version>
+    <version>10.49.2</version>
   </parent>
 
   <dependencies>
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>surveysvc-api</artifactId>
-      <version>10.49.0-SNAPSHOT</version>
+      <version>10.49.0</version>
     </dependency>
 
     <dependency>
@@ -56,13 +56,13 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>casesvc-api</artifactId>
-      <version>10.49.0-SNAPSHOT</version>
+      <version>10.49.1</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>partysvc-api</artifactId>
-      <version>10.49.1-SNAPSHOT</version>
+      <version>10.49.1</version>
     </dependency>
 
     <dependency>
