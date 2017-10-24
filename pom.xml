@@ -4,7 +4,7 @@
 
   <groupId>uk.gov.ons.ctp.product</groupId>
   <artifactId>collectionexercisesvc</artifactId>
-  <version>10.49.0-SNAPSHOT</version>
+  <version>10.49.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>CTP : CollectionExerciseService</name>
@@ -62,7 +62,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>partysvc-api</artifactId>
-      <version>10.49.0-SNAPSHOT</version>
+      <version>10.49.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -202,16 +202,6 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <executable>true</executable>
-          <requiresUnpack>
-            <dependency>
-              <groupId>uk.gov.ons.ctp.common</groupId>
-              <artifactId>framework</artifactId>
-            </dependency>
-            <dependency>
-              <groupId>uk.gov.ons.ctp.product</groupId>
-              <artifactId>reportmodule</artifactId>
-            </dependency>
-          </requiresUnpack>
           <mainClass>uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication</mainClass>
         </configuration>
         <executions>
