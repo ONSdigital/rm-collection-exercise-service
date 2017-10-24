@@ -22,7 +22,7 @@ import net.sourceforge.cobertura.CoverageIgnore;
 @NoArgsConstructor
 @Table(name = "samplelink", schema = "collectionexercise")
 public class SampleLink {
-  
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "samplelinkseq_gen")
   @GenericGenerator(name = "samplelinkseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
@@ -31,10 +31,10 @@ public class SampleLink {
   })
   @Column(name = "samplelinkpk")
   private Integer sampleLinkPK;
-  
+
   @Column(name = "collectionexerciseid")
   private UUID collectionExerciseId;
-  
+
   @Column(name = "samplesummaryid")
   private UUID sampleSummaryId;
 
