@@ -115,10 +115,10 @@ collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   connection-config:
     scheme: http
-    host: 
-    port:
-    username: 
-    password: 
+    host: localhost
+    port: 8002
+    username: admin
+    password: secret
     retry-attempts: 5
     retry-pause-milli-seconds: 5000
     connect-timeout-milli-seconds: 5000
@@ -128,10 +128,10 @@ party-svc:
   request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
   connection-config:
     scheme: http
-    host: 
-    port: 
-    username: 
-    password: 
+    host: localhost
+    port: 5062
+    username: admin
+    password: secret
     # how many times should we attempt connection on failure
     retry-attempts: 5
     # sleep between retries
