@@ -37,6 +37,41 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 
 An `HTTP 404 Not Found` status code is returned if the survey with the specified ID could not be found. An `HTTP 204 No Content` status code is returned if there are no known collection exercises for the specified survey.
 
+## List Collection Exercises
+* `GET /collectionexercises` will returns a list of all collection exercises
+
+### Example JSON Response
+```json
+[
+  {
+    "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "name": "201601",
+    "exerciseRef": "221_201712",
+    "actualExecutionDateTime": "2017-05-15T14:20:24Z",
+    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z",
+    "scheduledStartDateTime": "2017-06-01T00:00:00Z",
+    "actualPublishDateTime": null,
+    "periodStartDateTime": null,
+    "periodEndDateTime": null,
+    "scheduledReturnDateTime": "2017-06-30T00:00:00Z",
+    "scheduledEndDateTime": null,
+    "executedBy": "Fred Bloggs",
+    "state": "EXECUTED",
+    "caseTypes": [
+      {
+        "sampleUnitType": "B",
+        "actionPlanId": "60df56d9-f491-4ac8-b256-a10154290a8b"
+      },
+      {
+        "sampleUnitType": "BI",
+        "actionPlanId": "b1f46e33-a3ef-4e50-939d-c18f8a9f11bb"
+      }
+    ]
+  }
+]
+```
+
 ## Get Collection Exercise
 * `GET /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will returns the details of the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
 
@@ -83,3 +118,44 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ```
 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
+
+## Link Sample Summary To Collection Exercise
+* `PUT /collectionexercises/link/c6467711-21eb-4e78-804c-1db8392f93fb` will link the Sample Summaries specified in the json request to the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+
+The endpoint will also delete any entries currently in the samplelink table for `c6467711-21eb-4e78-804c-1db8392f93fb` before linking to the sample summary IDs in the json request.
+
+### Example JSON Request
+```json
+{
+  "sampleSummaryIds": [
+    "8fa33fd9-486a-41ca-baf2-2a833cfa031c",
+    "08c191b8-e8b8-4920-b8de-87f85e536463"
+  ]
+}
+```
+
+### Example JSON Response
+```json
+{
+  "collectionExerciseId": "c6467711-21eb-4e78-804c-1db8392f93fb",
+  "sampleSummaryIds": [
+    "8fa33fd9-486a-41ca-baf2-2a833cfa031c",
+    "08c191b8-e8b8-4920-b8de-87f85e536463"
+  ]
+}
+```
+
+An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
+
+## Get Sample Summaries Linked To Collection Exercise
+* `GET /collectionexercises/link/c6467711-21eb-4e78-804c-1db8392f93fb` will return a list of Sample Summary IDs linked to a collection exercise.
+
+### Example JSON Response
+```json
+[
+  "8fa33fd9-486a-41ca-baf2-2a833cfa031c",
+  "08c191b8-e8b8-4920-b8de-87f85e536463"
+]
+```
+
+An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found. An `HTTP 204 No Content` status code is returned if there are no sample summaries linked to the specified collection exercise.
