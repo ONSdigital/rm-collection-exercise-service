@@ -44,13 +44,13 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectioninstrumentsvc-api</artifactId>
-      <version>10.49.0-SNAPSHOT</version>
+      <version>10.49.0</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>reportmodule</artifactId>
-      <version>10.49.0-SNAPSHOT</version>
+      <version>10.49.0</version>
     </dependency>
 
     <dependency>
