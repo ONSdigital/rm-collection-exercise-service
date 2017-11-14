@@ -1,9 +1,6 @@
-FROM openjdk:8u121-jre
-MAINTAINER Kieran Wardle <kieran.wardle@ons.gov.uk>
-ARG jar
-VOLUME /tmp
-COPY $jar collexsvc.jar
-RUN sh -c 'touch /collexsvc.jar'
-ENV JAVA_OPTS=""
-ENTRYPOINT [ "sh", "-c", "java -jar /collexsvc.jar" ]
+FROM openjdk:8-jre
+
+COPY target/collectionexercisesvc*.jar /opt/collectionexercisesvc.jar
+
+ENTRYPOINT [ "java", "-jar", "/opt/collectionexercisesvc.jar" ]
 
