@@ -16,10 +16,10 @@ after_success:
 
 notifications:
   slack:
-    rooms:
-      - surveydatacollection:da6uVlmyrFhqINdm25bkLDiu
     on_failure: always
-    on_success: never
+    on_success: always
+    rooms:
+      secure: xHvqsIklJ+gX67JbpTdi0TMHxMKV9llXH6htk8qIe/sRweq/8tgcTFhSnp6Zlw42cFH6jeweme8xXH6xS3Cft6gLj8nHwAzpkU6cgDndUDPiN1pgCZOBHmIccFcWrl81REfJVgyOVicyKgVthdV1VLCDUkj9Cq+67LKq+EUi9EUw5/1ZzAkPDmuhzinelZ50lu27jyWcPQkKjN4XnpLYB2ybyqqBAJkKaxwooxCZifq1Ghub7a/EH7wiCZgc0zyJfg6EvY4MkJgbfj6b449PRTYaqNxj8Cpy0hO7EsALSednjbjoJtH3+axAFoHdVvskj0QAc3Q9pZfddXWajK4uvWOxf8EifvbhOX+yMJDy7olfuDfVD+BuCSwUXKycbJNA5C4A9fSvj/aoHI/kxxm+/ydToSaZVxLmIa5WR8EU215AAzP3RnOfYDcpPAbYLtq+TdqMuxmns+4mNjOflu4EaRexlNgWbnEwRDvuvgoS/ALEFr2fHrC/LSoMDdgb0pxDE7ddFmAsutWT8zbhGjrNF3mXlfJWEu4xky3rmUsc3GiB5xebPnPaagrVciwHkyJenn8zywBn+zk3u/VfQuHTN9u04dwf38FNC/QZBNj9AFy9wyn9YxWVvsS7euEkpbMLorz1fcIQL+H1sP8C3tZqOleurY+0mkJRHMsiGSjwwx4=
 
 cache:
   directories:
