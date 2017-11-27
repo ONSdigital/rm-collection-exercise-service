@@ -223,6 +223,7 @@
             </goals>
             <phase>package</phase>
             <configuration>
+              <finalName>docker-info-${project.artifactId}</finalName>
               <repository>sdcplatform/${project.artifactId}</repository>
             </configuration>
           </execution>
