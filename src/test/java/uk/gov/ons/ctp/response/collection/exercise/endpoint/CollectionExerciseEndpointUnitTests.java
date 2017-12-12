@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.ons.ctp.common.MvcHelper.getJson;
+import static uk.gov.ons.ctp.common.MvcHelper.postJson;
 import static uk.gov.ons.ctp.common.MvcHelper.putJson;
 import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
@@ -70,6 +71,9 @@ public class CollectionExerciseEndpointUnitTests {
   @InjectMocks
   private CollectionExerciseEndpoint colectionExerciseEndpoint;
 
+  @InjectMocks
+  private CollectionExerciseExecutionEndpoint collectionExerciseExecutionEndpoint;
+
   @Mock
   private SampleService sampleService;
 
@@ -82,7 +86,8 @@ public class CollectionExerciseEndpointUnitTests {
   @Spy
   private MapperFacade mapperFacade = new CollectionExerciseBeanMapper();
 
-  private MockMvc mockMvc;
+  private MockMvc mockCollectionExerciseMvc;
+  private MockMvc mockCollectionExerciseExecutionMvc;
   private List<Survey> surveyResults;
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
@@ -99,8 +104,14 @@ public class CollectionExerciseEndpointUnitTests {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    this.mockMvc = MockMvcBuilders
-        .standaloneSetup(colectionExerciseEndpoint)
+    this.mockCollectionExerciseMvc = MockMvcBuilders
+            .standaloneSetup(colectionExerciseEndpoint)
+            .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
+            .setMessageConverters(new MappingJackson2HttpMessageConverter(new CustomObjectMapper()))
+            .build();
+
+    this.mockCollectionExerciseExecutionMvc = MockMvcBuilders
+        .standaloneSetup(collectionExerciseExecutionEndpoint)
         .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
         .setMessageConverters(new MappingJackson2HttpMessageConverter(new CustomObjectMapper()))
         .build();
@@ -128,7 +139,7 @@ public class CollectionExerciseEndpointUnitTests {
     when(collectionExerciseService.findCollectionExercisesForSurvey(surveyResults.get(0)))
         .thenReturn(collectionExerciseResults);
 
-    ResultActions actions = mockMvc.perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID)));
+    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID)));
 
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
@@ -151,7 +162,7 @@ public class CollectionExerciseEndpointUnitTests {
    */
   @Test
   public void findCollectionExercisesForSurveyNotFound() throws Exception {
-    ResultActions actions = mockMvc
+    ResultActions actions = mockCollectionExerciseMvc
         .perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_IDNOTFOUND)));
 
     actions.andExpect(status().isNotFound())
@@ -174,7 +185,7 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurveyByFK(SURVEY_FK)).thenReturn(surveyResults.get(0));
 
-    ResultActions actions = mockMvc.perform(getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1)));
+    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1)));
 
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
@@ -197,7 +208,7 @@ public class CollectionExerciseEndpointUnitTests {
    */
   @Test
   public void findCollectionExerciseNotFound() throws Exception {
-    ResultActions actions = mockMvc
+    ResultActions actions = mockCollectionExerciseMvc
         .perform(getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_IDNOTFOUND)));
 
     actions.andExpect(status().isNotFound())
@@ -215,11 +226,11 @@ public class CollectionExerciseEndpointUnitTests {
   public void requestSampleUnits() throws Exception {
     when(sampleService.requestSampleUnits(COLLECTIONEXERCISE_ID1)).thenReturn(sampleUnitsRequestDTOResults.get(0));
 
-    ResultActions actions = mockMvc
-        .perform(putJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1), "{}"));
+    ResultActions actions = mockCollectionExerciseExecutionMvc
+        .perform(postJson(String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1), "{}"));
 
     actions.andExpect(status().isOk())
-        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
         .andExpect(handler().methodName("requestSampleUnits"))
         .andExpect(jsonPath("$.*", hasSize(1)))
         .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
@@ -240,7 +251,7 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurveyByFK(SURVEY_FK)).thenReturn(surveyResults.get(0));
 
-    ResultActions actions = mockMvc.perform(getJson(String.format("/collectionexercises/")));
+    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/")));
 
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
@@ -273,7 +284,7 @@ public class CollectionExerciseEndpointUnitTests {
     when(collectionExerciseService.linkSampleSummaryToCollectionExercise(COLLECTIONEXERCISE_ID1, sampleSummaries))
         .thenReturn(sampleLink);
 
-    ResultActions actions = mockMvc
+    ResultActions actions = mockCollectionExerciseMvc
         .perform(
             putJson(String.format("/collectionexercises/link/%s", COLLECTIONEXERCISE_ID1), LINK_SAMPLE_SUMMARY_JSON));
 
@@ -296,7 +307,7 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(collectionExerciseResults.get(0));
     when(collectionExerciseService.findLinkedSampleSummaries(COLLECTIONEXERCISE_ID1)).thenReturn(sampleLink);
 
-    ResultActions actions = mockMvc
+    ResultActions actions = mockCollectionExerciseMvc
         .perform(getJson(String.format("/collectionexercises/link/%s", COLLECTIONEXERCISE_ID1)));
 
     actions.andExpect(status().isOk())

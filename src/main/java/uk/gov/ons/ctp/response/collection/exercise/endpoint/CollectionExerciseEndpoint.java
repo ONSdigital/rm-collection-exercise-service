@@ -44,12 +44,8 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 @Slf4j
 public class CollectionExerciseEndpoint {
 
-  private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
   private static final String RETURN_COLLECTIONEXERCISENOTFOUND = "Collection Exercise not found for collection exercise Id";
   private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
-
-  @Autowired
-  private SampleService sampleService;
 
   @Autowired
   private CollectionExerciseService collectionExerciseService;
@@ -148,13 +144,7 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
   public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
       throws CTPException {
-    log.debug("Entering collection exercise fetch with Id {}", id);
-    SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
-    if (requestDTO == null) {
-      throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
-    }
-    return ResponseEntity.ok(requestDTO);
+      return null;
   }
 
   /**
