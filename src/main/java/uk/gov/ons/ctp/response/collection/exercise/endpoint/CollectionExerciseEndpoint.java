@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -7,19 +8,17 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
@@ -32,7 +31,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
@@ -133,18 +131,65 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * PUT to manually trigger the request of the sample units from the sample
-   * service for the given collection exercise Id.
-   *
-   * @param id Collection exercise Id for which to trigger delivery of sample
-   *          units
-   * @return total sample units to be delivered.
+   * PUT request to update a collection exercise
+   * @param id Collection exercise Id to update
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-  public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
+  public ResponseEntity<SampleUnitsRequestDTO> updateCollectionExercise(@PathVariable("id") final UUID id)
+          throws CTPException {
+    log.info("Updating collection exercise {}", id);
+    return null;
+  }
+
+  /**
+   * POST request to create a collection exercise
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(method = RequestMethod.POST)
+  public ResponseEntity<?> createCollectionExercise(final @Valid @RequestBody CollectionExerciseDTO collex)
+          throws CTPException {
+    log.info("Creating collection exercise");
+    String surveyId = collex.getSurveyId();
+
+    if (StringUtils.isBlank(surveyId)){
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
+    } else {
+      Survey survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+
+      if (survey == null) {
+          throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
+      } else {
+        CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(collex.getExerciseRef(), survey);
+
+        if (existing != null) {
+          throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                  String.format("Collection exercise with survey %s and exerciseRef %s already exists",
+                          survey.getId().toString(),
+                          collex.getExerciseRef()));
+        } else {
+          CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
+
+          URI location = ServletUriComponentsBuilder
+                  .fromCurrentRequest().path("/{id}")
+                  .buildAndExpand(newCollex.getId()).toUri();
+
+          return ResponseEntity.created(location).build();
+        }
+      }
+    }
+  }
+
+  /**
+   * DELETE request to delete a collection exercise
+   * @param id Collection exercise Id to delete
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+  public ResponseEntity<SampleUnitsRequestDTO> deleteCollectionExercise(@PathVariable("id") final UUID id)
       throws CTPException {
-      return null;
+    log.info("Deleting collection exercise {}", id);
+    return null;
   }
 
   /**

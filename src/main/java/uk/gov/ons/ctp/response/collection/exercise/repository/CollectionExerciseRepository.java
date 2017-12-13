@@ -32,6 +32,15 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
 
   /**
+   * Query repository for collection exercise with given period and survey
+   *
+   * @param exerciseRef collection exercise period
+   * @param surveyfk surveyfk to which collection exercises are associated.
+   * @return List of collection exercises.
+   */
+  List<CollectionExercise> findByExerciseRefAndSurveySurveyPK(String exerciseRef, Integer surveyfk);
+
+  /**
    * Query repository for list of collection exercises associated with a certain
    * state.
    *

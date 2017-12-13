@@ -8,6 +8,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 
 /**
  * Service responsible for dealing with collection exercises
@@ -70,4 +71,19 @@ public interface CollectionExerciseService {
    */
   List<SampleLink> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
       List<UUID> sampleSummaryIds);
+
+  /**
+   * Create a collection exercise
+   * @param collex the data to create the collection exercise from
+   * @return a new CollectionExercise object
+   */
+  CollectionExercise createCollectionExercise(CollectionExerciseDTO collex);
+
+  /**
+   * Gets collection exercise with given exerciseRef and survey (should be no more than 1)
+   * @param exerciseRef the exerciseRef (period) of the collection exercise
+   * @param survey the survey the collection exercise is associated with
+   * @return the collection exercise if it exists, null otherwise
+   */
+  CollectionExercise  findCollectionExercise(String exerciseRef, Survey survey);
 }

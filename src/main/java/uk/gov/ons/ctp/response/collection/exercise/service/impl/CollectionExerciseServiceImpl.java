@@ -1,11 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.util.*;
 
 import javax.transaction.Transactional;
 
@@ -24,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
 /**
@@ -127,6 +124,34 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
 
     return linkedSummaries;
+  }
+
+  @Override
+  public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
+      Survey survey = surveyRepo.findById(UUID.fromString(collex.getSurveyId()));
+      CollectionExercise collectionExercise = new CollectionExercise();
+
+      collectionExercise.setName(collex.getName());
+      collectionExercise.setUserDescription(collex.getUserDescription());
+      collectionExercise.setExerciseRef(collex.getExerciseRef());
+      collectionExercise.setCreated(new Timestamp(new Date().getTime()));
+      collectionExercise.setId(UUID.randomUUID());
+      collectionExercise.setSurvey(survey);
+      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
+
+      return this.collectRepo.save(collectionExercise);
+  }
+
+  @Override
+  public CollectionExercise findCollectionExercise(String exerciseRef, Survey survey) {
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveySurveyPK(exerciseRef, survey.getSurveyPK());
+
+      switch(existing.size()){
+        case 0:
+          return null;
+        default:
+          return existing.get(0);
+      }
   }
 
   /**

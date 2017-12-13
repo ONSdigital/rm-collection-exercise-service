@@ -85,4 +85,15 @@ public class CollectionExercise {
   @Column(name = "exerciseref")
   private String exerciseRef;
 
+  @Column(name="user_description", length = 50)
+  private String userDescription;
+
+  @Column(name="created")
+  private Timestamp created;
+
+  @Column(name="updated")
+  private Timestamp updated;
+
+  @Column(name="deleted")
+  private Boolean deleted;
 }

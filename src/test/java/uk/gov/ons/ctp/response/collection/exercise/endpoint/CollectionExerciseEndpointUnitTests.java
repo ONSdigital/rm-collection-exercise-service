@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import org.mockito.Spy;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import ma.glasnost.orika.MapperFacade;
@@ -50,6 +52,7 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 /**
  * Collection Exercise Endpoint Unit tests
  */
+@Slf4j
 public class CollectionExerciseEndpointUnitTests {
   private static final String LINK_SAMPLE_SUMMARY_JSON = "{\"sampleSummaryIds\": [\"87043936-4d38-4696-952a-fcd55a51be96\", \"cf23b621-c613-424c-9d0d-53a9cfa82f3a\"]}";
   private static final UUID SURVEY_ID = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
@@ -185,12 +188,17 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurveyByFK(SURVEY_FK)).thenReturn(surveyResults.get(0));
 
-    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1)));
+    MockHttpServletRequestBuilder json = getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
+
+    log.info("json: {}", json);
+
+    ResultActions actions = mockCollectionExerciseMvc.perform(json);
+
+    log.info("actions: {}", actions);
 
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercise"))
-        .andExpect(jsonPath("$.*", hasSize(15)))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID.toString())))
         .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
