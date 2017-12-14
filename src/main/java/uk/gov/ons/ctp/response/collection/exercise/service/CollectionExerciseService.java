@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
@@ -86,4 +87,34 @@ public interface CollectionExerciseService {
    * @return the collection exercise if it exists, null otherwise
    */
   CollectionExercise  findCollectionExercise(String exerciseRef, Survey survey);
+
+  /**
+   * Gets collection exercise with given exerciseRef and survey uuid (should be no more than 1)
+   * @param exerciseRef the exerciseRef (period) of the collection exercise
+   * @param surveyId the uuid of the survey the collection exercise is associated with
+   * @return the collection exercise if it exists, null otherwise
+   */
+  CollectionExercise  findCollectionExercise(String exerciseRef, UUID surveyId);
+
+  /**
+   * Update a collection exercise
+   * @param collex the updated collection exercise
+   * @return the updated CollectionExercise object
+   */
+  CollectionExercise updateCollectionExercise(UUID id, CollectionExerciseDTO collex) throws CTPException;
+
+  /**
+   * Delete a collection exercise
+   * @param id the id of the collection exercise to delete
+   * @return the updated CollectionExercise object
+   */
+  CollectionExercise deleteCollectionExercise(UUID id) throws CTPException;
+
+  /**
+   * Undelete a collection exercise
+   * @param id the id of the collection exercise to delete
+   * @return the updated CollectionExercise object
+   */
+  CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException;
+
 }

@@ -41,6 +41,15 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   List<CollectionExercise> findByExerciseRefAndSurveySurveyPK(String exerciseRef, Integer surveyfk);
 
   /**
+   * Query repository for collection exercise with given period and survey uuid
+   *
+   * @param exerciseRef collection exercise period
+   * @param surveyUuid uuid to which collection exercises are associated.
+   * @return List of collection exercises.
+   */
+  List<CollectionExercise> findByExerciseRefAndSurveyId(String exerciseRef, UUID surveyUuid);
+
+  /**
    * Query repository for list of collection exercises associated with a certain
    * state.
    *

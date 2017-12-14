@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -136,10 +137,15 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-  public ResponseEntity<SampleUnitsRequestDTO> updateCollectionExercise(@PathVariable("id") final UUID id)
+  public ResponseEntity<?> updateCollectionExercise(
+          @PathVariable("id") final UUID id,
+          final @Validated(CollectionExerciseDTO.PutValidation.class) @RequestBody CollectionExerciseDTO collexDto)
           throws CTPException {
     log.info("Updating collection exercise {}", id);
-    return null;
+
+    this.collectionExerciseService.updateCollectionExercise(id, collexDto);
+
+    return ResponseEntity.ok().build();
   }
 
   /**
@@ -147,7 +153,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(method = RequestMethod.POST)
-  public ResponseEntity<?> createCollectionExercise(final @Valid @RequestBody CollectionExerciseDTO collex)
+  public ResponseEntity<?> createCollectionExercise(final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody CollectionExerciseDTO collex)
           throws CTPException {
     log.info("Creating collection exercise");
     String surveyId = collex.getSurveyId();
@@ -163,7 +169,7 @@ public class CollectionExerciseEndpoint {
         CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(collex.getExerciseRef(), survey);
 
         if (existing != null) {
-          throw new CTPException(CTPException.Fault.BAD_REQUEST,
+          throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
                   String.format("Collection exercise with survey %s and exerciseRef %s already exists",
                           survey.getId().toString(),
                           collex.getExerciseRef()));
@@ -186,10 +192,12 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-  public ResponseEntity<SampleUnitsRequestDTO> deleteCollectionExercise(@PathVariable("id") final UUID id)
+  public ResponseEntity<CollectionExercise> deleteCollectionExercise(@PathVariable("id") final UUID id)
       throws CTPException {
     log.info("Deleting collection exercise {}", id);
-    return null;
+    this.collectionExerciseService.deleteCollectionExercise(id);
+
+    return ResponseEntity.accepted().build();
   }
 
   /**
