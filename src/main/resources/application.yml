@@ -130,7 +130,7 @@ party-svc:
   connection-config:
     scheme: http
     host: localhost
-    port: 8081
+    port: 5062
     username: admin
     password: secret
     # how many times should we attempt connection on failure
