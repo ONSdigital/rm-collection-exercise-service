@@ -10,14 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.party.definition.SampleLinkCreationRequestDTO;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
+//import uk.gov.ons.ctp.response.party.definition.
 
 import java.io.IOException;
 
@@ -72,5 +77,23 @@ public class PartySvcRestClientImpl implements PartySvcClient {
     }
 
     return result;
+  }
+
+  @Override
+  public void linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) throws RestClientException {
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.add("sampleSummaryId", sampleSummaryId);
+
+    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getPartySvc().getSampleLinkPath(), queryParams, collectionExerciseId);
+    SampleLinkCreationRequestDTO sampleLinkCreationRequestDTO = new SampleLinkCreationRequestDTO();
+    sampleLinkCreationRequestDTO.setCollectionExerciseId(collectionExerciseId);
+    HttpEntity<SampleLinkCreationRequestDTO> httpEntity = restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
+    ResponseEntity<SampleLinkDTO> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
+
+    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+      log.info("Created link Sample Summary Id: " + sampleSummaryId + "Collection exercise: " + collectionExerciseId);
+    } else {
+      log.error("Couldn't link Sample Summary Id: " + sampleSummaryId + "Collection exercise: " + collectionExerciseId);
+    }
   }
 }

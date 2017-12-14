@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
@@ -50,6 +51,9 @@ public class CollectionExerciseEndpoint {
 
   @Autowired
   private SampleService sampleService;
+
+  @Autowired
+  private PartySvcClient partySvcClient;
 
   @Autowired
   private CollectionExerciseService collectionExerciseService;
@@ -191,6 +195,10 @@ public class CollectionExerciseEndpoint {
     List<SampleLink> linkSampleSummaryToCollectionExercise = collectionExerciseService
         .linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO.getSampleSummaryIds());
     LinkedSampleSummariesDTO result = new LinkedSampleSummariesDTO();
+
+    for (UUID summaryId : linkSampleSummaryDTO.getSampleSummaryIds()) {
+      partySvcClient.linkSampleSummaryId(summaryId.toString(), collectionExerciseId.toString());
+    }
 
     if (linkSampleSummaryToCollectionExercise != null) {
       List<UUID> summaryIds = new ArrayList<UUID>();

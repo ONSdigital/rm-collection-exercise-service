@@ -21,4 +21,5 @@ public interface PartySvcClient {
    */
   PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef) throws RestClientException;
 
+  void linkSampleSummaryId(String sampleSummaryId, String collectionExercise);
 }

@@ -34,6 +34,7 @@ import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
@@ -72,6 +73,9 @@ public class CollectionExerciseEndpointUnitTests {
 
   @Mock
   private SampleService sampleService;
+
+  @Mock
+  private PartySvcClient partySvcClient;
 
   @Mock
   private CollectionExerciseService collectionExerciseService;

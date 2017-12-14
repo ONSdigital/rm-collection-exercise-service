@@ -126,10 +126,11 @@ collection-instrument-svc:
 
 party-svc:
   request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
+  sample-link-path: /party-api/v1/businesses/sample/link/{sampleSummaryId}
   connection-config:
     scheme: http
     host: localhost
-    port: 5062
+    port: 8081
     username: admin
     password: secret
     # how many times should we attempt connection on failure
