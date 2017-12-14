@@ -48,13 +48,16 @@ public class PartySvcRestClientImpl implements PartySvcClient {
   public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef)
       throws RestClientException {
 
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitType, sampleUnitRef);
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitType, sampleUnitRef);
 
     HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug("about to get the Party with Sample Unit Type: {} and Sample Unit Ref: {}", sampleUnitType, sampleUnitRef);
+    log.debug("about to get the Party with Sample Unit Type: {} and Sample Unit Ref: {}",
+            sampleUnitType, sampleUnitRef);
 
-    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
+    ResponseEntity<String> responseEntity = restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
     if (responseEntity != null) {
       System.out.println(responseEntity.getStatusCodeValue());

@@ -1,27 +1,49 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.ons.ctp.common.FixtureHelper;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.*;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
+import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * UnitTests for CollectionExerciseServiceImpl
  */
-
+@RunWith(MockitoJUnitRunner.class)
 public class CollectionExerciseServiceImplTest {
 
   private static final UUID ACTIONPLANID1 = UUID.fromString("60df56d9-f491-4ac8-b256-a10154290a8b");
   private static final UUID ACTIONPLANID2 = UUID.fromString("60df56d9-f491-4ac8-b256-a10154290a8c");
   private static final UUID ACTIONPLANID3 = UUID.fromString("70df56d9-f491-4ac8-b256-a10154290a8b");
   private static final UUID ACTIONPLANID4 = UUID.fromString("80df56d9-f491-4ac8-b256-a10154290a8b");
+
+  @Mock
+  private CollectionExerciseRepository collexRepo;
+
+  @Mock
+  private SurveyRepository surveyRepo;
+
+  @InjectMocks
+  private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
 
   /**
    * Tests that default and override are empty
@@ -31,9 +53,7 @@ public class CollectionExerciseServiceImplTest {
     List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
     List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
 
-    CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
-
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+    Collection<CaseType> caseTypeList = this.collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
         caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.isEmpty());
@@ -50,9 +70,7 @@ public class CollectionExerciseServiceImplTest {
 
     caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID1, "B"));
 
-    CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
-
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+    Collection<CaseType> caseTypeList = this.collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
         caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID1));
@@ -65,9 +83,7 @@ public class CollectionExerciseServiceImplTest {
 
     caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "B"));
 
-    CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
-
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+    Collection<CaseType> caseTypeList = this.collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
         caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID3));
@@ -82,9 +98,7 @@ public class CollectionExerciseServiceImplTest {
 
     caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "B"));
 
-    CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
-
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+    Collection<CaseType> caseTypeList = this.collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
         caseTypeOverrideList);
 
     Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID3));
@@ -102,9 +116,7 @@ public class CollectionExerciseServiceImplTest {
 
     caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "BI"));
 
-    CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
-
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+    Collection<CaseType> caseTypeList = this.collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
         caseTypeOverrideList);
     Iterator<CaseType> i = caseTypeList.iterator();
     Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID1));
@@ -124,9 +136,7 @@ public class CollectionExerciseServiceImplTest {
     caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "B"));
     caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID4, "BI"));
 
-    CollectionExerciseServiceImpl collectionExerciseServiceImpl = new CollectionExerciseServiceImpl();
-
-    Collection<CaseType> caseTypeList = collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
+    Collection<CaseType> caseTypeList = this.collectionExerciseServiceImpl.createCaseTypeList(caseTypeDefaultList,
         caseTypeOverrideList);
 
     Iterator<CaseType> i = caseTypeList.iterator();
@@ -156,6 +166,233 @@ public class CollectionExerciseServiceImplTest {
   private CaseTypeOverride createCaseTypeOverride(UUID actionPlanId, String sampleUnitTypeFK) {
     CaseTypeOverride.builder().caseTypeOverridePK(1).exerciseFK(1);
     return CaseTypeOverride.builder().actionPlanId(actionPlanId).sampleUnitTypeFK(sampleUnitTypeFK).build();
+  }
+
+  @Test
+  public void testCreateCollectionExercise() throws Exception {
+      CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+      Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
+      when(this.surveyRepo.findById(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+
+      this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
+
+      ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+      verify(this.collexRepo).save(captor.capture());
+
+      CollectionExercise collex = captor.getValue();
+
+      assertEquals(toCreate.getName(), collex.getName());
+      assertEquals(toCreate.getUserDescription(), collex.getUserDescription());
+      assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
+      assertEquals(toCreate.getSurveyId(), collex.getSurvey().getId().toString());
+      assertNotNull(collex.getCreated());
+  }
+
+  @Test
+  public void testUpdateCollectionExercise() throws Exception {
+    CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
+    existing.setSurvey(survey);
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+    when(surveyRepo.findById(survey.getId())).thenReturn(survey);
+
+    this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
+
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+
+    verify(collexRepo).save(captor.capture());
+    CollectionExercise collex = captor.getValue();
+    assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurvey().getId());
+    assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
+    assertEquals(toUpdate.getName(), collex.getName());
+    assertEquals(toUpdate.getUserDescription(), collex.getUserDescription());
+    assertNotNull(collex.getUpdated());
+  }
+
+  @Test
+  public void testUpdateCollectionExerciseInvalidSurvey() throws Exception {
+    CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
+    existing.setSurvey(survey);
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+
+    try {
+      this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
+      fail("Update collection exercise with null survey succeeded");
+    } catch(CTPException e){
+      assertEquals(CTPException.Fault.BAD_REQUEST, e.getFault());
+    }
+  }
+
+  @Test
+  public void testUpdateCollectionExerciseNonUnique() throws Exception {
+    CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
+    existing.setSurvey(survey);
+    // Set up the mock to return the one we are attempting to update
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+
+    UUID uuid = UUID.fromString("0f66744b-bfdb-458a-b495-1eb605462003");
+    CollectionExercise otherExisting = new CollectionExercise();
+    otherExisting.setId(uuid);
+    // Set up the mock to return a different one with the same exercise ref and survey id
+    when(collexRepo.findByExerciseRefAndSurveyId(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
+            .thenReturn(Arrays.asList(otherExisting));
+
+    try {
+      this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
+
+      fail("Update to collection exercise breaking uniqueness constraint succeeded");
+    } catch(CTPException e){
+      assertEquals(CTPException.Fault.RESOURCE_VERSION_CONFLICT, e.getFault());
+    }
+  }
+
+  @Test
+  public void testUpdateCollectionExerciseDoesNotExist() throws Exception {
+    CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    UUID updateUuid = UUID.randomUUID();
+
+    try {
+      this.collectionExerciseServiceImpl.updateCollectionExercise(updateUuid, toUpdate);
+      fail("Update of non-existent collection exercise succeeded");
+    } catch(CTPException e){
+      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+    }
+  }
+
+  @Test
+  public void testDeleteCollectionExercise() throws Exception {
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+
+    this.collectionExerciseServiceImpl.deleteCollectionExercise(existing.getId());
+
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(this.collexRepo).save(captor.capture());
+
+    assertEquals(true, captor.getValue().getDeleted());
+  }
+
+  @Test
+  public void testUndeleteCollectionExercise() throws Exception {
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+
+    this.collectionExerciseServiceImpl.undeleteCollectionExercise(existing.getId());
+
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(this.collexRepo).save(captor.capture());
+
+    assertEquals(false, captor.getValue().getDeleted());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseNotExists() throws Exception {
+    CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    UUID updateUuid = UUID.randomUUID();
+
+    try {
+      this.collectionExerciseServiceImpl.patchCollectionExercise(updateUuid, toUpdate);
+
+      fail("Attempt to patch non-existent collection exercise succeeded");
+    } catch(CTPException e){
+      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+    }
+  }
+
+  /**
+   * Method to setup the member collexRepo with a single collection exercise.  This isn't @Before as not all of the
+   * tests require a collection exercise to be present (some explicitly do not)
+   * @return the collection exercise configured
+   * @throws Exception throws if error attempting to load fixtures
+   */
+  private CollectionExercise setupCollectionExercise() throws Exception {
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
+    existing.setSurvey(survey);
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+
+    return existing;
+  }
+
+  @Test
+  public void testPatchCollectionExerciseExerciseRef() throws Exception {
+    CollectionExercise existing = setupCollectionExercise();
+    CollectionExerciseDTO collex = new CollectionExerciseDTO();
+    String exerciseRef = "209966";
+    collex.setExerciseRef(exerciseRef);
+
+    this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
+
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(this.collexRepo).save(captor.capture());
+
+    CollectionExercise ce = captor.getValue();
+    assertEquals(exerciseRef, ce.getExerciseRef());
+    assertNotNull(ce.getUpdated());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseName() throws Exception {
+    CollectionExercise existing = setupCollectionExercise();
+    CollectionExerciseDTO collex = new CollectionExerciseDTO();
+    String name = "Not BRES";
+    collex.setName(name);
+
+    this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
+
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(this.collexRepo).save(captor.capture());
+
+    CollectionExercise ce = captor.getValue();
+    assertEquals(name, ce.getName());
+    assertNotNull(ce.getUpdated());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseUserDescription() throws Exception {
+    CollectionExercise existing = setupCollectionExercise();
+    CollectionExerciseDTO collex = new CollectionExerciseDTO();
+    String userDescription = "Really odd description";
+    collex.setUserDescription(userDescription);
+
+    this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
+
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(this.collexRepo).save(captor.capture());
+
+    CollectionExercise ce = captor.getValue();
+    assertEquals(userDescription, ce.getUserDescription());
+    assertNotNull(ce.getUpdated());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseNonUnique() throws Exception {
+    CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
+    existing.setSurvey(survey);
+    // Set up the mock to return the one we are attempting to update
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+
+    UUID uuid = UUID.fromString("0f66744b-bfdb-458a-b495-1eb605462003");
+    CollectionExercise otherExisting = new CollectionExercise();
+    otherExisting.setId(uuid);
+    // Set up the mock to return a different one with the same exercise ref and survey id
+    when(collexRepo.findByExerciseRefAndSurveyId(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
+            .thenReturn(Arrays.asList(otherExisting));
+
+    try {
+      this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), toUpdate);
+
+      fail("Update to collection exercise breaking uniqueness constraint succeeded");
+    } catch(CTPException e){
+      assertEquals(CTPException.Fault.RESOURCE_VERSION_CONFLICT, e.getFault());
+    }
   }
 
 }

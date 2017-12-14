@@ -3,33 +3,34 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.common.MvcHelper.getJson;
 import static uk.gov.ons.ctp.common.MvcHelper.postJson;
 import static uk.gov.ons.ctp.common.MvcHelper.putJson;
 import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import ma.glasnost.orika.MapperFacade;
@@ -43,6 +44,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
@@ -74,9 +76,6 @@ public class CollectionExerciseEndpointUnitTests {
   @InjectMocks
   private CollectionExerciseEndpoint colectionExerciseEndpoint;
 
-  @InjectMocks
-  private CollectionExerciseExecutionEndpoint collectionExerciseExecutionEndpoint;
-
   @Mock
   private SampleService sampleService;
 
@@ -90,8 +89,9 @@ public class CollectionExerciseEndpointUnitTests {
   private MapperFacade mapperFacade = new CollectionExerciseBeanMapper();
 
   private MockMvc mockCollectionExerciseMvc;
-  private MockMvc mockCollectionExerciseExecutionMvc;
+  private MockMvc textPlainMock;
   private List<Survey> surveyResults;
+  private List<CollectionExerciseDTO> collectionExerciseDTOResults;
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
   private Collection<CaseType> caseTypeDefaultResults;
@@ -113,11 +113,10 @@ public class CollectionExerciseEndpointUnitTests {
             .setMessageConverters(new MappingJackson2HttpMessageConverter(new CustomObjectMapper()))
             .build();
 
-    this.mockCollectionExerciseExecutionMvc = MockMvcBuilders
-        .standaloneSetup(collectionExerciseExecutionEndpoint)
-        .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
-        .setMessageConverters(new MappingJackson2HttpMessageConverter(new CustomObjectMapper()))
-        .build();
+    this.textPlainMock = MockMvcBuilders
+            .standaloneSetup(colectionExerciseEndpoint)
+            .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
+            .build();
 
     this.surveyResults = FixtureHelper.loadClassFixtures(Survey[].class);
     this.collectionExerciseResults = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
@@ -226,26 +225,6 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   /**
-   * Tests put request returns sampleUnitsTotal.
-   *
-   * @throws Exception exception thrown
-   */
-  @Test
-  public void requestSampleUnits() throws Exception {
-    when(sampleService.requestSampleUnits(COLLECTIONEXERCISE_ID1)).thenReturn(sampleUnitsRequestDTOResults.get(0));
-
-    ResultActions actions = mockCollectionExerciseExecutionMvc
-        .perform(postJson(String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1), "{}"));
-
-    actions.andExpect(status().isOk())
-        .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
-        .andExpect(handler().methodName("requestSampleUnits"))
-        .andExpect(jsonPath("$.*", hasSize(1)))
-        .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
-
-  }
-
-  /**
    * Test to get all collection exercises.
    *
    * @throws Exception exception thrown
@@ -324,6 +303,185 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(jsonPath("$[0]", is(SAMPLE_SUMARY_ID1.toString())))
         .andExpect(jsonPath("$[1]", is(SAMPLE_SUMARY_ID2.toString())));
 
+  }
+
+  private String getResourceAsString(String resourceName) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(getClass().getResource(resourceName).getFile())));
+  }
+
+  @Test
+  public void testCreateCollectionExerciseMissingSurvey() throws Exception {
+    String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post-missing-survey.json");
+    ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
+
+    actions.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testCreateCollectionExercise() throws Exception {
+    CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
+    when(surveyService.findSurvey(SURVEY_ID)).thenReturn(surveyResults.get(0));
+    when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
+
+    String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
+    ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
+
+    actions
+            .andExpect(status().isCreated())
+            .andExpect(header().string("location", "http://localhost/collectionexercises/3ec82e0e-18ff-4886-8703-5b83442041ba"));
+  }
+
+  @Test
+  public void testCreateCollectionExerciseAlreadyExists() throws Exception {
+    CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
+    when(surveyService.findSurvey(SURVEY_ID)).thenReturn(surveyResults.get(0));
+    when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
+    when(this.collectionExerciseService.findCollectionExercise("202103", surveyResults.get(0))).thenReturn(created);
+
+    String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
+    ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
+
+    actions.andExpect(status().isConflict());
+  }
+
+  @Test
+  public void testUpdateCollectionExercise() throws Exception {
+    String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    ResultActions actions = mockCollectionExerciseMvc.perform(putJson(String.format("/collectionexercises/%s", uuid.toString()), json));
+
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    verify(this.collectionExerciseService).updateCollectionExercise(uuidCaptor.capture(), dtoCaptor.capture());
+    assertEquals(uuid, uuidCaptor.getValue());
+    CollectionExerciseDTO dtoArg = dtoCaptor.getValue();
+    assertEquals("31ec898e-f370-429a-bca4-eab1045aff4e", dtoArg.getSurveyId());
+    assertEquals("Survey Name", dtoArg.getName());
+    assertEquals("202103", dtoArg.getExerciseRef());
+    assertEquals("March 2021", dtoArg.getUserDescription());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseExerciseRef() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    String newExerciseRef = "299909";
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+            String.format("/collectionexercises/%s/exerciseRef", uuid.toString()),
+            new Object[0])
+            .content(newExerciseRef)
+            .contentType(MediaType.TEXT_PLAIN);
+
+    ResultActions actions = this.textPlainMock.perform(builder);
+
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+    verify(this.collectionExerciseService).patchCollectionExercise(uuidCaptor.capture(), dtoCaptor.capture());
+
+    assertEquals(uuid, uuidCaptor.getValue());
+    CollectionExerciseDTO collexDto = dtoCaptor.getValue();
+    assertEquals(newExerciseRef, collexDto.getExerciseRef());
+    assertNull(collexDto.getName());
+    assertNull(collexDto.getUserDescription());
+    assertNull(collexDto.getSurveyId());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseName() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    String newName = "New Collex Name";
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+            String.format("/collectionexercises/%s/name", uuid.toString()),
+            new Object[0])
+            .content(newName)
+            .contentType(MediaType.TEXT_PLAIN);
+
+    ResultActions actions = this.textPlainMock.perform(builder);
+
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+    verify(this.collectionExerciseService).patchCollectionExercise(uuidCaptor.capture(), dtoCaptor.capture());
+
+    assertEquals(uuid, uuidCaptor.getValue());
+    CollectionExerciseDTO collexDto = dtoCaptor.getValue();
+    assertEquals(newName, collexDto.getName());
+    assertNull(collexDto.getExerciseRef());
+    assertNull(collexDto.getUserDescription());
+    assertNull(collexDto.getSurveyId());
+  }
+
+
+  @Test
+  public void testPatchCollectionExerciseUserDescription() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    String newUserDesc = "Collection exercise description";
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+            String.format("/collectionexercises/%s/userDescription", uuid.toString()),
+            new Object[0])
+            .content(newUserDesc)
+            .contentType(MediaType.TEXT_PLAIN);
+
+    ResultActions actions = this.textPlainMock.perform(builder);
+
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+    verify(this.collectionExerciseService).patchCollectionExercise(uuidCaptor.capture(), dtoCaptor.capture());
+
+    assertEquals(uuid, uuidCaptor.getValue());
+    CollectionExerciseDTO collexDto = dtoCaptor.getValue();
+    assertEquals(newUserDesc, collexDto.getUserDescription());
+    assertNull(collexDto.getName());
+    assertNull(collexDto.getExerciseRef());
+    assertNull(collexDto.getSurveyId());
+  }
+
+  @Test
+  public void testPatchCollectionExerciseSurveyId() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    String newSurveyId = "4cacb120-3bed-430f-90fd-dddc6256f856";
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+                String.format("/collectionexercises/%s/surveyId", uuid.toString()),
+                new Object[0])
+            .content(newSurveyId)
+            .contentType(MediaType.TEXT_PLAIN);
+
+    ResultActions actions = this.textPlainMock.perform(builder);
+
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+    verify(this.collectionExerciseService).patchCollectionExercise(uuidCaptor.capture(), dtoCaptor.capture());
+
+    assertEquals(uuid, uuidCaptor.getValue());
+    CollectionExerciseDTO collexDto = dtoCaptor.getValue();
+    assertEquals(newSurveyId, collexDto.getSurveyId());
+    assertNull(collexDto.getName());
+    assertNull(collexDto.getUserDescription());
+    assertNull(collexDto.getExerciseRef());
+  }
+
+  @Test
+  public void testDeleteCollectionExercise() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete(String.format("/collectionexercises/%s", uuid.toString()));
+    ResultActions actions = mockCollectionExerciseMvc.perform(builder);
+
+    // NOTE: delete currently returns 202 Accepted as, while the delete request is logged, no delete function has been
+    // implemented
+    actions.andExpect(status().isAccepted());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    verify(this.collectionExerciseService).deleteCollectionExercise(uuidCaptor.capture());
+
+    assertEquals(uuid, uuidCaptor.getValue());
   }
 
 }

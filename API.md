@@ -107,6 +107,75 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
+## Create Collection Exercise
+* `POST /collectionexercises` will create a new collection exercise
+* Returns 201 Created if the resource is created
+
+### Example JSON Request Body
+```json
+{
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef77",
+    "name": "SurveyName",
+    "exerciseRef": "201715",
+    "userDescription": "August 2017"
+}
+```
+
+## Update Collection Exercise
+* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will update the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* Returns 200 OK if the resource is updated
+
+### Example JSON Request Body
+
+```json
+{
+    "name": "UpdatedSurveyName",
+    "exerciseRef": "201715",
+    "userDescription": "Updated August 2017",
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef77"
+}
+```
+
+## Update Collection Exercise exerciseRef (period)
+* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/exerciseRef` will update the exerciseRef for collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* Returns 200 OK if the resource is updated
+
+### Example Request Body
+```
+201803
+```
+
+## Update Collection Exercise userDescription (user visible name)
+* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/userDescription` will update the user visible name for collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* Returns 200 OK if the resource is updated
+
+### Example Request Body
+```
+August 2018
+```
+
+## Update Collection Exercise exerciseRef (name)
+* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/name` will update the name of collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* Returns 200 OK if the resource is updated
+
+### Example Request Body
+```
+Collex name
+```
+
+## Update Collection Exercise survey
+* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/surveyId` will update the survey for collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* Returns 200 OK if the resource is updated
+
+### Example Request Body
+```
+cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87
+```
+
+## Delete Collection Exercise
+* `DELETE /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will mark the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb` for deletion.  This operation is included for future use and currently serves no purpose (also included for completeness).
+
+
 ## Execute Collection Exercise
 * `POST /collectionexerciseexecute/c6467711-21eb-4e78-804c-1db8392f93fb` will execute the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
 

@@ -1,0 +1,11 @@
+[
+	{
+		"name": "Survey Name",
+		"exerciseRef": "202103",
+		"userDescription": "March 2021",
+		"exercisePK": 1,
+		"id": "3ec82e0e-18ff-4886-8703-5b83442041ba",
+		"state": "INIT",
+		"survey": {"surveyPK": 1}
+	}
+]
