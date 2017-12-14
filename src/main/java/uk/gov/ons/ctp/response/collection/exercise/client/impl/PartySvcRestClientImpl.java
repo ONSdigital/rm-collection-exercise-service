@@ -85,9 +85,9 @@ public class PartySvcRestClientImpl implements PartySvcClient {
     ResponseEntity<SampleLinkDTO> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
 
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      log.info("Created link Sample Summary Id: " + sampleSummaryId + "Collection exercise: " + collectionExerciseId);
+      log.info("Created link Sample Summary Id: " + sampleSummaryId + " Collection exercise: " + collectionExerciseId);
     } else {
-      log.error("Couldn't link Sample Summary Id: " + sampleSummaryId + "Collection exercise: " + collectionExerciseId);
+      log.error("Couldn't link Sample Summary Id: " + sampleSummaryId + " Collection exercise: " + collectionExerciseId + " Status code: " + responseEntity.getStatusCode());
     }
     return responseEntity.getBody();
   }
