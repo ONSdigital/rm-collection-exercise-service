@@ -81,10 +81,7 @@ public class PartySvcRestClientImpl implements PartySvcClient {
 
   @Override
   public void linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) throws RestClientException {
-    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add("sampleSummaryId", sampleSummaryId);
-
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getPartySvc().getSampleLinkPath(), queryParams, collectionExerciseId);
+    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getPartySvc().getSampleLinkPath(), null, sampleSummaryId);
     SampleLinkCreationRequestDTO sampleLinkCreationRequestDTO = new SampleLinkCreationRequestDTO();
     sampleLinkCreationRequestDTO.setCollectionExerciseId(collectionExerciseId);
     HttpEntity<SampleLinkCreationRequestDTO> httpEntity = restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
