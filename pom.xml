@@ -19,44 +19,44 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>rm-common-config</artifactId>
-    <version>10.49.6-SNAPSHOT</version>
+    <version>10.49.6</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectionexercisesvc-api</artifactId>
-      <version>10.49.2-SNAPSHOT</version>
+      <version>10.49.2</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>surveysvc-api</artifactId>
-      <version>10.49.0</version>
+      <version>10.49.1</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>samplesvc-api</artifactId>
-      <version>10.49.3-SNAPSHOT</version>
+      <version>10.49.3</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectioninstrumentsvc-api</artifactId>
-      <version>10.49.1-SNAPSHOT</version>
+      <version>10.49.1</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>reportmodule</artifactId>
-      <version>10.49.1-SNAPSHOT</version>
+      <version>10.49.0</version>
     </dependency>
 
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>casesvc-api</artifactId>
-      <version>10.49.2-SNAPSHOT</version>
+      <version>10.49.2</version>
     </dependency>
 
     <dependency>
