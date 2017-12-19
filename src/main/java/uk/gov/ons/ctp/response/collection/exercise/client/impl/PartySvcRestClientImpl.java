@@ -16,7 +16,9 @@ import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.party.definition.SampleLinkCreationRequestDTO;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 import java.io.IOException;
@@ -72,5 +74,21 @@ public class PartySvcRestClientImpl implements PartySvcClient {
     }
 
     return result;
+  }
+
+  @Override
+  public SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) throws RestClientException {
+    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getPartySvc().getSampleLinkPath(), null, sampleSummaryId);
+    SampleLinkCreationRequestDTO sampleLinkCreationRequestDTO = new SampleLinkCreationRequestDTO();
+    sampleLinkCreationRequestDTO.setCollectionExerciseId(collectionExerciseId);
+    HttpEntity<SampleLinkCreationRequestDTO> httpEntity = restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
+    ResponseEntity<SampleLinkDTO> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
+
+    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+      log.info("Created link Sample Summary Id: " + sampleSummaryId + " Collection exercise: " + collectionExerciseId);
+    } else {
+      log.error("Couldn't link Sample Summary Id: " + sampleSummaryId + " Collection exercise: " + collectionExerciseId + " Status code: " + responseEntity.getStatusCode());
+    }
+    return responseEntity.getBody();
   }
 }

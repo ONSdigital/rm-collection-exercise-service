@@ -1,50 +1,43 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.ons.ctp.common.MvcHelper.getJson;
-import static uk.gov.ons.ctp.common.MvcHelper.putJson;
-import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
-import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
+import ma.glasnost.orika.MapperFacade;
+import org.hamcrest.core.Is;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import uk.gov.ons.ctp.common.FixtureHelper;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.error.RestExceptionHandler;
+import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.domain.*;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.hamcrest.core.Is;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import ma.glasnost.orika.MapperFacade;
-import uk.gov.ons.ctp.common.FixtureHelper;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.error.RestExceptionHandler;
-import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.ons.ctp.common.MvcHelper.getJson;
+import static uk.gov.ons.ctp.common.MvcHelper.putJson;
+import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
+import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
 /**
  * Collection Exercise Endpoint Unit tests
@@ -64,14 +57,17 @@ public class CollectionExerciseEndpointUnitTests {
   private static final UUID SURVEY_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff5e");
   private static final UUID COLLECTIONEXERCISE_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff6e");
 
-  private static final UUID SAMPLE_SUMARY_ID1 = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
-  private static final UUID SAMPLE_SUMARY_ID2 = UUID.fromString("cf23b621-c613-424c-9d0d-53a9cfa82f3a");
+  private static final UUID SAMPLE_SUMMARY_ID1 = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
+  private static final UUID SAMPLE_SUMMARY_ID2 = UUID.fromString("cf23b621-c613-424c-9d0d-53a9cfa82f3a");
 
   @InjectMocks
   private CollectionExerciseEndpoint colectionExerciseEndpoint;
 
   @Mock
   private SampleService sampleService;
+
+  @Mock
+  private PartySvcClient partySvcClient;
 
   @Mock
   private CollectionExerciseService collectionExerciseService;
@@ -265,13 +261,18 @@ public class CollectionExerciseEndpointUnitTests {
   @Test
   public void linkSampleUnitsPut() throws Exception {
     List<UUID> sampleSummaries = new ArrayList<>();
-    sampleSummaries.add(SAMPLE_SUMARY_ID1);
-    sampleSummaries.add(SAMPLE_SUMARY_ID2);
+    sampleSummaries.add(SAMPLE_SUMMARY_ID1);
+    sampleSummaries.add(SAMPLE_SUMMARY_ID2);
+    SampleLinkDTO sampleLinkDTO1 = new SampleLinkDTO(SAMPLE_SUMMARY_ID1.toString(),COLLECTIONEXERCISE_ID1.toString());
+    SampleLinkDTO sampleLinkDTO2 = new SampleLinkDTO(SAMPLE_SUMMARY_ID2.toString(),COLLECTIONEXERCISE_ID1.toString());
+
 
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
         .thenReturn(collectionExerciseResults.get(0));
     when(collectionExerciseService.linkSampleSummaryToCollectionExercise(COLLECTIONEXERCISE_ID1, sampleSummaries))
         .thenReturn(sampleLink);
+    when(partySvcClient.linkSampleSummaryId(SAMPLE_SUMMARY_ID1.toString(), COLLECTIONEXERCISE_ID1.toString())).thenReturn(sampleLinkDTO1);
+    when(partySvcClient.linkSampleSummaryId(SAMPLE_SUMMARY_ID2.toString(), COLLECTIONEXERCISE_ID1.toString())).thenReturn(sampleLinkDTO2);
 
     ResultActions actions = mockMvc
         .perform(
@@ -281,8 +282,12 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("linkSampleSummary"))
         .andExpect(jsonPath("$.collectionExerciseId", is(COLLECTIONEXERCISE_ID1.toString())))
-        .andExpect(jsonPath("$.sampleSummaryIds[*]", containsInAnyOrder(SAMPLE_SUMARY_ID1.toString(), SAMPLE_SUMARY_ID2.toString())));
+        .andExpect(jsonPath("$.sampleSummaryIds[*]", containsInAnyOrder(SAMPLE_SUMMARY_ID1.toString(), SAMPLE_SUMMARY_ID2.toString())));
 
+
+    InOrder inOrder = Mockito.inOrder((partySvcClient));
+    inOrder.verify(partySvcClient).linkSampleSummaryId(SAMPLE_SUMMARY_ID1.toString(), COLLECTIONEXERCISE_ID1.toString());
+    inOrder.verify(partySvcClient).linkSampleSummaryId(SAMPLE_SUMMARY_ID2.toString(), COLLECTIONEXERCISE_ID1.toString());
   }
 
   /**
@@ -302,8 +307,8 @@ public class CollectionExerciseEndpointUnitTests {
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("requestLinkedSampleSummaries"))
-        .andExpect(jsonPath("$[0]", is(SAMPLE_SUMARY_ID1.toString())))
-        .andExpect(jsonPath("$[1]", is(SAMPLE_SUMARY_ID2.toString())));
+        .andExpect(jsonPath("$[0]", is(SAMPLE_SUMMARY_ID1.toString())))
+        .andExpect(jsonPath("$[1]", is(SAMPLE_SUMMARY_ID2.toString())));
 
   }
 

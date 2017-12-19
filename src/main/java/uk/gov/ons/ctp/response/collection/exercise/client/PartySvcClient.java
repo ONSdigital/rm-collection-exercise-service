@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.client;
 import org.springframework.web.client.RestClientException;
 
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /**
@@ -21,4 +22,5 @@ public interface PartySvcClient {
    */
   PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef) throws RestClientException;
 
+  SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExercise) throws RestClientException;
 }
