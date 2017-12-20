@@ -126,6 +126,7 @@ collection-instrument-svc:
 
 party-svc:
   request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
+  sample-link-path: /party-api/v1/businesses/sample/link/{sampleSummaryId}
   connection-config:
     scheme: http
     host: localhost

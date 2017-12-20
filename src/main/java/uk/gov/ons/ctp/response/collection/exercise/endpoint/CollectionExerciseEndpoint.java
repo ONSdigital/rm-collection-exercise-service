@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
@@ -56,6 +57,9 @@ public class CollectionExerciseEndpoint {
           "Collection Exercise not found for collection exercise Id";
   private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
   private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
+
+  @Autowired
+  private PartySvcClient partySvcClient;
 
   @Autowired
   private CollectionExerciseService collectionExerciseService;
@@ -378,6 +382,10 @@ public class CollectionExerciseEndpoint {
     List<SampleLink> linkSampleSummaryToCollectionExercise = collectionExerciseService
         .linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO.getSampleSummaryIds());
     LinkedSampleSummariesDTO result = new LinkedSampleSummariesDTO();
+
+    for (UUID summaryId : linkSampleSummaryDTO.getSampleSummaryIds()) {
+      partySvcClient.linkSampleSummaryId(summaryId.toString(), collectionExerciseId.toString());
+    }
 
     if (linkSampleSummaryToCollectionExercise != null) {
       List<UUID> summaryIds = new ArrayList<UUID>();

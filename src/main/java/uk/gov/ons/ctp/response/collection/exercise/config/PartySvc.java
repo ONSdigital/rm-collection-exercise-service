@@ -14,4 +14,5 @@ import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 public class PartySvc {
   private RestUtilityConfig connectionConfig;
   private String requestPartyPath;
+  private String sampleLinkPath;
 }
