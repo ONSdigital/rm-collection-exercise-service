@@ -13,12 +13,12 @@ import java.util.UUID;
 public interface CaseTypeDefaultRepository extends JpaRepository<CaseTypeDefault, UUID> {
 
   /**
-   * Query repository for case type defaults associated to survey pk.
+   * Query repository for case type defaults associated to survey uuid.
    *
-   * @param surveyPK survey pk to which the Case Type Default is associated.
+   * @param surveyUuid survey uuid to which the Case Type Default is associated.
    * @return list of associated casetypes.
    */
-  List<CaseTypeDefault> findBySurveyFK(Integer surveyPK);
+  List<CaseTypeDefault> findBySurveyUuid(UUID surveyUuid);
 
 
 }

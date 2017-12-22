@@ -27,25 +27,17 @@ public class CaseTypeDefault implements CaseType {
   @Column(name = "casetypedefaultpk")
   private Integer caseTypeDefaultPK;
 
-  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
-  @Column(name = "surveyfk")
-  private Integer surveyFK;
+//  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
+//  @Column(name = "surveyfk")
+//  private Integer surveyFK;
+
+  @Column(name="survey_uuid")
+  private UUID surveyId;
 
   @Column(name = "actionplanid")
   private UUID actionPlanId;
 
   @Column(name = "sampleunittypefk")
   private String sampleUnitTypeFK;
-
-  @Override
-  public String toString() {
-    return "CaseTypeDefault{"
-            + "sampleUnitTypeFK='" + sampleUnitTypeFK + '\''
-            + ", actionPlanId=" + actionPlanId
-            + ", caseTypeDefaultPK=" + caseTypeDefaultPK
-            + ", surveyFK=" + surveyFK
-            + '}';
-  }
-
 
 }

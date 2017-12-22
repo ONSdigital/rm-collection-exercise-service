@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
@@ -15,6 +16,7 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
  *
  */
 @Service
+@Qualifier("database")
 public class SurveyServiceImpl implements SurveyService {
 
   @Autowired

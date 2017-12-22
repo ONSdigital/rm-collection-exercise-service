@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,8 @@ import java.util.UUID;
  */
 @Component
 @Slf4j
+@Qualifier("restClient")
+@Primary
 public class SurveySvcRestClientImpl implements SurveySvcClient {
 
   @Autowired

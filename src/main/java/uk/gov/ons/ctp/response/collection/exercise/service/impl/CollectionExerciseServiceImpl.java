@@ -27,9 +27,9 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRep
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /**
@@ -50,7 +50,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
   @Autowired
-  private SurveyRepository surveyRepo;
+  private SurveyService surveyService;
 
   @Autowired
   private SampleLinkRepository sampleLinkRepository;
@@ -79,9 +79,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
-    Survey survey = surveyRepo.findById(collectionExercise.getSurvey().getId());
-
-    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyFK(survey.getSurveyPK());
+    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyUuid(collectionExercise.getSurveyUuid());
 
     List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo
         .findByExerciseFK(collectionExercise.getExercisePK());
@@ -136,7 +134,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Override
   public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
-      Survey survey = surveyRepo.findById(UUID.fromString(collex.getSurveyId()));
       CollectionExercise collectionExercise = new CollectionExercise();
 
       collectionExercise.setName(collex.getName());
@@ -144,7 +141,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       collectionExercise.setExerciseRef(collex.getExerciseRef());
       collectionExercise.setCreated(new Timestamp(new Date().getTime()));
       collectionExercise.setId(UUID.randomUUID());
-      collectionExercise.setSurvey(survey);
+      collectionExercise.setSurveyUuid(UUID.fromString(collex.getSurveyId()));
       collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
 
       return this.collectRepo.save(collectionExercise);
@@ -188,7 +185,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
                   ? collex.getExerciseRef()
                   : patchData.getExerciseRef();
           UUID proposedSurvey = patchData.getSurveyId() == null
-                  ? collex.getSurvey().getId()
+                  ? collex.getSurveyUuid()
                   : UUID.fromString(patchData.getSurveyId());
 
           // If period/survey not supplied in patchData then this call will trivially return
@@ -196,14 +193,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
           if (StringUtils.isBlank(patchData.getSurveyId()) == false) {
               UUID surveyId = UUID.fromString(patchData.getSurveyId());
-              Survey survey = this.surveyRepo.findById(surveyId);
 
-              if (survey == null) {
-                  throw new CTPException(CTPException.Fault.BAD_REQUEST,
-                          String.format("Survey %s does not exist", surveyId));
-              } else {
-                  collex.setSurvey(survey);
-              }
+              // MATTTODO do we need to implement a new check to see if the survey exists here?
+//              if (survey == null) {
+//                  throw new CTPException(CTPException.Fault.BAD_REQUEST,
+//                          String.format("Survey %s does not exist", surveyId));
+//              } else {
+                  collex.setSurveyUuid(surveyId);
+//              }
           }
 
           if (StringUtils.isBlank(patchData.getExerciseRef()) == false) {
@@ -233,7 +230,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
    private void validateUniqueness(CollectionExercise existing, String candidatePeriod, UUID candidateSurvey)
            throws CTPException {
-       if (existing.getSurvey().getId().equals(candidateSurvey) == false
+       if (existing.getSurveyUuid().equals(candidateSurvey) == false
                || existing.getExerciseRef().equals(candidatePeriod) == false) {
            CollectionExercise otherExisting = findCollectionExercise(candidatePeriod, candidateSurvey);
 
@@ -262,7 +259,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         // This will throw exception if period & surveyUuid are not unique
         validateUniqueness(existing, period, surveyUuid);
 
-        Survey survey = this.surveyRepo.findById(surveyUuid);
+        // MATTTODO do we need to implement a new check to see if the survey exists here?
+        SurveyDTO survey = this.surveyService.findSurvey(surveyUuid);
 
         if (survey == null) {
             throw new CTPException(
@@ -272,7 +270,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             existing.setUserDescription(collexDto.getUserDescription());
             existing.setName(collexDto.getName());
             existing.setExerciseRef(collexDto.getExerciseRef());
-            existing.setSurvey(survey);
+            existing.setSurveyUuid(surveyUuid);
 
             existing.setUpdated(new Timestamp(new Date().getTime()));
 

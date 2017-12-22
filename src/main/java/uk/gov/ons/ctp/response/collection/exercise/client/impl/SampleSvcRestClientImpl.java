@@ -19,8 +19,10 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,6 +53,9 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private SurveyService surveyService;
+
   @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
@@ -65,9 +70,11 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
       sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
     }
 
+    SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyUuid());
+
     CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
     requestDTO.setCollectionExerciseId(exercise.getId());
-    requestDTO.setSurveyRef(exercise.getSurvey().getSurveyRef());
+    requestDTO.setSurveyRef(surveyDto.getSurveyRef());
     requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
     requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
 

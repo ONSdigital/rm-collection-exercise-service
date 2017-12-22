@@ -15,6 +15,8 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.util.*;
 
@@ -40,7 +42,7 @@ public class CollectionExerciseServiceImplTest {
   private CollectionExerciseRepository collexRepo;
 
   @Mock
-  private SurveyRepository surveyRepo;
+  private SurveyService surveyService;
 
   @InjectMocks
   private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
@@ -152,7 +154,7 @@ public class CollectionExerciseServiceImplTest {
    * @return CaseTypeDefault
    */
   private CaseTypeDefault createCaseTypeDefault(UUID actionPlanId, String sampleUnitTypeFK) {
-    CaseTypeDefault.builder().caseTypeDefaultPK(1).surveyFK(1);
+    CaseTypeDefault.builder().caseTypeDefaultPK(1).surveyId(UUID.randomUUID());
     return CaseTypeDefault.builder().actionPlanId(actionPlanId).sampleUnitTypeFK(sampleUnitTypeFK).build();
   }
 
@@ -171,8 +173,8 @@ public class CollectionExerciseServiceImplTest {
   @Test
   public void testCreateCollectionExercise() throws Exception {
       CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-      Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-      when(this.surveyRepo.findById(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+      SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+      when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
 
       this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
 
@@ -184,7 +186,7 @@ public class CollectionExerciseServiceImplTest {
       assertEquals(toCreate.getName(), collex.getName());
       assertEquals(toCreate.getUserDescription(), collex.getUserDescription());
       assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
-      assertEquals(toCreate.getSurveyId(), collex.getSurvey().getId().toString());
+      assertEquals(toCreate.getSurveyId(), collex.getSurveyUuid().toString());
       assertNotNull(collex.getCreated());
   }
 
@@ -192,10 +194,11 @@ public class CollectionExerciseServiceImplTest {
   public void testUpdateCollectionExercise() throws Exception {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurvey(survey);
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    UUID surveyId = UUID.fromString(survey.getId());
+    existing.setSurveyUuid(surveyId);
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
-    when(surveyRepo.findById(survey.getId())).thenReturn(survey);
+    when(surveyService.findSurvey(surveyId)).thenReturn(survey);
 
     this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
 
@@ -203,7 +206,7 @@ public class CollectionExerciseServiceImplTest {
 
     verify(collexRepo).save(captor.capture());
     CollectionExercise collex = captor.getValue();
-    assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurvey().getId());
+    assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurveyUuid());
     assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
     assertEquals(toUpdate.getName(), collex.getName());
     assertEquals(toUpdate.getUserDescription(), collex.getUserDescription());
@@ -215,7 +218,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurvey(survey);
+    existing.setSurveyUuid(survey.getId());
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
     try {
@@ -231,7 +234,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurvey(survey);
+    existing.setSurveyUuid(survey.getId());
     // Set up the mock to return the one we are attempting to update
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
@@ -313,7 +316,7 @@ public class CollectionExerciseServiceImplTest {
   private CollectionExercise setupCollectionExercise() throws Exception {
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurvey(survey);
+    existing.setSurveyUuid(survey.getId());
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
     return existing;
@@ -375,7 +378,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurvey(survey);
+    existing.setSurveyUuid(survey.getId());
     // Set up the mock to return the one we are attempting to update
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
