@@ -10,6 +10,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /**
  * Service responsible for dealing with collection exercises
@@ -24,7 +25,7 @@ public interface CollectionExerciseService {
    * @param survey the survey for which to find collection exercises
    * @return the associated surveys.
    */
-  List<CollectionExercise> findCollectionExercisesForSurvey(Survey survey);
+  List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey);
 
   /**
    * Find a collection exercise associated to a collection exercise Id from the
@@ -86,7 +87,7 @@ public interface CollectionExerciseService {
    * @param survey the survey the collection exercise is associated with
    * @return the collection exercise if it exists, null otherwise
    */
-  CollectionExercise  findCollectionExercise(String exerciseRef, Survey survey);
+  CollectionExercise  findCollectionExercise(String exerciseRef, SurveyDTO survey);
 
   /**
    * Gets collection exercise with given exerciseRef and survey uuid (should be no more than 1)

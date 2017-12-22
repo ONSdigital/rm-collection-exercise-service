@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /**
  * The implementation of the SampleService
@@ -20,12 +21,15 @@ public class SurveyServiceImpl implements SurveyService {
   private SurveyRepository surveyRepo;
 
   @Override
-  public Survey findSurvey(UUID id) {
-    return surveyRepo.findById(id);
+  public SurveyDTO findSurvey(UUID id) {
+    Survey survey = surveyRepo.findById(id);
+
+    SurveyDTO result = new SurveyDTO();
+
+    result.setId(survey.getId().toString());
+    result.setSurveyRef(survey.getSurveyRef());
+
+    return result;
   }
 
-  @Override
-  public Survey findSurveyByFK(int surveyFK) {
-    return surveyRepo.findOne(surveyFK);
-  }
 }

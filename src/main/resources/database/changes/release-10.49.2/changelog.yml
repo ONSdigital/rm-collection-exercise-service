@@ -8,3 +8,12 @@ databaseChangeLog:
             comment: US002a - add necessary fields to collectionexercise table
             path: us002a-add-columns-to-collection-exercise.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-2
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US002a - change survey reference to be uuid not fk to cache table
+            path: us002a-survey-ref-to-uuid.sql
+            relativeToChangelogFile: true

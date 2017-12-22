@@ -30,6 +30,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkReposito
 import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /**
  * The implementation of the SampleService
@@ -55,9 +56,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private SampleLinkRepository sampleLinkRepository;
 
   @Override
-  public List<CollectionExercise> findCollectionExercisesForSurvey(Survey survey) {
-
-    return collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
+  public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
+    return this.collectRepo.findBySurveyUuid(UUID.fromString(survey.getId()));
   }
 
   @Override
@@ -151,10 +151,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public CollectionExercise findCollectionExercise(String exerciseRef, Survey survey) {
-      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveySurveyPK(
+  public CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) {
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(
               exerciseRef,
-              survey.getSurveyPK());
+              UUID.fromString(survey.getId()));
 
       switch (existing.size()) {
         case 0:
@@ -166,7 +166,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
    @Override
    public CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) {
-      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(exerciseRef, surveyId);
 
        switch (existing.size()) {
            case 0:

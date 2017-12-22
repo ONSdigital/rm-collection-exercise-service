@@ -42,6 +42,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSumm
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import static java.util.stream.Collectors.joining;
 
@@ -83,7 +84,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id) throws CTPException {
 
-    Survey survey = surveyService.findSurvey(id);
+    SurveyDTO survey = surveyService.findSurvey(id);
 
     List<CollectionExerciseSummaryDTO> collectionExerciseSummaryDTOList;
 
@@ -308,7 +309,7 @@ public class CollectionExerciseEndpoint {
     if (StringUtils.isBlank(surveyId)) {
       throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
     } else {
-      Survey survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+      SurveyDTO survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
 
       if (survey == null) {
           throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
@@ -444,11 +445,11 @@ public class CollectionExerciseEndpoint {
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 
-    Survey survey = surveyService.findSurveyByFK(collectionExercise.getSurvey().getSurveyPK());
+    SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyUuid());
 
     CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
     collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
-    collectionExerciseDTO.setSurveyId(survey.getId().toString());
+    collectionExerciseDTO.setSurveyId(survey.getId());
     return collectionExerciseDTO;
   }
 }

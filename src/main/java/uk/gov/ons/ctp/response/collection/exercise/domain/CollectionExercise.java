@@ -96,4 +96,7 @@ public class CollectionExercise {
 
   @Column(name = "deleted")
   private Boolean deleted;
+
+  @Column(name="survey_uuid")
+  private UUID surveyUuid;
 }

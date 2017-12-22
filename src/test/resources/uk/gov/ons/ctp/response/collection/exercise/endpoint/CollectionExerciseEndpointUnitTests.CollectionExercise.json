@@ -7,7 +7,8 @@
 		"state": "EXECUTED",
 		"survey":
 			{"surveyPK": 1},
-		"exerciseRef": "2017"
+		"exerciseRef": "2017",
+		"surveyUuid": "31ec898e-f370-429a-bca4-eab1045aff4e"
 	},
 	{
 		"exercisePK": 2,
@@ -17,6 +18,7 @@
 		"state": "EXECUTED",
 		"survey":
 			{"surveyPK": 1},
-		"exerciseRef": "2017"
+		"exerciseRef": "2017",
+		"surveyUuid": "32ec898e-f370-429a-bca4-eab1045aff4e"
 	}
 ]

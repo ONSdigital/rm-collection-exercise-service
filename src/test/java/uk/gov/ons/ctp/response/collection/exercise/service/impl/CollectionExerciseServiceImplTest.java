@@ -239,7 +239,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise otherExisting = new CollectionExercise();
     otherExisting.setId(uuid);
     // Set up the mock to return a different one with the same exercise ref and survey id
-    when(collexRepo.findByExerciseRefAndSurveyId(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
+    when(collexRepo.findByExerciseRefAndSurveyUuid(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
             .thenReturn(Arrays.asList(otherExisting));
 
     try {
@@ -383,7 +383,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise otherExisting = new CollectionExercise();
     otherExisting.setId(uuid);
     // Set up the mock to return a different one with the same exercise ref and survey id
-    when(collexRepo.findByExerciseRefAndSurveyId(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
+    when(collexRepo.findByExerciseRefAndSurveyUuid(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
             .thenReturn(Arrays.asList(otherExisting));
 
     try {

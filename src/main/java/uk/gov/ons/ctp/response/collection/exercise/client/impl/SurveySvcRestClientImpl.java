@@ -17,8 +17,10 @@ import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -100,4 +102,29 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     }
     return result;
   }
+
+  @Override
+  public SurveyDTO findSurvey(UUID surveyId) {
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
+
+    HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
+
+    log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
+    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
+            String.class);
+
+    SurveyDTO result = null;
+    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+      String responseBody = responseEntity.getBody();
+      try {
+        result = objectMapper.readValue(responseBody, SurveyDTO.class);
+      } catch (IOException e) {
+        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
+        log.error(msg);
+      }
+    }
+    return result;
+  }
+
 }

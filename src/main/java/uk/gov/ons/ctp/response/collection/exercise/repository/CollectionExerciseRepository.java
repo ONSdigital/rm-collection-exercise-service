@@ -24,30 +24,15 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   CollectionExercise findOneById(UUID id);
 
   /**
-   * Query repository for list of collection exercises associated to surveyfk.
-   *
-   * @param surveyfk surveyfk to which collection exercises are associated.
-   * @return List of collection exercises.
-   */
-  List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
-
-  /**
    * Query repository for collection exercise with given period and survey
    *
    * @param exerciseRef collection exercise period
-   * @param surveyfk surveyfk to which collection exercises are associated.
+   * @param surveyUuid surveyfk to which collection exercises are associated.
    * @return List of collection exercises.
    */
-  List<CollectionExercise> findByExerciseRefAndSurveySurveyPK(String exerciseRef, Integer surveyfk);
+  List<CollectionExercise> findByExerciseRefAndSurveyUuid(String exerciseRef, UUID surveyUuid);
 
-  /**
-   * Query repository for collection exercise with given period and survey uuid
-   *
-   * @param exerciseRef collection exercise period
-   * @param surveyUuid uuid to which collection exercises are associated.
-   * @return List of collection exercises.
-   */
-  List<CollectionExercise> findByExerciseRefAndSurveyId(String exerciseRef, UUID surveyUuid);
+  List<CollectionExercise> findBySurveyUuid(UUID surveyUuid);
 
   /**
    * Query repository for list of collection exercises associated with a certain
