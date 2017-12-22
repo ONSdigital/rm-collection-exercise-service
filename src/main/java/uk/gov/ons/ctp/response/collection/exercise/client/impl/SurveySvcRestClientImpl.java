@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -113,21 +114,25 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
-    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
-            String.class);
+    try {
+      log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
+      ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
+              String.class);
 
-    SurveyDTO result = null;
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody();
-      try {
-        result = objectMapper.readValue(responseBody, SurveyDTO.class);
-      } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+      SurveyDTO result = null;
+      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+        String responseBody = responseEntity.getBody();
+        try {
+          result = objectMapper.readValue(responseBody, SurveyDTO.class);
+        } catch (IOException e) {
+          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
+          log.error(msg);
+        }
       }
+      return result;
+    } catch(RestClientException e){
+      return null;
     }
-    return result;
   }
 
 }

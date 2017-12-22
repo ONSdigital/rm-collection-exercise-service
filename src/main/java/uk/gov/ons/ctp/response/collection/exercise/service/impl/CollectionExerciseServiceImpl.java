@@ -22,7 +22,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
@@ -79,7 +78,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
-    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyUuid(collectionExercise.getSurveyUuid());
+    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyId(collectionExercise.getSurveyUuid());
 
     List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo
         .findByExerciseFK(collectionExercise.getExercisePK());

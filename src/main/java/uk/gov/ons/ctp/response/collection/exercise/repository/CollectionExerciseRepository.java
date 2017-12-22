@@ -49,15 +49,15 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
    *
    * @param exercisefk of CollectionExercise.
    * @param sampleunittypefk of SampleUnitType.
-   * @param surveyUuid uuid of Survey.
+   * @param surveyuuid uuid of Survey.
    * @return ActiveActionPlanId
    */
   @Query(value = "SELECT CASE WHEN r.actionplanid IS NULL THEN CAST(df.actionplanid AS VARCHAR) ELSE "
           + "CAST(r.actionplanid AS VARCHAR) END as to_use FROM (SELECT o.* FROM collectionexercise.casetypeoverride o "
           + "WHERE o.exercisefk = :p_exercisefk AND o.sampleunittypefk = :p_sampleunittypefk) r "
-          + "RIGHT OUTER JOIN (SELECT d.* FROM collectionexercise.casetypedefault d WHERE d.surveyfk = :p_surveyfk "
+          + "RIGHT OUTER JOIN (SELECT d.* FROM collectionexercise.casetypedefault d WHERE d.survey_uuid = :p_surveyuuid "
           + "AND d.sampleunittypefk = :p_sampleunittypefk) df ON r.sampleunittypeFK = df.sampleunittypeFK;",
           nativeQuery = true)
   String getActiveActionPlanId(@Param("p_exercisefk") Integer exercisefk,
-      @Param("p_sampleunittypefk") String sampleunittypefk, @Param("p_surveyUuid") UUID surveyUuid);
+      @Param("p_sampleunittypefk") String sampleunittypefk, @Param("p_surveyuuid") UUID surveyuuid);
 }

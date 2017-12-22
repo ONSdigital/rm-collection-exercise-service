@@ -18,7 +18,7 @@ public interface CaseTypeDefaultRepository extends JpaRepository<CaseTypeDefault
    * @param surveyUuid survey uuid to which the Case Type Default is associated.
    * @return list of associated casetypes.
    */
-  List<CaseTypeDefault> findBySurveyUuid(UUID surveyUuid);
+  List<CaseTypeDefault> findBySurveyId(UUID surveyUuid);
 
 
 }
