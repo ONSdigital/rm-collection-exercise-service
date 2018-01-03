@@ -16,4 +16,5 @@ public class SurveySvc {
   private String requestClassifierTypesListPath;
   private String requestClassifierTypesPath;
   private String surveyDetailPath;
+  private String surveyRefPath;
 }

@@ -19,4 +19,11 @@ public interface SurveyService {
    */
   SurveyDTO findSurvey(UUID id);
 
+  /**
+   * Request a survey by reference (the id the business use, e.g. 221 for BRES)
+   * @param surveyRef
+   * @return
+   */
+  SurveyDTO findSurveyByRef(String surveyRef);
+
 }

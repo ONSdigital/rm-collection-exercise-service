@@ -97,6 +97,7 @@ survey-svc:
   request-classifier-types-list-path: /surveys/{surveyId}/classifiertypeselectors
   request-classifier-types-path: /surveys/{surveyId}/classifiertypeselectors/{selectorId}
   survey-detail-path: /surveys/{surveyId}
+  survey-ref-path: /surveys/ref/{surveyRef}
   connection-config:
     scheme: http
     host: localhost

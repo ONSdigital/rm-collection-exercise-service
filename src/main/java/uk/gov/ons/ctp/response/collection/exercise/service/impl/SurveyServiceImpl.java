@@ -24,12 +24,30 @@ public class SurveyServiceImpl implements SurveyService {
 
   @Override
   public SurveyDTO findSurvey(UUID id) {
+    SurveyDTO result = null;
     Survey survey = surveyRepo.findById(id);
 
-    SurveyDTO result = new SurveyDTO();
+    if (survey != null) {
+      result = new SurveyDTO();
 
-    result.setId(survey.getId().toString());
-    result.setSurveyRef(survey.getSurveyRef());
+      result.setId(survey.getId().toString());
+      result.setSurveyRef(survey.getSurveyRef());
+    }
+
+    return result;
+  }
+
+  @Override
+  public SurveyDTO findSurveyByRef(String surveyRef) {
+    SurveyDTO result = null;
+    Survey survey = surveyRepo.findBySurveyRef(surveyRef);
+
+    if (survey != null) {
+      result = new SurveyDTO();
+
+      result.setId(survey.getId().toString());
+      result.setSurveyRef(survey.getSurveyRef());
+    }
 
     return result;
   }

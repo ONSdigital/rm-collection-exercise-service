@@ -107,6 +107,20 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     return result;
   }
 
+  private SurveyDTO getSurveyDtoFromResponseEntity(ResponseEntity<String> responseEntity){
+    SurveyDTO result = null;
+    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+      String responseBody = responseEntity.getBody();
+      try {
+        result = objectMapper.readValue(responseBody, SurveyDTO.class);
+      } catch (IOException e) {
+        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
+        log.error(msg);
+      }
+    }
+    return result;
+  }
+
   @Override
   public SurveyDTO findSurvey(UUID surveyId) {
     UriComponents uriComponents = restUtility.createUriComponents(
@@ -119,17 +133,25 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
               String.class);
 
-      SurveyDTO result = null;
-      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-        String responseBody = responseEntity.getBody();
-        try {
-          result = objectMapper.readValue(responseBody, SurveyDTO.class);
-        } catch (IOException e) {
-          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-          log.error(msg);
-        }
-      }
-      return result;
+      return getSurveyDtoFromResponseEntity(responseEntity);
+    } catch(RestClientException e){
+      return null;
+    }
+  }
+
+  @Override
+  public SurveyDTO findSurveyByRef(String surveyRef) {
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);
+
+    HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
+
+    try {
+      log.debug("about to get to the Survey SVC with surveyRef {}", surveyRef);
+      ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
+              String.class);
+
+      return getSurveyDtoFromResponseEntity(responseEntity);
     } catch(RestClientException e){
       return null;
     }
