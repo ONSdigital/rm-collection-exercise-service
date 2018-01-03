@@ -171,7 +171,7 @@ public class CollectionExerciseEndpoint {
    * @param cv a constraint violation
    * @return a human readable message
    */
-  private static String getMessageForConstraintViolation(ConstraintViolation<?> cv) {
+  private static String getMessageForConstraintViolation(final ConstraintViolation<?> cv) {
     return cv.getPropertyPath() + " " + cv.getMessage();
   }
 
@@ -182,7 +182,7 @@ public class CollectionExerciseEndpoint {
    * @param collexDto The collection exercise data to validate
    * @throws CTPException thrown if constraint violation
    */
-  private void validateConstraints(CollectionExerciseDTO collexDto) throws CTPException {
+  private void validateConstraints(final CollectionExerciseDTO collexDto) throws CTPException {
     javax.validation.Validator validator = VALIDATOR_FACTORY.getValidator();
     Set<ConstraintViolation<CollectionExerciseDTO>> result = validator.validate(collexDto,
             CollectionExerciseDTO.PatchValidation.class);
@@ -205,7 +205,7 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException thrown if constraint violation etc
    */
-  private ResponseEntity<?> patchCollectionExercise(UUID id, CollectionExerciseDTO collexDto) throws CTPException {
+  private ResponseEntity<?> patchCollectionExercise(final UUID id, final CollectionExerciseDTO collexDto) throws CTPException {
     validateConstraints(collexDto);
 
     this.collectionExerciseService.patchCollectionExercise(id, collexDto);
@@ -272,6 +272,7 @@ public class CollectionExerciseEndpoint {
   /**
    * PUT request to update a collection exercise userDescription
    * @param id Collection exercise Id to update
+   * @param surveyId The new survey to associate with this collection exercise
    * @throws CTPException on resource not found
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    */
@@ -345,6 +346,7 @@ public class CollectionExerciseEndpoint {
    * DELETE request to delete a collection exercise
    * @param id Collection exercise Id to delete
    * @throws CTPException on resource not found
+   * @return the collection exercise that was to be deleted
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   public ResponseEntity<CollectionExercise> deleteCollectionExercise(@PathVariable("id") final UUID id)

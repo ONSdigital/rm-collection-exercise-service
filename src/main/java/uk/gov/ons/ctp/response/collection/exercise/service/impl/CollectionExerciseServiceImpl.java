@@ -190,7 +190,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
           // If period/survey not supplied in patchData then this call will trivially return
           validateUniqueness(collex, proposedPeriod, proposedSurvey);
 
-          if (StringUtils.isBlank(patchData.getSurveyId()) == false) {
+          if (!StringUtils.isBlank(patchData.getSurveyId())) {
               UUID surveyId = UUID.fromString(patchData.getSurveyId());
 
               SurveyDTO survey = this.surveyService.findSurvey(surveyId);
@@ -203,13 +203,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
               }
           }
 
-          if (StringUtils.isBlank(patchData.getExerciseRef()) == false) {
+          if (!StringUtils.isBlank(patchData.getExerciseRef())) {
               collex.setExerciseRef(patchData.getExerciseRef());
           }
-          if (StringUtils.isBlank(patchData.getName()) == false) {
+          if (!StringUtils.isBlank(patchData.getName())) {
               collex.setName(patchData.getName());
           }
-          if (StringUtils.isBlank(patchData.getUserDescription()) == false) {
+          if (!StringUtils.isBlank(patchData.getUserDescription())) {
               collex.setUserDescription(patchData.getUserDescription());
           }
 
@@ -230,11 +230,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
    private void validateUniqueness(CollectionExercise existing, String candidatePeriod, UUID candidateSurvey)
            throws CTPException {
-       if (existing.getSurveyUuid().equals(candidateSurvey) == false
-               || existing.getExerciseRef().equals(candidatePeriod) == false) {
+       if (!existing.getSurveyUuid().equals(candidateSurvey)
+               || !existing.getExerciseRef().equals(candidatePeriod)) {
            CollectionExercise otherExisting = findCollectionExercise(candidatePeriod, candidateSurvey);
 
-           if (otherExisting != null && otherExisting.getId().equals(existing.getId()) == false) {
+           if (otherExisting != null && !otherExisting.getId().equals(existing.getId())) {
                throw new CTPException(
                        CTPException.Fault.RESOURCE_VERSION_CONFLICT,
                        String.format("A collection exercise with period %s and id %s already exists.",

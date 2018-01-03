@@ -115,7 +115,6 @@ public class CollectionExerciseEndpointUnitTests {
   private MockMvc textPlainMock;
   private List<Survey> surveyResults;
   private List<SurveyDTO> surveyDtoResults;
-  private List<CollectionExerciseDTO> collectionExerciseDTOResults;
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
   private Collection<CaseType> caseTypeDefaultResults;

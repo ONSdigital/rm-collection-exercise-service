@@ -100,6 +100,7 @@ public interface CollectionExerciseService {
   /**
    * Update a collection exercise
    * @param collex the updated collection exercise
+   * @param id the id of the collection exercise to update
    * @return the updated CollectionExercise object
    */
   CollectionExercise updateCollectionExercise(UUID id, CollectionExerciseDTO collex) throws CTPException;
@@ -109,6 +110,7 @@ public interface CollectionExerciseService {
    * @param id the id of the collection exercise to patch
    * @param collex the patch data
    * @return the patched CollectionExercise object
+   * @throws CTPException thrown if error occurs
    */
   CollectionExercise patchCollectionExercise(UUID id, CollectionExerciseDTO collex) throws CTPException;
 
@@ -116,6 +118,7 @@ public interface CollectionExerciseService {
    * Delete a collection exercise
    * @param id the id of the collection exercise to delete
    * @return the updated CollectionExercise object
+   * @throws CTPException thrown if error occurs
    */
   CollectionExercise deleteCollectionExercise(UUID id) throws CTPException;
 
@@ -123,6 +126,7 @@ public interface CollectionExerciseService {
    * Undelete a collection exercise
    * @param id the id of the collection exercise to delete
    * @return the updated CollectionExercise object
+   * @throws CTPException thrown if error occurs
    */
   CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException;
 
