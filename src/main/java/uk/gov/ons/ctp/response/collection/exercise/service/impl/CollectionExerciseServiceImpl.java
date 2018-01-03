@@ -193,13 +193,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
           if (StringUtils.isBlank(patchData.getSurveyId()) == false) {
               UUID surveyId = UUID.fromString(patchData.getSurveyId());
 
-              // MATTTODO do we need to implement a new check to see if the survey exists here?
-//              if (survey == null) {
-//                  throw new CTPException(CTPException.Fault.BAD_REQUEST,
-//                          String.format("Survey %s does not exist", surveyId));
-//              } else {
+              SurveyDTO survey = this.surveyService.findSurvey(surveyId);
+
+              if (survey == null) {
+                  throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                          String.format("Survey %s does not exist", surveyId));
+              } else {
                   collex.setSurveyUuid(surveyId);
-//              }
+              }
           }
 
           if (StringUtils.isBlank(patchData.getExerciseRef()) == false) {
@@ -258,7 +259,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         // This will throw exception if period & surveyUuid are not unique
         validateUniqueness(existing, period, surveyUuid);
 
-        // MATTTODO do we need to implement a new check to see if the survey exists here?
         SurveyDTO survey = this.surveyService.findSurvey(surveyUuid);
 
         if (survey == null) {

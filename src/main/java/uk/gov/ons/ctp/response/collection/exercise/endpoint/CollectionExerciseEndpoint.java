@@ -443,13 +443,14 @@ public class CollectionExerciseEndpoint {
    */
   private CollectionExerciseDTO addCaseTypesandSurveyId(CollectionExercise collectionExercise) {
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
-   List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
-
-    SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyUuid());
+    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 
     CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
     collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
-    collectionExerciseDTO.setSurveyId(survey.getId());
+    // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now the survey id
+    // is not validated and passed on verbatim
+    collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyUuid().toString());
+
     return collectionExerciseDTO;
   }
 }
