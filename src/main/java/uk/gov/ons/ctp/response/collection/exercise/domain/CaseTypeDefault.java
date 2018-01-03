@@ -27,10 +27,6 @@ public class CaseTypeDefault implements CaseType {
   @Column(name = "casetypedefaultpk")
   private Integer caseTypeDefaultPK;
 
-//  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
-//  @Column(name = "surveyfk")
-//  private Integer surveyFK;
-
   @Column(name="survey_uuid")
   private UUID surveyId;
 

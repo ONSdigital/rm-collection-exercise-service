@@ -42,10 +42,6 @@ public class CollectionExercise {
   @Column(name = "exercisepk")
   private Integer exercisePK;
 
-//  @ManyToOne
-//  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
-//  private Survey survey;
-
   private String name;
 
   @Column(name = "actualexecutiondatetime")
