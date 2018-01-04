@@ -32,7 +32,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>surveysvc-api</artifactId>
-      <version>10.49.1</version>
+      <version>10.49.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>

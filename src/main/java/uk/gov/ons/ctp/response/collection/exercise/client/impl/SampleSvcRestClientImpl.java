@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -59,7 +60,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) {
+  public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException {
 
     UriComponents uriComponents = restUtility.createUriComponents(appConfig.getSampleSvc().getRequestSampleUnitsPath(),
         null, exercise);
@@ -72,29 +73,34 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
 
     SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyUuid());
 
-    CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
-    requestDTO.setCollectionExerciseId(exercise.getId());
-    requestDTO.setSurveyRef(surveyDto.getSurveyRef());
-    requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
-    requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
+    if (surveyDto == null){
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid survey %s for collection exercise %s",
+              exercise.getSurveyUuid(), exercise.getId()));
+    } else {
+      CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
+      requestDTO.setCollectionExerciseId(exercise.getId());
+      requestDTO.setSurveyRef(surveyDto.getSurveyRef());
+      requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
+      requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
 
-    HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
+      HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
 
-    log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
-    ResponseEntity<String> responseEntity = restTemplate.exchange(
-            uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
+      log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
+      ResponseEntity<String> responseEntity = restTemplate.exchange(
+              uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
 
-    SampleUnitsRequestDTO result = null;
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody();
-      try {
-        result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
-      } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+      SampleUnitsRequestDTO result = null;
+      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+        String responseBody = responseEntity.getBody();
+        try {
+          result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
+        } catch (IOException e) {
+          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
+          log.error(msg);
+        }
       }
+      return result;
     }
-    return result;
   }
 
 }
