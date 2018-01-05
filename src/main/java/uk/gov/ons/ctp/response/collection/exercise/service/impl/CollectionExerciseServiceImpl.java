@@ -131,17 +131,17 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     return linkedSummaries;
   }
 
-  @Override
-  public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
-      CollectionExercise collectionExercise = new CollectionExercise();
-
+    /**
+     * Sets the values in a supplied collection exercise from a supplied DTO.
+     * WARNING: Mutates collection exercise
+     * @param collex the dto containing the data
+     * @param collectionExercise the collection exercise to apply the value from the dto to
+     */
+  private void setCollectionExerciseFromDto(CollectionExerciseDTO collex, CollectionExercise collectionExercise) {
       collectionExercise.setName(collex.getName());
       collectionExercise.setUserDescription(collex.getUserDescription());
       collectionExercise.setExerciseRef(collex.getExerciseRef());
-      collectionExercise.setCreated(new Timestamp(new Date().getTime()));
-      collectionExercise.setId(UUID.randomUUID());
       collectionExercise.setSurveyUuid(UUID.fromString(collex.getSurveyId()));
-      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
 
       // In the strictest sense, some of these dates are mandatory fields for collection exercises.  However as they
       // are not supplied at creation time, but later as "events" we will allow them to be null
@@ -161,6 +161,17 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       if (collex.getActualPublishDateTime() != null) {
           collectionExercise.setActualPublishDateTime(new Timestamp(collex.getActualPublishDateTime().getTime()));
       }
+  }
+
+  @Override
+  public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
+      CollectionExercise collectionExercise = new CollectionExercise();
+
+      setCollectionExerciseFromDto(collex, collectionExercise);
+
+      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
+      collectionExercise.setCreated(new Timestamp(new Date().getTime()));
+      collectionExercise.setId(UUID.randomUUID());
 
       return this.collectRepo.save(collectionExercise);
   }
@@ -231,6 +242,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
           if (!StringUtils.isBlank(patchData.getUserDescription())) {
               collex.setUserDescription(patchData.getUserDescription());
           }
+          if (patchData.getScheduledStartDateTime() != null){
+              collex.setScheduledStartDateTime(new Timestamp(patchData.getScheduledStartDateTime().getTime()));
+          }
 
           collex.setUpdated(new Timestamp(new Date().getTime()));
 
@@ -285,11 +299,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
                     CTPException.Fault.BAD_REQUEST,
                     String.format("Survey %s does not exist", surveyUuid));
         } else {
-            existing.setUserDescription(collexDto.getUserDescription());
-            existing.setName(collexDto.getName());
-            existing.setExerciseRef(collexDto.getExerciseRef());
-            existing.setSurveyUuid(surveyUuid);
-
+            setCollectionExerciseFromDto(collexDto, existing);
             existing.setUpdated(new Timestamp(new Date().getTime()));
 
             return this.collectRepo.save(existing);

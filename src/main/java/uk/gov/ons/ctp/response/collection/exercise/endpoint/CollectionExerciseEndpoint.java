@@ -1,9 +1,15 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,6 +21,7 @@ import javax.validation.ValidatorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
@@ -210,6 +217,31 @@ public class CollectionExerciseEndpoint {
 
     this.collectionExerciseService.patchCollectionExercise(id, collexDto);
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * PUT request to update a collection exercise scheduledStartDateTime
+   * @param id Collection exercise Id to update
+   * @param scheduledStart new value for exercise ref
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/scheduledStart", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseScheduledStart(
+          @PathVariable("id") final UUID id,
+          final @RequestBody String scheduledStart)
+          throws CTPException {
+    log.info("Updating collection exercise {}, setting scheduledStartDateTime to {}", id, scheduledStart);
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+
+    try {
+      LocalDateTime date = LocalDateTime.parse(scheduledStart, DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
+      collexDto.setScheduledStartDateTime(java.sql.Timestamp.valueOf(date));
+
+      return patchCollectionExercise(id, collexDto);
+    } catch (DateTimeParseException e){
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", scheduledStart, e.getLocalizedMessage()));
+    }
   }
 
   /**
