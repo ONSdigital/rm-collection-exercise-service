@@ -40,14 +40,17 @@ import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -74,6 +77,9 @@ public class CollectionExerciseEndpoint {
 
   @Autowired
   private SurveyService surveyService;
+
+  @Autowired
+  private EventService eventService;
 
   @Qualifier("collectionExerciseBeanMapper")
   @Autowired
@@ -493,4 +499,22 @@ public class CollectionExerciseEndpoint {
 
     return collectionExerciseDTO;
   }
+
+  @RequestMapping(value = "/{id}/events", method = RequestMethod.POST)
+  public ResponseEntity<?> createCollectionExerciseEvent(
+          @PathVariable("id") final UUID id,
+          final @RequestBody EventDTO eventDto)
+          throws CTPException {
+    log.info("Creating event {} for collection exercise {}", eventDto.getTag(), eventDto.getCollectionExerciseId());
+
+    Event newEvent = eventService.createEvent(eventDto);
+
+    // MATTTODO - fix this
+    URI location = ServletUriComponentsBuilder
+            .fromCurrentRequest().path("/{id}/events")
+            .buildAndExpand(newEvent.getId()).toUri();
+
+    return ResponseEntity.created(location).build();
+  }
+
 }
