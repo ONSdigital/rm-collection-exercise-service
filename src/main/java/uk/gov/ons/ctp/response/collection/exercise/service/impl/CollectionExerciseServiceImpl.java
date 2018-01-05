@@ -143,6 +143,25 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       collectionExercise.setSurveyUuid(UUID.fromString(collex.getSurveyId()));
       collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
 
+      // In the strictest sense, some of these dates are mandatory fields for collection exercises.  However as they
+      // are not supplied at creation time, but later as "events" we will allow them to be null
+      if (collex.getScheduledStartDateTime() != null) {
+          collectionExercise.setScheduledStartDateTime(new Timestamp(collex.getScheduledStartDateTime().getTime()));
+      }
+      if (collex.getScheduledEndDateTime() != null) {
+          collectionExercise.setScheduledEndDateTime(new Timestamp(collex.getScheduledEndDateTime().getTime()));
+      }
+      if (collex.getScheduledExecutionDateTime() != null) {
+          collectionExercise.setScheduledExecutionDateTime(
+                  new Timestamp(collex.getScheduledExecutionDateTime().getTime()));
+      }
+      if (collex.getActualExecutionDateTime() != null) {
+          collectionExercise.setActualExecutionDateTime(new Timestamp(collex.getActualExecutionDateTime().getTime()));
+      }
+      if (collex.getActualPublishDateTime() != null) {
+          collectionExercise.setActualPublishDateTime(new Timestamp(collex.getActualPublishDateTime().getTime()));
+      }
+
       return this.collectRepo.save(collectionExercise);
   }
 
