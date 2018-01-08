@@ -6,6 +6,6 @@
 		"exercisePK": 1,
 		"id": "3ec82e0e-18ff-4886-8703-5b83442041ba",
 		"state": "INIT",
-		"survey": {"surveyPK": 1}
+        "surveyUuid": "31ec898e-f370-429a-bca4-eab1045aff4e"
 	}
 ]

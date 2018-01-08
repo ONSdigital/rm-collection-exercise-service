@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.web.client.RestClientException;
 
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
@@ -12,7 +13,7 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
  * Service responsible for making client calls to the Survey service
  *
  */
-public interface SurveySvcClient {
+public interface SurveySvcClient extends SurveyService {
 
   /**
    * Get classifier type selectors for Survey by UUID.

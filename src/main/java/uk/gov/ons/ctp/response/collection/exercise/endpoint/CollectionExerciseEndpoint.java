@@ -42,6 +42,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSumm
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import static java.util.stream.Collectors.joining;
 
@@ -83,7 +84,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id) throws CTPException {
 
-    Survey survey = surveyService.findSurvey(id);
+    SurveyDTO survey = surveyService.findSurvey(id);
 
     List<CollectionExerciseSummaryDTO> collectionExerciseSummaryDTOList;
 
@@ -170,7 +171,7 @@ public class CollectionExerciseEndpoint {
    * @param cv a constraint violation
    * @return a human readable message
    */
-  private static String getMessageForConstraintViolation(ConstraintViolation<?> cv) {
+  private static String getMessageForConstraintViolation(final ConstraintViolation<?> cv) {
     return cv.getPropertyPath() + " " + cv.getMessage();
   }
 
@@ -181,7 +182,7 @@ public class CollectionExerciseEndpoint {
    * @param collexDto The collection exercise data to validate
    * @throws CTPException thrown if constraint violation
    */
-  private void validateConstraints(CollectionExerciseDTO collexDto) throws CTPException {
+  private void validateConstraints(final CollectionExerciseDTO collexDto) throws CTPException {
     javax.validation.Validator validator = VALIDATOR_FACTORY.getValidator();
     Set<ConstraintViolation<CollectionExerciseDTO>> result = validator.validate(collexDto,
             CollectionExerciseDTO.PatchValidation.class);
@@ -204,7 +205,7 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException thrown if constraint violation etc
    */
-  private ResponseEntity<?> patchCollectionExercise(UUID id, CollectionExerciseDTO collexDto) throws CTPException {
+  private ResponseEntity<?> patchCollectionExercise(final UUID id, final CollectionExerciseDTO collexDto) throws CTPException {
     validateConstraints(collexDto);
 
     this.collectionExerciseService.patchCollectionExercise(id, collexDto);
@@ -271,6 +272,7 @@ public class CollectionExerciseEndpoint {
   /**
    * PUT request to update a collection exercise userDescription
    * @param id Collection exercise Id to update
+   * @param surveyId The new survey to associate with this collection exercise
    * @throws CTPException on resource not found
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    */
@@ -304,32 +306,38 @@ public class CollectionExerciseEndpoint {
           throws CTPException {
     log.info("Creating collection exercise");
     String surveyId = collex.getSurveyId();
+    String surveyRef = collex.getSurveyRef();
+    SurveyDTO survey = null;
 
-    if (StringUtils.isBlank(surveyId)) {
-      throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
+    if (StringUtils.isBlank(surveyId) == false){
+      survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+    } else if (StringUtils.isBlank(surveyRef) == false){
+      survey = this.surveyService.findSurveyByRef(surveyRef);
+      // Downstream expects the surveyId to be present so add it now
+      collex.setSurveyId(survey.getId());
     } else {
-      Survey survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
+    }
 
-      if (survey == null) {
-          throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
+    if (survey == null) {
+        throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
+    } else {
+      CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
+              collex.getExerciseRef(), survey);
+
+      if (existing != null) {
+        throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+                String.format("Collection exercise with survey %s and exerciseRef %s already exists",
+                        survey.getId().toString(),
+                        collex.getExerciseRef()));
       } else {
-        CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
-                collex.getExerciseRef(), survey);
+        CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
 
-        if (existing != null) {
-          throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                  String.format("Collection exercise with survey %s and exerciseRef %s already exists",
-                          survey.getId().toString(),
-                          collex.getExerciseRef()));
-        } else {
-          CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(newCollex.getId()).toUri();
 
-          URI location = ServletUriComponentsBuilder
-                  .fromCurrentRequest().path("/{id}")
-                  .buildAndExpand(newCollex.getId()).toUri();
-
-          return ResponseEntity.created(location).build();
-        }
+        return ResponseEntity.created(location).build();
       }
     }
   }
@@ -338,6 +346,7 @@ public class CollectionExerciseEndpoint {
    * DELETE request to delete a collection exercise
    * @param id Collection exercise Id to delete
    * @throws CTPException on resource not found
+   * @return the collection exercise that was to be deleted
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   public ResponseEntity<CollectionExercise> deleteCollectionExercise(@PathVariable("id") final UUID id)
@@ -442,13 +451,14 @@ public class CollectionExerciseEndpoint {
    */
   private CollectionExerciseDTO addCaseTypesandSurveyId(CollectionExercise collectionExercise) {
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
-   List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
-
-    Survey survey = surveyService.findSurveyByFK(collectionExercise.getSurvey().getSurveyPK());
+    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 
     CollectionExerciseDTO collectionExerciseDTO = mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
     collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
-    collectionExerciseDTO.setSurveyId(survey.getId().toString());
+    // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now the survey id
+    // is not validated and passed on verbatim
+    collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyUuid().toString());
+
     return collectionExerciseDTO;
   }
 }

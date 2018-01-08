@@ -22,14 +22,14 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /**
  * The implementation of the SampleService
@@ -49,15 +49,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
   @Autowired
-  private SurveyRepository surveyRepo;
+  private SurveyService surveyService;
 
   @Autowired
   private SampleLinkRepository sampleLinkRepository;
 
   @Override
-  public List<CollectionExercise> findCollectionExercisesForSurvey(Survey survey) {
-
-    return collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
+  public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
+    return this.collectRepo.findBySurveyUuid(UUID.fromString(survey.getId()));
   }
 
   @Override
@@ -79,9 +78,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
-    Survey survey = surveyRepo.findById(collectionExercise.getSurvey().getId());
-
-    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyFK(survey.getSurveyPK());
+    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyId(collectionExercise.getSurveyUuid());
 
     List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo
         .findByExerciseFK(collectionExercise.getExercisePK());
@@ -136,7 +133,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Override
   public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
-      Survey survey = surveyRepo.findById(UUID.fromString(collex.getSurveyId()));
       CollectionExercise collectionExercise = new CollectionExercise();
 
       collectionExercise.setName(collex.getName());
@@ -144,17 +140,17 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       collectionExercise.setExerciseRef(collex.getExerciseRef());
       collectionExercise.setCreated(new Timestamp(new Date().getTime()));
       collectionExercise.setId(UUID.randomUUID());
-      collectionExercise.setSurvey(survey);
+      collectionExercise.setSurveyUuid(UUID.fromString(collex.getSurveyId()));
       collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
 
       return this.collectRepo.save(collectionExercise);
   }
 
   @Override
-  public CollectionExercise findCollectionExercise(String exerciseRef, Survey survey) {
-      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveySurveyPK(
+  public CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) {
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(
               exerciseRef,
-              survey.getSurveyPK());
+              UUID.fromString(survey.getId()));
 
       switch (existing.size()) {
         case 0:
@@ -166,7 +162,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
    @Override
    public CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) {
-      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(exerciseRef, surveyId);
 
        switch (existing.size()) {
            case 0:
@@ -188,31 +184,32 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
                   ? collex.getExerciseRef()
                   : patchData.getExerciseRef();
           UUID proposedSurvey = patchData.getSurveyId() == null
-                  ? collex.getSurvey().getId()
+                  ? collex.getSurveyUuid()
                   : UUID.fromString(patchData.getSurveyId());
 
           // If period/survey not supplied in patchData then this call will trivially return
           validateUniqueness(collex, proposedPeriod, proposedSurvey);
 
-          if (StringUtils.isBlank(patchData.getSurveyId()) == false) {
+          if (!StringUtils.isBlank(patchData.getSurveyId())) {
               UUID surveyId = UUID.fromString(patchData.getSurveyId());
-              Survey survey = this.surveyRepo.findById(surveyId);
+
+              SurveyDTO survey = this.surveyService.findSurvey(surveyId);
 
               if (survey == null) {
                   throw new CTPException(CTPException.Fault.BAD_REQUEST,
                           String.format("Survey %s does not exist", surveyId));
               } else {
-                  collex.setSurvey(survey);
+                  collex.setSurveyUuid(surveyId);
               }
           }
 
-          if (StringUtils.isBlank(patchData.getExerciseRef()) == false) {
+          if (!StringUtils.isBlank(patchData.getExerciseRef())) {
               collex.setExerciseRef(patchData.getExerciseRef());
           }
-          if (StringUtils.isBlank(patchData.getName()) == false) {
+          if (!StringUtils.isBlank(patchData.getName())) {
               collex.setName(patchData.getName());
           }
-          if (StringUtils.isBlank(patchData.getUserDescription()) == false) {
+          if (!StringUtils.isBlank(patchData.getUserDescription())) {
               collex.setUserDescription(patchData.getUserDescription());
           }
 
@@ -233,11 +230,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
    private void validateUniqueness(CollectionExercise existing, String candidatePeriod, UUID candidateSurvey)
            throws CTPException {
-       if (existing.getSurvey().getId().equals(candidateSurvey) == false
-               || existing.getExerciseRef().equals(candidatePeriod) == false) {
+       if (!existing.getSurveyUuid().equals(candidateSurvey)
+               || !existing.getExerciseRef().equals(candidatePeriod)) {
            CollectionExercise otherExisting = findCollectionExercise(candidatePeriod, candidateSurvey);
 
-           if (otherExisting != null && otherExisting.getId().equals(existing.getId()) == false) {
+           if (otherExisting != null && !otherExisting.getId().equals(existing.getId())) {
                throw new CTPException(
                        CTPException.Fault.RESOURCE_VERSION_CONFLICT,
                        String.format("A collection exercise with period %s and id %s already exists.",
@@ -262,7 +259,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         // This will throw exception if period & surveyUuid are not unique
         validateUniqueness(existing, period, surveyUuid);
 
-        Survey survey = this.surveyRepo.findById(surveyUuid);
+        SurveyDTO survey = this.surveyService.findSurvey(surveyUuid);
 
         if (survey == null) {
             throw new CTPException(
@@ -272,7 +269,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             existing.setUserDescription(collexDto.getUserDescription());
             existing.setName(collexDto.getName());
             existing.setExerciseRef(collexDto.getExerciseRef());
-            existing.setSurvey(survey);
+            existing.setSurveyUuid(surveyUuid);
 
             existing.setUpdated(new Timestamp(new Date().getTime()));
 
