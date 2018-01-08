@@ -1,25 +1,33 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+
+import lombok.extern.slf4j.Slf4j;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import lombok.extern.slf4j.Slf4j;
-import ma.glasnost.orika.MapperFacade;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
@@ -33,9 +41,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * The REST endpoint controller for Collection Exercises.
@@ -45,12 +53,10 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 @Slf4j
 public class CollectionExerciseEndpoint {
 
-  private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
-  private static final String RETURN_COLLECTIONEXERCISENOTFOUND = "Collection Exercise not found for collection exercise Id";
+  private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
+          "Collection Exercise not found for collection exercise Id";
   private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
-
-  @Autowired
-  private SampleService sampleService;
+  private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
 
   @Autowired
   private PartySvcClient partySvcClient;
@@ -141,24 +147,205 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * PUT to manually trigger the request of the sample units from the sample
-   * service for the given collection exercise Id.
-   *
-   * @param id Collection exercise Id for which to trigger delivery of sample
-   *          units
-   * @return total sample units to be delivered.
+   * PUT request to update a collection exercise
+   * @param id Collection exercise Id to update
+   * @param collexDto a DTO containing survey id, name, user description and exercise ref
    * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-  public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
-      throws CTPException {
-    log.debug("Entering collection exercise fetch with Id {}", id);
-    SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
-    if (requestDTO == null) {
-      throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
+  public ResponseEntity<?> updateCollectionExercise(
+          @PathVariable("id") final UUID id,
+          final @Validated(CollectionExerciseDTO.PutValidation.class) @RequestBody CollectionExerciseDTO collexDto)
+          throws CTPException {
+    log.info("Updating collection exercise {}", id);
+
+    this.collectionExerciseService.updateCollectionExercise(id, collexDto);
+
+    return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Method to return a useful message from a ConstraintViolation
+   * @param cv a constraint violation
+   * @return a human readable message
+   */
+  private static String getMessageForConstraintViolation(ConstraintViolation<?> cv) {
+    return cv.getPropertyPath() + " " + cv.getMessage();
+  }
+
+  /**
+   * A method to manually validate the constraints on a CollectionExerciseDTO.  The reason this is needed is for
+   * validating PUTs to subresources.  As these are the literal field values and not a JSON document it's difficult
+   * to get Spring to validate these automatically. Hence the need for some kind of manual validation
+   * @param collexDto The collection exercise data to validate
+   * @throws CTPException thrown if constraint violation
+   */
+  private void validateConstraints(CollectionExerciseDTO collexDto) throws CTPException {
+    javax.validation.Validator validator = VALIDATOR_FACTORY.getValidator();
+    Set<ConstraintViolation<CollectionExerciseDTO>> result = validator.validate(collexDto,
+            CollectionExerciseDTO.PatchValidation.class);
+
+    if (result.size() > 0) {
+      String errorMessage =
+              result
+                .stream()
+                .map(CollectionExerciseEndpoint::getMessageForConstraintViolation)
+                .collect(joining(","));
+
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, errorMessage);
     }
-    return ResponseEntity.ok(requestDTO);
+  }
+
+  /**
+   * Utility method to wrap partial update of a collection exercise
+   * @param id the uuid of the collection exercise to update
+   * @param collexDto a dto containing some or all of the data to update
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   * @throws CTPException thrown if constraint violation etc
+   */
+  private ResponseEntity<?> patchCollectionExercise(UUID id, CollectionExerciseDTO collexDto) throws CTPException {
+    validateConstraints(collexDto);
+
+    this.collectionExerciseService.patchCollectionExercise(id, collexDto);
+    return ResponseEntity.ok().build();
+  }
+
+  /**
+   * PUT request to update a collection exercise exerciseRef
+   * @param id Collection exercise Id to update
+   * @param exerciseRef new value for exercise ref
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/exerciseRef", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseExerciseRef(
+          @PathVariable("id") final UUID id,
+          final @RequestBody String exerciseRef)
+          throws CTPException {
+    log.info("Updating collection exercise {}, setting exerciseRef to {}", id, exerciseRef);
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+    collexDto.setExerciseRef(exerciseRef);
+
+    return patchCollectionExercise(id, collexDto);
+  }
+
+  /**
+   * PUT request to update a collection exercise name
+   * @param id Collection exercise Id to update
+   * @param name new value for name
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/name", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseName(
+          @PathVariable("id") final UUID id,
+          final @RequestBody String name)
+          throws CTPException {
+    log.info("Updating collection exercise {}, setting name to {}", id, name);
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+    collexDto.setName(name);
+
+    return patchCollectionExercise(id, collexDto);
+  }
+
+  /**
+   * PUT request to update a collection exercise userDescription
+   * @param id Collection exercise Id to update
+   * @param userDescription new value for user description
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/userDescription", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseUserDescription(
+          @PathVariable("id") final UUID id,
+          final @RequestBody String userDescription)
+          throws CTPException {
+    log.info("Updating collection exercise {}, setting userDescription to {}", id, userDescription);
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+    collexDto.setUserDescription(userDescription);
+
+    return patchCollectionExercise(id, collexDto);
+  }
+
+  /**
+   * PUT request to update a collection exercise userDescription
+   * @param id Collection exercise Id to update
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/surveyId", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseSurveyId(
+          @PathVariable("id") final UUID id,
+          final @RequestBody String surveyId)
+          throws CTPException {
+    log.info("Updating collection exercise {}, setting surveyId to {}", id, surveyId);
+    try {
+      UUID.fromString(surveyId);
+    } catch (IllegalArgumentException e) {
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, e);
+    }
+
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+    collexDto.setSurveyId(surveyId);
+
+    return patchCollectionExercise(id, collexDto);
+  }
+
+  /**
+   * POST request to create a collection exercise
+   * @param collex A dto containing the data about the collection exercise
+   * @return 201 if all is ok, 400 for bad request, 409 for conflict
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(method = RequestMethod.POST)
+  public ResponseEntity<?> createCollectionExercise(
+          final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody CollectionExerciseDTO collex)
+          throws CTPException {
+    log.info("Creating collection exercise");
+    String surveyId = collex.getSurveyId();
+
+    if (StringUtils.isBlank(surveyId)) {
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
+    } else {
+      Survey survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+
+      if (survey == null) {
+          throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
+      } else {
+        CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
+                collex.getExerciseRef(), survey);
+
+        if (existing != null) {
+          throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+                  String.format("Collection exercise with survey %s and exerciseRef %s already exists",
+                          survey.getId().toString(),
+                          collex.getExerciseRef()));
+        } else {
+          CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
+
+          URI location = ServletUriComponentsBuilder
+                  .fromCurrentRequest().path("/{id}")
+                  .buildAndExpand(newCollex.getId()).toUri();
+
+          return ResponseEntity.created(location).build();
+        }
+      }
+    }
+  }
+
+  /**
+   * DELETE request to delete a collection exercise
+   * @param id Collection exercise Id to delete
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+  public ResponseEntity<CollectionExercise> deleteCollectionExercise(@PathVariable("id") final UUID id)
+      throws CTPException {
+    log.info("Deleting collection exercise {}", id);
+    this.collectionExerciseService.deleteCollectionExercise(id);
+
+    return ResponseEntity.accepted().build();
   }
 
   /**
@@ -255,7 +442,7 @@ public class CollectionExerciseEndpoint {
    */
   private CollectionExerciseDTO addCaseTypesandSurveyId(CollectionExercise collectionExercise) {
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
-    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
+   List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 
     Survey survey = surveyService.findSurveyByFK(collectionExercise.getSurvey().getSurveyPK());
 

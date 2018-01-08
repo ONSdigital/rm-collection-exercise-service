@@ -61,7 +61,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
 
     List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(exercise.getId());
     List<UUID> sampleSummaryUUIDList =  new ArrayList<>();
-    for(SampleLink samplelink : sampleLinks) {
+    for (SampleLink samplelink : sampleLinks) {
       sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
     }
 
@@ -74,7 +74,8 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
     HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
 
     log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
-    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
+    ResponseEntity<String> responseEntity = restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
 
     SampleUnitsRequestDTO result = null;
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {

@@ -50,8 +50,8 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   @Override
   public List<SurveyClassifierDTO> requestClassifierTypeSelectors(final UUID surveyId) throws RestClientException {
 
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getSurveySvc().getRequestClassifierTypesListPath(),
-        null, surveyId);
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getSurveySvc().getRequestClassifierTypesListPath(), null, surveyId);
 
     HttpEntity<List<SurveyClassifierDTO>> httpEntity = restUtility.createHttpEntity(null);
 
@@ -63,7 +63,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
       String responseBody = responseEntity.getBody();
       try {
-        result = objectMapper.readValue(responseBody, new TypeReference<List<SurveyClassifierDTO>>() {});
+        result = objectMapper.readValue(responseBody, new TypeReference<List<SurveyClassifierDTO>>() { });
       } catch (IOException e) {
         String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
         log.error(msg);
@@ -79,8 +79,8 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   public SurveyClassifierTypeDTO requestClassifierTypeSelector(final UUID surveyId, final UUID classifierType)
       throws RestClientException {
 
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getSurveySvc().getRequestClassifierTypesPath(),
-        null, surveyId, classifierType);
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getSurveySvc().getRequestClassifierTypesPath(), null, surveyId, classifierType);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
