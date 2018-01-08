@@ -19,4 +19,11 @@ public interface SurveyRepository extends JpaRepository<Survey, Integer> {
      */
     Survey findById(UUID id);
 
+    /**
+     * Query reporitory for survey by survey ref
+     * @param surveyRef survey ref to find
+     * @return Survey object
+     */
+    Survey findBySurveyRef(String surveyRef);
+
 }
