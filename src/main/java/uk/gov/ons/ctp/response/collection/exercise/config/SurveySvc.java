@@ -15,4 +15,6 @@ public class SurveySvc {
   private RestUtilityConfig connectionConfig;
   private String requestClassifierTypesListPath;
   private String requestClassifierTypesPath;
+  private String surveyDetailPath;
+  private String surveyRefPath;
 }

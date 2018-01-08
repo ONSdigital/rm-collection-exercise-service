@@ -51,6 +51,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,7 +75,9 @@ import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAd
 @Slf4j
 public class CollectionExerciseEndpointUnitTests {
   private static final String LINK_SAMPLE_SUMMARY_JSON = "{\"sampleSummaryIds\": [\"87043936-4d38-4696-952a-fcd55a51be96\", \"cf23b621-c613-424c-9d0d-53a9cfa82f3a\"]}";
-  private static final UUID SURVEY_ID = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
+  private static final UUID SURVEY_ID_1 = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
+  private static final UUID SURVEY_ID_2 = UUID.fromString("32ec898e-f370-429a-bca4-eab1045aff4e");
+  private static final String SURVEY_REF_1 = "221";
   private static final int SURVEY_FK = 1;
   private static final UUID COLLECTIONEXERCISE_ID1 = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
   private static final UUID COLLECTIONEXERCISE_ID2 = UUID.fromString("e653d1ce-551b-4b41-b05c-eec02f71891e");
@@ -111,7 +114,7 @@ public class CollectionExerciseEndpointUnitTests {
   private MockMvc mockCollectionExerciseMvc;
   private MockMvc textPlainMock;
   private List<Survey> surveyResults;
-  private List<CollectionExerciseDTO> collectionExerciseDTOResults;
+  private List<SurveyDTO> surveyDtoResults;
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
   private Collection<CaseType> caseTypeDefaultResults;
@@ -139,6 +142,7 @@ public class CollectionExerciseEndpointUnitTests {
             .build();
 
     this.surveyResults = FixtureHelper.loadClassFixtures(Survey[].class);
+    this.surveyDtoResults = FixtureHelper.loadClassFixtures(SurveyDTO[].class);
     this.collectionExerciseResults = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     this.sampleUnitsRequestDTOResults = FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
     this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
@@ -157,11 +161,11 @@ public class CollectionExerciseEndpointUnitTests {
    */
   @Test
   public void findCollectionExercisesForSurvey() throws Exception {
-    when(surveyService.findSurvey(SURVEY_ID)).thenReturn(surveyResults.get(0));
-    when(collectionExerciseService.findCollectionExercisesForSurvey(surveyResults.get(0)))
+    when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
+    when(collectionExerciseService.findCollectionExercisesForSurvey(surveyDtoResults.get(0)))
         .thenReturn(collectionExerciseResults);
 
-    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID)));
+    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID_1)));
 
     actions.andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
@@ -205,7 +209,7 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(collectionExerciseResults.get(0));
     when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
         .thenReturn(caseTypeDefaultResults);
-    when(surveyService.findSurveyByFK(SURVEY_FK)).thenReturn(surveyResults.get(0));
+    when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e"))).thenReturn(surveyDtoResults.get(0));
 
     MockHttpServletRequestBuilder json = getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
 
@@ -219,7 +223,7 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercise"))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
-        .andExpect(jsonPath("$.surveyId", is(SURVEY_ID.toString())))
+        .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
         .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
@@ -256,7 +260,8 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(collectionExerciseResults.get(0));
     when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
         .thenReturn(caseTypeDefaultResults);
-    when(surveyService.findSurveyByFK(SURVEY_FK)).thenReturn(surveyResults.get(0));
+    when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
+    when(surveyService.findSurvey(SURVEY_ID_2)).thenReturn(surveyDtoResults.get(1));
 
     ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/")));
 
@@ -264,12 +269,12 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getAllCollectionExercises"))
         .andExpect(jsonPath("$[0].id", is(COLLECTIONEXERCISE_ID1.toString())))
-        .andExpect(jsonPath("$[0].surveyId", is(SURVEY_ID.toString())))
+        .andExpect(jsonPath("$[0].surveyId", is(SURVEY_ID_1.toString())))
         .andExpect(jsonPath("$[0].name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$[0].state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$[0].exerciseRef", is("2017")))
         .andExpect(jsonPath("$[1].id", is(COLLECTIONEXERCISE_ID2.toString())))
-        .andExpect(jsonPath("$[1].surveyId", is(SURVEY_ID.toString())))
+        .andExpect(jsonPath("$[1].surveyId", is(SURVEY_ID_2.toString())))
         .andExpect(jsonPath("$[1].name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$[1].state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$[1].exerciseRef", is("2017")));
@@ -349,7 +354,7 @@ public class CollectionExerciseEndpointUnitTests {
   @Test
   public void testCreateCollectionExercise() throws Exception {
     CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
-    when(surveyService.findSurvey(SURVEY_ID)).thenReturn(surveyResults.get(0));
+    when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
     when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
 
     String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
@@ -361,11 +366,25 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   @Test
+  public void testCreateCollectionExerciseBySurveyRef() throws Exception {
+    CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
+    when(surveyService.findSurveyByRef(SURVEY_REF_1)).thenReturn(surveyDtoResults.get(0));
+    when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
+
+    String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post-survey-ref.json");
+    ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
+
+    actions
+            .andExpect(status().isCreated())
+            .andExpect(header().string("location", "http://localhost/collectionexercises/3ec82e0e-18ff-4886-8703-5b83442041ba"));
+  }
+
+  @Test
   public void testCreateCollectionExerciseAlreadyExists() throws Exception {
     CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
-    when(surveyService.findSurvey(SURVEY_ID)).thenReturn(surveyResults.get(0));
+    when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
     when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
-    when(this.collectionExerciseService.findCollectionExercise("202103", surveyResults.get(0))).thenReturn(created);
+    when(this.collectionExerciseService.findCollectionExercise("202103", surveyDtoResults.get(0))).thenReturn(created);
 
     String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
     ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));

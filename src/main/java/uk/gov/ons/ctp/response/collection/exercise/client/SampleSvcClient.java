@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
@@ -17,6 +18,6 @@ public interface SampleSvcClient {
    *          units.
    * @return the total number of sample units in the collection exercise.
    */
-  SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise);
+  SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException;
 
 }

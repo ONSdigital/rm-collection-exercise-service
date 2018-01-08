@@ -148,7 +148,7 @@ public class SampleUnitDistributor {
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         actionPlanId = collectionExerciseRepo
             .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
-                exercise.getSurvey().getSurveyPK());
+                exercise.getSurveyUuid());
       } else {
         SampleUnitChild child = new SampleUnitChild();
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
@@ -158,7 +158,7 @@ public class SampleUnitDistributor {
         child.setActionPlanId(
             collectionExerciseRepo
                 .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
-                    exercise.getSurvey().getSurveyPK()));
+                    exercise.getSurveyUuid()));
         children.add(child);
       }
     }
