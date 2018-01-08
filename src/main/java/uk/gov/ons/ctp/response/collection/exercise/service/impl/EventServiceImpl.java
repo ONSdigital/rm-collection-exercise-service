@@ -13,6 +13,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,5 +41,10 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
 
         return event;
+    }
+
+    @Override
+    public List<Event> getEvents(UUID collexId) throws CTPException {
+        return this.eventRepository.findByCollectionExerciseId(collexId);
     }
 }

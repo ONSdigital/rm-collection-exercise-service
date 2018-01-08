@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -516,5 +517,15 @@ public class CollectionExerciseEndpoint {
 
     return ResponseEntity.created(location).build();
   }
+
+  @RequestMapping(value = "/{id}/events", method = RequestMethod.GET)
+  public ResponseEntity<List<EventDTO>> getCollectionExerciseEvents(
+          @PathVariable("id") final UUID id)
+          throws CTPException {
+    List<EventDTO> result = this.eventService.getEvents(id).stream().map(EventService::createEventDTOFromEvent).collect(Collectors.toList());
+
+    return ResponseEntity.ok(result);
+  }
+
 
 }
