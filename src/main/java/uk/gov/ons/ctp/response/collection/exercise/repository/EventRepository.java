@@ -10,6 +10,6 @@ import java.util.UUID;
 public interface EventRepository extends JpaRepository<Event, Integer> {
     Event findOneById(UUID id);
     List<Event> findByCollectionExercise(CollectionExercise collex);
-    List<Event> findByCollectionExerciseAndTag(CollectionExercise collex, String tag);
+    Event findOneByCollectionExerciseAndTag(CollectionExercise collex, String tag);
     List<Event> findByCollectionExerciseId(UUID collexId);
 }

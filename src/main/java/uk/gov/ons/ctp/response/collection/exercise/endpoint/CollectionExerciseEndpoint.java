@@ -508,12 +508,13 @@ public class CollectionExerciseEndpoint {
           throws CTPException {
     log.info("Creating event {} for collection exercise {}", eventDto.getTag(), eventDto.getCollectionExerciseId());
 
+    eventDto.setCollectionExerciseId(id);
+
     Event newEvent = eventService.createEvent(eventDto);
 
-    // MATTTODO - fix this
     URI location = ServletUriComponentsBuilder
-            .fromCurrentRequest().path("/{id}/events")
-            .buildAndExpand(newEvent.getId()).toUri();
+            .fromCurrentRequest().path("/{id}/events/{tag}")
+            .buildAndExpand(newEvent.getId(),newEvent.getTag()).toUri();
 
     return ResponseEntity.created(location).build();
   }

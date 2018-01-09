@@ -28,19 +28,33 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event createEvent(EventDTO eventDto) throws CTPException {
-        CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(eventDto.getCollectionExerciseId());
+        CollectionExercise collex =
+                this.collectionExerciseService.findCollectionExercise(eventDto.getCollectionExerciseId());
 
-        Event event = new Event();
+        if (collex == null) {
+            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                    String.format("Collection exercise %s does not exist", eventDto.getCollectionExerciseId()));
+        } else {
+            Event existing = this.eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
 
-        event.setCollectionExercise(collex);
-        event.setTag(eventDto.getTag());
-        event.setId(UUID.randomUUID());
-        event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
-        event.setCreated(new Timestamp(new Date().getTime()));
+            if (existing != null) {
+                throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+                        String.format("Event %s already exists for collection exercise %s",
+                                eventDto.getTag(), collex.getId()));
+            } else {
+                Event event = new Event();
 
-        eventRepository.save(event);
+                event.setCollectionExercise(collex);
+                event.setTag(eventDto.getTag());
+                event.setId(UUID.randomUUID());
+                event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
+                event.setCreated(new Timestamp(new Date().getTime()));
 
-        return event;
+                eventRepository.save(event);
+
+                return event;
+            }
+        }
     }
 
     @Override
