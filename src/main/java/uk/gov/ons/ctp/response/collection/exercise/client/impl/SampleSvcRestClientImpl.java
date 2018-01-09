@@ -13,14 +13,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,42 +54,53 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private SurveyService surveyService;
+
   @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
-  public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) {
+  public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException {
 
     UriComponents uriComponents = restUtility.createUriComponents(appConfig.getSampleSvc().getRequestSampleUnitsPath(),
         null, exercise);
 
     List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(exercise.getId());
     List<UUID> sampleSummaryUUIDList =  new ArrayList<>();
-    for(SampleLink samplelink : sampleLinks) {
+    for (SampleLink samplelink : sampleLinks) {
       sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
     }
 
-    CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
-    requestDTO.setCollectionExerciseId(exercise.getId());
-    requestDTO.setSurveyRef(exercise.getSurvey().getSurveyRef());
-    requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
-    requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
+    SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyUuid());
 
-    HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
+    if (surveyDto == null){
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid survey %s for collection exercise %s",
+              exercise.getSurveyUuid(), exercise.getId()));
+    } else {
+      CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
+      requestDTO.setCollectionExerciseId(exercise.getId());
+      requestDTO.setSurveyRef(surveyDto.getSurveyRef());
+      requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
+      requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
 
-    log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
-    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
+      HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
 
-    SampleUnitsRequestDTO result = null;
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody();
-      try {
-        result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
-      } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+      log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
+      ResponseEntity<String> responseEntity = restTemplate.exchange(
+              uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
+
+      SampleUnitsRequestDTO result = null;
+      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+        String responseBody = responseEntity.getBody();
+        try {
+          result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
+        } catch (IOException e) {
+          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
+          log.error(msg);
+        }
       }
+      return result;
     }
-    return result;
   }
 
 }

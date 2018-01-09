@@ -96,6 +96,8 @@ sample-svc:
 survey-svc:
   request-classifier-types-list-path: /surveys/{surveyId}/classifiertypeselectors
   request-classifier-types-path: /surveys/{surveyId}/classifiertypeselectors/{selectorId}
+  survey-detail-path: /surveys/{surveyId}
+  survey-ref-path: /surveys/ref/{surveyRef}
   connection-config:
     scheme: http
     host: localhost
@@ -130,7 +132,7 @@ party-svc:
   connection-config:
     scheme: http
     host: localhost
-    port: 5062
+    port: 8081
     username: admin
     password: secret
     # how many times should we attempt connection on failure

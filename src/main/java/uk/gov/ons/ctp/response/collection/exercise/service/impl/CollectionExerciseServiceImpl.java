@@ -1,7 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,22 +11,25 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /**
  * The implementation of the SampleService
@@ -44,15 +49,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
   @Autowired
-  private SurveyRepository surveyRepo;
+  private SurveyService surveyService;
 
   @Autowired
   private SampleLinkRepository sampleLinkRepository;
 
   @Override
-  public List<CollectionExercise> findCollectionExercisesForSurvey(Survey survey) {
-
-    return collectRepo.findBySurveySurveyPK(survey.getSurveyPK());
+  public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
+    return this.collectRepo.findBySurveyUuid(UUID.fromString(survey.getId()));
   }
 
   @Override
@@ -74,9 +78,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
-    Survey survey = surveyRepo.findById(collectionExercise.getSurvey().getId());
-
-    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyFK(survey.getSurveyPK());
+    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyId(collectionExercise.getSurveyUuid());
 
     List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo
         .findByExerciseFK(collectionExercise.getExercisePK());
@@ -129,7 +131,185 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     return linkedSummaries;
   }
 
-  /**
+  @Override
+  public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
+      CollectionExercise collectionExercise = new CollectionExercise();
+
+      collectionExercise.setName(collex.getName());
+      collectionExercise.setUserDescription(collex.getUserDescription());
+      collectionExercise.setExerciseRef(collex.getExerciseRef());
+      collectionExercise.setCreated(new Timestamp(new Date().getTime()));
+      collectionExercise.setId(UUID.randomUUID());
+      collectionExercise.setSurveyUuid(UUID.fromString(collex.getSurveyId()));
+      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
+
+      return this.collectRepo.save(collectionExercise);
+  }
+
+  @Override
+  public CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) {
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(
+              exerciseRef,
+              UUID.fromString(survey.getId()));
+
+      switch (existing.size()) {
+        case 0:
+          return null;
+        default:
+          return existing.get(0);
+      }
+  }
+
+   @Override
+   public CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) {
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(exerciseRef, surveyId);
+
+       switch (existing.size()) {
+           case 0:
+               return null;
+           default:
+               return existing.get(0);
+       }
+   }
+
+   @Override
+   public CollectionExercise patchCollectionExercise(UUID id, CollectionExerciseDTO patchData) throws CTPException {
+      CollectionExercise collex = findCollectionExercise(id);
+
+      if (collex == null) {
+          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                  String.format("Collection exercise %s not found", id));
+      } else {
+          String proposedPeriod = patchData.getExerciseRef() == null
+                  ? collex.getExerciseRef()
+                  : patchData.getExerciseRef();
+          UUID proposedSurvey = patchData.getSurveyId() == null
+                  ? collex.getSurveyUuid()
+                  : UUID.fromString(patchData.getSurveyId());
+
+          // If period/survey not supplied in patchData then this call will trivially return
+          validateUniqueness(collex, proposedPeriod, proposedSurvey);
+
+          if (!StringUtils.isBlank(patchData.getSurveyId())) {
+              UUID surveyId = UUID.fromString(patchData.getSurveyId());
+
+              SurveyDTO survey = this.surveyService.findSurvey(surveyId);
+
+              if (survey == null) {
+                  throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                          String.format("Survey %s does not exist", surveyId));
+              } else {
+                  collex.setSurveyUuid(surveyId);
+              }
+          }
+
+          if (!StringUtils.isBlank(patchData.getExerciseRef())) {
+              collex.setExerciseRef(patchData.getExerciseRef());
+          }
+          if (!StringUtils.isBlank(patchData.getName())) {
+              collex.setName(patchData.getName());
+          }
+          if (!StringUtils.isBlank(patchData.getUserDescription())) {
+              collex.setUserDescription(patchData.getUserDescription());
+          }
+
+          collex.setUpdated(new Timestamp(new Date().getTime()));
+
+          return this.collectRepo.save(collex);
+      }
+   }
+
+    /**
+     * This method checks whether the supplied CollectionExercise (existing) can change it's period to candidatePeriod
+     * and it's survey to candidateSurvey without breaching the uniqueness constraint on those fields
+     * @param existing the collection exercise that is to be updated
+     * @param candidatePeriod the proposed new value for the period (exerciseRef)
+     * @param candidateSurvey the proposed new value for the survey
+     * @throws CTPException thrown if there is an existing different collection exercise that already uses the proposed
+     *                      combination of period and survey
+     */
+   private void validateUniqueness(CollectionExercise existing, String candidatePeriod, UUID candidateSurvey)
+           throws CTPException {
+       if (!existing.getSurveyUuid().equals(candidateSurvey)
+               || !existing.getExerciseRef().equals(candidatePeriod)) {
+           CollectionExercise otherExisting = findCollectionExercise(candidatePeriod, candidateSurvey);
+
+           if (otherExisting != null && !otherExisting.getId().equals(existing.getId())) {
+               throw new CTPException(
+                       CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+                       String.format("A collection exercise with period %s and id %s already exists.",
+                               candidatePeriod,
+                               candidateSurvey));
+           }
+       }
+   }
+
+    @Override
+  public CollectionExercise updateCollectionExercise(UUID id, CollectionExerciseDTO collexDto)  throws CTPException {
+    CollectionExercise existing = findCollectionExercise(id);
+
+    if (existing == null) {
+      throw new CTPException(
+              CTPException.Fault.RESOURCE_NOT_FOUND,
+              String.format("Collection exercise with id %s does not exist", id));
+    } else {
+        UUID surveyUuid = UUID.fromString(collexDto.getSurveyId());
+        String period = collexDto.getExerciseRef();
+
+        // This will throw exception if period & surveyUuid are not unique
+        validateUniqueness(existing, period, surveyUuid);
+
+        SurveyDTO survey = this.surveyService.findSurvey(surveyUuid);
+
+        if (survey == null) {
+            throw new CTPException(
+                    CTPException.Fault.BAD_REQUEST,
+                    String.format("Survey %s does not exist", surveyUuid));
+        } else {
+            existing.setUserDescription(collexDto.getUserDescription());
+            existing.setName(collexDto.getName());
+            existing.setExerciseRef(collexDto.getExerciseRef());
+            existing.setSurveyUuid(surveyUuid);
+
+            existing.setUpdated(new Timestamp(new Date().getTime()));
+
+            return this.collectRepo.save(existing);
+        }
+    }
+  }
+
+
+    /**
+     * Utility method to set the deleted flag for a collection exercise
+     * @param id the uuid of the collection exercise to update
+     * @param deleted true if the collection exercise is to be marked as deleted, false otherwise
+     * @return 200 if success, 404 if not found
+     * @throws CTPException thrown if specified collection exercise does not exist
+     */
+  private CollectionExercise updateCollectionExerciseDeleted(UUID id, boolean deleted) throws CTPException {
+      CollectionExercise collex = findCollectionExercise(id);
+
+      if (collex == null) {
+          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                  String.format("Collection exercise %s does not exists", id));
+      } else {
+          collex.setDeleted(deleted);
+
+          return this.collectRepo.save(collex);
+      }
+  }
+
+    @Override
+    public CollectionExercise deleteCollectionExercise(UUID id) throws CTPException {
+      return updateCollectionExerciseDeleted(id, true);
+    }
+
+    @Override
+    public CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException {
+        return updateCollectionExerciseDeleted(id, false);
+    }
+
+    /**
    * Links a sample summary to a collection exercise and stores in db
    *
    * @param sampleSummaryId the Id of the Sample summary to be linked

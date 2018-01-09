@@ -42,10 +42,6 @@ public class CollectionExercise {
   @Column(name = "exercisepk")
   private Integer exercisePK;
 
-  @ManyToOne
-  @JoinColumn(name = "surveyfk", referencedColumnName = "surveypk")
-  private Survey survey;
-
   private String name;
 
   @Column(name = "actualexecutiondatetime")
@@ -85,4 +81,18 @@ public class CollectionExercise {
   @Column(name = "exerciseref")
   private String exerciseRef;
 
+  @Column(name = "user_description", length = 50)
+  private String userDescription;
+
+  @Column(name = "created")
+  private Timestamp created;
+
+  @Column(name = "updated")
+  private Timestamp updated;
+
+  @Column(name = "deleted")
+  private Boolean deleted;
+
+  @Column(name="survey_uuid")
+  private UUID surveyUuid;
 }

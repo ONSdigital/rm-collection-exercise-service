@@ -24,12 +24,15 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   CollectionExercise findOneById(UUID id);
 
   /**
-   * Query repository for list of collection exercises associated to surveyfk.
+   * Query repository for collection exercise with given period and survey
    *
-   * @param surveyfk surveyfk to which collection exercises are associated.
+   * @param exerciseRef collection exercise period
+   * @param surveyUuid surveyfk to which collection exercises are associated.
    * @return List of collection exercises.
    */
-  List<CollectionExercise> findBySurveySurveyPK(Integer surveyfk);
+  List<CollectionExercise> findByExerciseRefAndSurveyUuid(String exerciseRef, UUID surveyUuid);
+
+  List<CollectionExercise> findBySurveyUuid(UUID surveyUuid);
 
   /**
    * Query repository for list of collection exercises associated with a certain
@@ -46,15 +49,15 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
    *
    * @param exercisefk of CollectionExercise.
    * @param sampleunittypefk of SampleUnitType.
-   * @param surveyfk of Survey.
+   * @param surveyuuid uuid of Survey.
    * @return ActiveActionPlanId
    */
   @Query(value = "SELECT CASE WHEN r.actionplanid IS NULL THEN CAST(df.actionplanid AS VARCHAR) ELSE "
           + "CAST(r.actionplanid AS VARCHAR) END as to_use FROM (SELECT o.* FROM collectionexercise.casetypeoverride o "
           + "WHERE o.exercisefk = :p_exercisefk AND o.sampleunittypefk = :p_sampleunittypefk) r "
-          + "RIGHT OUTER JOIN (SELECT d.* FROM collectionexercise.casetypedefault d WHERE d.surveyfk = :p_surveyfk "
+          + "RIGHT OUTER JOIN (SELECT d.* FROM collectionexercise.casetypedefault d WHERE d.survey_uuid = :p_surveyuuid "
           + "AND d.sampleunittypefk = :p_sampleunittypefk) df ON r.sampleunittypeFK = df.sampleunittypeFK;",
           nativeQuery = true)
   String getActiveActionPlanId(@Param("p_exercisefk") Integer exercisefk,
-      @Param("p_sampleunittypefk") String sampleunittypefk, @Param("p_surveyfk") Integer surveyfk);
+      @Param("p_sampleunittypefk") String sampleunittypefk, @Param("p_surveyuuid") UUID surveyuuid);
 }

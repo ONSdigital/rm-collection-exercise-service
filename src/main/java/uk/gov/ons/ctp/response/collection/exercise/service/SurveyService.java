@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.util.UUID;
 
@@ -16,14 +17,13 @@ public interface SurveyService {
    * @param id the survey Id for which to request survey.
    * @return the survey object
    */
-  Survey findSurvey(UUID id);
+  SurveyDTO findSurvey(UUID id);
 
   /**
-   * Request the delivery of survey from the Survey Service.
-   *
-   * @param surveyFK the survey FK for which to request survey.
-   * @return the survey object
+   * Request a survey by reference (the id the business use, e.g. 221 for BRES)
+   * @param surveyRef
+   * @return
    */
-  Survey findSurveyByFK(int surveyFK);
+  SurveyDTO findSurveyByRef(String surveyRef);
 
 }

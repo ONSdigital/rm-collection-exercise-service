@@ -54,7 +54,8 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add("searchString", searchString);
 
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getCollectionInstrumentSvc().getRequestCollectionInstruments(), queryParams);
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getCollectionInstrumentSvc().getRequestCollectionInstruments(), queryParams);
 
     HttpEntity<List<CollectionInstrumentDTO>> httpEntity = restUtility.createHttpEntity(null);
 
@@ -65,7 +66,7 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
       String responseBody = responseEntity.getBody();
       try {
-        result = objectMapper.readValue(responseBody, new TypeReference<List<CollectionInstrumentDTO>>() {});
+        result = objectMapper.readValue(responseBody, new TypeReference<List<CollectionInstrumentDTO>>() { });
       } catch (IOException e) {
         String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
         log.error(msg);

@@ -25,7 +25,8 @@ public class SampleLink {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "samplelinkseq_gen")
-  @GenericGenerator(name = "samplelinkseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
+  @GenericGenerator(name = "samplelinkseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+          parameters = {
       @Parameter(name = "sequence_name", value = "collectionexercise.samplelinkpkseq"),
       @Parameter(name = "increment_size", value = "1")
   })
