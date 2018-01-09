@@ -95,12 +95,12 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
-  public ResponseEntity<List<CollectionExerciseSummaryDTO>> getCollectionExercisesForSurvey(
+  public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id) throws CTPException {
 
     SurveyDTO survey = surveyService.findSurvey(id);
 
-    List<CollectionExerciseSummaryDTO> collectionExerciseSummaryDTOList;
+    List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
 
     if (survey == null) {
       throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
@@ -110,7 +110,7 @@ public class CollectionExerciseEndpoint {
       List<CollectionExercise> collectionExerciseList = collectionExerciseService
           .findCollectionExercisesForSurvey(survey);
       collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
-          CollectionExerciseSummaryDTO.class);
+          CollectionExerciseDTO.class);
       if (collectionExerciseList.isEmpty()) {
         return ResponseEntity.noContent().build();
       }
