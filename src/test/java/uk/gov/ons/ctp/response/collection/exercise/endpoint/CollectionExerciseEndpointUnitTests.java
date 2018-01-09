@@ -171,7 +171,6 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
         .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(jsonPath("$[0].*", hasSize(3)))
         .andExpect(jsonPath("$[*].id",
             containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
         .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
