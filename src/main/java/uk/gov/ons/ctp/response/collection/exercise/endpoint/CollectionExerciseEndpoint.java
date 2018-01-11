@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -519,6 +520,7 @@ public class CollectionExerciseEndpoint {
     return ResponseEntity.created(location).build();
   }
 
+
   @RequestMapping(value = "/{id}/events", method = RequestMethod.GET)
   public ResponseEntity<List<EventDTO>> getCollectionExerciseEvents(
           @PathVariable("id") final UUID id)
@@ -526,6 +528,78 @@ public class CollectionExerciseEndpoint {
     List<EventDTO> result = this.eventService.getEvents(id).stream().map(EventService::createEventDTOFromEvent).collect(Collectors.toList());
 
     return ResponseEntity.ok(result);
+  }
+
+  /**
+   * PUT request to update a collection event date
+   * @param id Collection exercise Id
+   * @param tag collection exercise event tag
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> updateEventDate(
+          @PathVariable("id") final UUID id,
+          @PathVariable("tag") final String tag,
+          final @RequestBody String date)
+          throws CTPException {
+
+    Date finalDate = null;
+
+    log.info("Adding collection exercise {}, setting date to {}", id, date);
+
+      try
+        {
+          LocalDateTime parseDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
+          finalDate = Date.from(parseDate.atZone(ZoneId.systemDefault()).toInstant());
+
+        }
+        catch (DateTimeParseException e)
+        {
+           throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", date, e.getLocalizedMessage()));
+        }
+
+    Event event = eventService.updateEvent(id, tag, finalDate);
+
+    return ResponseEntity.ok().build();
+
+  }
+
+
+    /**
+     * GET to find event from the collection exercise service for
+     * the given event tag collection Id.
+     * @param  id collection exercise id
+     * @param  tag collection exercise event tag
+     * @return event associated to collection exercise
+     * @throws CTPException on resource not found
+     */
+    @RequestMapping(value = "/{id}/event/{tag}", method = RequestMethod.GET)
+    public ResponseEntity<Event> getEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
+            throws CTPException {
+        log.debug("Entering Event fetch with event id {}, event tag {} ",id, tag);
+
+        Event event = eventService.getEvent(id, tag);
+
+        return ResponseEntity.ok(event);
+    }
+
+
+  /**
+   * DELETE request to delete a collection exercise event
+   * @param id Collection exercise Id
+   * @param  tag collection exercise event tag
+   * @throws CTPException on resource not found
+   * @return the collection exercise event that was to be deleted
+   */
+  @RequestMapping(value = "/{id}/{tag}", method = RequestMethod.DELETE)
+  public ResponseEntity<Event> deleteCollectionExerciseEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
+          throws CTPException {
+    log.info("Deleting collection exercise event id {}, event tag ", id, tag);
+
+    eventService.deleteEvent(id, tag);
+
+    return ResponseEntity.accepted().build();
   }
 
 

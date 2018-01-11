@@ -6,6 +6,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Date;
 
 public interface EventService {
     Event createEvent(EventDTO eventDto) throws CTPException;
@@ -21,4 +22,8 @@ public interface EventService {
 
         return dto;
     }
+
+    public Event updateEvent(UUID collexUuid, String tag, Date date) throws CTPException;
+    public Event getEvent(UUID collexUuid, String tag) throws CTPException;
+    public Event deleteEvent(UUID collexUuid, String tag) throws CTPException;
 }
