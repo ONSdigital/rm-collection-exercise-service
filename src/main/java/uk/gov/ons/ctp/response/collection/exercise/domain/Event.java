@@ -57,4 +57,7 @@ public class Event {
 
   private Boolean deleted = false;
 
+  @Column(name="message_sent")
+  private Timestamp messageSent;
+
 }

@@ -35,3 +35,12 @@ databaseChangeLog:
             comment: US004 - add event table
             path: us004-event-table.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-5
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US004 - message sent flag
+            path: us004-message-sent.sql
+            relativeToChangelogFile: true
