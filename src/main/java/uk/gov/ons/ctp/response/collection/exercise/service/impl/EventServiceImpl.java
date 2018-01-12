@@ -61,4 +61,87 @@ public class EventServiceImpl implements EventService {
     public List<Event> getEvents(UUID collexId) throws CTPException {
         return this.eventRepository.findByCollectionExerciseId(collexId);
     }
+
+    @Override
+    public Event updateEvent(UUID collexUuid, String tag, Date date) throws CTPException
+    {
+        CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexUuid);
+        if (collex != null)
+        {
+            Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
+            if (event != null)
+            {
+                event.setTimestamp(new Timestamp(date.getTime()));
+
+                this.eventRepository.save(event);
+            }
+            else
+                {
+                   throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, "message");
+                }
+
+                return event;
+        }
+        else
+            {
+                  throw new CTPException(CTPException.Fault.BAD_REQUEST, "message");
+
+            }
+
+
+    }
+
+    @Override
+    public Event getEvent(UUID collexUuid, String tag) throws CTPException
+    {
+        CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexUuid);
+        if (collex != null)
+        {
+            Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
+            if (event != null)
+            {
+                return event;
+            }
+            else
+            {
+                throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, "message");
+            }
+
+        }
+        else
+        {
+            throw new CTPException(CTPException.Fault.BAD_REQUEST, "message");
+
+        }
+
+    }
+
+    public Event deleteEvent(UUID collexUuid, String tag) throws CTPException
+    {
+
+        CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexUuid);
+        if (collex != null)
+        {
+            Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
+            if (event != null)
+            {
+                event.setDeleted(true);
+                this.eventRepository.delete(event);
+
+                return event;
+            }
+            else
+            {
+                throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, "message");
+            }
+
+        }
+        else
+        {
+            throw new CTPException(CTPException.Fault.BAD_REQUEST, "message");
+
+        }
+
+    }
+
 }
