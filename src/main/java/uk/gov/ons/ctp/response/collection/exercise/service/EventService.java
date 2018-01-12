@@ -16,7 +16,8 @@ public interface EventService {
     static EventDTO createEventDTOFromEvent(Event event){
         EventDTO dto = new EventDTO();
 
-        dto.setCollectionExerciseId(event.getId());
+        dto.setCollectionExerciseId(event.getCollectionExercise().getId());
+        dto.setId(event.getId());
         dto.setTag(event.getTag());
         dto.setTimestamp(event.getTimestamp());
 
