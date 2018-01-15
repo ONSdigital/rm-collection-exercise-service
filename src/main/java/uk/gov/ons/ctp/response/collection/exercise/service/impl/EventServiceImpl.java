@@ -116,6 +116,17 @@ public class EventServiceImpl implements EventService {
 
     }
 
+    @Override
+    public Event getEvent(UUID eventId) throws CTPException {
+        Event event = this.eventRepository.findOneById(eventId);
+
+        if (event == null){
+            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event));
+        } else {
+            return event;
+        }
+    }
+
     public Event deleteEvent(UUID collexUuid, String tag) throws CTPException
     {
 
@@ -147,6 +158,24 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> getOutstandingEvents() {
         return this.eventRepository.findByMessageSentNotNull();
+    }
+
+    @Override
+    public void setEventMessageSent(UUID eventId) throws CTPException {
+        Event event = getEvent(eventId);
+
+        event.setMessageSent(new Timestamp(new Date().getTime()));
+
+        this.eventRepository.save(event);
+    }
+
+    @Override
+    public void clearEventMessageSent(UUID eventId) throws CTPException {
+        Event event = getEvent(eventId);
+
+        event.setMessageSent(null);
+
+        this.eventRepository.save(event);
     }
 
 }
