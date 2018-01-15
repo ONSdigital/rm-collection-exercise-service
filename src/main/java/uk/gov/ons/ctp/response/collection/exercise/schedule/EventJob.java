@@ -9,6 +9,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.util.Date;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Slf4j
 public class EventJob implements Job {
     @Autowired
-    private EventService eventService;
+    private CollectionExerciseEventPublisher eventPublisher;
 
     @Override
     public void execute(JobExecutionContext jec) throws JobExecutionException {
@@ -31,11 +32,9 @@ public class EventJob implements Job {
         log.info("Executing event: {} - {} - {}", tag, collexId, date);
 
         try {
-            this.eventService.setEventMessageSent(eventId);
+            this.eventPublisher.publishCollectionExerciseEvent(eventId, collexId, tag, date);
         } catch (CTPException e) {
-            String message = String.format("Failed to set event %s as message sent", eventId);
-            log.error(message);
-
+            String message = String.format("Error publishing collection exercise event %s", eventId);
             throw new JobExecutionException(message, e);
         }
     }

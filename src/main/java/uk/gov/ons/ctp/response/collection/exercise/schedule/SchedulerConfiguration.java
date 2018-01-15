@@ -9,6 +9,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -99,6 +100,9 @@ public class SchedulerConfiguration {
 
     @Bean
     public Scheduler scheduler() throws SchedulerException, IOException {
+        // Force creation of the fanout exchange before any jobs are scheduled
+        fanout();
+
         StdSchedulerFactory factory = new StdSchedulerFactory();
         factory.initialize(new ClassPathResource("quartz.properties").getInputStream());
 
@@ -117,5 +121,10 @@ public class SchedulerConfiguration {
         log.debug("Starting Scheduler threads");
         scheduler.start();
         return scheduler;
+    }
+
+    @Bean
+    public FanoutExchange fanout() {
+        return new FanoutExchange("collex-event-message-outbound-exchange");
     }
 }
