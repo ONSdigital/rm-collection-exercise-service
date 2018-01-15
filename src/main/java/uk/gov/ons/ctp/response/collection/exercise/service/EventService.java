@@ -24,7 +24,12 @@ public interface EventService {
         return dto;
     }
 
-    public Event updateEvent(UUID collexUuid, String tag, Date date) throws CTPException;
-    public Event getEvent(UUID collexUuid, String tag) throws CTPException;
-    public Event deleteEvent(UUID collexUuid, String tag) throws CTPException;
+    Event updateEvent(UUID collexUuid, String tag, Date date) throws CTPException;
+    Event getEvent(UUID collexUuid, String tag) throws CTPException;
+    Event getEvent(UUID eventId) throws CTPException;
+    Event deleteEvent(UUID collexUuid, String tag) throws CTPException;
+    List<Event> getOutstandingEvents();
+    void setEventMessageSent(UUID eventId) throws CTPException;
+    void clearEventMessageSent(UUID eventId) throws CTPException;
+
 }
