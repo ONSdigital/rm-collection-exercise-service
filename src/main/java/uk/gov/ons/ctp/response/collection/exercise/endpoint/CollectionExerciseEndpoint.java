@@ -513,7 +513,7 @@ public class CollectionExerciseEndpoint {
           @PathVariable("id") final UUID id,
           final @RequestBody EventDTO eventDto)
           throws CTPException {
-    log.info("Creating event {} for collection exercise {}", eventDto.getTag(), eventDto.getCollectionExerciseId());
+    log.info("Creating event {} for collection exercise {}", eventDto.getTag(), id);
 
     eventDto.setCollectionExerciseId(id);
 
