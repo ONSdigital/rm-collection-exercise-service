@@ -21,6 +21,8 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -51,6 +53,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
+import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
@@ -86,6 +89,9 @@ public class CollectionExerciseEndpoint {
   @Qualifier("collectionExerciseBeanMapper")
   @Autowired
   private MapperFacade mapperFacade;
+
+  @Autowired
+  private Scheduler scheduler;
 
   /**
    * GET to find collection exercises from the collection exercise service for
@@ -516,6 +522,12 @@ public class CollectionExerciseEndpoint {
     URI location = ServletUriComponentsBuilder
             .fromCurrentRequest().path("/{id}/events/{tag}")
             .buildAndExpand(newEvent.getId(),newEvent.getTag()).toUri();
+
+    try {
+      SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
+    } catch (SchedulerException e) {
+        log.error("Failed to schedule event: " + newEvent);
+    }
 
     return ResponseEntity.created(location).build();
   }
