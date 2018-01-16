@@ -71,11 +71,11 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
       sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
     }
 
-    SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyUuid());
+    SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyId());
 
     if (surveyDto == null){
       throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid survey %s for collection exercise %s",
-              exercise.getSurveyUuid(), exercise.getId()));
+              exercise.getSurveyId(), exercise.getId()));
     } else {
       CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
       requestDTO.setCollectionExerciseId(exercise.getId());

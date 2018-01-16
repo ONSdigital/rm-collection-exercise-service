@@ -44,6 +44,14 @@ public interface CollectionExerciseService {
   List<CollectionExercise> findAllCollectionExercise();
 
   /**
+   * Find a collection exercise from a survey ref (e.g. 221) and a collection exercise ref (e.g. 201808)
+   * @param surveyRef the survey ref
+   * @param exerciseRef the collection exercise ref
+   * @return the specified collection exercise or null if not found
+   */
+  CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef);
+
+  /**
    * find a list of all sample summary linked to a collection exercise
    *
    * @param id the collection exercise Id to find the linked sample summaries

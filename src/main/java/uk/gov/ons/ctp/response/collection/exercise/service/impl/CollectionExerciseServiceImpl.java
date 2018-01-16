@@ -56,7 +56,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
-    return this.collectRepo.findBySurveyUuid(UUID.fromString(survey.getId()));
+    return this.collectRepo.findBySurveyId(UUID.fromString(survey.getId()));
   }
 
   @Override
@@ -76,9 +76,21 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
+  public CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef) {
+      CollectionExercise collex = null;
+      SurveyDTO survey = this.surveyService.findSurveyByRef(surveyRef);
+
+      if (survey != null){
+          collex = findCollectionExercise(exerciseRef, survey);
+      }
+
+      return collex;
+  }
+
+  @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
-    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyId(collectionExercise.getSurveyUuid());
+    List<CaseTypeDefault> caseTypeDefaultList = caseTypeDefaultRepo.findBySurveyId(collectionExercise.getSurveyId());
 
     List<CaseTypeOverride> caseTypeOverrideList = caseTypeOverrideRepo
         .findByExerciseFK(collectionExercise.getExercisePK());
@@ -141,7 +153,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       collectionExercise.setName(collex.getName());
       collectionExercise.setUserDescription(collex.getUserDescription());
       collectionExercise.setExerciseRef(collex.getExerciseRef());
-      collectionExercise.setSurveyUuid(UUID.fromString(collex.getSurveyId()));
+      collectionExercise.setSurveyId(UUID.fromString(collex.getSurveyId()));
 
       // In the strictest sense, some of these dates are mandatory fields for collection exercises.  However as they
       // are not supplied at creation time, but later as "events" we will allow them to be null
@@ -178,7 +190,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Override
   public CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) {
-      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyId(
               exerciseRef,
               UUID.fromString(survey.getId()));
 
@@ -192,7 +204,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
    @Override
    public CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) {
-      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyUuid(exerciseRef, surveyId);
+      List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
 
        switch (existing.size()) {
            case 0:
@@ -214,7 +226,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
                   ? collex.getExerciseRef()
                   : patchData.getExerciseRef();
           UUID proposedSurvey = patchData.getSurveyId() == null
-                  ? collex.getSurveyUuid()
+                  ? collex.getSurveyId()
                   : UUID.fromString(patchData.getSurveyId());
 
           // If period/survey not supplied in patchData then this call will trivially return
@@ -229,7 +241,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
                   throw new CTPException(CTPException.Fault.BAD_REQUEST,
                           String.format("Survey %s does not exist", surveyId));
               } else {
-                  collex.setSurveyUuid(surveyId);
+                  collex.setSurveyId(surveyId);
               }
           }
 
@@ -263,7 +275,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
    private void validateUniqueness(CollectionExercise existing, String candidatePeriod, UUID candidateSurvey)
            throws CTPException {
-       if (!existing.getSurveyUuid().equals(candidateSurvey)
+       if (!existing.getSurveyId().equals(candidateSurvey)
                || !existing.getExerciseRef().equals(candidatePeriod)) {
            CollectionExercise otherExisting = findCollectionExercise(candidatePeriod, candidateSurvey);
 
@@ -289,7 +301,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         UUID surveyUuid = UUID.fromString(collexDto.getSurveyId());
         String period = collexDto.getExerciseRef();
 
-        // This will throw exception if period & surveyUuid are not unique
+        // This will throw exception if period & surveyId are not unique
         validateUniqueness(existing, period, surveyUuid);
 
         SurveyDTO survey = this.surveyService.findSurvey(surveyUuid);

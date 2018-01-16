@@ -144,11 +144,11 @@ public class SampleUnitDistributorTest {
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitParentOnly);
 
     when(collectionExerciseRepo.getActiveActionPlanId(collectionExercise.getExercisePK(), "B",
-        collectionExercise.getSurveyUuid()))
+        collectionExercise.getSurveyId()))
             .thenReturn(ACTION_PLAN_ID_PARENT);
 
     when(collectionExerciseRepo.getActiveActionPlanId(collectionExercise.getExercisePK(), "BI",
-        collectionExercise.getSurveyUuid()))
+        collectionExercise.getSurveyId()))
             .thenReturn(ACTION_PLAN_ID_CHILD);
     when(
         sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
@@ -298,7 +298,7 @@ public class SampleUnitDistributorTest {
 
     // Override happy path scenario so no ActionPlanId is returned.
     when(collectionExerciseRepo.getActiveActionPlanId(collectionExercise.getExercisePK(), "B",
-        collectionExercise.getSurveyUuid()))
+        collectionExercise.getSurveyId()))
             .thenReturn(null);
 
     // Count of SampleUnitGroups would not match as didn't publish the

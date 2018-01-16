@@ -5,7 +5,7 @@
     "name": "BRES_2016",
     "scheduledExecutionDateTime": 1494846000001,
     "state": "EXECUTED",
-    "surveyUuid": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
     "sampleSize": 2
   },
   {
@@ -14,7 +14,7 @@
     "name": "BRES_2016",
     "scheduledExecutionDateTime": 1494846000002,
     "state": "EXECUTED",
-    "surveyUuid": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
     "sampleSize": 2
   }
 ]
