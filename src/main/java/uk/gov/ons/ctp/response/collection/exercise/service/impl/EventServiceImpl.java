@@ -77,15 +77,16 @@ public class EventServiceImpl implements EventService {
             }
             else
                 {
-                   throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, "message");
+                    throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                            String.format("Event %s does not exist", event.getId()));
                 }
 
                 return event;
         }
         else
             {
-                  throw new CTPException(CTPException.Fault.BAD_REQUEST, "message");
-
+                throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                        String.format("Collection exercise %s does not exist", collex.getId()));
             }
 
 
@@ -104,14 +105,15 @@ public class EventServiceImpl implements EventService {
             }
             else
             {
-                throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, "message");
+                throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                        String.format("Event %s does not exist", event.getId()));
             }
 
         }
         else
         {
-            throw new CTPException(CTPException.Fault.BAD_REQUEST, "message");
-
+            throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                    String.format("Collection exercise %s does not exist", collex.getId()));
         }
 
     }
@@ -132,13 +134,15 @@ public class EventServiceImpl implements EventService {
             }
             else
             {
-                throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, "message");
+                throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                        String.format("Event %s does not exist", event.getId()));
             }
 
         }
         else
         {
-            throw new CTPException(CTPException.Fault.BAD_REQUEST, "message");
+            throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                    String.format("Collection exercise %s does not exist", collex.getId()));
 
         }
 

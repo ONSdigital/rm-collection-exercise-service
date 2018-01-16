@@ -574,7 +574,7 @@ public class CollectionExerciseEndpoint {
      * @return event associated to collection exercise
      * @throws CTPException on resource not found
      */
-    @RequestMapping(value = "/{id}/event/{tag}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.GET)
     public ResponseEntity<Event> getEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
             throws CTPException {
         log.debug("Entering Event fetch with event id {}, event tag {} ",id, tag);
@@ -592,7 +592,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException on resource not found
    * @return the collection exercise event that was to be deleted
    */
-  @RequestMapping(value = "/{id}/{tag}", method = RequestMethod.DELETE)
+  @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.DELETE)
   public ResponseEntity<Event> deleteCollectionExerciseEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
           throws CTPException {
     log.info("Deleting collection exercise event id {}, event tag ", id, tag);
