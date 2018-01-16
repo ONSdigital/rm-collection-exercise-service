@@ -15,9 +15,13 @@ import static uk.gov.ons.ctp.common.MvcHelper.putJson;
 import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
+import java.time.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.util.*;
+import java.text.SimpleDateFormat;
 
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
@@ -46,6 +50,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
@@ -86,8 +91,10 @@ public class CollectionExerciseEndpointUnitTests {
   private static final UUID SAMPLE_SUMMARY_ID1 = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
   private static final UUID SAMPLE_SUMMARY_ID2 = UUID.fromString("cf23b621-c613-424c-9d0d-53a9cfa82f3a");
 
+
   @InjectMocks
   private CollectionExerciseEndpoint colectionExerciseEndpoint;
+
 
   @Mock
   private SampleService sampleService;
@@ -100,6 +107,9 @@ public class CollectionExerciseEndpointUnitTests {
 
   @Mock
   private SurveyService surveyService;
+
+  @Mock
+  private EventService eventService;
 
   @Spy
   private MapperFacade mapperFacade = new CollectionExerciseBeanMapper();
@@ -522,6 +532,80 @@ public class CollectionExerciseEndpointUnitTests {
     verify(this.collectionExerciseService).deleteCollectionExercise(uuidCaptor.capture());
 
     assertEquals(uuid, uuidCaptor.getValue());
+  }
+
+@Test
+public void testUpdateEvent() throws Exception
+{
+
+  UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+  String newDate = "2017-10-07T00:00:00.000+0000";
+  MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+          String.format("/collectionexercises/%s/events/End", uuid.toString()),
+          new Object[0])
+          .content(newDate)
+          .contentType(MediaType.TEXT_PLAIN);
+
+  ResultActions actions = this.textPlainMock.perform(builder);
+
+  actions.andExpect(status().isOk());
+
+  ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+  ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+  ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);
+  ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
+
+  SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+  Date parseDate= null;
+  try {
+        parseDate = formatter.parse(newDate);
+
+      }
+      catch (ParseException e)
+      {
+          throw new ParseException("Date parse exception",e.getErrorOffset());
+      }
+
+      verify(this.eventService).updateEvent(uuidCaptor.capture(), tagCaptor.capture(), dateCaptor.capture());
+
+  assertEquals(uuid, uuidCaptor.getValue());
+  assertEquals("End", tagCaptor.getValue());
+  assertEquals(parseDate, dateCaptor.getValue());
+
+}
+
+
+  @Test
+  public void testGetEvent() throws Exception
+  {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(String.format("/collectionexercises/%s/events/End", uuid.toString()));
+    ResultActions actions = mockCollectionExerciseMvc.perform(builder);
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);
+
+    verify(this.eventService).getEvent(uuidCaptor.capture(), tagCaptor.capture());
+  }
+
+
+  @Test
+  public void testDeleteEvent() throws Exception
+  {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete(String.format("/collectionexercises/%s/events/End", uuid.toString()));
+
+    ResultActions actions = mockCollectionExerciseMvc.perform(builder);
+    actions.andExpect(status().isAccepted());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);
+
+    verify(this.eventService).deleteEvent(uuidCaptor.capture(), tagCaptor.capture());
+    assertEquals(uuid, uuidCaptor.getValue());
+    assertEquals("End", tagCaptor.getValue());
+
   }
 
 }
