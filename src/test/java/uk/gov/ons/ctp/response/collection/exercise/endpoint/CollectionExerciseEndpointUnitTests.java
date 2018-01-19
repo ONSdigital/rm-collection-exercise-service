@@ -534,6 +534,11 @@ public class CollectionExerciseEndpointUnitTests {
     assertEquals(uuid, uuidCaptor.getValue());
   }
 
+  /**
+   * Test to update collection exercise event timestamp(date) linked to a collection exercise
+   *
+   * @throws Exception exception thrown
+   */
 @Test
 public void testUpdateEvent() throws Exception
 {
@@ -574,7 +579,11 @@ public void testUpdateEvent() throws Exception
 
 }
 
-
+  /**
+   * Test to get exercise event linked to a collection exercise
+   *
+   * @throws Exception exception thrown
+   */
   @Test
   public void testGetEvent() throws Exception
   {
@@ -590,6 +599,11 @@ public void testUpdateEvent() throws Exception
   }
 
 
+  /**
+   * Test to delete collection exercise event linked to a collection exercise
+   *
+   * @throws Exception exception thrown
+   */
   @Test
   public void testDeleteEvent() throws Exception
   {

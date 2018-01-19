@@ -228,3 +228,69 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ```
 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found. An `HTTP 204 No Content` status code is returned if there are no sample summaries linked to the specified collection exercise.
+
+
+
+# Collection Exercise Event Service API
+This part of the page  documents the Collection Exercise event service API endpoints. Apart from the Service Information endpoint, all these endpoints are secured using HTTP basic authentication. All endpoints return an `HTTP 200 OK` status code except where noted otherwise.
+
+## Service Information
+
+## Update Collection Event Exercise
+* `PUT /collectionexercises/14fb3e68-4dca-46db-bf49-04b84e07e97c/events/End` will update the collection exercise event timestamp with an ID of `14fb3e68-4dca-46db-bf49-04b84e07e97c`.
+* Returns 200 OK if the resource is updated
+
+
+### Example JSON Request Body
+
+```
+json
+{
+    "date": "2017-10-09T00:00:00.000+0000"
+}
+```
+
+## Get Event Linked To Collection Exercise event
+* `GET /collectionexercises/14fb3e68-4dca-46db-bf49-04b84e07e97c/events/End` will return an event linked to a collection exercise.
+
+
+### Example JSON Response
+```
+json
+{
+    "id": "87ea52d1-745b-45fb-b1f7-148d33be09ed",
+    "eventPK": 3,
+    "tag": "End",
+    "timestamp": "2017-10-09T00:00:00.000+0000",
+    "collectionExercise": {
+        "id": "14fb3e68-4dca-46db-bf49-04b84e07e97c",
+        "exercisePK": 3,
+        "name": "SOCIAL",
+        "actualExecutionDateTime": null,
+        "scheduledExecutionDateTime": null,
+        "scheduledStartDateTime": "2001-12-31T12:00:00.000+0000",
+        "actualPublishDateTime": null,
+        "periodStartDateTime": "2017-09-08T00:00:00.000+0000",
+        "periodEndDateTime": "2017-09-08T00:00:00.000+0000",
+        "scheduledReturnDateTime": "2017-10-06T00:00:00.000+0000",
+        "scheduledEndDateTime": "2099-01-01T00:00:00.000+0000",
+        "executedBy": null,
+        "state": "INIT",
+        "sampleSize": null,
+        "exerciseRef": "SOCIAL_201712",
+        "userDescription": null,
+        "created": null,
+        "updated": null,
+        "deleted": false,
+        "surveyUuid": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef67"
+    }
+```
+
+An `HTTP 404 Not Found` status code is returned if the collection exercise event with the specified ID could not be found.
+
+
+
+## Delete Collection Exercise event
+* `DELETE /collectionexercises/9139f443-b44d-4aaf-a5bb-942a7916e49e/events/End` will delete the collection exercise event with an ID of `9139f443-b44d-4aaf-a5bb-942a7916e49e`.
+
+An `HTTP 202 ` status code is returned if the collection exercise event with the specified ID deleted.
