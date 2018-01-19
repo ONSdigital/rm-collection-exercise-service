@@ -177,13 +177,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context-support</artifactId>
     </dependency>
-
-      <dependency>
-          <groupId>uk.gov.ons.ctp.common</groupId>
-          <artifactId>framework</artifactId>
-          <version>10.49.6</version>
-      </dependency>
-
   </dependencies>
 
   <scm>
