@@ -243,7 +243,9 @@ public class CollectionExerciseApplication {
   public CustomObjectMapper customObjectMapper() {
     CustomObjectMapper mapper = new CustomObjectMapper();
 
-    mapper.setDateFormat(new MultiIsoDateFormat());
+    // This code is commented out for now (and the Python loader kludged) to allow the PR for this to proceed
+    // but will reinstate in the next interation
+    // mapper.setDateFormat(new MultiIsoDateFormat());
 
     return mapper;
   }
