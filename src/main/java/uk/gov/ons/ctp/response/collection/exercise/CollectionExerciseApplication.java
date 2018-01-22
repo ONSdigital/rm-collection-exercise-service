@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
