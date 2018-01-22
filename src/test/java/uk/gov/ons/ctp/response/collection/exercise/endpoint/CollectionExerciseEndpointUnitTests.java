@@ -553,7 +553,7 @@ public void testUpdateEvent() throws Exception
 
   ResultActions actions = this.textPlainMock.perform(builder);
 
-  actions.andExpect(status().isOk());
+  actions.andExpect(status().isNoContent());
 
   ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
   ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
@@ -611,7 +611,7 @@ public void testUpdateEvent() throws Exception
     MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete(String.format("/collectionexercises/%s/events/End", uuid.toString()));
 
     ResultActions actions = mockCollectionExerciseMvc.perform(builder);
-    actions.andExpect(status().isAccepted());
+    actions.andExpect(status().isNoContent());
 
     ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
     ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);

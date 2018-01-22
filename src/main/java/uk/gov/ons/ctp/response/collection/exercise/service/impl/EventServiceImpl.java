@@ -1,11 +1,15 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -25,6 +29,9 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private CollectionExerciseEventPublisher eventPublisher;
 
     @Override
     public Event createEvent(EventDTO eventDto) throws CTPException {
@@ -50,7 +57,11 @@ public class EventServiceImpl implements EventService {
                 event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
                 event.setCreated(new Timestamp(new Date().getTime()));
 
-                eventRepository.save(event);
+                event = eventRepository.save(event);
+
+                eventPublisher.publishCollectionExerciseEvent(
+                        CollectionExerciseEventPublisher.MessageType.EventCreated,
+                        EventService.createEventDTOFromEvent(event));
 
                 return event;
             }
@@ -74,6 +85,10 @@ public class EventServiceImpl implements EventService {
                 event.setTimestamp(new Timestamp(date.getTime()));
 
                 this.eventRepository.save(event);
+
+                eventPublisher.publishCollectionExerciseEvent(
+                        CollectionExerciseEventPublisher.MessageType.EventUpdated,
+                        EventService.createEventDTOFromEvent(event));
             }
             else
                 {
@@ -86,7 +101,7 @@ public class EventServiceImpl implements EventService {
         else
             {
                 throw new CTPException(CTPException.Fault.BAD_REQUEST,
-                        String.format("Collection exercise %s does not exist", collex.getId()));
+                        String.format("Collection exercise %s does not exist", collexUuid));
             }
 
 
@@ -141,12 +156,15 @@ public class EventServiceImpl implements EventService {
                 event.setDeleted(true);
                 this.eventRepository.delete(event);
 
+                eventPublisher.publishCollectionExerciseEvent(
+                        CollectionExerciseEventPublisher.MessageType.EventDeleted,
+                        EventService.createEventDTOFromEvent(event));
                 return event;
             }
             else
             {
                 throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                        String.format("Event %s does not exist", event.getId()));
+                        String.format("Event %s does not exist", tag));
             }
 
         }

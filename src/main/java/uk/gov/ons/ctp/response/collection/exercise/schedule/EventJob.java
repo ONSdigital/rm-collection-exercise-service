@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.util.Date;
@@ -32,7 +33,13 @@ public class EventJob implements Job {
         log.info("Executing event: {} - {} - {}", tag, collexId, date);
 
         try {
-            this.eventPublisher.publishCollectionExerciseEvent(eventId, collexId, tag, date);
+            EventDTO event = new EventDTO();
+            event.setId(eventId);
+            event.setCollectionExerciseId(collexId);
+            event.setTag(tag);
+            event.setTimestamp(date);
+
+            this.eventPublisher.publishCollectionExerciseEvent(CollectionExerciseEventPublisher.MessageType.EventElapsed, event);
         } catch (CTPException e) {
             String message = String.format("Error publishing collection exercise event %s", eventId);
             throw new JobExecutionException(message, e);

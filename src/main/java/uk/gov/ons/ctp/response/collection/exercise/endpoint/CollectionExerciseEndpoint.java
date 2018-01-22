@@ -571,7 +571,7 @@ public class CollectionExerciseEndpoint {
 
     Event event = eventService.updateEvent(id, tag, finalDate);
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
 
   }
 
@@ -609,7 +609,7 @@ public class CollectionExerciseEndpoint {
 
     eventService.deleteEvent(id, tag);
 
-    return ResponseEntity.accepted().build();
+    return ResponseEntity.noContent().build();
   }
 
   /**
