@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -246,6 +247,8 @@ public class CollectionExerciseApplication {
     // This code is commented out for now (and the Python loader kludged) to allow the PR for this to proceed
     // but will reinstate in the next interation
     // mapper.setDateFormat(new MultiIsoDateFormat());
+
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     return mapper;
   }
