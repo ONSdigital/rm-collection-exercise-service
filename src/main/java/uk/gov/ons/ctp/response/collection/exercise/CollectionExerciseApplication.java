@@ -240,7 +240,9 @@ public class CollectionExerciseApplication {
   @Bean
   @Primary
   public CustomObjectMapper customObjectMapper() {
-    return new CustomObjectMapper();
+    CustomObjectMapper mapper = new CustomObjectMapper();
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return mapper;
   }
 
   /**
