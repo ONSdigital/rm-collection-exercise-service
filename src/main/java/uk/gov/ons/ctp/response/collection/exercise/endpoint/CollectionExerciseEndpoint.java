@@ -1,11 +1,18 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -13,6 +20,8 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +42,16 @@ import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
+import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -68,9 +79,15 @@ public class CollectionExerciseEndpoint {
   @Autowired
   private SurveyService surveyService;
 
+  @Autowired
+  private EventService eventService;
+
   @Qualifier("collectionExerciseBeanMapper")
   @Autowired
   private MapperFacade mapperFacade;
+
+  @Autowired
+  private Scheduler scheduler;
 
   /**
    * GET to find collection exercises from the collection exercise service for
@@ -210,6 +227,31 @@ public class CollectionExerciseEndpoint {
 
     this.collectionExerciseService.patchCollectionExercise(id, collexDto);
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * PUT request to update a collection exercise scheduledStartDateTime
+   * @param id Collection exercise Id to update
+   * @param scheduledStart new value for exercise ref
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/scheduledStart", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseScheduledStart(
+          @PathVariable("id") final UUID id,
+          final @RequestBody String scheduledStart)
+          throws CTPException {
+    log.info("Updating collection exercise {}, setting scheduledStartDateTime to {}", id, scheduledStart);
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+
+    try {
+      LocalDateTime date = LocalDateTime.parse(scheduledStart, DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
+      collexDto.setScheduledStartDateTime(java.sql.Timestamp.valueOf(date));
+
+      return patchCollectionExercise(id, collexDto);
+    } catch (DateTimeParseException e){
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", scheduledStart, e.getLocalizedMessage()));
+    }
   }
 
   /**
@@ -457,8 +499,139 @@ public class CollectionExerciseEndpoint {
     collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
     // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now the survey id
     // is not validated and passed on verbatim
-    collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyUuid().toString());
+    collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyId().toString());
 
     return collectionExerciseDTO;
   }
+
+  @RequestMapping(value = "/{id}/events", method = RequestMethod.POST)
+  public ResponseEntity<?> createCollectionExerciseEvent(
+          @PathVariable("id") final UUID id,
+          final @RequestBody EventDTO eventDto)
+          throws CTPException {
+    log.info("Creating event {} for collection exercise {}", eventDto.getTag(), id);
+
+    eventDto.setCollectionExerciseId(id);
+
+    Event newEvent = eventService.createEvent(eventDto);
+
+    URI location = ServletUriComponentsBuilder
+            .fromCurrentRequest().path("/{id}/events/{tag}")
+            .buildAndExpand(newEvent.getId(),newEvent.getTag()).toUri();
+
+    try {
+      SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
+    } catch (SchedulerException e) {
+        log.error("Failed to schedule event: " + newEvent);
+    }
+
+    return ResponseEntity.created(location).build();
+  }
+
+
+  @RequestMapping(value = "/{id}/events", method = RequestMethod.GET)
+  public ResponseEntity<List<EventDTO>> getCollectionExerciseEvents(
+          @PathVariable("id") final UUID id)
+          throws CTPException {
+    List<EventDTO> result = this.eventService.getEvents(id).stream().map(EventService::createEventDTOFromEvent).collect(Collectors.toList());
+
+    return ResponseEntity.ok(result);
+  }
+
+  /**
+   * PUT request to update a collection event date
+   * @param id Collection exercise Id
+   * @param tag collection exercise event tag
+   * @throws CTPException on resource not found
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   */
+  @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> updateEventDate(
+          @PathVariable("id") final UUID id,
+          @PathVariable("tag") final String tag,
+          final @RequestBody String date)
+          throws CTPException {
+
+    Date finalDate = null;
+
+    log.info("Adding collection exercise {}, setting date to {}", id, date);
+
+      try
+        {
+          LocalDateTime parseDate = LocalDateTime.parse(date,
+                  DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
+          finalDate = Date.from(parseDate.atZone(ZoneId.systemDefault()).toInstant());
+
+        }
+        catch (DateTimeParseException e)
+        {
+           throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", date,
+                   e.getLocalizedMessage()));
+        }
+
+    Event event = eventService.updateEvent(id, tag, finalDate);
+
+    return ResponseEntity.noContent().build();
+
+  }
+
+
+    /**
+     * GET to find event from the collection exercise service for
+     * the given event tag collection Id.
+     * @param  id collection exercise id
+     * @param  tag collection exercise event tag
+     * @return event associated to collection exercise
+     * @throws CTPException on resource not found
+     */
+    @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.GET)
+    public ResponseEntity<Event> getEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
+            throws CTPException {
+        log.debug("Entering Event fetch with event id {}, event tag {} ",id, tag);
+
+        Event event = eventService.getEvent(id, tag);
+
+        return ResponseEntity.ok(event);
+    }
+
+
+  /**
+   * DELETE request to delete a collection exercise event
+   * @param id Collection exercise Id
+   * @param  tag collection exercise event tag
+   * @throws CTPException on resource not found
+   * @return the collection exercise event that was to be deleted
+   */
+  @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.DELETE)
+  public ResponseEntity<Event> deleteCollectionExerciseEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
+          throws CTPException {
+    log.info("Deleting collection exercise event id {}, event tag ", id, tag);
+
+    eventService.deleteEvent(id, tag);
+
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Endpoint to get a collection exercise by exercise ref and survey ref
+   * @param exerciseRef the exercise ref
+   * @param surveyRef the survey ref
+   * @return 200 with collection exercise body if found, otherwise 404
+   * @throws CTPException
+   */
+  @RequestMapping(value = "/{exerciseRef}/survey/{surveyRef}", method = RequestMethod.GET)
+  public ResponseEntity<CollectionExerciseDTO> getCollectionExercisesForSurvey(
+          @PathVariable("exerciseRef") final String exerciseRef, @PathVariable("surveyRef") final String surveyRef)
+          throws CTPException {
+      CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(surveyRef, exerciseRef);
+
+      if (collex == null){
+        throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                String.format("Cannot find collection exercise for survey %s and period %s", surveyRef, exerciseRef));
+      } else {
+        return ResponseEntity.ok(this.mapperFacade.map(collex, CollectionExerciseDTO.class));
+      }
+  }
+
+
 }

@@ -31,6 +31,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
+import uk.gov.ons.ctp.response.collection.exercise.util.MultiIsoDateFormat;
 
 /**
  * The main entry point into the Collection Exercise Service SpringBoot
@@ -242,7 +243,13 @@ public class CollectionExerciseApplication {
   @Primary
   public CustomObjectMapper customObjectMapper() {
     CustomObjectMapper mapper = new CustomObjectMapper();
+
+    // This code is commented out for now (and the Python loader kludged) to allow the PR for this to proceed
+    // but will reinstate in the next interation
+    // mapper.setDateFormat(new MultiIsoDateFormat());
+
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     return mapper;
   }
 

@@ -18,7 +18,7 @@
              "scheduledExecutionDateTime": 1494846000001,   
              "state": "EXECUTED",
              "sampleSize": 2,
-             "surveyUuid": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"
+             "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"
 	       }
 	  }
   }

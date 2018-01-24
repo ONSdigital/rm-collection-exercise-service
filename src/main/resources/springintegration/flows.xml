@@ -10,5 +10,6 @@
 
     <import resource="sample-sampleunit-inbound-flow.xml"/>
 	<import resource="case-outbound-flow.xml"/>
+    <import resource="collex-event-messager.xml"/>
 
 </beans>

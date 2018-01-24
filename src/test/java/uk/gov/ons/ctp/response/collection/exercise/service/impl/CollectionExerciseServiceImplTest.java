@@ -1,7 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -12,9 +11,7 @@ import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.*;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SurveyRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -186,7 +183,7 @@ public class CollectionExerciseServiceImplTest {
       assertEquals(toCreate.getName(), collex.getName());
       assertEquals(toCreate.getUserDescription(), collex.getUserDescription());
       assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
-      assertEquals(toCreate.getSurveyId(), collex.getSurveyUuid().toString());
+      assertEquals(toCreate.getSurveyId(), collex.getSurveyId().toString());
       assertNotNull(collex.getCreated());
   }
 
@@ -196,7 +193,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     UUID surveyId = UUID.fromString(survey.getId());
-    existing.setSurveyUuid(surveyId);
+    existing.setSurveyId(surveyId);
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
     when(surveyService.findSurvey(surveyId)).thenReturn(survey);
 
@@ -206,7 +203,7 @@ public class CollectionExerciseServiceImplTest {
 
     verify(collexRepo).save(captor.capture());
     CollectionExercise collex = captor.getValue();
-    assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurveyUuid());
+    assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurveyId());
     assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
     assertEquals(toUpdate.getName(), collex.getName());
     assertEquals(toUpdate.getUserDescription(), collex.getUserDescription());
@@ -218,7 +215,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyUuid(survey.getId());
+    existing.setSurveyId(survey.getId());
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
     try {
@@ -234,7 +231,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyUuid(survey.getId());
+    existing.setSurveyId(survey.getId());
     // Set up the mock to return the one we are attempting to update
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
@@ -242,7 +239,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise otherExisting = new CollectionExercise();
     otherExisting.setId(uuid);
     // Set up the mock to return a different one with the same exercise ref and survey id
-    when(collexRepo.findByExerciseRefAndSurveyUuid(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
+    when(collexRepo.findByExerciseRefAndSurveyId(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
             .thenReturn(Arrays.asList(otherExisting));
 
     try {
@@ -316,7 +313,7 @@ public class CollectionExerciseServiceImplTest {
   private CollectionExercise setupCollectionExercise() throws Exception {
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyUuid(survey.getId());
+    existing.setSurveyId(survey.getId());
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
     return existing;
@@ -378,7 +375,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyUuid(survey.getId());
+    existing.setSurveyId(survey.getId());
     // Set up the mock to return the one we are attempting to update
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
@@ -386,7 +383,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise otherExisting = new CollectionExercise();
     otherExisting.setId(uuid);
     // Set up the mock to return a different one with the same exercise ref and survey id
-    when(collexRepo.findByExerciseRefAndSurveyUuid(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
+    when(collexRepo.findByExerciseRefAndSurveyId(toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
             .thenReturn(Arrays.asList(otherExisting));
 
     try {

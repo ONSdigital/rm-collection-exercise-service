@@ -26,3 +26,21 @@ databaseChangeLog:
             comment: US002a - convert the survey fk to a survey uuid
             path: us002a-survey-pk-to-uuid.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-4
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US004 - add event table
+            path: us004-event-table.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-5
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US004 - message sent flag
+            path: us004-message-sent.sql
+            relativeToChangelogFile: true

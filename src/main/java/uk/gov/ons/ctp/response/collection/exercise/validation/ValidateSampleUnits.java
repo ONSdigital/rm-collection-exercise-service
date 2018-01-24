@@ -119,7 +119,7 @@ public class ValidateSampleUnits {
         collections.forEach((exercise, groups) -> {
           if (!validateSampleUnits(exercise, groups)) {
             log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
-                exercise.getSurveyUuid());
+                exercise.getSurveyId());
             return; // Exit collection forEach for exercise as no
                     // classifierTypes, fatal error.
           }
@@ -158,7 +158,7 @@ public class ValidateSampleUnits {
       return false;
     }
 
-    String surveyId = exercise.getSurveyUuid().toString();
+    String surveyId = exercise.getSurveyId().toString();
     List<ExerciseSampleUnit> updatedSampleUnitsForGroup = new ArrayList<>();
 
     for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
@@ -350,21 +350,21 @@ public class ValidateSampleUnits {
     // Get Classifier types for Collection Instruments
     try {
       List<SurveyClassifierDTO> classifierTypeSelectors = surveySvcClient
-          .requestClassifierTypeSelectors(exercise.getSurveyUuid());
+          .requestClassifierTypeSelectors(exercise.getSurveyId());
       SurveyClassifierDTO chosenSelector = classifierTypeSelectors.stream()
           .filter(claz -> CASE_TYPE_SELECTOR.equals(claz.getName())).findAny().orElse(null);
       if (chosenSelector != null) {
         classifierTypeSelector = surveySvcClient
-            .requestClassifierTypeSelector(exercise.getSurveyUuid(), UUID.fromString(chosenSelector.getId()));
+            .requestClassifierTypeSelector(exercise.getSurveyId(), UUID.fromString(chosenSelector.getId()));
         if (classifierTypeSelector != null) {
           classifierTypes = classifierTypeSelector.getClassifierTypes();
         } else {
           log.error("Error requesting Survey Classifier Types for SurveyId: {},  caseTypeSelectorId: {}",
-              exercise.getSurveyUuid(), chosenSelector.getId());
+              exercise.getSurveyId(), chosenSelector.getId());
         }
       } else {
         log.error("Error requesting Survey Classifier Types for SurveyId: {}",
-            exercise.getSurveyUuid());
+            exercise.getSurveyId());
       }
     } catch (RestClientException ex) {
       log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());

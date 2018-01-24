@@ -94,5 +94,5 @@ public class CollectionExercise {
   private Boolean deleted;
 
   @Column(name="survey_uuid")
-  private UUID surveyUuid;
+  private UUID surveyId;
 }
