@@ -44,3 +44,12 @@ databaseChangeLog:
             comment: US004 - message sent flag
             path: us004-message-sent.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-6
+      author: Ben Jefferies
+      changes:
+        - sqlFile:
+            comment: US004 - fix sequence number to compensate for BRES_collectionexercise_seeddata.sql
+            path: us004-fix-sequence.sql
+            relativeToChangelogFile: true
