@@ -13,9 +13,11 @@ import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEve
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +33,7 @@ public class EventServiceImpl implements EventService {
     private EventRepository eventRepository;
 
     @Autowired
-    private CollectionExerciseEventPublisher eventPublisher;
+    private EventChangeHandler[] changeHandlers;
 
     @Override
     public Event createEvent(EventDTO eventDto) throws CTPException {
@@ -59,9 +61,7 @@ public class EventServiceImpl implements EventService {
 
                 event = eventRepository.save(event);
 
-                eventPublisher.publishCollectionExerciseEvent(
-                        CollectionExerciseEventPublisher.MessageType.EventCreated,
-                        EventService.createEventDTOFromEvent(event));
+                fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventCreated, event);
 
                 return event;
             }
@@ -86,9 +86,7 @@ public class EventServiceImpl implements EventService {
 
                 this.eventRepository.save(event);
 
-                eventPublisher.publishCollectionExerciseEvent(
-                        CollectionExerciseEventPublisher.MessageType.EventUpdated,
-                        EventService.createEventDTOFromEvent(event));
+                fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventUpdated, event);
             }
             else
                 {
@@ -156,9 +154,7 @@ public class EventServiceImpl implements EventService {
                 event.setDeleted(true);
                 this.eventRepository.delete(event);
 
-                eventPublisher.publishCollectionExerciseEvent(
-                        CollectionExerciseEventPublisher.MessageType.EventDeleted,
-                        EventService.createEventDTOFromEvent(event));
+                fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventDeleted, event);
                 return event;
             }
             else
@@ -175,6 +171,16 @@ public class EventServiceImpl implements EventService {
 
         }
 
+    }
+
+    private void fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType messageType, Event event){
+        Arrays.stream(this.changeHandlers).forEach(handler -> {
+            try {
+                handler.handleEventLifecycle(messageType, event);
+            } catch (CTPException e) {
+                log.error("Failed to handle event change for {} of {} - {}", messageType, event, e);
+            }
+        });
     }
 
     @Override

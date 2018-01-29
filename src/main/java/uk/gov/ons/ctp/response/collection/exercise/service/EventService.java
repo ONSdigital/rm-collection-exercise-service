@@ -9,6 +9,9 @@ import java.util.UUID;
 import java.util.Date;
 
 public interface EventService {
+
+    enum Tag { mps, go_live, return_by, exercise_end }
+
     Event createEvent(EventDTO eventDto) throws CTPException;
 
     List<Event> getEvents(UUID collexId) throws CTPException;
