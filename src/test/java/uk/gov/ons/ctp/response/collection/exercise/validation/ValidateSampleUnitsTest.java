@@ -245,49 +245,6 @@ public class ValidateSampleUnitsTest {
   }
 
   /**
-   * Test of survey service client failure to get list of classifier type
-   * selectors.
-   */
-  @Test
-  public void validateSampleUnitsNoSurveyClassifierTypeSelectors() {
-
-    // Override happy path scenario to receive error from survey service client
-    // when requesting list of classifier type selectors.
-    when(surveySvcClient.requestClassifierTypeSelectors(any()))
-        .thenThrow(new RestClientException("Test failure of Survey service"));
-
-    validateSampleUnits.validateSampleUnits();
-
-    // Survey classifiers should be set-up once for a survey so always there,
-    // error should not occur. Without them have no chance to get collection
-    // instruments so simply exits validation and tries again on another run.
-    // Does not save any updates or change any states.
-    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(collectRepo, never()).saveAndFlush(any());
-  }
-
-  /**
-   * Test of survey service client failure to get a classifier type selector.
-   */
-  @Test
-  public void validateSampleUnitsNoSurveyClassifierTypeSelector() {
-
-    // Override happy path scenario to receive error from survey service client
-    // when requesting a classifier type selector.
-    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
-        .thenThrow(new RestClientException("Test failure of Survey service"));
-
-    validateSampleUnits.validateSampleUnits();
-
-    // Survey classifiers should be set-up once for a survey so always there,
-    // error should not occur. Without them have no chance to get collection
-    // instruments so simply exits validation and tries again on another run.
-    // Does not save any updates or change any states.
-    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(collectRepo, never()).saveAndFlush(any());
-  }
-
-  /**
    * Test of party service client failure.
    */
   @Test
@@ -423,4 +380,18 @@ public class ValidateSampleUnitsTest {
             .requestCollectionInstruments(new JSONObject(CI_1_SVC_SEARCH).toString());
   }
 
+  @Test
+  public void testSurveyClassifierInRequestToCollectionInstrumentWhenClassifierSearchFails() {
+    // Given classifier search fails
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
+            .thenThrow(new RestClientException("Test failure of Survey service"));
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    Map<String, String> searchString = ImmutableMap.of("SURVEY_ID", "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87");
+    verify(collectionInstrumentSvcClient, times(4))
+            .requestCollectionInstruments(new JSONObject(searchString).toString());
+  }
 }

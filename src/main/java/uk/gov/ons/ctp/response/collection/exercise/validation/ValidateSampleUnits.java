@@ -100,8 +100,7 @@ public class ValidateSampleUnits {
    */
   public void validateSampleUnits() {
 
-    List<CollectionExercise> exercises = collectRepo.findByState(
-        CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    List<CollectionExercise> exercises = collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     if (!exercises.isEmpty()) {
 
@@ -153,11 +152,7 @@ public class ValidateSampleUnits {
   private boolean validateSampleUnits(CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
-    if (classifierTypes.isEmpty()) {
-      return false;
-    }
 
-    String surveyId = exercise.getSurveyId().toString();
     List<ExerciseSampleUnit> updatedSampleUnitsForGroup = new ArrayList<>();
 
     for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
@@ -172,6 +167,7 @@ public class ValidateSampleUnits {
           continue;
         }
         try {
+          String surveyId = exercise.getSurveyId().toString();
           UUID collectionInstrumentId = requestCollectionInstrumentId(classifierTypes, sampleUnitParent, surveyId);
           updatedSampleUnitsForGroup = requestPartyDetails(sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
           updatedSampleUnitsForGroup.forEach(updatedSampleUnit -> {
@@ -340,19 +336,19 @@ public class ValidateSampleUnits {
    */
   private List<String> requestSurveyClassifiers(CollectionExercise exercise) {
 
-    SurveyClassifierTypeDTO classifierTypeSelector = null;
-    List<String> classifierTypes = new ArrayList<String>();
+    SurveyClassifierTypeDTO classifierTypeSelector;
+    List<String> classifierTypes = new ArrayList<>();
 
     // Call Survey Service
     // Get Classifier types for Collection Instruments
     try {
-      List<SurveyClassifierDTO> classifierTypeSelectors = surveySvcClient
-          .requestClassifierTypeSelectors(exercise.getSurveyId());
+      List<SurveyClassifierDTO> classifierTypeSelectors = surveySvcClient.requestClassifierTypeSelectors(exercise.getSurveyId());
       SurveyClassifierDTO chosenSelector = classifierTypeSelectors.stream()
-          .filter(claz -> CASE_TYPE_SELECTOR.equals(claz.getName())).findAny().orElse(null);
+          .filter(classifierType -> CASE_TYPE_SELECTOR.equals(classifierType.getName()))
+          .findAny()
+          .orElse(null);
       if (chosenSelector != null) {
-        classifierTypeSelector = surveySvcClient
-            .requestClassifierTypeSelector(exercise.getSurveyId(), UUID.fromString(chosenSelector.getId()));
+        classifierTypeSelector = surveySvcClient.requestClassifierTypeSelector(exercise.getSurveyId(), UUID.fromString(chosenSelector.getId()));
         if (classifierTypeSelector != null) {
           classifierTypes = classifierTypeSelector.getClassifierTypes();
         } else {
