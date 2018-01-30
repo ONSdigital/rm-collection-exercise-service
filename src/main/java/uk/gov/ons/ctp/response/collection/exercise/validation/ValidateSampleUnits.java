@@ -150,8 +150,7 @@ public class ValidateSampleUnits {
    * @return boolean false if fatal error validating, for example no
    *         classifierTypes
    */
-  private boolean validateSampleUnits(CollectionExercise exercise,
-      List<ExerciseSampleUnitGroup> sampleUnitGroups) {
+  private boolean validateSampleUnits(CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
     if (classifierTypes.isEmpty()) {
@@ -173,9 +172,8 @@ public class ValidateSampleUnits {
           continue;
         }
         try {
-          UUID collectionInstrumentId = requestCollectionInstrumentId(classifierTypes, sampleUnitParent);
-          updatedSampleUnitsForGroup = requestPartyDetails(sampleUnitParent, sampleUnits, sampleUnitGroup,
-              surveyId);
+          UUID collectionInstrumentId = requestCollectionInstrumentId(classifierTypes, sampleUnitParent, surveyId);
+          updatedSampleUnitsForGroup = requestPartyDetails(sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
           updatedSampleUnitsForGroup.forEach(updatedSampleUnit -> {
             updatedSampleUnit.setCollectionInstrumentId(collectionInstrumentId);
           });
@@ -212,7 +210,7 @@ public class ValidateSampleUnits {
     List<Integer> excludedGroups = sampleValidationListManager.findList(VALIDATION_LIST_ID, false);
     log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
 
-    excludedGroups.add(Integer.valueOf(IMPOSSIBLE_ID));
+    excludedGroups.add(IMPOSSIBLE_ID);
     sampleUnitGroups = sampleUnitGroupSvc
         .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
             SampleUnitGroupDTO.SampleUnitGroupState.INIT,
@@ -225,7 +223,7 @@ public class ValidateSampleUnits {
           sampleUnitGroups.stream().map(group -> group.getSampleUnitGroupPK().toString()).collect(
               Collectors.joining(",")));
       sampleValidationListManager.saveList(VALIDATION_LIST_ID,
-          sampleUnitGroups.stream().map(group -> group.getSampleUnitGroupPK()).collect(Collectors.toList()), true);
+          sampleUnitGroups.stream().map(ExerciseSampleUnitGroup::getSampleUnitGroupPK).collect(Collectors.toList()), true);
     } else {
       log.debug("VALIDATION retrieved 0 sampleUnitGroup PKs");
       sampleValidationListManager.unlockContainer();
@@ -250,7 +248,7 @@ public class ValidateSampleUnits {
   private List<ExerciseSampleUnit> requestPartyDetails(ExerciseSampleUnit sampleUnit,
       List<ExerciseSampleUnit> sampleUnits, ExerciseSampleUnitGroup sampleUnitGroup, String surveyId)
       throws RestClientException {
-    List<ExerciseSampleUnit> updatedSampleUnits = new ArrayList<ExerciseSampleUnit>();
+    List<ExerciseSampleUnit> updatedSampleUnits = new ArrayList<>();
     PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
     sampleUnit.setPartyId(UUID.fromString(party.getId()));
     updatedSampleUnits.add(sampleUnit);
@@ -258,9 +256,10 @@ public class ValidateSampleUnits {
       association.getEnrolments().forEach(enrolment -> {
         if (enrolment.getSurveyId().equals(surveyId)) {
           // Make sure respondent unit doesn't already exist.
-          Optional<ExerciseSampleUnit> match = (sampleUnits.stream().filter(
-              existingSampleUnit -> association.getPartyId().equals(existingSampleUnit.getPartyId().toString()))
-              .findFirst());
+          Optional<ExerciseSampleUnit> match = sampleUnits.stream()
+                  .filter(existingSampleUnit -> association.getPartyId()
+                          .equals(existingSampleUnit.getPartyId().toString()))
+              .findFirst();
           if (match.isPresent()) {
             log.warn("Validation for SampleUnit PK: {} Respondent already exists {}", sampleUnit.getSampleUnitPK(),
                 association.getPartyId());
@@ -288,35 +287,33 @@ public class ValidateSampleUnits {
    * @param classifierTypes used in search by Collection Instrument service to
    *          return instrument details matching classifiers.
    * @param sampleUnit to which the collection instrument relates.
-   * @return UUID of collection instrument.
+   * @return UUID of collection instrument or null if not found.
    * @throws RestClientException something went wrong making http call
    */
-  private UUID requestCollectionInstrumentId(List<String> classifierTypes, ExerciseSampleUnit sampleUnit)
+  private UUID requestCollectionInstrumentId(List<String> classifierTypes, ExerciseSampleUnit sampleUnit, String surveyId)
       throws RestClientException {
-
     Map<String, String> classifiers = new HashMap<>();
-    UUID collectionInstrumentId = null;
+    classifiers.put("SURVEY_ID", surveyId);
     for (String classifier : classifierTypes) {
       try {
         CollectionInstrumentClassifierTypes classifierType = CollectionInstrumentClassifierTypes.valueOf(classifier);
         classifiers.put(classifierType.name(), classifierType.apply(sampleUnit));
       } catch (IllegalArgumentException e) {
-        log.error("Classifier cannot be dealt with {}", e.getMessage());
-        log.error("Stack trace: " + e);
-        return collectionInstrumentId;
+        log.warn("Classifier not supported {}", classifier);
       }
     }
     String searchString = convertToJSON(classifiers);
-    List<CollectionInstrumentDTO> requestCollectionInstruments = collectionInstrumentSvcClient
+    List<CollectionInstrumentDTO> collectionInstruments = collectionInstrumentSvcClient
         .requestCollectionInstruments(searchString);
-    if (requestCollectionInstruments.isEmpty()) {
+    UUID collectionInstrumentId;
+    if (collectionInstruments.isEmpty()) {
       log.error("No collection instruments found for: {}", searchString);
-    } else if (requestCollectionInstruments.size() > 1) {
-      log.warn("{} collection instruments found for: {}, taking first", requestCollectionInstruments.size(),
-          searchString);
-      collectionInstrumentId = requestCollectionInstruments.get(0).getId();
+      collectionInstrumentId = null;
+    } else if (collectionInstruments.size() > 1) {
+      log.warn("{} collection instruments found for: {}, taking first", collectionInstruments.size(), searchString);
+      collectionInstrumentId = collectionInstruments.get(0).getId();
     } else {
-      collectionInstrumentId = requestCollectionInstruments.get(0).getId();
+      collectionInstrumentId = collectionInstruments.get(0).getId();
     }
 
     return collectionInstrumentId;

@@ -15,7 +15,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
  */
 public enum CollectionInstrumentClassifierTypes implements Function<ExerciseSampleUnit, String> {
   COLLECTION_EXERCISE(unit -> unit.getSampleUnitGroup().getCollectionExercise().getId().toString()),
-  RU_REF(unit -> unit.getSampleUnitRef());
+  RU_REF(ExerciseSampleUnit::getSampleUnitRef);
 
   private final Function<ExerciseSampleUnit, String> func;
 
