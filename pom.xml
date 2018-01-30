@@ -64,6 +64,12 @@
     </dependency>
 
     <dependency>
+      <groupId>uk.gov.ons.ctp.common</groupId>
+      <artifactId>framework</artifactId>
+      <version>10.49.8</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
@@ -164,6 +170,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.common</groupId>
       <artifactId>test-framework</artifactId>
+      <version>10.49.7</version>
       <scope>test</scope>
     </dependency>
 
