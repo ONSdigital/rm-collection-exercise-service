@@ -10,6 +10,9 @@ import java.util.Date;
 
 public interface EventService {
 
+    /**
+     * An enum to represent the collection exercise events that are mandatory for all surveys
+     */
     enum Tag { mps, go_live, return_by, exercise_end }
 
     Event createEvent(EventDTO eventDto) throws CTPException;

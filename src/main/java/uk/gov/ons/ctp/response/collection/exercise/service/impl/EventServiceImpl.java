@@ -173,7 +173,12 @@ public class EventServiceImpl implements EventService {
 
     }
 
-    private void fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType messageType, Event event){
+    /**
+     * Method that is called whenever a change occurs to a collection exercise event
+     * @param messageType the type of change
+     * @param event the event to which the change occurred
+     */
+    private void fireEventChangeHandlers(final CollectionExerciseEventPublisher.MessageType messageType, final Event event) {
         Arrays.stream(this.changeHandlers).forEach(handler -> {
             try {
                 handler.handleEventLifecycle(messageType, event);

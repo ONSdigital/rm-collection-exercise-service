@@ -19,19 +19,27 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.when;
 
+/**
+ * Class containing tests for EventServiceImpl
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceImplTest {
     @Mock
-    EventRepository eventRepository;
+    private EventRepository eventRepository;
 
     @Mock
-    CollectionExerciseService collectionExerciseService;
+    private CollectionExerciseService collectionExerciseService;
 
     @InjectMocks
-    EventServiceImpl eventService;
+    private EventServiceImpl eventService;
 
+    /**
+     * Given collection excercise does not exist
+     * When event is created
+     * Then exception is thrown
+     */
     @Test
-    public void givenCollectionExcerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown(){
+    public void givenCollectionExcerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown() {
         EventDTO eventDto = new EventDTO();
         UUID collexUuid = UUID.randomUUID();
         eventDto.setCollectionExerciseId(collexUuid);
@@ -46,8 +54,13 @@ public class EventServiceImplTest {
         }
     }
 
+    /**
+     * Given event already exists
+     * When event is created
+     * Then exception is thrown
+     */
     @Test
-    public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown(){
+    public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() {
         String tag = EventService.Tag.mps.name();
         EventDTO eventDto = new EventDTO();
         CollectionExercise collex = new CollectionExercise();

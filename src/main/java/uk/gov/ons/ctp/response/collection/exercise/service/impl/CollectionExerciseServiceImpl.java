@@ -320,7 +320,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
     @Override
-    public CollectionExercise updateCollectionExercise(CollectionExercise collex){
+    public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
        return this.collectRepo.save(collex);
     }
 

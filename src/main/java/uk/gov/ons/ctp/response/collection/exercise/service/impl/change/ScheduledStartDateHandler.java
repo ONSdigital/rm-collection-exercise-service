@@ -10,16 +10,19 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
+/**
+ * EventChangeHandler to set the scheduledStartDate for a collection exercise when an mps event is created or updated
+ */
 @Component
 @Slf4j
-public class ScheduledStartDateHandler implements EventChangeHandler {
+public final class ScheduledStartDateHandler implements EventChangeHandler {
 
     @Autowired
     private CollectionExerciseService collectionExerciseService;
 
     @Override
     public void handleEventLifecycle(CollectionExerciseEventPublisher.MessageType change, Event event) {
-        switch(change){
+        switch(change) {
             case EventCreated:
             case EventUpdated:
                 updateCollectionExerciseFromEvent(event);
@@ -29,11 +32,15 @@ public class ScheduledStartDateHandler implements EventChangeHandler {
         }
     }
 
-    private void updateCollectionExerciseFromEvent(Event event){
+    /**
+     * Updates the scheduledStartDate for the collection exercise from the event timestamp if the event is an mps event
+     * @param event the incoming event
+     */
+    private void updateCollectionExerciseFromEvent(final Event event) {
         try {
             EventService.Tag tag = EventService.Tag.valueOf(event.getTag());
 
-            switch(tag){
+            switch(tag) {
                 case mps:
                     CollectionExercise collex = event.getCollectionExercise();
 
@@ -46,7 +53,7 @@ public class ScheduledStartDateHandler implements EventChangeHandler {
                 default:
                     break;
             }
-        } catch(IllegalArgumentException e){
+        } catch(IllegalArgumentException e) {
             // Thrown if tag isn't one of the mandatory types - if it happens we don't care about the event
         }
     }
