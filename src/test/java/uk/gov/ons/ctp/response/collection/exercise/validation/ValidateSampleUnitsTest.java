@@ -132,7 +132,7 @@ public class ValidateSampleUnitsTest {
    * @throws Exception from FixtureHelper loading test data flat files.
    */
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     when(appConfig.getSchedules()).thenReturn(scheduleSettings);
     when(scheduleSettings.getValidationScheduleRetrievalMax()).thenReturn(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
 
