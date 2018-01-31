@@ -306,7 +306,7 @@ public class ValidateSampleUnits {
       log.error("No collection instruments found for: {}", searchString);
       collectionInstrumentId = null;
     } else if (collectionInstruments.size() > 1) {
-      log.warn("{} collection instruments found for: {}, taking first", collectionInstruments.size(), searchString);
+      log.warn("{} collection instruments found for: {}, taking most recent first", collectionInstruments.size(), searchString);
       collectionInstrumentId = collectionInstruments.get(0).getId();
     } else {
       collectionInstrumentId = collectionInstruments.get(0).getId();
