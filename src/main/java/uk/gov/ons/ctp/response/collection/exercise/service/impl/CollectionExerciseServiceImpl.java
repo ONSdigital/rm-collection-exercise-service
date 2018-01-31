@@ -319,6 +319,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
+    @Override
+    public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
+       return this.collectRepo.save(collex);
+    }
+
 
     /**
      * Utility method to set the deleted flag for a collection exercise

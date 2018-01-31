@@ -114,6 +114,13 @@ public interface CollectionExerciseService {
   CollectionExercise updateCollectionExercise(UUID id, CollectionExerciseDTO collex) throws CTPException;
 
   /**
+   * Update a collection exercise
+   * @param collex the updated collection exercise
+   * @return the updated CollectionExercise object
+   */
+  CollectionExercise updateCollectionExercise(CollectionExercise collex);
+
+  /**
    * Patch a collection exercise
    * @param id the id of the collection exercise to patch
    * @param collex the patch data
