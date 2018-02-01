@@ -1,33 +1,17 @@
 package uk.gov.ons.ctp.response.collection.exercise.validation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.collect.ImmutableMap;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestClientException;
-
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
@@ -56,99 +40,88 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitTyp
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 /**
  * Tests for the ValidatesSampleTest
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ValidateSampleUnitsTest {
 
-  /**
-   * Java Test Configuration
-   */
-  @Configuration
-  static class TestContext {
+  @Mock
+  private DistributedListManager<Integer> sampleValidationListManager;
 
+  @Mock
+  private CollectionExerciseRepository collectRepo;
 
-    @MockBean
-    @Qualifier("validation")
-    private static DistributedListManager<Integer> sampleValidationListManager;
+  @Mock
+  private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
 
-    @MockBean
-    private static CollectionExerciseRepository collectRepo;
+  @Mock
+  private ExerciseSampleUnitService sampleUnitSvc;
 
-    @MockBean
-    private static ExerciseSampleUnitGroupService sampleUnitGroupSvc;
+  @Mock
+  private SurveySvcClient surveySvcClient;
 
-    @MockBean
-    private static ExerciseSampleUnitService sampleUnitSvc;
+  @Mock
+  private PartySvcRestClientImpl partySvcClient;
 
-    @MockBean
-    private static SurveySvcClient surveySvcClient;
+  @Mock
+  private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
-    @MockBean
-    private static PartySvcRestClientImpl partySvcClient;
+  @Mock
+  private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionState;
 
-    @MockBean
-    private static CollectionInstrumentSvcClient collectionInstrumentSvcClient;
+  @Mock
+  private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
-    @MockBean
-    @Qualifier("collectionExercise")
-    private static StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-        collectionExerciseTransitionState;
+  @Mock
+  private AppConfig appConfig;
 
-    @MockBean
-    @Qualifier("sampleUnitGroup")
-    private static StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
+  @Mock
+  private ScheduleSettings scheduleSettings;
 
-    /**
-     * Validation bean under test
-     *
-     * @return ValidateSampleUnits bean under test to be autowired with mocks
-     */
-    @Bean
-    public ValidateSampleUnits validateSampleUnits() {
-      return new ValidateSampleUnits();
-    }
-
-    /**
-     * Test Configuration bean
-     *
-     * @return Appconfig bean for test
-     */
-    @Bean
-    public AppConfig appConfig() {
-      AppConfig appConfig = new AppConfig();
-      ScheduleSettings schedules = new ScheduleSettings();
-      schedules.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
-      appConfig.setSchedules(schedules);
-      return appConfig;
-    }
-
-  }
+  @InjectMocks
+  private ValidateSampleUnits validateSampleUnits;
 
   private static final Integer DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX = 10;
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
 
   private static final String COLLECTION_EXERCISE_ID_1 = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
   private static final String COLLECTION_EXERCISE_ID_2 = "14fb3e68-4dca-46db-bf49-04b84e07e77d";
-  private static final String COLLECTION_INSTR_SVC_SEARCH_STRING = "{\"RU_REF\":\"%s\",\"COLLECTION_EXERCISE\":\"%s\"}";
-  private static final String COLLECTION_INSTRUMENT_ID = "5ca1afd6-4d01-4e13-bb73-acae62e2e540";
   private static final String SAMPLE_UNIT_REF = "50000065975";
 
-  private static final ArrayList<String> RESULT_COLLECTION_ID = new ArrayList<>(
-      Arrays.asList(COLLECTION_EXERCISE_ID_1, COLLECTION_EXERCISE_ID_2));
-  private static final ArrayList<String> PARTY_ID = new ArrayList<>(
-      Arrays.asList("4eed610a-39f7-437b-a37d-9de1f905cb39",
-          "4625df99-7c20-4610-a18c-2f93daffce2a", "45297c23-763d-46a9-b4e5-c37ff5b4fbe8"));
+  private static final Map<String, String> CI_1_SVC_SEARCH = ImmutableMap.<String, String>builder()
+          .put("RU_REF", SAMPLE_UNIT_REF)
+          .put("COLLECTION_EXERCISE", COLLECTION_EXERCISE_ID_1)
+          .put("SURVEY_ID", "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87")
+          .build();
+  private static final Map<String, String> CI_2_SVC_SEARCH = ImmutableMap.<String, String>builder()
+          .put("RU_REF", SAMPLE_UNIT_REF)
+          .put("COLLECTION_EXERCISE", COLLECTION_EXERCISE_ID_2)
+          .put("SURVEY_ID", "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87")
+          .build();
 
-  @Autowired
-  private ValidateSampleUnits validate;
+  private static final List<String> RESULT_COLLECTION_ID =Arrays.asList(COLLECTION_EXERCISE_ID_1, COLLECTION_EXERCISE_ID_2);
 
   private List<CollectionExercise> collectionExercises;
 
   @Captor
-  private ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
-      .forClass(ExerciseSampleUnitGroup.class);
+  private ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave;
 
   @Captor
   private ArgumentCaptor<List<ExerciseSampleUnit>> sampleUnitSave;
@@ -158,68 +131,70 @@ public class ValidateSampleUnitsTest {
    *
    * @throws Exception from FixtureHelper loading test data flat files.
    */
-  @PostConstruct
-  public void initIt() throws Exception {
+  @Before
+  public void setUp() throws Exception {
+    when(appConfig.getSchedules()).thenReturn(scheduleSettings);
+    when(scheduleSettings.getValidationScheduleRetrievalMax()).thenReturn(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
 
     // Mock data layer domain objects CollectionExercise, SampleUnitGroup,
     // SampleUnit
     collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
-    when(TestContext.collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
+    when(collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
         .thenReturn(collectionExercises);
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
             SampleUnitGroupDTO.SampleUnitGroupState.INIT,
             collectionExercises,
-            new ArrayList<Integer>(Arrays.asList(IMPOSSIBLE_ID)),
+            Collections.singletonList(IMPOSSIBLE_ID),
             new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
                 .thenReturn(sampleUnitGroups);
-    when(TestContext.sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
+    when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         eq(SampleUnitGroupDTO.SampleUnitGroupState.INIT),
         any()))
             .thenReturn(0L);
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED), any()))
             .thenReturn(2L);
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION), any()))
             .thenReturn(0L);
 
     List<ExerciseSampleUnit> sampleUnits = FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class);
-    when(TestContext.sampleUnitSvc.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
+    when(sampleUnitSvc.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
 
     // Mock client Rest calls
     List<SurveyClassifierDTO> classifierTypeSelectors = FixtureHelper.loadClassFixtures(SurveyClassifierDTO[].class);
-    when(TestContext.surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(classifierTypeSelectors);
+    when(surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(classifierTypeSelectors);
 
     List<SurveyClassifierTypeDTO> classifierTypeSelector = FixtureHelper
         .loadClassFixtures(SurveyClassifierTypeDTO[].class);
-    when(TestContext.surveySvcClient.requestClassifierTypeSelector(any(), any()))
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
         .thenReturn(classifierTypeSelector.get(0));
 
     List<PartyDTO> partyJson = FixtureHelper.loadClassFixtures(PartyDTO[].class);
-    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
+    when(partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
         .thenReturn(partyJson.get(0));
 
     List<CollectionInstrumentDTO> collectionInstruments = FixtureHelper
         .loadClassFixtures(CollectionInstrumentDTO[].class);
-    when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_1)))
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+            new JSONObject(CI_1_SVC_SEARCH).toString()))
             .thenReturn(collectionInstruments);
-    when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_2)))
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+            new JSONObject(CI_2_SVC_SEARCH).toString()))
             .thenReturn(collectionInstruments);
 
     // Mock transition Managers
-    when(TestContext.collectionExerciseTransitionState.transition(CollectionExerciseState.EXECUTED,
+    when(collectionExerciseTransitionState.transition(CollectionExerciseState.EXECUTED,
         CollectionExerciseEvent.VALIDATE)).thenReturn(CollectionExerciseState.VALIDATED);
-    when(TestContext.collectionExerciseTransitionState.transition(CollectionExerciseState.EXECUTED,
+    when(collectionExerciseTransitionState.transition(CollectionExerciseState.EXECUTED,
         CollectionExerciseEvent.INVALIDATE)).thenReturn(CollectionExerciseState.FAILEDVALIDATION);
 
-    when(TestContext.sampleUnitGroupState.transition(SampleUnitGroupState.INIT, SampleUnitGroupEvent.VALIDATE))
+    when(sampleUnitGroupState.transition(SampleUnitGroupState.INIT, SampleUnitGroupEvent.VALIDATE))
         .thenReturn(SampleUnitGroupState.VALIDATED);
-    when(TestContext.sampleUnitGroupState.transition(SampleUnitGroupState.INIT, SampleUnitGroupEvent.INVALIDATE))
+    when(sampleUnitGroupState.transition(SampleUnitGroupState.INIT, SampleUnitGroupEvent.INVALIDATE))
         .thenReturn(SampleUnitGroupState.FAILEDVALIDATION);
   }
 
@@ -229,12 +204,15 @@ public class ValidateSampleUnitsTest {
    */
   @Test
   public void validateSampleUnitsOK() {
-    validate.validateSampleUnits();
+    List<String> PARTY_ID = Arrays.asList("4eed610a-39f7-437b-a37d-9de1f905cb39", "4625df99-7c20-4610-a18c-2f93daffce2a",
+            "45297c23-763d-46a9-b4e5-c37ff5b4fbe8");
+
+    validateSampleUnits.validateSampleUnits();
 
     // Two collectionExercises with two SampleUnitGroups each with one
     // sampleUnit per group. Test data configuration. All read the same
     // sampleUnit instance data
-    verify(TestContext.sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(sampleUnitGroupSave.capture(),
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(sampleUnitGroupSave.capture(),
         sampleUnitSave.capture());
     List<List<ExerciseSampleUnit>> savedSampleUnits = sampleUnitSave.getAllValues();
     assertTrue(savedSampleUnits.size() == 4);
@@ -243,7 +221,7 @@ public class ValidateSampleUnitsTest {
       assertTrue(sampleUnits.stream().filter(item -> item.getSampleUnitType() == SampleUnitType.B).count() == 1L);
       sampleUnits.forEach((unit) -> {
         assertTrue(PARTY_ID.contains(unit.getPartyId().toString()));
-        assertEquals(COLLECTION_INSTRUMENT_ID, unit.getCollectionInstrumentId().toString());
+        assertEquals("5ca1afd6-4d01-4e13-bb73-acae62e2e540", unit.getCollectionInstrumentId().toString());
         assertEquals(SAMPLE_UNIT_REF, unit.getSampleUnitRef());
       });
     });
@@ -257,7 +235,7 @@ public class ValidateSampleUnitsTest {
     });
 
     ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(TestContext.collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
+    verify(collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
@@ -267,67 +245,24 @@ public class ValidateSampleUnitsTest {
   }
 
   /**
-   * Test of survey service client failure to get list of classifier type
-   * selectors.
-   */
-  @Test
-  public void validateSampleUnitsNoSurveyClassifierTypeSelectors() {
-
-    // Override happy path scenario to receive error from survey service client
-    // when requesting list of classifier type selectors.
-    when(TestContext.surveySvcClient.requestClassifierTypeSelectors(any()))
-        .thenThrow(new RestClientException("Test failure of Survey service"));
-
-    validate.validateSampleUnits();
-
-    // Survey classifiers should be set-up once for a survey so always there,
-    // error should not occur. Without them have no chance to get collection
-    // instruments so simply exits validation and tries again on another run.
-    // Does not save any updates or change any states.
-    verify(TestContext.sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(TestContext.collectRepo, never()).saveAndFlush(any());
-  }
-
-  /**
-   * Test of survey service client failure to get a classifier type selector.
-   */
-  @Test
-  public void validateSampleUnitsNoSurveyClassifierTypeSelector() {
-
-    // Override happy path scenario to receive error from survey service client
-    // when requesting a classifier type selector.
-    when(TestContext.surveySvcClient.requestClassifierTypeSelector(any(), any()))
-        .thenThrow(new RestClientException("Test failure of Survey service"));
-
-    validate.validateSampleUnits();
-
-    // Survey classifiers should be set-up once for a survey so always there,
-    // error should not occur. Without them have no chance to get collection
-    // instruments so simply exits validation and tries again on another run.
-    // Does not save any updates or change any states.
-    verify(TestContext.sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(TestContext.collectRepo, never()).saveAndFlush(any());
-  }
-
-  /**
    * Test of party service client failure.
    */
   @Test
   public void validateSampleUnitsNoParty() {
 
     // Override happy path scenario to receive error from party service client
-    when(TestContext.partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
+    when(partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
         .thenThrow(new RestClientException("Test failure of Party service"));
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED), any()))
             .thenReturn(0L);
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION), any()))
             .thenReturn(2L);
 
-    validate.validateSampleUnits();
+    validateSampleUnits.validateSampleUnits();
 
-    verify(TestContext.sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(sampleUnitGroupSave.capture(),
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(sampleUnitGroupSave.capture(),
         sampleUnitSave.capture());
     List<List<ExerciseSampleUnit>> savedSampleUnits = sampleUnitSave.getAllValues();
     assertTrue(savedSampleUnits.size() == 4);
@@ -344,7 +279,7 @@ public class ValidateSampleUnitsTest {
     });
 
     ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(TestContext.collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
+    verify(collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
@@ -361,29 +296,23 @@ public class ValidateSampleUnitsTest {
 
     // Override happy path scenario to receive error from collection instrument
     // service.
-    when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_1)))
-            .thenThrow(new RestClientException("Test failure of Collection Instrument service"));
-    when(TestContext.collectionInstrumentSvcClient.requestCollectionInstruments(
-        String.format(COLLECTION_INSTR_SVC_SEARCH_STRING, SAMPLE_UNIT_REF, COLLECTION_EXERCISE_ID_2)))
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(anyString()))
             .thenThrow(new RestClientException("Test failure of Collection Instrument service"));
 
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED), any()))
             .thenReturn(0L);
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .countByStateFKAndCollectionExercise(eq(SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION), any()))
             .thenReturn(2L);
 
-    validate.validateSampleUnits();
+    validateSampleUnits.validateSampleUnits();
 
-    verify(TestContext.sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(sampleUnitGroupSave.capture(),
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(sampleUnitGroupSave.capture(),
         sampleUnitSave.capture());
     List<List<ExerciseSampleUnit>> savedSampleUnits = sampleUnitSave.getAllValues();
-    assertTrue(savedSampleUnits.size() == 4);
-    savedSampleUnits.forEach((sampleUnits) -> {
-      assertTrue(sampleUnits.size() == 0);
-    });
+    assertEquals(4, savedSampleUnits.size());
+    savedSampleUnits.forEach((sampleUnits) -> assertEquals(0, sampleUnits.size()));
 
     List<ExerciseSampleUnitGroup> savedSampleUnitGroups = sampleUnitGroupSave.getAllValues();
     assertTrue(savedSampleUnitGroups.size() == 4);
@@ -394,7 +323,7 @@ public class ValidateSampleUnitsTest {
     });
 
     ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(TestContext.collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
+    verify(collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
@@ -411,37 +340,58 @@ public class ValidateSampleUnitsTest {
   public void validateSampleUnitsNoneToValidate() {
     // Override happy path scenario to return any empty list querying for
     // sampleUnitGroups.
-    when(TestContext.sampleUnitGroupSvc
+    when(sampleUnitGroupSvc
         .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
             SampleUnitGroupDTO.SampleUnitGroupState.INIT,
             collectionExercises,
-            new ArrayList<Integer>(Arrays.asList(IMPOSSIBLE_ID)),
+            Collections.singletonList(IMPOSSIBLE_ID),
             new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
-                .thenReturn(new ArrayList<ExerciseSampleUnitGroup>());
+                .thenReturn(new ArrayList<>());
 
-    validate.validateSampleUnits();
+    validateSampleUnits.validateSampleUnits();
 
-    verify(TestContext.sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(TestContext.collectRepo, never()).saveAndFlush(any());
+    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
+    verify(collectRepo, never()).saveAndFlush(any());
   }
 
   /**
    * Test of LockingException thrown by DistributedListManager.
    */
   @Test
-  public void validateSampleUnitsDistributedListManagerLockingException() {
-    // Override happy path scenario to return a LockingException from
-    // DistributedListManager.
-    try {
-      when(TestContext.sampleValidationListManager.findList(any(String.class), any(boolean.class)))
-          .thenThrow(new LockingException("Failed to obtain lock Test"));
-    } catch (LockingException ex) {
-      // Do nothing with it, actually want to catch it in ValidateSampleUnits
-    }
+  public void validateSampleUnitsDistributedListManagerLockingException() throws LockingException {
+    when(sampleValidationListManager.findList(any(String.class), any(boolean.class)))
+        .thenThrow(new LockingException("Failed to obtain lock Test"));
 
-    validate.validateSampleUnits();
+    validateSampleUnits.validateSampleUnits();
 
-    verify(TestContext.sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(TestContext.collectRepo, never()).saveAndFlush(any());
+    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
+    verify(collectRepo, never()).saveAndFlush(any());
+  }
+
+  @Test
+  public void testSurveyIdClassifierInRequestToCollectionInstrument() {
+    // Given 4 sample units belonging to 2 different sample unit groups
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then expect SURVEY_ID in 4 CI requests
+    verify(collectionInstrumentSvcClient, times(4))
+            .requestCollectionInstruments(new JSONObject(CI_1_SVC_SEARCH).toString());
+  }
+
+  @Test
+  public void testSurveyClassifierInRequestToCollectionInstrumentWhenClassifierSearchFails() {
+    // Given classifier search fails
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
+            .thenThrow(new RestClientException("Test failure of Survey service"));
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    Map<String, String> searchString = ImmutableMap.of("SURVEY_ID", "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87");
+    verify(collectionInstrumentSvcClient, times(4))
+            .requestCollectionInstruments(new JSONObject(searchString).toString());
   }
 }
