@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.ons.ctp.common.MvcHelper.getJson;
 import static uk.gov.ons.ctp.common.MvcHelper.postJson;
 import static uk.gov.ons.ctp.common.MvcHelper.putJson;
-import static uk.gov.ons.ctp.common.TestHelper.createTestDate;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
 import java.time.*;
@@ -40,6 +39,7 @@ import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
+import uk.gov.ons.ctp.common.matcher.DateMatcher;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
@@ -76,14 +76,13 @@ public class CollectionExerciseEndpointUnitTests {
   private static final UUID SURVEY_ID_1 = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
   private static final UUID SURVEY_ID_2 = UUID.fromString("32ec898e-f370-429a-bca4-eab1045aff4e");
   private static final String SURVEY_REF_1 = "221";
-  private static final int SURVEY_FK = 1;
   private static final UUID COLLECTIONEXERCISE_ID1 = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
   private static final UUID COLLECTIONEXERCISE_ID2 = UUID.fromString("e653d1ce-551b-4b41-b05c-eec02f71891e");
   private static final String COLLECTIONEXERCISE_NAME = ("BRES_2016");
-  private static final String COLLECTIONEXERCISE_DATE = createTestDate("2017-05-15T12:00:00.00+0100");
+  private static final String COLLECTIONEXERCISE_DATE_OUTPUT = "2017-05-15T12:00:00.000+01:00";
+
   private static final String COLLECTIONEXERCISE_STATE = ("EXECUTED");
   private static final UUID ACTIONPLANID = UUID.fromString("2de9d435-7d99-4819-9af8-5942f515500b");
-  private static final int SAMPLEUNITSTOTAL = 500;
 
   private static final UUID SURVEY_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff5e");
   private static final UUID COLLECTIONEXERCISE_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff6e");
@@ -177,10 +176,9 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(jsonPath("$[*].id",
             containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
         .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
-        .andExpect(
-            jsonPath("$[*].scheduledExecutionDateTime", containsInAnyOrder(COLLECTIONEXERCISE_DATE,
-                COLLECTIONEXERCISE_DATE)));
-
+        .andExpect(jsonPath("$[*].scheduledExecutionDateTime",
+                containsInAnyOrder(new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
+                        new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
   }
 
   /**
