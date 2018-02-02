@@ -17,7 +17,7 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 ```
 
 ## Get Collection Exercises for Survey
-* `GET /collectionexercises/survey/cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87` will return a list of known collection exercises for the survey with an ID of `cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87`.
+* `GET /collectionexercises/survey/{survey_id}` will return a list of known collection exercises for the survey id.
 
 ### Example JSON Response
 ```json
@@ -35,10 +35,28 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 ]
 ```
 
+
+
+## Get Collection Exercises for Survey and Exercise
+* `GET /collectionexercises/{exerciseRef}/survey/{survey_id}` will return a list of known collection exercises for the survey id and exerciseRef.
+
+### Example JSON Response
+```json
+[
+  {
+    "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
+    "name": "201601",
+    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z"
+  },
+]
+```
+
+
+
 An `HTTP 404 Not Found` status code is returned if the survey with the specified ID could not be found. An `HTTP 204 No Content` status code is returned if there are no known collection exercises for the specified survey.
 
 ## List Collection Exercises
-* `GET /collectionexercises` will returns a list of all collection exercises
+* `GET /collectionexercises` will return a list of all collection exercises.
 
 ### Example JSON Response
 ```json
@@ -73,7 +91,7 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 ```
 
 ## Get Collection Exercise
-* `GET /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will returns the details of the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `GET /collectionexercises/{collection_exercise_id}` will return the details of the collection exercise with the given id.
 
 ### Example JSON Response
 ```json
@@ -110,6 +128,8 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ## Create Collection Exercise
 * `POST /collectionexercises` will create a new collection exercise
 * Returns 201 Created if the resource is created
+* Returns 400 Bad Request
+* Returns 409 Conflict
 
 ### Example JSON Request Body
 ```json
@@ -122,8 +142,10 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ```
 
 ## Update Collection Exercise
-* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will update the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `PUT /collectionexercises/{collection_exercise_id}` will update the collection exercise with the given id.
 * Returns 200 OK if the resource is updated
+* Returns 400 Bad Request
+* Returns 409 conflict
 
 ### Example JSON Request Body
 
@@ -137,8 +159,10 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ```
 
 ## Update Collection Exercise exerciseRef (period)
-* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/exerciseRef` will update the exerciseRef for collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
-* Returns 200 OK if the resource is updated
+* `PUT /collectionexercises/{collection_exercise_id}/exerciseRef` will update the exerciseRef for collection exercise with given id.
+* Returns 200 OK if the resource is updated.
+* Returns 400 Bad Request, resource not updated.
+* Returns 409 conflict, resource not updated.
 
 ### Example Request Body
 ```
@@ -146,8 +170,10 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 ```
 
 ## Update Collection Exercise userDescription (user visible name)
-* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/userDescription` will update the user visible name for collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `PUT /collectionexercises/{collection_exercise_id}/userDescription` will update the user visible name for collection exercise with given id.
 * Returns 200 OK if the resource is updated
+* Returns 400 Bad Request, not updated resource.
+* Returns 409 conflict, not updated resource.
 
 ### Example Request Body
 ```
@@ -155,17 +181,28 @@ August 2018
 ```
 
 ## Update Collection Exercise exerciseRef (name)
-* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/name` will update the name of collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `PUT /collectionexercises/{collection_exercise_id}/name` will update the name of collection exercise with given id.
 * Returns 200 OK if the resource is updated
+* Returns 400 Bad Request, resource not updated
+* Returns 409 Conflict, resource not updated
 
 ### Example Request Body
 ```
 Collex name
 ```
 
-## Update Collection Exercise survey
-* `PUT /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb/surveyId` will update the survey for collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+## Update Collection Exercise start
+* `PUT /collectionexercises/{collection_exercise_id}/scheduledStart` will update the scheduled start of collection exercise with given id.
 * Returns 200 OK if the resource is updated
+* Returns 400 Bad Request, resource not updated
+* Returns 409 Conflict, resource not updated
+
+
+## Update Collection Exercise survey
+* `PUT /collectionexercises/{collection_exercise_id}/surveyId` will update the survey for collection exercise with given id.
+* Returns 200 OK if the resource is updated
+* Returns 400 Bad Request, resource not updated
+* Returns 409 Conflict, resource not updated
 
 ### Example Request Body
 ```
@@ -173,11 +210,12 @@ cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87
 ```
 
 ## Delete Collection Exercise
-* `DELETE /collectionexercises/c6467711-21eb-4e78-804c-1db8392f93fb` will mark the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb` for deletion.  This operation is included for future use and currently serves no purpose (also included for completeness).
+* `DELETE /collectionexercises/{collection_exercise_id}` will mark the collection exercise with given id for deletion.  This operation is included for future use and currently serves no purpose (also included for completeness).
+* Returns collection exercise to be deleted.
 
 
 ## Execute Collection Exercise
-* `POST /collectionexerciseexecute/c6467711-21eb-4e78-804c-1db8392f93fb` will execute the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `POST /collectionexerciseexecution/{collection_exercise_id}` will execute the collection exercise with the given id.
 
 ### Example JSON Response
 ```json
@@ -189,9 +227,9 @@ cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
 ## Link Sample Summary To Collection Exercise
-* `PUT /collectionexercises/link/c6467711-21eb-4e78-804c-1db8392f93fb` will link the Sample Summaries specified in the json request to the collection exercise with an ID of `c6467711-21eb-4e78-804c-1db8392f93fb`.
+* `PUT /collectionexercises/link/{collection_exercise_id}` will link the Sample Summaries specified in the json request to the collection exercise with the given id.
 
-The endpoint will also delete any entries currently in the samplelink table for `c6467711-21eb-4e78-804c-1db8392f93fb` before linking to the sample summary IDs in the json request.
+The endpoint will also delete any entries currently in the samplelink table for the specified collection exercise before linking to the sample summary IDs in the json request.
 
 ### Example JSON Request
 ```json
@@ -217,7 +255,7 @@ The endpoint will also delete any entries currently in the samplelink table for 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
 ## Get Sample Summaries Linked To Collection Exercise
-* `GET /collectionexercises/link/c6467711-21eb-4e78-804c-1db8392f93fb` will return a list of Sample Summary IDs linked to a collection exercise.
+* `GET /collectionexercises/link/{collection_exercise_id}` will return a list of Sample Summary IDs linked to a collection exercise.
 
 ### Example JSON Response
 ```json
@@ -237,7 +275,7 @@ This part of the page  documents the Collection Exercise event service API endpo
 ## Service Information
 
 ## Update Collection Event Exercise
-* `PUT /collectionexercises/14fb3e68-4dca-46db-bf49-04b84e07e97c/events/End` will update the collection exercise event timestamp with an ID of `14fb3e68-4dca-46db-bf49-04b84e07e97c`.
+* `PUT /collectionexercises/{collection_exercise_id}/events/{event-tag}` will update the collection exercise event timestamp with the given id.
 * Returns 200 OK if the resource is updated
 
 
@@ -251,7 +289,7 @@ json
 ```
 
 ## Get Event Linked To Collection Exercise event
-* `GET /collectionexercises/14fb3e68-4dca-46db-bf49-04b84e07e97c/events/End` will return an event linked to a collection exercise.
+* `GET /collectionexercises/{collection_exercie_id}/events/{event-tag}` will return an event linked to a collection exercise.
 
 
 ### Example JSON Response
@@ -291,6 +329,6 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise event
 
 
 ## Delete Collection Exercise event
-* `DELETE /collectionexercises/9139f443-b44d-4aaf-a5bb-942a7916e49e/events/End` will delete the collection exercise event with an ID of `9139f443-b44d-4aaf-a5bb-942a7916e49e`.
+* `DELETE /collectionexercises/{collection_exercise_id}/events/{event-tag}` will delete the collection exercise event with the given id.
 
 An `HTTP 202 ` status code is returned if the collection exercise event with the specified ID deleted.
