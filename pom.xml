@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>collectionexercisesvc</artifactId>
-  <version>10.49.4-SNAPSHOT</version>
+  <version>10.49.5</version>
   <packaging>jar</packaging>
 
   <name>CTP : CollectionExerciseService</name>
