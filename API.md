@@ -263,7 +263,7 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 * Returns 409 conflict, resource not updated.
 
 ### Example Request Body
-```
+```text/plain
 201803
 ```
 
@@ -274,7 +274,7 @@ An `HTTP 404 Not Found` status code is returned if the collection exercise with 
 * Returns 409 conflict, not updated resource.
 
 ### Example Request Body
-```
+```text/plain
 August 2018
 ```
 
@@ -285,7 +285,7 @@ August 2018
 * Returns 409 Conflict, resource not updated
 
 ### Example Request Body
-```
+```text\plain
 Collex name
 ```
 
