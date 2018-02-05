@@ -24,13 +24,45 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 [
   {
     "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
-    "name": "201601",
-    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z"
+    "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54"
+    "name": "Monthly Survey of Building Materials Bricks",
+    "actualExecutionDateTime": null,
+    "scheduledExecutionDateTime": null,
+    "scheduledStartDateTime": null,
+    "actualPublishDateTime": null,
+    "periodStartDateTime": null,
+    "periodEndDateTime": null,
+    "scheduledReturnDateTime": null,
+    "scheduledEndDateTime": null,
+    "executedBy": null,
+    "state": "INIT",
+    "caseTypes": null,
+    "exerciseRef": "201801",
+    "userDescription": "January 2018",
+    "created": "2018-01-09T12:56:09.652Z",
+    "updated": null,
+    "deleted": null
   },
   {
-    "id": "e33daf0e-6a27-40cd-98dc-c6231f50e84a",
-    "name": "201602",
-    "scheduledExecutionDateTime": "2017-08-12T00:00:00Z"
+    "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
+    "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
+    "name": "Monthly Survey of Building materials Bricks",
+    "actualExecutionDateTime": null,
+    "scheduledExecutionDateTime": null,
+    "scheduledStartDateTime": null,
+    "actualPublishDateTime": null,
+    "periodStartDateTime": null,
+    "periodEndDateTime": null,
+    "scheduledReturnDateTime": null,
+    "scheduledEndDateTime": null,
+    "executedBy": null,
+    "state": "INIT",
+    "caseTypes": null,
+    "exerciseRef": "201802",
+    "userDescription": "February 2018",
+    "created": "2018-01-09T12:56:09.709Z",
+    "updated": null,
+    "deleted": null
   }
 ]
 ```
@@ -44,9 +76,25 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 ```json
 [
   {
-    "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
-    "name": "201601",
-    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z"
+    "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
+    "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
+    "name": "Monthly Survey of Building materials Bricks",
+    "actualExecutionDateTime": null,
+    "scheduledExecutionDateTime": null,
+    "scheduledStartDateTime": null,
+    "actualPublishDateTime": null,
+    "periodStartDateTime": null,
+    "periodEndDateTime": null,
+    "scheduledReturnDateTime": null,
+    "scheduledEndDateTime": null,
+    "executedBy": null,
+    "state": "INIT",
+    "caseTypes": null,
+    "exerciseRef": "201802",
+    "userDescription": "February 2018",
+    "created": "2018-01-09T12:56:09.709Z",
+    "updated": null,
+    "deleted": null
   },
 ]
 ```
@@ -62,31 +110,77 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 ```json
 [
   {
-    "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
-    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
-    "name": "201601",
-    "exerciseRef": "221_201712",
-    "actualExecutionDateTime": "2017-05-15T14:20:24Z",
-    "scheduledExecutionDateTime": "2017-05-15T00:00:00Z",
-    "scheduledStartDateTime": "2017-06-01T00:00:00Z",
-    "actualPublishDateTime": null,
-    "periodStartDateTime": null,
-    "periodEndDateTime": null,
-    "scheduledReturnDateTime": "2017-06-30T00:00:00Z",
-    "scheduledEndDateTime": null,
-    "executedBy": "Fred Bloggs",
-    "state": "EXECUTED",
-    "caseTypes": [
-      {
-        "sampleUnitType": "B",
-        "actionPlanId": "60df56d9-f491-4ac8-b256-a10154290a8b"
-      },
-      {
-        "sampleUnitType": "BI",
-        "actionPlanId": "b1f46e33-a3ef-4e50-939d-c18f8a9f11bb"
-      }
-    ]
-  }
+        "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
+        "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+        "name": "BRES_2017",
+        "actualExecutionDateTime": "2017-11-06T16:06:19.966Z",
+        "scheduledExecutionDateTime": "2017-09-10T23:00:00.000Z",
+        "scheduledStartDateTime": "2017-09-11T23:00:00.000Z",
+        "actualPublishDateTime": "2017-11-06T16:08:26.100Z",
+        "periodStartDateTime": "2017-09-14T23:00:00.000Z",
+        "periodEndDateTime": "2017-09-15T22:59:59.000Z",
+        "scheduledReturnDateTime": "2017-10-06T00:00:00.000Z",
+        "scheduledEndDateTime": "2018-06-29T23:00:00.000Z",
+        "executedBy": null,
+        "state": "PUBLISHED",
+        "caseTypes": [
+            {
+                "actionPlanId": "e71002ac-3575-47eb-b87f-cd9db92bf9a7",
+                "sampleUnitType": "B"
+            },
+            {
+                "actionPlanId": "0009e978-0932-463b-a2a1-b45cb3ffcb2a",
+                "sampleUnitType": "BI"
+            }
+        ],
+        "exerciseRef": "221_201712",
+        "userDescription": null,
+        "created": null,
+        "updated": null,
+        "deleted": false
+    },
+    {
+        "id": "88e18a80-bc77-48bf-8eff-db351024be2b",
+        "surveyId": "75b19ea0-69a4-4c58-8d7f-4458c8f43f5c",
+        "name": "Monthly Business Sur",
+        "actualExecutionDateTime": null,
+        "scheduledExecutionDateTime": null,
+        "scheduledStartDateTime": null,
+        "actualPublishDateTime": null,
+        "periodStartDateTime": null,
+        "periodEndDateTime": null,
+        "scheduledReturnDateTime": null,
+        "scheduledEndDateTime": null,
+        "executedBy": null,
+        "state": "INIT",
+        "caseTypes": [],
+        "exerciseRef": "1802",
+        "userDescription": "February 2018",
+        "created": "2018-01-09T12:56:07.262Z",
+        "updated": null,
+        "deleted": null
+    },
+    {
+        "id": "6af19036-f69b-4d2e-abf1-ce442debb51c",
+        "surveyId": "75b19ea0-69a4-4c58-8d7f-4458c8f43f5c",
+        "name": "Monthly Business Sur",
+        "actualExecutionDateTime": null,
+        "scheduledExecutionDateTime": null,
+        "scheduledStartDateTime": null,
+        "actualPublishDateTime": null,
+        "periodStartDateTime": null,
+        "periodEndDateTime": null,
+        "scheduledReturnDateTime": null,
+        "scheduledEndDateTime": null,
+        "executedBy": null,
+        "state": "INIT",
+        "caseTypes": [],
+        "exerciseRef": "1803",
+        "userDescription": "March 2018",
+        "created": "2018-01-09T12:56:07.485Z",
+        "updated": null,
+        "deleted": null
+    },
 ]
 ```
 
@@ -96,30 +190,34 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 ### Example JSON Response
 ```json
 {
-  "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
-  "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
-  "name": "201601",
-  "exerciseRef": "221_201712",
-  "actualExecutionDateTime": "2017-05-15T14:20:24Z",
-  "scheduledExecutionDateTime": "2017-05-15T00:00:00Z",
-  "scheduledStartDateTime": "2017-06-01T00:00:00Z",
-  "actualPublishDateTime": null,
-  "periodStartDateTime": null,
-  "periodEndDateTime": null,
-  "scheduledReturnDateTime": "2017-06-30T00:00:00Z",
-  "scheduledEndDateTime": null,
-  "executedBy": "Fred Bloggs",
-  "state": "EXECUTED",
-  "caseTypes": [
-    {
-      "sampleUnitType": "B",
-      "actionPlanId": "60df56d9-f491-4ac8-b256-a10154290a8b"
-    },
-    {
-      "sampleUnitType": "BI",
-      "actionPlanId": "b1f46e33-a3ef-4e50-939d-c18f8a9f11bb"
-    }
-  ]
+    "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "name": "BRES_2017",
+    "actualExecutionDateTime": "2017-11-06T16:06:19.966Z",
+    "scheduledExecutionDateTime": "2017-09-10T23:00:00.000Z",
+    "scheduledStartDateTime": "2017-09-11T23:00:00.000Z",
+    "actualPublishDateTime": "2017-11-06T16:08:26.100Z",
+    "periodStartDateTime": "2017-09-14T23:00:00.000Z",
+    "periodEndDateTime": "2017-09-15T22:59:59.000Z",
+    "scheduledReturnDateTime": "2017-10-06T00:00:00.000Z",
+    "scheduledEndDateTime": "2018-06-29T23:00:00.000Z",
+    "executedBy": null,
+    "state": "PUBLISHED",
+    "caseTypes": [
+        {
+            "actionPlanId": "e71002ac-3575-47eb-b87f-cd9db92bf9a7",
+            "sampleUnitType": "B"
+        },
+        {
+            "actionPlanId": "0009e978-0932-463b-a2a1-b45cb3ffcb2a",
+            "sampleUnitType": "BI"
+        }
+    ],
+    "exerciseRef": "221_201712",
+    "userDescription": null,
+    "created": null,
+    "updated": null,
+    "deleted": false
 }
 ```
 
