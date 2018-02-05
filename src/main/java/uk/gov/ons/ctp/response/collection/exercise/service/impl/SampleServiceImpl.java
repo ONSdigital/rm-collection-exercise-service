@@ -78,7 +78,7 @@ public class SampleServiceImpl implements SampleService {
         collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
 
         collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
-            CollectionExerciseEvent.REQUEST));
+            CollectionExerciseEvent.EXECUTE));
         collectRepo.saveAndFlush(collectionExercise);
       }
     }

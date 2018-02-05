@@ -181,7 +181,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
       setCollectionExerciseFromDto(collex, collectionExercise);
 
-      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
+      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
       collectionExercise.setCreated(new Timestamp(new Date().getTime()));
       collectionExercise.setId(UUID.randomUUID());
 
