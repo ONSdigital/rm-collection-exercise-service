@@ -53,3 +53,21 @@ databaseChangeLog:
             comment: US004 - fix sequence number to compensate for BRES_collectionexercise_seeddata.sql
             path: us004-fix-sequence.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-7
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US041 - rename INIT and PENDING to CREATED and EXECUTION_STARTED
+            path: us041-rename-states.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-8
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US041 - add new states
+            path: us041-insert-states.sql
+            relativeToChangelogFile: true

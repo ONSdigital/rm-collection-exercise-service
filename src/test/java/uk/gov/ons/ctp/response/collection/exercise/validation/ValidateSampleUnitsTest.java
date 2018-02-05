@@ -15,6 +15,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
@@ -31,6 +32,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
@@ -45,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -95,6 +98,9 @@ public class ValidateSampleUnitsTest {
   @Mock
   private ScheduleSettings scheduleSettings;
 
+  @Mock
+  private CollectionExerciseService collectionExerciseService;
+
   @InjectMocks
   private ValidateSampleUnits validateSampleUnits;
 
@@ -140,6 +146,8 @@ public class ValidateSampleUnitsTest {
     // SampleUnit
     collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     when(collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
+            .thenReturn(collectionExercises);
+    when(collectionExerciseService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
         .thenReturn(collectionExercises);
 
     List<ExerciseSampleUnitGroup> sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
@@ -203,7 +211,7 @@ public class ValidateSampleUnitsTest {
    * CollectionExercises.
    */
   @Test
-  public void validateSampleUnitsOK() {
+  public void validateSampleUnitsOK() throws CTPException {
     List<String> PARTY_ID = Arrays.asList("4eed610a-39f7-437b-a37d-9de1f905cb39", "4625df99-7c20-4610-a18c-2f93daffce2a",
             "45297c23-763d-46a9-b4e5-c37ff5b4fbe8");
 
@@ -234,21 +242,29 @@ public class ValidateSampleUnitsTest {
       assertEquals("0015", group.getFormType());
     });
 
-    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
-    List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
+    ArgumentCaptor<CollectionExercise> collexTransition = ArgumentCaptor.forClass(CollectionExercise.class);
+    ArgumentCaptor<CollectionExerciseEvent> collexEvent = ArgumentCaptor.forClass(CollectionExerciseEvent.class);
+    verify(collectionExerciseService, times(2)).transitionCollectionExercise(
+            collexTransition.capture(), collexEvent.capture());
+
+    List<CollectionExercise> exercises = collexTransition.getAllValues();
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
       assertTrue(RESULT_COLLECTION_ID.contains(exercise.getId().toString()));
-      assertEquals(CollectionExerciseState.VALIDATED, exercise.getState());
     });
+    List<CollectionExerciseEvent> events = collexEvent.getAllValues();
+
+    assertEquals(2, events
+            .stream()
+            .filter(e -> e.equals(CollectionExerciseEvent.VALIDATE))
+            .collect(Collectors.toList()).size());
   }
 
   /**
    * Test of party service client failure.
    */
   @Test
-  public void validateSampleUnitsNoParty() {
+  public void validateSampleUnitsNoParty() throws CTPException {
 
     // Override happy path scenario to receive error from party service client
     when(partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF))
@@ -278,21 +294,29 @@ public class ValidateSampleUnitsTest {
       assertEquals("0015", group.getFormType());
     });
 
-    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
-    List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
+    ArgumentCaptor<CollectionExercise> collexTransition = ArgumentCaptor.forClass(CollectionExercise.class);
+    ArgumentCaptor<CollectionExerciseEvent> collexEvent = ArgumentCaptor.forClass(CollectionExerciseEvent.class);
+    verify(collectionExerciseService, times(2)).transitionCollectionExercise(
+            collexTransition.capture(), collexEvent.capture());
+
+    List<CollectionExercise> exercises = collexTransition.getAllValues();
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
       assertTrue(RESULT_COLLECTION_ID.contains(exercise.getId().toString()));
-      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getState());
     });
+    List<CollectionExerciseEvent> events = collexEvent.getAllValues();
+
+    assertEquals(2, events
+            .stream()
+            .filter(e -> e.equals(CollectionExerciseEvent.INVALIDATE))
+            .collect(Collectors.toList()).size());
   }
 
   /**
    * Test of collection instrument client service failure.
    */
   @Test
-  public void validateSampleUnitsNoCollectionInstrument() {
+  public void validateSampleUnitsNoCollectionInstrument() throws CTPException {
 
     // Override happy path scenario to receive error from collection instrument
     // service.
@@ -322,15 +346,22 @@ public class ValidateSampleUnitsTest {
       assertEquals("0015", group.getFormType());
     });
 
-    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(collectRepo, times(2)).saveAndFlush(collectionExerciseSave.capture());
-    List<CollectionExercise> exercises = collectionExerciseSave.getAllValues();
+    ArgumentCaptor<CollectionExercise> collexTransition = ArgumentCaptor.forClass(CollectionExercise.class);
+    ArgumentCaptor<CollectionExerciseEvent> collexEvent = ArgumentCaptor.forClass(CollectionExerciseEvent.class);
+    verify(collectionExerciseService, times(2)).transitionCollectionExercise(
+            collexTransition.capture(), collexEvent.capture());
+
+    List<CollectionExercise> exercises = collexTransition.getAllValues();
     assertTrue(exercises.size() == 2);
     exercises.forEach((exercise) -> {
       assertTrue(RESULT_COLLECTION_ID.contains(exercise.getId().toString()));
-      assertEquals(CollectionExerciseState.FAILEDVALIDATION, exercise.getState());
     });
+    List<CollectionExerciseEvent> events = collexEvent.getAllValues();
 
+    assertEquals(2, events
+                    .stream()
+                    .filter(e -> e.equals(CollectionExerciseEvent.INVALIDATE))
+                    .collect(Collectors.toList()).size());
   }
 
   /**

@@ -58,6 +58,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     transitionForInit.put(CollectionExerciseEvent.CI_SAMPLE_ADDED, CollectionExerciseState.CREATED);
     transitionForInit.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
     transitionForInit.put(CollectionExerciseEvent.EVENTS_ADDED, CollectionExerciseState.SCHEDULED);
+    transitionForInit.put(CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
     transitions.put(CollectionExerciseState.CREATED, transitionForInit);
 
     // SCHEDULED

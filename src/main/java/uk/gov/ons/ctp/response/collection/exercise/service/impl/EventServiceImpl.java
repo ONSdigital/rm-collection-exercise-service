@@ -41,8 +41,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event createEvent(EventDTO eventDto) throws CTPException {
+        UUID collexId = eventDto.getCollectionExerciseId();
         CollectionExercise collex =
-                this.collectionExerciseService.findCollectionExercise(eventDto.getCollectionExerciseId());
+                this.collectionExerciseService.findCollectionExercise(collexId);
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
