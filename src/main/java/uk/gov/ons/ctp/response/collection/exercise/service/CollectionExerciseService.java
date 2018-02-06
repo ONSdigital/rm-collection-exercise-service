@@ -150,4 +150,7 @@ public interface CollectionExerciseService {
   void transitionCollectionExercise(CollectionExercise collex, CollectionExerciseDTO.CollectionExerciseEvent event)
           throws CTPException;
 
+
+  void maybeSendCiSampleAdded(UUID collexId) throws CTPException;
+  void maybeSendCiSampleAdded(CollectionExercise collectionExercise) throws CTPException;
 }

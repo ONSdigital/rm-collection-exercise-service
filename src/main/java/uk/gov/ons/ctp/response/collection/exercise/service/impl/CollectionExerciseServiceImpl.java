@@ -30,6 +30,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -55,6 +56,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Autowired
   private SampleLinkRepository sampleLinkRepository;
+
+  @Autowired
+  private EventService eventService;
 
   @Autowired
   @Qualifier("collectionExercise")
@@ -137,16 +141,22 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    *         SampleSummaries
    */
   @Transactional
+  @Override
   public List<SampleLink> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
       List<UUID> sampleSummaryIds) {
-
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
     List<SampleLink> linkedSummaries = new ArrayList<SampleLink>();
     for (UUID summaryId : sampleSummaryIds) {
       linkedSummaries.add(createLink(summaryId, collectionExerciseId));
     }
 
-    return linkedSummaries;
+      try {
+        maybeSendCiSampleAdded(collectionExerciseId);
+      } catch (CTPException e) {
+        log.error("Failed to set state for collection exercise {} - {}", collectionExerciseId, e);
+      }
+
+      return linkedSummaries;
   }
 
     /**
@@ -376,6 +386,25 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             collex.setState(newState);
             this.collectRepo.saveAndFlush(collex);
         }
+    }
+
+    @Override
+    public void maybeSendCiSampleAdded(UUID collexId) throws CTPException {
+        CollectionExercise collex = findCollectionExercise(collexId);
+
+        if (collex != null){
+            maybeSendCiSampleAdded(collex);
+        }
+    }
+
+    @Override
+    public void maybeSendCiSampleAdded(CollectionExercise collectionExercise) throws CTPException {
+      UUID collexId = collectionExercise.getId();
+      List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
+
+      if (sampleLinks.size() > 0){
+          transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
+      }
     }
 
     /**

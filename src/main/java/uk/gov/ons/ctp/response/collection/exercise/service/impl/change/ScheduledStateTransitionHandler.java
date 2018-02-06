@@ -31,9 +31,15 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
         CollectionExercise collectionExercise = event.getCollectionExercise();
 
         if (this.eventService.isScheduled(collectionExercise.getId())){
-            this.collectionExerciseService.transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_ADDED);
+            this.collectionExerciseService.transitionCollectionExercise(collectionExercise,
+                    CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_ADDED);
+            // This is a bit of a kludge on account of SCHEDULED not being a proper state.  If the CI & sample are
+            // already loaded, loading the events may trigger a transition straight through to READY_FOR_REVIEW
+            // Performing this call here will force that
+            this.collectionExerciseService.maybeSendCiSampleAdded(collectionExercise);
         } else {
-            this.collectionExerciseService.transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_DELETED);
+            this.collectionExerciseService.transitionCollectionExercise(collectionExercise,
+                    CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_DELETED);
         }
     }
 }
