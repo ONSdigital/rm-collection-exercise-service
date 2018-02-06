@@ -191,7 +191,7 @@ pipeline {
                 sh 'wget https://gist.githubusercontent.com/benjefferies/106d53e3178e1627bcad4784f6fe7fe1/raw/832c07c0f3e31933e634a9e0a2398d2845943090/artifactory-get.sh'
                 sh 'sh artifactory-get.sh -r http://artifactory-sdc.onsdigital.uk/artifactory/libs-release-local/ -g uk.gov.ons.ctp.product -a collectionexercisesvc > target/collectionexercisesvc.jar'
                 sh 'chmod 777 target/collectionexercisesvc.jar'
-                sh "sed -i -- 's/SPACE/dev/g' *template.yml"
+                sh "sed -i -- 's/SPACE/test/g' *template.yml"
                 sh "sed -i -- 's/INSTANCES/1/g' *template.yml"
                 sh "sed -i -- 's/DATABASE/rm-pg-db/g' *template.yml"
                 sh "sed -i -- 's/DOMAIN/${env.CF_DOMAIN}/g' *template.yml"
