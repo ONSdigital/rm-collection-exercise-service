@@ -201,7 +201,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       collectionExercise.setCreated(new Timestamp(new Date().getTime()));
       collectionExercise.setId(UUID.randomUUID());
 
-      return this.collectRepo.save(collectionExercise);
+      return this.collectRepo.saveAndFlush(collectionExercise);
   }
 
   @Override
@@ -276,7 +276,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
           collex.setUpdated(new Timestamp(new Date().getTime()));
 
-          return this.collectRepo.save(collex);
+          return updateCollectionExercise(collex);
       }
    }
 
@@ -330,14 +330,15 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             setCollectionExerciseFromDto(collexDto, existing);
             existing.setUpdated(new Timestamp(new Date().getTime()));
 
-            return this.collectRepo.save(existing);
+            return updateCollectionExercise(existing);
         }
     }
   }
 
     @Override
     public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
-       return this.collectRepo.save(collex);
+       collex.setUpdated(new Timestamp(new Date().getTime()));
+       return this.collectRepo.saveAndFlush(collex);
     }
 
 
@@ -357,7 +358,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       } else {
           collex.setDeleted(deleted);
 
-          return this.collectRepo.save(collex);
+          return updateCollectionExercise(collex);
       }
   }
 
@@ -384,7 +385,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
                 collectionExerciseTransitionState.transition(collex.getState(), event);
         if (oldState != newState){
             collex.setState(newState);
-            this.collectRepo.saveAndFlush(collex);
+            updateCollectionExercise(collex);
         }
     }
 
@@ -402,9 +403,39 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       UUID collexId = collectionExercise.getId();
       List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
 
-      if (sampleLinks.size() > 0){
+      if (sampleLinks.size() > 0 && collectionExercise.getCollectionInstrumentReferenceCount() > 0){
           transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
+      } else {
+          transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
       }
+    }
+
+    public int changeCollectionInstrumentReferenceCount(UUID collexId, int amount) throws CTPException {
+      CollectionExercise collex = findCollectionExercise(collexId);
+
+      if (collex == null){
+          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Collection exercise %s does not exist", collexId));
+      }
+
+      int count = collex.getCollectionInstrumentReferenceCount();
+
+      count += amount;
+
+      collex.setCollectionInstrumentReferenceCount(count);
+
+      updateCollectionExercise(collex);
+
+      return collex.getCollectionInstrumentReferenceCount();
+    }
+
+    @Override
+    public int incrementCollectionInstrumentReferenceCount(UUID collexId) throws CTPException {
+      return changeCollectionInstrumentReferenceCount(collexId, 1);
+    }
+
+    @Override
+    public int decrementCollectionInstrumentReferenceCount(UUID collexId) throws CTPException {
+        return changeCollectionInstrumentReferenceCount(collexId, -1);
     }
 
     /**

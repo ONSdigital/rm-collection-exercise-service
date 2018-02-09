@@ -153,4 +153,7 @@ public interface CollectionExerciseService {
 
   void maybeSendCiSampleAdded(UUID collexId) throws CTPException;
   void maybeSendCiSampleAdded(CollectionExercise collectionExercise) throws CTPException;
+
+  int incrementCollectionInstrumentReferenceCount(UUID collexId) throws CTPException;
+  int decrementCollectionInstrumentReferenceCount(UUID collexId) throws CTPException;
 }

@@ -176,7 +176,7 @@ public class CollectionExerciseServiceImplTest {
       this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
 
       ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-      verify(this.collexRepo).save(captor.capture());
+      verify(this.collexRepo).saveAndFlush(captor.capture());
 
       CollectionExercise collex = captor.getValue();
 
@@ -201,7 +201,7 @@ public class CollectionExerciseServiceImplTest {
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
 
-    verify(collexRepo).save(captor.capture());
+    verify(collexRepo).saveAndFlush(captor.capture());
     CollectionExercise collex = captor.getValue();
     assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurveyId());
     assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
@@ -272,7 +272,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.deleteCollectionExercise(existing.getId());
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     assertEquals(true, captor.getValue().getDeleted());
   }
@@ -285,7 +285,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.undeleteCollectionExercise(existing.getId());
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     assertEquals(false, captor.getValue().getDeleted());
   }
@@ -329,7 +329,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
     assertEquals(exerciseRef, ce.getExerciseRef());
@@ -346,7 +346,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
     assertEquals(name, ce.getName());
@@ -363,7 +363,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
     assertEquals(userDescription, ce.getUserDescription());

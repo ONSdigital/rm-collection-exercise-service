@@ -71,3 +71,21 @@ databaseChangeLog:
             comment: US041 - add new states
             path: us041-insert-states.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-9
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US042 - add live
+            path: us042-add-live.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-10
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: US042 - add collection instrument reference count
+            path: us042-add-ci-reference-count.sql
+            relativeToChangelogFile: true

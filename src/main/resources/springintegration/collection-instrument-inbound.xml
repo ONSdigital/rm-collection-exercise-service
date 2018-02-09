@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
+       xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd
+		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <int:channel id="ciJson" />
+    <int:channel id="ciMessageDto" />
+
+    <bean id="simpleMessageConverter"
+          class="org.springframework.amqp.support.converter.SimpleMessageConverter" />
+
+    <int-amqp:inbound-channel-adapter channel="ciJson"
+                                      queue-names="collex.seft.instruments" connection-factory="connectionFactory"
+                                      message-converter="simpleMessageConverter"/>
+
+    <int:json-to-object-transformer id="json-to-ci-message-dto" input-channel="ciJson" output-channel="ciMessageDto" type="uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionInstrumentMessageDTO"/>
+
+    <rabbit:queue name="collex.seft.instruments"/>
+
+    <rabbit:fanout-exchange name="Seft.Instruments" durable="false">
+        <rabbit:bindings>
+            <rabbit:binding queue="collex.seft.instruments"/>
+        </rabbit:bindings>
+    </rabbit:fanout-exchange>
+
+</beans>
