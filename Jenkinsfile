@@ -164,8 +164,8 @@ pipeline {
                 environment name: 'do_release', value: 'yes'
             }
             steps {
-                git url: 'https://github.com/ONSdigital/rm-collection-exercise-service.git', branch: 'jenkins-pipeline'
-                sh 'git clean -f && git reset --hard origin/jenkins-pipeline'
+                git url: 'https://github.com/ONSdigital/rm-collection-exercise-service.git', branch: 'master'
+                sh 'git clean -f && git reset --hard origin/master'
                 sh 'git tag -d $(git tag -l)'
                 sh 'git config --local user.email "jenkins@jenkins2.rmdev.onsdigital.uk"'
                 sh 'git config --local user.name "Jenkins";'
