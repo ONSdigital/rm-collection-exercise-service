@@ -74,7 +74,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForReview = new HashMap<>();
     transitionForReview.put(CollectionExerciseEvent.CI_SAMPLE_DELETED, CollectionExerciseState.SCHEDULED);
     transitionForReview.put(CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
-    transitionForReview.put(CollectionExerciseEvent.REVIEWED, CollectionExerciseState.EXECUTION_STARTED);
+    transitionForReview.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
     transitions.put(CollectionExerciseState.READY_FOR_REVIEW, transitionForReview);
 
     // PENDING/EXECUTION_STARTED
