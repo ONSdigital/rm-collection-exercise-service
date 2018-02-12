@@ -92,7 +92,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
 
     // VALIDATED
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForValidated = new HashMap<>();
-    transitionForValidated.put(CollectionExerciseEvent.PUBLISH, CollectionExerciseState.PUBLISHED);
+    transitionForValidated.put(CollectionExerciseEvent.PUBLISH, CollectionExerciseState.READY_FOR_LIVE);
     transitions.put(CollectionExerciseState.VALIDATED, transitionForValidated);
 
     StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionManager =
