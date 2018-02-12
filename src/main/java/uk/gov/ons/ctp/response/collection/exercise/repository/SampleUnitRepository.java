@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,6 +35,17 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
       + "su.sampleunittypefk = :p_sampleunittypefk);", nativeQuery = true)
   boolean tupleExists(@Param("p_exercisefk") Integer id, @Param("p_sampleunitref") String sampleUnitRef,
       @Param("p_sampleunittypefk") String sampleUnitTypeFK);
+
+  /**
+   * Check repository for SampleUnit existence by party ID.
+   *
+   * @param partyID sample unit party id to check for existence of sample unit.
+   * @return boolean whether exists
+   */
+  @Query(value = "select exists (select 1 from "
+          + "collectionexercise.sampleunit su "
+          + "where su.partyid = :p_partyid);", nativeQuery = true)
+  boolean partyExists(@Param("p_partyid") UUID partyID);
 
   /**
    * Count the number of SampleUnits for the CollectionExercise.
