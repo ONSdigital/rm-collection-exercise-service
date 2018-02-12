@@ -97,7 +97,8 @@ public class ValidateSampleUnits {
    */
   public void validateSampleUnits() {
 
-    List<CollectionExercise> exercises = collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    List<CollectionExercise> exercises =
+            collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     if (!exercises.isEmpty()) {
 
@@ -123,10 +124,10 @@ public class ValidateSampleUnits {
           try {
             CollectionExerciseEvent event = getCollectionExerciseTransitionState(exercise);
 
-            if (event != null){
+            if (event != null) {
               this.collexService.transitionCollectionExercise(exercise, event);
             }
-          } catch(CTPException e){
+          } catch(CTPException e) {
               log.error("Error validating collection exercise {}: {}", exercise.getId(), e);
           }
         }); // End looping collections
@@ -378,6 +379,7 @@ public class ValidateSampleUnits {
    *
    * @param exercise to transition.
    * @return exercise Collection Exercise with new state.
+   * @throws CTPException
    */
   private CollectionExerciseEvent getCollectionExerciseTransitionState(CollectionExercise exercise)
           throws CTPException {

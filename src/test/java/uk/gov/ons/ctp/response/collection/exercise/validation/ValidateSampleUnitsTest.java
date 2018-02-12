@@ -209,6 +209,7 @@ public class ValidateSampleUnitsTest {
   /**
    * Test happy path through to validate all SampleUnitGroups and
    * CollectionExercises.
+   * @throws CTPException
    */
   @Test
   public void validateSampleUnitsOK() throws CTPException {
@@ -262,6 +263,7 @@ public class ValidateSampleUnitsTest {
 
   /**
    * Test of party service client failure.
+   * @throws CTPException
    */
   @Test
   public void validateSampleUnitsNoParty() throws CTPException {
@@ -314,6 +316,7 @@ public class ValidateSampleUnitsTest {
 
   /**
    * Test of collection instrument client service failure.
+   * @throws CTPException
    */
   @Test
   public void validateSampleUnitsNoCollectionInstrument() throws CTPException {

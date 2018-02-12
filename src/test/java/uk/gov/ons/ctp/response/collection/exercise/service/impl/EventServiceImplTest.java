@@ -90,7 +90,7 @@ public class EventServiceImplTest {
         }
     }
 
-    private static Event createEvent(EventService.Tag tag){
+    private static Event createEvent(EventService.Tag tag) {
         Timestamp eventTime = new Timestamp(new Date().getTime());
         Event event = new Event();
         event.setTimestamp(eventTime);
@@ -99,7 +99,7 @@ public class EventServiceImplTest {
         return event;
     }
 
-    private List<Event> createEventList(EventService.Tag... tags){
+    private List<Event> createEventList(EventService.Tag... tags) {
         return Arrays.stream(tags)
                 .map(EventServiceImplTest::createEvent)
                 .collect(Collectors.toList());
