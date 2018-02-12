@@ -39,19 +39,29 @@ public final class ScheduledStartDateHandler implements EventChangeHandler {
     private void updateCollectionExerciseFromEvent(final Event event) {
         try {
             EventService.Tag tag = EventService.Tag.valueOf(event.getTag());
+            CollectionExercise collex = event.getCollectionExercise();
 
-            switch(tag) {
-                case mps:
-                    CollectionExercise collex = event.getCollectionExercise();
-
-                    if (collex != null) {
+            if (collex != null) {
+                switch (tag) {
+                    case mps:
                         log.info("Setting scheduledStartDate for {} to {}", collex.getId(), event.getTimestamp());
                         collex.setScheduledStartDateTime(event.getTimestamp());
-                        this.collectionExerciseService.updateCollectionExercise(collex);
-                    }
-                    break;
-                default:
-                    break;
+                        collex.setScheduledExecutionDateTime(event.getTimestamp());
+                        collex.setPeriodStartDateTime(event.getTimestamp());
+                        break;
+                    case exercise_end:
+                        log.info("Setting scheduledEndDate for {} to {}", collex.getId(), event.getTimestamp());
+                        collex.setScheduledEndDateTime(event.getTimestamp());
+                        collex.setPeriodEndDateTime(event.getTimestamp());
+                        break;
+                    case return_by:
+                        log.info("Setting scheduledReturnDate for {} to {}", collex.getId(), event.getTimestamp());
+                        collex.setScheduledReturnDateTime(event.getTimestamp());
+                        break;
+                    default:
+                        break;
+                }
+                this.collectionExerciseService.updateCollectionExercise(collex);
             }
         } catch(IllegalArgumentException e) {
             // Thrown if tag isn't one of the mandatory types - if it happens we don't care about the event
