@@ -412,7 +412,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE", collectionExercise.getId().toString());
       String searchStringJson = new JSONObject(searchStringMap).toString();
       Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
-        if (sampleLinks.size() > 0 && numberOfCollectionInstruments > 0){
+      if (sampleLinks.size() > 0 && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0){
           transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
       } else {
           transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);

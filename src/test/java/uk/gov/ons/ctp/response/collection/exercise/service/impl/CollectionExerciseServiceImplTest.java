@@ -459,13 +459,31 @@ public class CollectionExerciseServiceImplTest {
   }
 
   @Test
-  public void testTransitionToReadyToReviewWhenScheduledWithNoCIsAndSample() throws Exception {
+  public void testDoNotTransitionToReadyToReviewWhenScheduledWithNoCIsAndSample() throws Exception {
     // Given
     CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
     String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
     given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(0);
+
+    // When
+    collectionExerciseServiceImpl.transitionScheduleCollectionExerciseToReadyToReview(exercise);
+
+    // Then
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
+    verify(collexRepo, times(0)).saveAndFlush(exercise);
+  }
+
+
+  @Test
+  public void testDoNotTransitionToReadyToReviewWhenCIsCountFailsAndReturnsNull() throws Exception {
+    // Given
+    CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
+    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
+    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(null);
 
     // When
     collectionExerciseServiceImpl.transitionScheduleCollectionExerciseToReadyToReview(exercise);
