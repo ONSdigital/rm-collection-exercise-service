@@ -17,10 +17,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 public class ScheduledStateTransitionHandler implements EventChangeHandler {
 
     @Autowired
-    @Qualifier("collectionExercise")
-    private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
-
-    @Autowired
     private EventService eventService;
 
     @Autowired
