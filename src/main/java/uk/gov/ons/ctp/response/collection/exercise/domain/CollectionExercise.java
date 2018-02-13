@@ -96,6 +96,4 @@ public class CollectionExercise {
   @Column(name="survey_uuid")
   private UUID surveyId;
 
-  @Column(name="ci_ref_count")
-  private int collectionInstrumentReferenceCount;
 }

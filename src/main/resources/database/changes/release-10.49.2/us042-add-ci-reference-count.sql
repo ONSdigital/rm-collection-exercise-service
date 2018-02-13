@@ -1,1 +1,0 @@
-ALTER TABLE collectionexercise.collectionexercise ADD COLUMN ci_ref_count INTEGER DEFAULT 0;

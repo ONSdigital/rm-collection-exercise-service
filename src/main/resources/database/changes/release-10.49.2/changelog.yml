@@ -86,15 +86,6 @@ databaseChangeLog:
       author: Matt Innes
       changes:
         - sqlFile:
-            comment: US042 - add collection instrument reference count
-            path: us042-add-ci-reference-count.sql
-            relativeToChangelogFile: true
-
-  - changeSet:
-      id: 10.49.2-11
-      author: Matt Innes
-      changes:
-        - sqlFile:
             comment: US042 - deprecate PUBLISHED
             path: us042-deprecate-published.sql
             relativeToChangelogFile: true

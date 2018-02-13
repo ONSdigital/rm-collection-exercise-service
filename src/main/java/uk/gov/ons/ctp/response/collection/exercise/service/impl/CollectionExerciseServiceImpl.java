@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.UUID;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
@@ -63,6 +66,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Autowired
   @Qualifier("collectionExercise")
   private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
+
+  @Autowired
+  private CollectionInstrumentSvcClient collectionInstrument;
 
   @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
@@ -403,39 +409,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       UUID collexId = collectionExercise.getId();
       List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
 
-      if (sampleLinks.size() > 0 && collectionExercise.getCollectionInstrumentReferenceCount() > 0){
+      Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE", collectionExercise.getId().toString());
+      String searchStringJson = new JSONObject(searchStringMap).toString();
+      Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
+        if (sampleLinks.size() > 0 && numberOfCollectionInstruments > 0){
           transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
       } else {
           transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
       }
-    }
-
-    public int changeCollectionInstrumentReferenceCount(UUID collexId, int amount) throws CTPException {
-      CollectionExercise collex = findCollectionExercise(collexId);
-
-      if (collex == null){
-          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Collection exercise %s does not exist", collexId));
-      }
-
-      int count = collex.getCollectionInstrumentReferenceCount();
-
-      count += amount;
-
-      collex.setCollectionInstrumentReferenceCount(count);
-
-      updateCollectionExercise(collex);
-
-      return collex.getCollectionInstrumentReferenceCount();
-    }
-
-    @Override
-    public int incrementCollectionInstrumentReferenceCount(UUID collexId) throws CTPException {
-      return changeCollectionInstrumentReferenceCount(collexId, 1);
-    }
-
-    @Override
-    public int decrementCollectionInstrumentReferenceCount(UUID collexId) throws CTPException {
-        return changeCollectionInstrumentReferenceCount(collexId, -1);
     }
 
     /**
