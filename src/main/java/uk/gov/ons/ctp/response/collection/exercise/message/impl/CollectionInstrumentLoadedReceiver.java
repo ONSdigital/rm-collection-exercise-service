@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @MessageEndpoint
 @Slf4j
-public class CollectionInstrumentLoadedReceiverImpl {
+public class CollectionInstrumentLoadedReceiver {
 
     @Autowired
     private CollectionExerciseService collectionExerciseService;
@@ -23,6 +23,6 @@ public class CollectionInstrumentLoadedReceiverImpl {
 
         UUID collexId = message.getExerciseId();
 
-        this.collectionExerciseService.maybeSendCiSampleAdded(collexId);
+        this.collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(collexId);
     }
 }

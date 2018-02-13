@@ -151,7 +151,16 @@ public interface CollectionExerciseService {
           throws CTPException;
 
 
-  void maybeSendCiSampleAdded(UUID collexId) throws CTPException;
-  void maybeSendCiSampleAdded(CollectionExercise collectionExercise) throws CTPException;
+  /**
+   * Transition scheduled collection exercises with collection instruments and samples to
+   * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
+   */
+  void transitionScheduleCollectionExerciseToReadyToReview(UUID collectionExerciseId) throws CTPException;
+
+  /**
+   * Transition scheduled collection exercises with collection instruments and samples to
+   * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
+   */
+  void transitionScheduleCollectionExerciseToReadyToReview(CollectionExercise collectionExercise) throws CTPException;
 
 }

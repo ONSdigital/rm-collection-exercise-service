@@ -24,7 +24,7 @@
 
     <rabbit:queue name="collex.seft.instruments"/>
 
-    <rabbit:fanout-exchange name="Seft.Instruments" durable="false">
+    <rabbit:fanout-exchange name="Seft.Instruments">
         <rabbit:bindings>
             <rabbit:binding queue="collex.seft.instruments"/>
         </rabbit:bindings>

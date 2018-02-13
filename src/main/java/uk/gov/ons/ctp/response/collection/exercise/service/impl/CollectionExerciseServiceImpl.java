@@ -151,13 +151,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   public List<SampleLink> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
       List<UUID> sampleSummaryIds) {
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
-    List<SampleLink> linkedSummaries = new ArrayList<SampleLink>();
+    List<SampleLink> linkedSummaries = new ArrayList<>();
     for (UUID summaryId : sampleSummaryIds) {
       linkedSummaries.add(createLink(summaryId, collectionExerciseId));
     }
 
       try {
-        maybeSendCiSampleAdded(collectionExerciseId);
+        transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
       } catch (CTPException e) {
         log.error("Failed to set state for collection exercise {} - {}", collectionExerciseId, e);
       }
@@ -396,16 +396,16 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
 
     @Override
-    public void maybeSendCiSampleAdded(UUID collexId) throws CTPException {
-        CollectionExercise collex = findCollectionExercise(collexId);
+    public void transitionScheduleCollectionExerciseToReadyToReview(UUID collectionExerciseId) throws CTPException {
+        CollectionExercise collex = findCollectionExercise(collectionExerciseId);
 
         if (collex != null){
-            maybeSendCiSampleAdded(collex);
+            transitionScheduleCollectionExerciseToReadyToReview(collex);
         }
     }
 
     @Override
-    public void maybeSendCiSampleAdded(CollectionExercise collectionExercise) throws CTPException {
+    public void transitionScheduleCollectionExerciseToReadyToReview(CollectionExercise collectionExercise) throws CTPException {
       UUID collexId = collectionExercise.getId();
       List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
 
