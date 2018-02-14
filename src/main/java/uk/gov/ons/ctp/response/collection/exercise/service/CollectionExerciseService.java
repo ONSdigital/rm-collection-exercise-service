@@ -145,4 +145,9 @@ public interface CollectionExerciseService {
    */
   CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException;
 
+  List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state);
+
+  void transitionCollectionExercise(CollectionExercise collex, CollectionExerciseDTO.CollectionExerciseEvent event)
+          throws CTPException;
+
 }

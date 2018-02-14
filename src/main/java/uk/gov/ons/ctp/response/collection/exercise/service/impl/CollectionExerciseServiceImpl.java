@@ -13,10 +13,12 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
@@ -53,6 +55,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Autowired
   private SampleLinkRepository sampleLinkRepository;
+
+  @Autowired
+  @Qualifier("collectionExercise")
+  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
 
   @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
@@ -181,7 +187,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
       setCollectionExerciseFromDto(collex, collectionExercise);
 
-      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
+      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
       collectionExercise.setCreated(new Timestamp(new Date().getTime()));
       collectionExercise.setId(UUID.randomUUID());
 
@@ -353,6 +359,23 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     @Override
     public CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException {
         return updateCollectionExerciseDeleted(id, false);
+    }
+
+    @Override
+    public List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state) {
+        return collectRepo.findByState(state);
+    }
+
+    @Override
+    public void transitionCollectionExercise(CollectionExercise collex,
+                                             CollectionExerciseDTO.CollectionExerciseEvent event) throws CTPException {
+        CollectionExerciseDTO.CollectionExerciseState oldState = collex.getState();
+        CollectionExerciseDTO.CollectionExerciseState newState =
+                collectionExerciseTransitionState.transition(collex.getState(), event);
+        if (oldState != newState){
+            collex.setState(newState);
+            this.collectRepo.saveAndFlush(collex);
+        }
     }
 
     /**

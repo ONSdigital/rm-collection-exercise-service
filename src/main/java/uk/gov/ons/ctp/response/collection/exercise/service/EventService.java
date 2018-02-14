@@ -37,5 +37,6 @@ public interface EventService {
     List<Event> getOutstandingEvents();
     void setEventMessageSent(UUID eventId) throws CTPException;
     void clearEventMessageSent(UUID eventId) throws CTPException;
+    boolean isScheduled(UUID collexUuid) throws CTPException;
 
 }
