@@ -124,7 +124,7 @@ public class SampleServiceImpl implements SampleService {
         if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK()) == collectionExercise
             .getSampleSize()) {
           collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
-              CollectionExerciseEvent.EXECUTE));
+              CollectionExerciseEvent.EXECUTION_COMPLETE));
           collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
           collectRepo.saveAndFlush(collectionExercise);
         }
