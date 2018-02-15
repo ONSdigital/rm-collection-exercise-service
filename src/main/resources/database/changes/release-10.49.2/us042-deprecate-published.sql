@@ -16,4 +16,9 @@ UPDATE collectionexercise.collectionexercise AS c
  OR (c.actualpublishdatetime > now()
  AND c.actualpublishdatetime IS NOT NULL);
 
+ -- Catch all for those without events
+ UPDATE collectionexercise.collectionexercise AS c
+ SET statefk = 'READY_FOR_LIVE'
+ WHERE statefk = 'PUBLISHED';
+
 DELETE FROM collectionexercise.collectionexercisestate WHERE statepk = 'PUBLISHED';
