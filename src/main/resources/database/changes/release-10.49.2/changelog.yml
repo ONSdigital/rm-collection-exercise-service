@@ -59,8 +59,8 @@ databaseChangeLog:
       author: Matt Innes
       changes:
         - sqlFile:
-            comment: US041 - rename INIT and PENDING to CREATED and EXECUTION_STARTED
-            path: us041-rename-states.sql
+            comment: US041 - add new states
+            path: us041-insert-states.sql
             relativeToChangelogFile: true
 
   - changeSet:
@@ -68,8 +68,8 @@ databaseChangeLog:
       author: Matt Innes
       changes:
         - sqlFile:
-            comment: US041 - add new states
-            path: us041-insert-states.sql
+            comment: US041 - rename INIT and PENDING to CREATED and EXECUTION_STARTED and any collection exercsises with mps, go_live, return_by and exercise_end to SCHEDULED
+            path: us041-rename-states.sql
             relativeToChangelogFile: true
 
   - changeSet:
