@@ -2,23 +2,31 @@ UPDATE collectionexercise.collectionexercise AS c
  SET statefk = 'LIVE'
  FROM collectionexercise.event AS e
  WHERE c.exercisepk = e.collexfk
- AND statefk = 'PUBLISHED'
- AND (tag = 'go_live' and timestamp <= now())
- OR (c.actualpublishdatetime <= now()
- AND c.actualpublishdatetime IS NOT NULL);
+ AND c.statefk = 'PUBLISHED'
+ AND e.tag = 'go_live'
+ AND e.timestamp <= now();
 
- UPDATE collectionexercise.collectionexercise AS c
+UPDATE collectionexercise.collectionexercise AS c
  SET statefk = 'READY_FOR_LIVE'
  FROM collectionexercise.event AS e
  WHERE c.exercisepk = e.collexfk
- AND statefk = 'PUBLISHED'
- AND (tag = 'go_live' and timestamp > now())
- OR (c.actualpublishdatetime > now()
- AND c.actualpublishdatetime IS NOT NULL);
+ AND c.statefk = 'PUBLISHED'
+ AND e.tag = 'go_live'
+ AND e.timestamp > now();
 
- -- Catch all for those without events
- UPDATE collectionexercise.collectionexercise AS c
+-- Catch those which don't have events
+UPDATE collectionexercise.collectionexercise AS c
+ SET statefk = 'LIVE'
+ WHERE statefk = 'PUBLISHED'
+ AND c.actualpublishdatetime <= now()
+ AND c.actualpublishdatetime IS NOT NULL;
+
+-- Catch those which don't have events
+UPDATE collectionexercise.collectionexercise AS c
  SET statefk = 'READY_FOR_LIVE'
- WHERE statefk = 'PUBLISHED';
+ WHERE c.statefk = 'PUBLISHED'
+ AND c.actualpublishdatetime > now()
+ AND c.actualpublishdatetime IS NOT NULL;
+
 
 DELETE FROM collectionexercise.collectionexercisestate WHERE statepk = 'PUBLISHED';
