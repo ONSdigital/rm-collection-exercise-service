@@ -95,4 +95,5 @@ public class CollectionExercise {
 
   @Column(name="survey_uuid")
   private UUID surveyId;
+
 }

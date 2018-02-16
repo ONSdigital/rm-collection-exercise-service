@@ -20,7 +20,11 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,8 +41,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event createEvent(EventDTO eventDto) throws CTPException {
+        UUID collexId = eventDto.getCollectionExerciseId();
         CollectionExercise collex =
-                this.collectionExerciseService.findCollectionExercise(eventDto.getCollectionExerciseId());
+                this.collectionExerciseService.findCollectionExercise(collexId);
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
@@ -209,6 +214,26 @@ public class EventServiceImpl implements EventService {
         event.setMessageSent(null);
 
         this.eventRepository.save(event);
+    }
+
+    /**
+     * 'scheduled' is defined as having events for mps, go_live, return_by and exercise_end
+     * @param collexUuid  the collection exercise to check for scheduled
+     * @return true if the mandatory events are all present, false otherwise
+     * @throws CTPException if collection exercise not found etc
+     */
+    @Override
+    public boolean isScheduled(UUID collexUuid) throws CTPException {
+        Map<String, Event> events = getEvents(collexUuid).stream().collect(
+                Collectors.toMap(Event::getTag, Function.identity())
+        );
+
+        return Arrays.stream(Tag.values())
+                .map(t -> events.get(t.name()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList())
+                .size() >= Tag.values().length;
+
     }
 
 }

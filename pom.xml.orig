@@ -24,7 +24,11 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectionexercisesvc-api</artifactId>
+<<<<<<< HEAD
       <version>10.49.7</version>
+=======
+      <version>10.49.7-SNAPSHOT</version>
+>>>>>>> bde0ef4... update states to match DTO
     </dependency>
 
     <dependency>

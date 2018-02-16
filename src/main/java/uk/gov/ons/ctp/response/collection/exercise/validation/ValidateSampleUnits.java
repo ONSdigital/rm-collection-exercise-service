@@ -38,6 +38,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
@@ -71,11 +72,7 @@ public class ValidateSampleUnits {
   private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
 
   @Autowired
-  private CollectionExerciseRepository collectRepo;
-
-  @Autowired
-  @Qualifier("collectionExercise")
-  private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionState;
+  private CollectionExerciseService collexService;
 
   @Autowired
   @Qualifier("sampleUnitGroup")
@@ -100,7 +97,8 @@ public class ValidateSampleUnits {
    */
   public void validateSampleUnits() {
 
-    List<CollectionExercise> exercises = collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    List<CollectionExercise> exercises =
+            collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
 
     if (!exercises.isEmpty()) {
 
@@ -123,7 +121,15 @@ public class ValidateSampleUnits {
                     // classifierTypes, fatal error.
           }
 
-          collectRepo.saveAndFlush(collectionExerciseTransitionState(exercise));
+          try {
+            CollectionExerciseEvent event = getCollectionExerciseTransitionState(exercise);
+
+            if (event != null) {
+              this.collexService.transitionCollectionExercise(exercise, event);
+            }
+          } catch(CTPException e) {
+              log.error("Error validating collection exercise {}: {}", exercise.getId(), e);
+          }
         }); // End looping collections
 
       } catch (LockingException ex) {
@@ -373,9 +379,11 @@ public class ValidateSampleUnits {
    *
    * @param exercise to transition.
    * @return exercise Collection Exercise with new state.
+   * @throws CTPException
    */
-  private CollectionExercise collectionExerciseTransitionState(CollectionExercise exercise) {
-
+  private CollectionExerciseEvent getCollectionExerciseTransitionState(CollectionExercise exercise)
+          throws CTPException {
+    CollectionExerciseEvent event = null;
     long init = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         SampleUnitGroupDTO.SampleUnitGroupState.INIT, exercise);
     long validated = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
@@ -383,22 +391,16 @@ public class ValidateSampleUnits {
     long failed = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION, exercise);
 
-    try {
-      if (validated == exercise.getSampleSize().longValue()) {
-        // All sample units validated, set exercise state to VALIDATED
-        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
-            CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE));
-      } else if (init < 1 && failed > 0) {
-        // None left to validate but some failed, set exercise to
-        // FAILEDVALIDATION
-        exercise.setState(collectionExerciseTransitionState.transition(exercise.getState(),
-            CollectionExerciseDTO.CollectionExerciseEvent.INVALIDATE));
-      }
-    } catch (CTPException ex) {
-      log.error("Collection Exercise state transition failed: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+    if (validated == exercise.getSampleSize().longValue()) {
+      // All sample units validated, set exercise state to VALIDATED
+      event = CollectionExerciseEvent.VALIDATE;
+    } else if (init < 1 && failed > 0) {
+      // None left to validate but some failed, set exercise to
+      // FAILEDVALIDATION
+      event = CollectionExerciseEvent.INVALIDATE;
     }
-    return exercise;
+
+    return event;
   }
 
   /**

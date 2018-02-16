@@ -22,4 +22,14 @@ public interface CollectionInstrumentSvcClient {
    */
   List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) throws RestClientException;
 
+  /**
+   * Request the count of existing collection instruments
+   *
+   * @param searchString search string for looking up collection instruments
+   *          based on classifiers
+   * @return count of collection instruments matching the search string
+   * @throws RestClientException something went wrong making http call
+   */
+  Integer countCollectionInstruments(String searchString) throws RestClientException;
+
 }
