@@ -1,26 +1,44 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.domain.*;
+import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +58,16 @@ public class CollectionExerciseServiceImplTest {
 
   @Mock
   private SurveyService surveyService;
+
+  @Mock
+  private SampleLinkRepository sampleLinkRepository;
+
+  @Mock
+  private CollectionInstrumentSvcClient collectionInstrument;
+
+  @Spy
+  private StateTransitionManager<?, ?> stateManager = new CollectionExerciseStateTransitionManagerFactory()
+          .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
 
   @InjectMocks
   private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
@@ -176,7 +204,7 @@ public class CollectionExerciseServiceImplTest {
       this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
 
       ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-      verify(this.collexRepo).save(captor.capture());
+      verify(this.collexRepo).saveAndFlush(captor.capture());
 
       CollectionExercise collex = captor.getValue();
 
@@ -201,7 +229,7 @@ public class CollectionExerciseServiceImplTest {
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
 
-    verify(collexRepo).save(captor.capture());
+    verify(collexRepo).saveAndFlush(captor.capture());
     CollectionExercise collex = captor.getValue();
     assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurveyId());
     assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
@@ -272,7 +300,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.deleteCollectionExercise(existing.getId());
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     assertEquals(true, captor.getValue().getDeleted());
   }
@@ -285,7 +313,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.undeleteCollectionExercise(existing.getId());
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     assertEquals(false, captor.getValue().getDeleted());
   }
@@ -329,7 +357,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
     assertEquals(exerciseRef, ce.getExerciseRef());
@@ -346,7 +374,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
     assertEquals(name, ce.getName());
@@ -363,7 +391,7 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-    verify(this.collexRepo).save(captor.capture());
+    verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
     assertEquals(userDescription, ce.getUserDescription());
@@ -393,6 +421,75 @@ public class CollectionExerciseServiceImplTest {
     } catch(CTPException e){
       assertEquals(CTPException.Fault.RESOURCE_VERSION_CONFLICT, e.getFault());
     }
+  }
+
+  @Test
+  public void testTransitionToReadyToReviewWhenScheduledWithCIsAndSample() throws Exception {
+    // Given
+    CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
+    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
+    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(1);
+
+    // When
+    collectionExerciseServiceImpl.transitionScheduleCollectionExerciseToReadyToReview(exercise);
+
+    // Then
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
+    verify(collexRepo).saveAndFlush(exercise);
+  }
+
+  @Test
+  public void testDoNotTransitionToReadyToReviewWhenScheduledWithCIsAndNoSample() throws Exception {
+    // Given
+    CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
+    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.emptyList());
+    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(1);
+
+    // When
+    collectionExerciseServiceImpl.transitionScheduleCollectionExerciseToReadyToReview(exercise);
+
+    // Then
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
+    verify(collexRepo, times(0)).saveAndFlush(exercise);
+  }
+
+  @Test
+  public void testDoNotTransitionToReadyToReviewWhenScheduledWithNoCIsAndSample() throws Exception {
+    // Given
+    CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
+    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
+    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(0);
+
+    // When
+    collectionExerciseServiceImpl.transitionScheduleCollectionExerciseToReadyToReview(exercise);
+
+    // Then
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
+    verify(collexRepo, times(0)).saveAndFlush(exercise);
+  }
+
+
+  @Test
+  public void testDoNotTransitionToReadyToReviewWhenCIsCountFailsAndReturnsNull() throws Exception {
+    // Given
+    CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
+    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
+    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(null);
+
+    // When
+    collectionExerciseServiceImpl.transitionScheduleCollectionExerciseToReadyToReview(exercise);
+
+    // Then
+    exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
+    verify(collexRepo, times(0)).saveAndFlush(exercise);
   }
 
 }

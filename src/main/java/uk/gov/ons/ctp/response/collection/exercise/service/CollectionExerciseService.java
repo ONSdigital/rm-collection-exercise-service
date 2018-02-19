@@ -154,4 +154,22 @@ public interface CollectionExerciseService {
    */
   CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException;
 
+  List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state);
+
+  void transitionCollectionExercise(CollectionExercise collex, CollectionExerciseDTO.CollectionExerciseEvent event)
+          throws CTPException;
+
+
+  /**
+   * Transition scheduled collection exercises with collection instruments and samples to
+   * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
+   */
+  void transitionScheduleCollectionExerciseToReadyToReview(UUID collectionExerciseId) throws CTPException;
+
+  /**
+   * Transition scheduled collection exercises with collection instruments and samples to
+   * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
+   */
+  void transitionScheduleCollectionExerciseToReadyToReview(CollectionExercise collectionExercise) throws CTPException;
+
 }

@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -74,6 +75,32 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
 
     }
 
+    return result;
+  }
+
+  @Override
+  public Integer countCollectionInstruments(String searchString) throws RestClientException {
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.add("searchString", searchString);
+
+    UriComponents uriComponents = restUtility.createUriComponents(
+            appConfig.getCollectionInstrumentSvc().getRequestCollectionInstrumentsCount(), queryParams);
+
+    HttpEntity<List<CollectionInstrumentDTO>> httpEntity = restUtility.createHttpEntity(null);
+
+    ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
+            String.class);
+
+    Integer result = null;
+    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+      String responseBody = responseEntity.getBody();
+      if (StringUtils.isNumeric(responseBody)) {
+        result = Integer.parseInt(responseBody);
+      } else {
+        log.warn("Body {} is not numeric", responseBody);
+        return null;
+      }
+    }
     return result;
   }
 }

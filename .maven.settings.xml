@@ -23,6 +23,19 @@
         </profile>
     </profiles>
 
+    <servers>
+        <server>
+            <username>travis</username>
+            <password>${env.ARTIFACTORY_PSW}</password>
+            <id>central</id>
+        </server>
+        <server>
+            <username>travis</username>
+            <password>${env.ARTIFACTORY_PSW}</password>
+            <id>snapshots</id>
+        </server>
+    </servers>
+
     <activeProfiles>
         <activeProfile>artifactory</activeProfile>
     </activeProfiles>

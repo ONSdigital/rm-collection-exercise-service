@@ -13,10 +13,18 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -80,5 +88,52 @@ public class EventServiceImplTest {
             // Expected 409
             assertEquals(CTPException.Fault.RESOURCE_VERSION_CONFLICT, e.getFault());
         }
+    }
+
+    private static Event createEvent(EventService.Tag tag) {
+        Timestamp eventTime = new Timestamp(new Date().getTime());
+        Event event = new Event();
+        event.setTimestamp(eventTime);
+        event.setTag(tag.name());
+
+        return event;
+    }
+
+    private List<Event> createEventList(EventService.Tag... tags) {
+        return Arrays.stream(tags)
+                .map(EventServiceImplTest::createEvent)
+                .collect(Collectors.toList());
+    }
+
+    @Test
+    public void givenNoEventsWhenScheduledIsCheckedThenFalse() throws CTPException {
+        UUID collexUuid = UUID.randomUUID();
+        when(eventRepository.findByCollectionExerciseId(collexUuid)).thenReturn(new ArrayList<>());
+
+        boolean scheduled = this.eventService.isScheduled(collexUuid);
+
+        assertFalse(scheduled);
+    }
+
+    @Test
+    public void givenSomeEventsWhenScheduledIsCheckedThenFalse() throws CTPException {
+        UUID collexUuid = UUID.randomUUID();
+        List<Event> events = createEventList(EventService.Tag.mps, EventService.Tag.exercise_end);
+        when(eventRepository.findByCollectionExerciseId(collexUuid)).thenReturn(events);
+
+        boolean scheduled = this.eventService.isScheduled(collexUuid);
+
+        assertFalse(scheduled);
+    }
+
+    @Test
+    public void givenAllEventsWhenScheduledIsCheckedThenTrue() throws CTPException {
+        UUID collexUuid = UUID.randomUUID();
+        List<Event> events = createEventList(EventService.Tag.values());
+        when(eventRepository.findByCollectionExerciseId(collexUuid)).thenReturn(events);
+
+        boolean scheduled = this.eventService.isScheduled(collexUuid);
+
+        assertTrue(scheduled);
     }
 }

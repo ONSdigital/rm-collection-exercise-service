@@ -1,22 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.transaction.Transactional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
@@ -30,6 +22,17 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
+
+import javax.transaction.Transactional;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * The implementation of the SampleService
@@ -53,6 +56,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   @Autowired
   private SampleLinkRepository sampleLinkRepository;
+
+  @Autowired
+  @Qualifier("collectionExercise")
+  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
+
+  @Autowired
+  private CollectionInstrumentSvcClient collectionInstrument;
 
   @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
@@ -136,16 +146,22 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    *         SampleSummaries
    */
   @Transactional
+  @Override
   public List<SampleLink> linkSampleSummaryToCollectionExercise(UUID collectionExerciseId,
       List<UUID> sampleSummaryIds) {
-
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
-    List<SampleLink> linkedSummaries = new ArrayList<SampleLink>();
+    List<SampleLink> linkedSummaries = new ArrayList<>();
     for (UUID summaryId : sampleSummaryIds) {
       linkedSummaries.add(createLink(summaryId, collectionExerciseId));
     }
 
-    return linkedSummaries;
+      try {
+        transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
+      } catch (CTPException e) {
+        log.error("Failed to set state for collection exercise {} - {}", collectionExerciseId, e);
+      }
+
+      return linkedSummaries;
   }
 
     /**
@@ -186,11 +202,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
       setCollectionExerciseFromDto(collex, collectionExercise);
 
-      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.INIT);
+      collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
       collectionExercise.setCreated(new Timestamp(new Date().getTime()));
       collectionExercise.setId(UUID.randomUUID());
 
-      return this.collectRepo.save(collectionExercise);
+      return this.collectRepo.saveAndFlush(collectionExercise);
   }
 
   @Override
@@ -265,7 +281,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
           collex.setUpdated(new Timestamp(new Date().getTime()));
 
-          return this.collectRepo.save(collex);
+          return updateCollectionExercise(collex);
       }
    }
 
@@ -319,14 +335,15 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             setCollectionExerciseFromDto(collexDto, existing);
             existing.setUpdated(new Timestamp(new Date().getTime()));
 
-            return this.collectRepo.save(existing);
+            return updateCollectionExercise(existing);
         }
     }
   }
 
     @Override
     public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
-       return this.collectRepo.save(collex);
+       collex.setUpdated(new Timestamp(new Date().getTime()));
+       return this.collectRepo.saveAndFlush(collex);
     }
 
 
@@ -346,7 +363,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       } else {
           collex.setDeleted(deleted);
 
-          return this.collectRepo.save(collex);
+          return updateCollectionExercise(collex);
       }
   }
 
@@ -358,6 +375,47 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     @Override
     public CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException {
         return updateCollectionExerciseDeleted(id, false);
+    }
+
+    @Override
+    public List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state) {
+        return collectRepo.findByState(state);
+    }
+
+    @Override
+    public void transitionCollectionExercise(CollectionExercise collex,
+                                             CollectionExerciseDTO.CollectionExerciseEvent event) throws CTPException {
+        CollectionExerciseDTO.CollectionExerciseState oldState = collex.getState();
+        CollectionExerciseDTO.CollectionExerciseState newState =
+                collectionExerciseTransitionState.transition(collex.getState(), event);
+        if (oldState != newState){
+            collex.setState(newState);
+            updateCollectionExercise(collex);
+        }
+    }
+
+    @Override
+    public void transitionScheduleCollectionExerciseToReadyToReview(UUID collectionExerciseId) throws CTPException {
+        CollectionExercise collex = findCollectionExercise(collectionExerciseId);
+
+        if (collex != null){
+            transitionScheduleCollectionExerciseToReadyToReview(collex);
+        }
+    }
+
+    @Override
+    public void transitionScheduleCollectionExerciseToReadyToReview(CollectionExercise collectionExercise) throws CTPException {
+      UUID collexId = collectionExercise.getId();
+      List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
+
+      Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE", collectionExercise.getId().toString());
+      String searchStringJson = new JSONObject(searchStringMap).toString();
+      Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
+      if (sampleLinks.size() > 0 && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0){
+          transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
+      } else {
+          transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
+      }
     }
 
     /**

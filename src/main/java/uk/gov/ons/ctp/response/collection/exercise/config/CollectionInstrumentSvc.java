@@ -14,5 +14,6 @@ import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 public class CollectionInstrumentSvc {
   private RestUtilityConfig connectionConfig;
   private String requestCollectionInstruments;
+  private String requestCollectionInstrumentsCount;
 
 }

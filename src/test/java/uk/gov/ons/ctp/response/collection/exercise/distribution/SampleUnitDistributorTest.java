@@ -157,7 +157,7 @@ public class SampleUnitDistributorTest {
 
     // Mock transition Managers
     when(collectionExerciseTransitionState.transition(CollectionExerciseState.VALIDATED,
-        CollectionExerciseEvent.PUBLISH)).thenReturn(CollectionExerciseState.PUBLISHED);
+        CollectionExerciseEvent.PUBLISH)).thenReturn(CollectionExerciseState.READY_FOR_LIVE);
 
     when(sampleUnitGroupState.transition(SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
         .thenReturn(SampleUnitGroupState.PUBLISHED);
@@ -206,7 +206,7 @@ public class SampleUnitDistributorTest {
     assertTrue(savedCollectionExercise.size() == 1);
     savedCollectionExercise.forEach((exercise) -> {
       assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
-      assertEquals(CollectionExerciseState.PUBLISHED, exercise.getState());
+      assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
     });
   }
 
@@ -263,7 +263,7 @@ public class SampleUnitDistributorTest {
     assertTrue(savedCollectionExercise.size() == 1);
     savedCollectionExercise.forEach((exercise) -> {
       assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
-      assertEquals(CollectionExerciseState.PUBLISHED, exercise.getState());
+      assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
     });
   }
 

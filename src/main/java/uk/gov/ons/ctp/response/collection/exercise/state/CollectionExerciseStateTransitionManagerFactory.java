@@ -53,16 +53,35 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
 
     Map<CollectionExerciseState, Map<CollectionExerciseEvent, CollectionExerciseState>> transitions = new HashMap<>();
 
-    // INIT
+    // INIT/CREATED
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForInit = new HashMap<>();
-    transitionForInit.put(CollectionExerciseEvent.REQUEST, CollectionExerciseState.PENDING);
-    transitions.put(CollectionExerciseState.INIT, transitionForInit);
+    transitionForInit.put(CollectionExerciseEvent.CI_SAMPLE_ADDED, CollectionExerciseState.CREATED);
+    transitionForInit.put(CollectionExerciseEvent.CI_SAMPLE_DELETED, CollectionExerciseState.CREATED);
+    transitionForInit.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
+    transitionForInit.put(CollectionExerciseEvent.EVENTS_ADDED, CollectionExerciseState.SCHEDULED);
+    transitionForInit.put(CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
+    transitions.put(CollectionExerciseState.CREATED, transitionForInit);
 
-    // PENDING
+    // SCHEDULED
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForScheduled = new HashMap<>();
+    transitionForScheduled.put(CollectionExerciseEvent.EVENTS_ADDED, CollectionExerciseState.SCHEDULED);
+    transitionForScheduled.put(CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
+    transitionForScheduled.put(CollectionExerciseEvent.CI_SAMPLE_DELETED, CollectionExerciseState.SCHEDULED);
+    transitionForScheduled.put(CollectionExerciseEvent.CI_SAMPLE_ADDED, CollectionExerciseState.READY_FOR_REVIEW);
+    transitions.put(CollectionExerciseState.SCHEDULED, transitionForScheduled);
+
+    // READY_FOR_REVIEW
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForReview = new HashMap<>();
+    transitionForReview.put(CollectionExerciseEvent.CI_SAMPLE_DELETED, CollectionExerciseState.SCHEDULED);
+    transitionForReview.put(CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
+    transitionForReview.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
+    transitions.put(CollectionExerciseState.READY_FOR_REVIEW, transitionForReview);
+
+    // PENDING/EXECUTION_STARTED
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForPending = new HashMap<>();
-    transitionForPending.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTED);
-    transitionForPending.put(CollectionExerciseEvent.REQUEST, CollectionExerciseState.PENDING);
-    transitions.put(CollectionExerciseState.PENDING, transitionForPending);
+    transitionForPending.put(CollectionExerciseEvent.EXECUTION_COMPLETE, CollectionExerciseState.EXECUTED);
+    transitionForPending.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
+    transitions.put(CollectionExerciseState.EXECUTION_STARTED, transitionForPending);
 
     // EXECUTED
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForExecuted = new HashMap<>();
@@ -72,7 +91,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
 
     // VALIDATED
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForValidated = new HashMap<>();
-    transitionForValidated.put(CollectionExerciseEvent.PUBLISH, CollectionExerciseState.PUBLISHED);
+    transitionForValidated.put(CollectionExerciseEvent.PUBLISH, CollectionExerciseState.READY_FOR_LIVE);
     transitions.put(CollectionExerciseState.VALIDATED, transitionForValidated);
 
     StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionManager =
