@@ -153,4 +153,9 @@ public class SampleServiceImpl implements SampleService {
     distributor.distributeSampleUnits(exercise);
   }
 
+  @Override
+  public boolean partyExists(final UUID id) {
+    return this.sampleUnitRepo.partyExists(id);
+  }
+
 }

@@ -19,13 +19,22 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 public interface CollectionExerciseService {
 
   /**
-   * Find a list of surveys associated to a collection exercise Id from the
+   * Find a list of collection exercises associated to a survey from the
    * Collection Exercise Service
    *
    * @param survey the survey for which to find collection exercises
-   * @return the associated surveys.
+   * @return the associated collection exercises.
    */
   List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey);
+
+  /**
+   * Find a list of collection exercises associated to a party from the
+   * Collection Exercise Service
+   *
+   * @param id the party id for which to find collection exercises
+   * @return the associated collection exercises.
+   */
+  List<CollectionExercise> findCollectionExercisesForParty(UUID id);
 
   /**
    * Find a collection exercise associated to a collection exercise Id from the

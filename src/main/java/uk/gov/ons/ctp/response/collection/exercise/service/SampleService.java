@@ -46,4 +46,12 @@ public interface SampleService {
    */
   void distributeSampleUnits(CollectionExercise exercise);
 
+  /**
+   * Check if SampleUnit exists by party ID.
+   *
+   * @param id for which to distribute SampleUnits.
+   * @return boolean
+   */
+  boolean partyExists(UUID id);
+
 }
