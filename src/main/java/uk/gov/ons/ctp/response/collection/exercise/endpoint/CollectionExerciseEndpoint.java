@@ -147,15 +147,15 @@ public class CollectionExerciseEndpoint {
     if (!partyExists) {
       throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
               String.format("%s %s", RETURN_PARTYNOTFOUND, id));
-    } else {
-      log.debug("Entering collection exercise fetch with survey Id {}", id);
-      List<CollectionExercise> collectionExerciseList = collectionExerciseService
-              .findCollectionExercisesForParty(id);
-      collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
-              CollectionExerciseDTO.class);
-      if (collectionExerciseList.isEmpty()) {
-        return ResponseEntity.noContent().build();
-      }
+    }
+
+    log.debug("Entering collection exercise fetch with party Id {}", id);
+    List<CollectionExercise> collectionExerciseList = collectionExerciseService
+            .findCollectionExercisesForParty(id);
+    collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
+            CollectionExerciseDTO.class);
+    if (collectionExerciseList.isEmpty()) {
+      return ResponseEntity.noContent().build();
     }
 
     return ResponseEntity.ok(collectionExerciseSummaryDTOList);
