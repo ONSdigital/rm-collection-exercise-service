@@ -53,6 +53,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSu
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -82,6 +83,9 @@ public class CollectionExerciseEndpoint {
   private SurveyService surveyService;
 
   @Autowired
+  private SampleService sampleService;
+
+  @Autowired
   private EventService eventService;
 
   @Qualifier("collectionExerciseBeanMapper")
@@ -91,8 +95,6 @@ public class CollectionExerciseEndpoint {
   @Autowired
   private Scheduler scheduler;
 
-  @Autowired
-  private SampleUnitRepository sampleUnitRepo;
 
   /**
    * GET to find collection exercises from the collection exercise service for
@@ -139,7 +141,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForParty(
           @PathVariable("id") final UUID id) throws CTPException {
 
-    Boolean partyExists = sampleUnitRepo.partyExists(id);
+    Boolean partyExists = sampleService.partyExists(id);
 
     List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
 
