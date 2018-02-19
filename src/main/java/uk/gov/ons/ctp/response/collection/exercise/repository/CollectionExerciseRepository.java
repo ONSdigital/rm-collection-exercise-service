@@ -65,7 +65,7 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   /**
    * Query repository for list of collection exercises associated with a certain party ID.
    *
-   * @param partyID for which to return Collection Exercises.
+   * @param partyid for which to return Collection Exercises.
    * @return collection exercises for party ID.
    */
   @Query(value = "select ce.id, ce.exercisepk, ce.name, ce.scheduledstartdatetime, ce.scheduledexecutiondatetime, "
@@ -77,6 +77,6 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
           + "on ce.exercisepk = sg.exercisefk "
           + "inner join collectionexercise.sampleunit su "
           + "on sg.sampleunitgrouppk = su.sampleunitgroupfk "
-          + "where su.partyid = :p_partyid;", nativeQuery = true)
-  List<CollectionExercise> findByPartyId(@Param("p_partyid") UUID partyID);
+          + "where su.partyid = :p_partyid ;", nativeQuery = true)
+  List<CollectionExercise> findByPartyId(@Param("p_partyid") UUID partyid);
 }
