@@ -154,7 +154,7 @@ public class SampleServiceImpl implements SampleService {
   }
 
   @Override
-  public boolean partyExists(UUID id) {
+  public boolean partyExists(final UUID id) {
     return this.sampleUnitRepo.partyExists(id);
   }
 

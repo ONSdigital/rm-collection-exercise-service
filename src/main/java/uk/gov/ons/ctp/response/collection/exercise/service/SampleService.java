@@ -50,6 +50,7 @@ public interface SampleService {
    * Check if SampleUnit exists by party ID.
    *
    * @param id for which to distribute SampleUnits.
+   * @return boolean
    */
   boolean partyExists(UUID id);
 
