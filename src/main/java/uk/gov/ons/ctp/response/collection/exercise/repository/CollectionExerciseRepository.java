@@ -60,4 +60,22 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
           nativeQuery = true)
   String getActiveActionPlanId(@Param("p_exercisefk") Integer exercisefk,
       @Param("p_sampleunittypefk") String sampleunittypefk, @Param("p_surveyuuid") UUID surveyuuid);
+
+  /**
+   * Query repository for list of collection exercises associated with a certain party ID.
+   *
+   * @param partyid for which to return Collection Exercises.
+   * @return collection exercises for party ID.
+   */
+  @Query(value = "select ce.id, ce.exercisepk, ce.name, ce.scheduledstartdatetime, ce.scheduledexecutiondatetime, "
+          + "ce.scheduledreturndatetime, ce.scheduledenddatetime, ce.periodstartdatetime, ce.periodenddatetime, "
+          + "ce.actualexecutiondatetime, ce.actualpublishdatetime, ce.executedby, ce.statefk, ce.samplesize, "
+          + "ce.exerciseref, ce.user_description, ce.created, ce.updated, ce.deleted, ce.survey_uuid "
+          + "from collectionexercise.collectionexercise ce "
+          + "inner join collectionexercise.sampleunitgroup sg "
+          + "on ce.exercisepk = sg.exercisefk "
+          + "inner join collectionexercise.sampleunit su "
+          + "on sg.sampleunitgrouppk = su.sampleunitgroupfk "
+          + "where su.partyid = :p_partyid ;", nativeQuery = true)
+  List<CollectionExercise> findByPartyId(@Param("p_partyid") UUID partyid);
 }

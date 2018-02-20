@@ -52,6 +52,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSu
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -68,6 +69,7 @@ public class CollectionExerciseEndpoint {
   private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
           "Collection Exercise not found for collection exercise Id";
   private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
+  private static final String RETURN_PARTYNOTFOUND = "Party not found for party Id";
   private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
 
   @Autowired
@@ -80,6 +82,9 @@ public class CollectionExerciseEndpoint {
   private SurveyService surveyService;
 
   @Autowired
+  private SampleService sampleService;
+
+  @Autowired
   private EventService eventService;
 
   @Qualifier("collectionExerciseBeanMapper")
@@ -88,6 +93,7 @@ public class CollectionExerciseEndpoint {
 
   @Autowired
   private Scheduler scheduler;
+
 
   /**
    * GET to find collection exercises from the collection exercise service for
@@ -117,6 +123,39 @@ public class CollectionExerciseEndpoint {
       if (collectionExerciseList.isEmpty()) {
         return ResponseEntity.noContent().build();
       }
+    }
+
+    return ResponseEntity.ok(collectionExerciseSummaryDTOList);
+  }
+
+  /**
+   * GET to find collection exercises from the collection exercise service for
+   * the given party Id.
+   *
+   * @param id party Id for which to trigger delivery of collection exercises
+   * @return list of collection exercises associated to party
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(value = "/party/{id}", method = RequestMethod.GET)
+  public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForParty(
+          @PathVariable("id") final UUID id) throws CTPException {
+
+    Boolean partyExists = sampleService.partyExists(id);
+
+    List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
+
+    if (!partyExists) {
+      throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+              String.format("%s %s", RETURN_PARTYNOTFOUND, id));
+    }
+
+    log.debug("Entering collection exercise fetch with party Id {}", id);
+    List<CollectionExercise> collectionExerciseList = collectionExerciseService
+            .findCollectionExercisesForParty(id);
+    collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
+            CollectionExerciseDTO.class);
+    if (collectionExerciseList.isEmpty()) {
+      return ResponseEntity.noContent().build();
     }
 
     return ResponseEntity.ok(collectionExerciseSummaryDTOList);

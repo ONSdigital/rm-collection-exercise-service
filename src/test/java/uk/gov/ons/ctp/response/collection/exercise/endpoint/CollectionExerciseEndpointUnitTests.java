@@ -86,9 +86,12 @@ public class CollectionExerciseEndpointUnitTests {
 
   private static final UUID SURVEY_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff5e");
   private static final UUID COLLECTIONEXERCISE_IDNOTFOUND = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff6e");
+    private static final UUID Party_IDNOTFOUND = UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
 
   private static final UUID SAMPLE_SUMMARY_ID1 = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
   private static final UUID SAMPLE_SUMMARY_ID2 = UUID.fromString("cf23b621-c613-424c-9d0d-53a9cfa82f3a");
+
+  private static final UUID PARTY_ID_1 = UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
 
 
   @InjectMocks
@@ -195,6 +198,48 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
         .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
+
+  }
+
+  /**
+   * Tests if collection exercise found for party.
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void findCollectionExercisesForParty() throws Exception {
+    when(sampleService.partyExists(PARTY_ID_1)).thenReturn(true);
+    when(collectionExerciseService.findCollectionExercisesForParty(PARTY_ID_1))
+            .thenReturn(collectionExerciseResults);
+
+    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/party/%s", PARTY_ID_1)));
+
+    actions.andExpect(status().isOk())
+            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+            .andExpect(handler().methodName("getCollectionExercisesForParty"))
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[*].id",
+                    containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
+            .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
+            .andExpect(jsonPath("$[*].scheduledExecutionDateTime",
+                    containsInAnyOrder(new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
+                            new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
+  }
+
+  /**
+   * Tests collection exercise not found.
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void findCollectionExercisesForPartyNotFound() throws Exception {
+    ResultActions actions = mockCollectionExerciseMvc
+            .perform(getJson(String.format("/collectionexercises/party/%s", Party_IDNOTFOUND)));
+
+    actions.andExpect(status().isNotFound())
+            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+            .andExpect(handler().methodName("getCollectionExercisesForParty"))
+            .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
 
   }
 
