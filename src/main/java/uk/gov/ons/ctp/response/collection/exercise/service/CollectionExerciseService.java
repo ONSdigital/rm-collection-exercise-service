@@ -154,9 +154,30 @@ public interface CollectionExerciseService {
    */
   CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException;
 
+  /**
+   * Find all collection exercises with a given state
+   * @param state the state to find
+   * @return a list of collection exercises with the given state
+   */
   List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state);
 
+  /**
+   * Utility method to transition a collection exercise to a new state
+   * @param collex a collection exercise
+   * @param event a collection exercise event
+   * @throws CTPException thrown if the specified event is not valid for the current state
+   */
   void transitionCollectionExercise(CollectionExercise collex, CollectionExerciseDTO.CollectionExerciseEvent event)
+          throws CTPException;
+
+  /**
+   * Utility method to transition a collection exercise to a new state
+   * @param collectionExerciseId a collection exercise UUID
+   * @param event a collection exercise event
+   * @throws CTPException thrown if the specified event is not valid for the current state or a collection exercise
+   *                      with the given id cannot be found
+   */
+  void transitionCollectionExercise(UUID collectionExerciseId, CollectionExerciseDTO.CollectionExerciseEvent event)
           throws CTPException;
 
 

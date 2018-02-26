@@ -395,6 +395,17 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
 
     @Override
+    public void transitionCollectionExercise(UUID collectionExerciseId, CollectionExerciseDTO.CollectionExerciseEvent event) throws CTPException {
+      CollectionExercise collex = findCollectionExercise(collectionExerciseId);
+
+      if (collex == null){
+          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Cannot find collection exercise %s", collectionExerciseId));
+      }
+
+      transitionCollectionExercise(collex, event);
+    }
+
+    @Override
     public void transitionScheduleCollectionExerciseToReadyToReview(UUID collectionExerciseId) throws CTPException {
         CollectionExercise collex = findCollectionExercise(collectionExerciseId);
 

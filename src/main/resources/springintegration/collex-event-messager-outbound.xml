@@ -15,7 +15,7 @@
   http://www.springframework.org/schema/integration/xml
   http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd">
 
-<rabbit:admin connection-factory="connectionFactory" />
+    <rabbit:admin connection-factory="connectionFactory" />
     <rabbit:template id="collexEventTemplate" connection-factory="connectionFactory" exchange="collex-event-message-outbound-exchange"
                        channel-transacted="true" />
 </beans>

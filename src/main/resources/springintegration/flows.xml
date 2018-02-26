@@ -10,7 +10,8 @@
 
     <import resource="sample-sampleunit-inbound-flow.xml"/>
 	<import resource="case-outbound-flow.xml"/>
-    <import resource="collex-event-messager.xml"/>
+    <import resource="collex-event-messager-outbound.xml"/>
+    <import resource="collex-event-messager-inbound.xml"/>
     <import resource="collection-instrument-inbound.xml"/>
 
 </beans>
