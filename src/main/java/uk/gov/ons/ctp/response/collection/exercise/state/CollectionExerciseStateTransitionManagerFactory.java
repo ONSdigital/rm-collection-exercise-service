@@ -96,8 +96,8 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
 
     // READY_FOR_LIVE
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForReadyForLive = new HashMap<>();
-    transitionForValidated.put(CollectionExerciseEvent.GO_LIVE, CollectionExerciseState.LIVE);
-    transitions.put(CollectionExerciseState.READY_FOR_LIVE, transitionForValidated);
+    transitionForReadyForLive.put(CollectionExerciseEvent.GO_LIVE, CollectionExerciseState.LIVE);
+    transitions.put(CollectionExerciseState.READY_FOR_LIVE, transitionForReadyForLive);
 
     StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent> collectionExerciseTransitionManager =
         new BasicStateTransitionManager<>(transitions);

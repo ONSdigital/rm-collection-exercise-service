@@ -22,12 +22,9 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 @Configuration
@@ -37,46 +34,47 @@ public class SchedulerConfiguration {
     @Autowired
     private EventService eventService;
 
-    public enum DataKey {
-        tag,
-        collectionExercise,
-        id,
-        eventPk,
-        timestamp
-    };
-
-    @Data
-    private static class EventJobTriggerDetail {
-        public EventJobTriggerDetail(final Event event){
-            UUID collexId = event.getCollectionExercise().getId();
-            String jobKey = event.getTag() + ":" + collexId.toString();
-            JobDetail job = newJob()
-                    .ofType(EventJob.class)
-                    .withIdentity(JobKey.jobKey(jobKey))
-                    .withDescription("Executing event " + jobKey + " at " + event.getTimestamp())
-                    .usingJobData(DataKey.tag.name(), event.getTag())
-                    .usingJobData(DataKey.collectionExercise.name(), event.getCollectionExercise().getId().toString())
-                    .usingJobData(DataKey.id.name(), event.getId().toString())
-                    .usingJobData(DataKey.eventPk.name(), event.getEventPK())
-                    .usingJobData(DataKey.timestamp.name(), event.getTimestamp().getTime())
-                    .build();
-            Trigger trigger = newTrigger()
-                    .forJob(job)
-                    .withIdentity(TriggerKey.triggerKey(jobKey))
-                    .withDescription("Triggering event " + jobKey + " at " + event.getTimestamp())
-                    .startAt(new Date(event.getTimestamp().getTime()))
-                    .build();
-
-            this.trigger = trigger;
-            this.jobDetail = job;
-        }
-
-        private Trigger trigger;
-        private JobDetail jobDetail;
-    }
-
     @Autowired
     private ApplicationContext applicationContext;
+
+    /**
+     * Method to schedule a collection exercise event
+     * @param scheduler a Quartz scheduler (can be autowired)
+     * @param event the collection exercise event to schedule
+     * @return the date and time the event is scheduled for
+     * @throws SchedulerException thrown if an error occurred scheduling event
+     */
+    public static Date scheduleEvent(final Scheduler scheduler, final Event event) throws SchedulerException {
+        EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
+
+        return scheduler.scheduleJob(detail.getJobDetail(), detail.getTrigger());
+    }
+
+    /**
+     * Method to unschedule a collection exercise event
+     * @param scheduler a Quartz scheduler (can be autowired)
+     * @param event the collection exercise event to unschedule
+     * @return true if the event was unscheduled, false otherwise
+     * @throws SchedulerException thrown if an error occurred unscheduling event
+     */
+    public static boolean unscheduleEvent(final Scheduler scheduler, final Event event) throws SchedulerException {
+        EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
+        JobKey jobKey = detail.getJobDetail().getKey();
+
+        return scheduler.deleteJob(jobKey);
+    }
+
+    /**
+     * Utility method to generate a JobKey from a collection exercise id and an event
+     * @param collexId a collection exercise id
+     * @param event an event
+     * @return a String that can be used as a JobKey
+     */
+    public static String getJobKey(final UUID collexId, final Event event) {
+        String jobKey = event.getTag() + ":" + collexId.toString();
+
+        return jobKey;
+    }
 
     @PostConstruct
     public void init() {
@@ -90,12 +88,6 @@ public class SchedulerConfiguration {
 
         jobFactory.setApplicationContext(applicationContext);
         return jobFactory;
-    }
-
-    public static Date scheduleEvent(Scheduler scheduler, Event event) throws SchedulerException {
-        EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
-
-        return scheduler.scheduleJob(detail.getJobDetail(), detail.getTrigger());
     }
 
     @Bean
@@ -126,5 +118,42 @@ public class SchedulerConfiguration {
     @Bean
     public FanoutExchange fanout() {
         return new FanoutExchange("collex-event-message-outbound-exchange");
+    }
+
+    public enum DataKey {
+        tag,
+        collectionExercise,
+        id,
+        eventPk,
+        timestamp
+    }
+
+    @Data
+    private static class EventJobTriggerDetail {
+        private Trigger trigger;
+        private JobDetail jobDetail;
+        public EventJobTriggerDetail(final Event event) {
+            UUID collexId = event.getCollectionExercise().getId();
+            String jobKey = getJobKey(collexId, event);
+            JobDetail job = newJob()
+                    .ofType(EventJob.class)
+                    .withIdentity(JobKey.jobKey(jobKey))
+                    .withDescription("Executing event " + jobKey + " at " + event.getTimestamp())
+                    .usingJobData(DataKey.tag.name(), event.getTag())
+                    .usingJobData(DataKey.collectionExercise.name(), event.getCollectionExercise().getId().toString())
+                    .usingJobData(DataKey.id.name(), event.getId().toString())
+                    .usingJobData(DataKey.eventPk.name(), event.getEventPK())
+                    .usingJobData(DataKey.timestamp.name(), event.getTimestamp().getTime())
+                    .build();
+            Trigger trigger = newTrigger()
+                    .forJob(job)
+                    .withIdentity(TriggerKey.triggerKey(jobKey))
+                    .withDescription("Triggering event " + jobKey + " at " + event.getTimestamp())
+                    .startAt(new Date(event.getTimestamp().getTime()))
+                    .build();
+
+            this.trigger = trigger;
+            this.jobDetail = job;
+        }
     }
 }

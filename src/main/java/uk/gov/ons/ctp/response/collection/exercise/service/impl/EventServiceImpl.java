@@ -3,6 +3,8 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -38,6 +41,9 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     private EventChangeHandler[] changeHandlers;
+
+    @Autowired
+    private Scheduler scheduler;
 
     @Override
     public Event createEvent(EventDTO eventDto) throws CTPException {
@@ -141,7 +147,8 @@ public class EventServiceImpl implements EventService {
         Event event = this.eventRepository.findOneById(eventId);
 
         if (event == null){
-            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event));
+            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist",
+                    event));
         } else {
             return event;
         }
@@ -236,4 +243,33 @@ public class EventServiceImpl implements EventService {
 
     }
 
+    /**
+     * Unschedule a collection exercise event
+     * @param event the event to unschedule
+     * @throws CTPException thrown if error occurred scheduling event
+     */
+    @Override
+    public void unscheduleEvent(final Event event) throws CTPException {
+        try {
+            SchedulerConfiguration.unscheduleEvent(this.scheduler, event);
+        } catch (SchedulerException e) {
+            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, String.format("Error unscheduling event %s",
+                    event.getId()));
+        }
+    }
+
+    /**
+     * Schedule a collection exercise event
+     * @param event the event to shchedule
+     * @throws CTPException thrown if error occurred scheduling event
+     */
+    @Override
+    public void scheduleEvent(final Event event) throws CTPException {
+        try {
+            SchedulerConfiguration.scheduleEvent(this.scheduler, event);
+        } catch (SchedulerException e) {
+            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, String.format("Error scheduling event %s",
+                    event.getId()));
+        }
+    }
 }
