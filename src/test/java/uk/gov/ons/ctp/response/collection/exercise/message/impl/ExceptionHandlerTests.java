@@ -34,10 +34,11 @@ public class ExceptionHandlerTests {
      * Create objects common to many tests
      */
     @Before
-    public void setUp(){
+    public void setUp() {
         this.exceptionHandler = new ExceptionHandler();
         this.ctpException = new CTPException(EXCEPTION_FAULT, EXCEPTION_MESSAGE);
-        this.messageDto = new CollectionInstrumentMessageDTO(null, COLLECTION_EXERCISE_ID.toString(), COLLECTION_INSTRUMENT_ID.toString());
+        this.messageDto = new CollectionInstrumentMessageDTO(null, COLLECTION_EXERCISE_ID.toString(),
+                COLLECTION_INSTRUMENT_ID.toString());
     }
 
     /**
@@ -46,8 +47,8 @@ public class ExceptionHandlerTests {
      * Then empty response
      */
     @Test
-    public void givenNullExceptionWhenHandleExceptionThenEmptyResponse(){
-        Map<ExceptionHandler.ResultKey,String> result = this.exceptionHandler.handleException(null);
+    public void givenNullExceptionWhenHandleExceptionThenEmptyResponse() {
+        Map<ExceptionHandler.ResultKey, String> result = this.exceptionHandler.handleException(null);
 
         assertEquals(0, result.size());
     }
@@ -58,7 +59,7 @@ public class ExceptionHandlerTests {
      * Then all fields returned
      */
     @Test
-    public void givenAllFieldsWhenHandleExceptionThenAllFields(){
+    public void givenAllFieldsWhenHandleExceptionThenAllFields() {
         GenericMessage<CollectionInstrumentMessageDTO> message = new GenericMessage<>(this.messageDto);
         MessageHandlingException exception = new MessageHandlingException(message, this.ctpException);
 
@@ -68,7 +69,8 @@ public class ExceptionHandlerTests {
         assertEquals(COLLECTION_EXERCISE_ID.toString(), result.get(ExceptionHandler.ResultKey.collectionExercise));
         assertEquals(EXCEPTION_FAULT.name(), result.get(ExceptionHandler.ResultKey.errorType));
         assertEquals(EXCEPTION_MESSAGE, result.get(ExceptionHandler.ResultKey.errorMessage));
-        assertEquals(this.ctpException.getTimestamp(), Long.parseLong(result.get(ExceptionHandler.ResultKey.errorTimestamp)));
+        assertEquals(this.ctpException.getTimestamp(),
+                Long.parseLong(result.get(ExceptionHandler.ResultKey.errorTimestamp)));
     }
 
     /**
@@ -77,7 +79,7 @@ public class ExceptionHandlerTests {
      * Then only exeception details returned
      */
     @Test
-    public void givenNoFailedMessageWhenHandleExceptionThenOnlyExeceptionDetails(){
+    public void givenNoFailedMessageWhenHandleExceptionThenOnlyExeceptionDetails() {
         MessageHandlingException exception = new MessageHandlingException(null, this.ctpException);
 
         Map<ExceptionHandler.ResultKey, String> result = this.exceptionHandler.handleException(exception);
@@ -86,7 +88,8 @@ public class ExceptionHandlerTests {
         assertNull(result.get(ExceptionHandler.ResultKey.collectionExercise));
         assertEquals(EXCEPTION_FAULT.name(), result.get(ExceptionHandler.ResultKey.errorType));
         assertEquals(EXCEPTION_MESSAGE, result.get(ExceptionHandler.ResultKey.errorMessage));
-        assertEquals(this.ctpException.getTimestamp(), Long.parseLong(result.get(ExceptionHandler.ResultKey.errorTimestamp)));
+        assertEquals(this.ctpException.getTimestamp(),
+                Long.parseLong(result.get(ExceptionHandler.ResultKey.errorTimestamp)));
     }
 
     /**
@@ -95,9 +98,9 @@ public class ExceptionHandlerTests {
      * Then only message details returned
      */
     @Test
-    public void givenNoExceptionWhenHandleExceptionThenOnlyMessageDetails(){
+    public void givenNoExceptionWhenHandleExceptionThenOnlyMessageDetails() {
         GenericMessage<CollectionInstrumentMessageDTO> message = new GenericMessage<>(this.messageDto);
-        MessageHandlingException exception = new MessageHandlingException(message, (Exception)null);
+        MessageHandlingException exception = new MessageHandlingException(message, (Exception) null);
 
         Map<ExceptionHandler.ResultKey, String> result = this.exceptionHandler.handleException(exception);
 
@@ -114,7 +117,7 @@ public class ExceptionHandlerTests {
      * Then only exception message returned
      */
     @Test
-    public void givenNonCtpExceptionWhenHandleExceptionThenOnlyExceptionMessage(){
+    public void givenNonCtpExceptionWhenHandleExceptionThenOnlyExceptionMessage() {
         GenericMessage<CollectionInstrumentMessageDTO> message = new GenericMessage<>(this.messageDto);
         MessageHandlingException exception = new MessageHandlingException(message, new Exception(EXCEPTION_MESSAGE));
 
