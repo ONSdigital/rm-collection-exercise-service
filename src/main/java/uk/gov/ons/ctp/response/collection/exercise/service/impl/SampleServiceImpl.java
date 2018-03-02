@@ -1,8 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitReposito
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
@@ -158,4 +164,30 @@ public class SampleServiceImpl implements SampleService {
     return this.sampleUnitRepo.partyExists(id);
   }
 
+  private static SampleUnitValidationErrorDTO getValidationDto(ExerciseSampleUnit su){
+    SampleUnitValidationErrorDTO dto = new SampleUnitValidationErrorDTO();
+
+    dto.setSampleUnitRef(su.getSampleUnitRef());
+    List<SampleUnitValidationErrorDTO.ValidationError> errors = new ArrayList<>();
+
+    if (su.getCollectionInstrumentId() == null || su.getCollectionInstrumentId() instanceof UUID == false){
+      errors.add(SampleUnitValidationErrorDTO.ValidationError.MISSING_COLLECTION_INSTRUMENT);
+    }
+    if (su.getPartyId() == null || su.getPartyId() instanceof UUID == false){
+      errors.add(SampleUnitValidationErrorDTO.ValidationError.MISSING_PARTY);
+    }
+
+    SampleUnitValidationErrorDTO.ValidationError[] errorArray = errors.toArray(new SampleUnitValidationErrorDTO.ValidationError[errors.size()]);
+    dto.setErrors(errorArray);
+
+    return dto;
+  }
+
+  @Override
+  public List<SampleUnitValidationErrorDTO> getValidationErrors(UUID collectionExerciseId) {
+      List<ExerciseSampleUnit> sampleUnits = this.sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
+      Predicate<ExerciseSampleUnit> validTest = su -> !(su.getPartyId() instanceof UUID)
+            || !(su.getCollectionInstrumentId() instanceof UUID);
+      return sampleUnits.stream().filter(validTest).map(SampleServiceImpl::getValidationDto).collect(Collectors.toList());
+  }
 }

@@ -272,7 +272,35 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 }
 ```
 
-An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
+## Get Collection Exercise validation errors
+* `GET /collectionexercises/{collection_exercise_id}/errors` will return the details of any validation errors that may have occurred when the collection exercise with the given id was executed
+
+### Example JSON Response
+```json
+[
+    {
+        "sampleUnitRef": "49900000037",
+        "errors": [
+            "MISSING_PARTY"
+        ]
+    },
+    {
+        "sampleUnitRef": "49900000038",
+        "errors": [
+            "MISSING_COLLECTION_INSTRUMENT",
+            "MISSING_PARTY"
+        ]
+    },
+    {
+        "sampleUnitRef": "49900000006",
+        "errors": [
+            "MISSING_COLLECTION_INSTRUMENT"
+        ]
+    }
+]
+```
+
+An empty array is returned if no errors have occurred. A 404 error occurs if the collection exercise does not exist
 
 ## Create Collection Exercise
 * `POST /collectionexercises` will create a new collection exercise
@@ -428,13 +456,10 @@ This part of the page  documents the Collection Exercise event service API endpo
 * Returns 200 OK if the resource is updated
 
 
-### Example JSON Request Body
+### Example text Request Body
 
 ```
-json
-{
-    "date": "2017-10-09T00:00:00.000+0000"
-}
+2017-10-09T00:00:00.000+0000
 ```
 
 ## Get Event Linked To Collection Exercise event

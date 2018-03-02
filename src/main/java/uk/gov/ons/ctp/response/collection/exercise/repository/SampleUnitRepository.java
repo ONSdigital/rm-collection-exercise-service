@@ -68,4 +68,12 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
    */
   List<ExerciseSampleUnit> findBySampleUnitGroup(ExerciseSampleUnitGroup sampleUnitGroup);
 
+  @Query( value = "select su.sampleunitpk, su.sampleunitgroupfk, su.collectioninstrumentid, su.partyid, su.sampleunitref, su.sampleunittypefk " +
+          "from collectionexercise.sampleunit su " +
+          "inner join collectionexercise.sampleunitgroup sug on su.sampleunitgroupfk = sug.sampleunitgrouppk " +
+          "inner join collectionexercise.collectionexercise ce on sug.exercisefk = ce.exercisepk " +
+          "where sug.statefk = 'FAILEDVALIDATION' " +
+          "and ce.id = :p_exerciseId", nativeQuery = true)
+  List<ExerciseSampleUnit> findInvalidByCollectionExercise(@Param("p_exerciseId") UUID collectionExerciseId);
+
 }

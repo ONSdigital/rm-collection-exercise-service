@@ -49,6 +49,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -673,4 +674,14 @@ public class CollectionExerciseEndpoint {
   }
 
 
+  @RequestMapping(value="/{id}/errors", method = RequestMethod.GET)
+  public ResponseEntity<List<SampleUnitValidationErrorDTO>> getValidationErrors(@PathVariable("id") UUID id) throws CTPException {
+      CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(id);
+
+      if (collex == null){
+          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Collection exercise %s does not exist", id));
+      } else {
+        return ResponseEntity.ok(this.sampleService.getValidationErrors(id));
+      }
+  }
 }
