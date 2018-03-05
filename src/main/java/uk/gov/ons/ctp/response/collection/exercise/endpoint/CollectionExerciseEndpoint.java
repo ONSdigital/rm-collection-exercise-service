@@ -119,8 +119,7 @@ public class CollectionExerciseEndpoint {
       log.debug("Entering collection exercise fetch with survey Id {}", id);
       List<CollectionExercise> collectionExerciseList = collectionExerciseService
           .findCollectionExercisesForSurvey(survey);
-      collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
-          CollectionExerciseDTO.class);
+      collectionExerciseSummaryDTOList = collectionExerciseList.stream().map(collex -> getCollectionExerciseDTO(collex)).collect(Collectors.toList());
       if (collectionExerciseList.isEmpty()) {
         return ResponseEntity.noContent().build();
       }
@@ -153,8 +152,7 @@ public class CollectionExerciseEndpoint {
     log.debug("Entering collection exercise fetch with party Id {}", id);
     List<CollectionExercise> collectionExerciseList = collectionExerciseService
             .findCollectionExercisesForParty(id);
-    collectionExerciseSummaryDTOList = mapperFacade.mapAsList(collectionExerciseList,
-            CollectionExerciseDTO.class);
+    collectionExerciseSummaryDTOList = collectionExerciseList.stream().map(collex -> getCollectionExerciseDTO(collex)).collect(Collectors.toList());
     if (collectionExerciseList.isEmpty()) {
       return ResponseEntity.noContent().build();
     }
@@ -181,7 +179,7 @@ public class CollectionExerciseEndpoint {
           String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, id));
     }
 
-    CollectionExerciseDTO collectionExerciseDTO = addCaseTypesandSurveyId(collectionExercise);
+    CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseDTO(collectionExercise);
 
     return ResponseEntity.ok(collectionExerciseDTO);
   }
@@ -198,7 +196,7 @@ public class CollectionExerciseEndpoint {
     List<CollectionExerciseDTO> result = new ArrayList<>();
 
     for (CollectionExercise collectionExercise : collectionExercises) {
-      CollectionExerciseDTO collectionExerciseDTO = addCaseTypesandSurveyId(collectionExercise);
+      CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseDTO(collectionExercise);
       result.add(collectionExerciseDTO);
     }
     return ResponseEntity.ok(result);
@@ -531,7 +529,7 @@ public class CollectionExerciseEndpoint {
    * @return a CollectionExerciseDTO of the collection exercise with case types
    *         and surveyId added which is output by the endpoints
    */
-  private CollectionExerciseDTO addCaseTypesandSurveyId(CollectionExercise collectionExercise) {
+  private CollectionExerciseDTO getCollectionExerciseDTO(CollectionExercise collectionExercise) {
     Collection<CaseType> caseTypeList = collectionExerciseService.getCaseTypesList(collectionExercise);
     List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 
@@ -540,6 +538,16 @@ public class CollectionExerciseEndpoint {
     // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now the survey id
     // is not validated and passed on verbatim
     collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyId().toString());
+
+    // If we are in the failed validation state, then there should be validation error so go look them up.
+    // We don't do this for all the states as this is a non-trivial database operation.
+    // Note: this code here will suppress any validation errors that are present in the other states
+    // (shouldn't happen but ...)
+    if (collectionExercise.getState() == CollectionExerciseDTO.CollectionExerciseState.FAILEDVALIDATION){
+        SampleUnitValidationErrorDTO[] errors = this.sampleService.getValidationErrors(collectionExercise.getId());
+
+        collectionExerciseDTO.setValidationErrors(errors);
+    }
 
     return collectionExerciseDTO;
   }
@@ -669,19 +677,7 @@ public class CollectionExerciseEndpoint {
         throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
                 String.format("Cannot find collection exercise for survey %s and period %s", surveyRef, exerciseRef));
       } else {
-        return ResponseEntity.ok(this.mapperFacade.map(collex, CollectionExerciseDTO.class));
-      }
-  }
-
-
-  @RequestMapping(value="/{id}/errors", method = RequestMethod.GET)
-  public ResponseEntity<List<SampleUnitValidationErrorDTO>> getValidationErrors(@PathVariable("id") UUID id) throws CTPException {
-      CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(id);
-
-      if (collex == null){
-          throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Collection exercise %s does not exist", id));
-      } else {
-        return ResponseEntity.ok(this.sampleService.getValidationErrors(id));
+        return ResponseEntity.ok(getCollectionExerciseDTO(collex));
       }
   }
 }

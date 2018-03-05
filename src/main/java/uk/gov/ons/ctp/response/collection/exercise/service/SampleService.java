@@ -57,5 +57,5 @@ public interface SampleService {
   boolean partyExists(UUID id);
 
 
-  List<SampleUnitValidationErrorDTO> getValidationErrors(UUID collectionExerciseId);
+  SampleUnitValidationErrorDTO[] getValidationErrors(UUID collectionExerciseId);
 }

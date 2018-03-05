@@ -96,9 +96,8 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
 
     // FAILEDVALIDATION
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForFailedvalidation = new HashMap<>();
-    transitionForValidated.put(CollectionExerciseEvent.RESET, CollectionExerciseState.READY_FOR_LIVE);
+    transitionForValidated.put(CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
     transitions.put(CollectionExerciseState.FAILEDVALIDATION, transitionForFailedvalidation);
-
 
     // READY_FOR_LIVE
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForReadyForLive = new HashMap<>();

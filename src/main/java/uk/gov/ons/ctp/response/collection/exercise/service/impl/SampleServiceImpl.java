@@ -184,10 +184,10 @@ public class SampleServiceImpl implements SampleService {
   }
 
   @Override
-  public List<SampleUnitValidationErrorDTO> getValidationErrors(UUID collectionExerciseId) {
+  public SampleUnitValidationErrorDTO[] getValidationErrors(UUID collectionExerciseId) {
       List<ExerciseSampleUnit> sampleUnits = this.sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
       Predicate<ExerciseSampleUnit> validTest = su -> !(su.getPartyId() instanceof UUID)
             || !(su.getCollectionInstrumentId() instanceof UUID);
-      return sampleUnits.stream().filter(validTest).map(SampleServiceImpl::getValidationDto).collect(Collectors.toList());
+      return sampleUnits.stream().filter(validTest).map(SampleServiceImpl::getValidationDto).toArray(SampleUnitValidationErrorDTO[]::new);
   }
 }
