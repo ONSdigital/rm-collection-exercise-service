@@ -39,4 +39,18 @@ public interface EventService {
     void clearEventMessageSent(UUID eventId) throws CTPException;
     boolean isScheduled(UUID collexUuid) throws CTPException;
 
+    /**
+     * Unschedule a collection exercise event
+     * @param event the event to unshchedule
+     * @throws CTPException thrown if error occurred unscheduling event
+     */
+    void unscheduleEvent(Event event) throws CTPException;
+
+    /**
+     * Schedule a collection exercise event
+     * @param event the event to shchedule
+     * @throws CTPException thrown if error occurred scheduling event
+     */
+    void scheduleEvent(Event event) throws CTPException;
+
 }
