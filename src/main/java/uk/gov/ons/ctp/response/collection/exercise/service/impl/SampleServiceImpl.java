@@ -2,12 +2,10 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -164,7 +162,7 @@ public class SampleServiceImpl implements SampleService {
     return this.sampleUnitRepo.partyExists(id);
   }
 
-  private static SampleUnitValidationErrorDTO getValidationDto(ExerciseSampleUnit su){
+  private static SampleUnitValidationErrorDTO validateSampleUnit(ExerciseSampleUnit su){
     SampleUnitValidationErrorDTO dto = new SampleUnitValidationErrorDTO();
 
     dto.setSampleUnitRef(su.getSampleUnitRef());
@@ -188,6 +186,6 @@ public class SampleServiceImpl implements SampleService {
       List<ExerciseSampleUnit> sampleUnits = this.sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
       Predicate<ExerciseSampleUnit> validTest = su -> !(su.getPartyId() instanceof UUID)
             || !(su.getCollectionInstrumentId() instanceof UUID);
-      return sampleUnits.stream().filter(validTest).map(SampleServiceImpl::getValidationDto).toArray(SampleUnitValidationErrorDTO[]::new);
+      return sampleUnits.stream().filter(validTest).map(SampleServiceImpl::validateSampleUnit).toArray(SampleUnitValidationErrorDTO[]::new);
   }
 }
