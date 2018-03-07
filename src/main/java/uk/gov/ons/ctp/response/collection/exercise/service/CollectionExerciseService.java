@@ -8,7 +8,6 @@ import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -192,5 +191,4 @@ public interface CollectionExerciseService {
    * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
    */
   void transitionScheduleCollectionExerciseToReadyToReview(CollectionExercise collectionExercise) throws CTPException;
-
 }

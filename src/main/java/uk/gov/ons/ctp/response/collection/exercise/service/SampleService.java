@@ -5,6 +5,7 @@ import java.util.UUID;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
@@ -54,4 +55,10 @@ public interface SampleService {
    */
   boolean partyExists(UUID id);
 
+  /**
+   * Get the sample unit validation errors for a given collection exercise
+   * @param collectionExerciseId a collection exercise
+   * @return an array of validation errors
+   */
+  SampleUnitValidationErrorDTO[] getValidationErrors(UUID collectionExerciseId);
 }

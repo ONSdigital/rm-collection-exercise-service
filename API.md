@@ -41,7 +41,8 @@ This page documents the Collection Exercise service API endpoints. Apart from th
     "userDescription": "January 2018",
     "created": "2018-01-09T12:56:09.652Z",
     "updated": null,
-    "deleted": null
+    "deleted": null,
+    "validationErrors": []
   },
   {
     "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
@@ -62,7 +63,8 @@ This page documents the Collection Exercise service API endpoints. Apart from th
     "userDescription": "February 2018",
     "created": "2018-01-09T12:56:09.709Z",
     "updated": null,
-    "deleted": null
+    "deleted": null,
+    "validationErrors": []
   }
 ]
 ```
@@ -94,7 +96,8 @@ This page documents the Collection Exercise service API endpoints. Apart from th
     "userDescription": "February 2018",
     "created": "2018-01-09T12:56:09.709Z",
     "updated": null,
-    "deleted": null
+    "deleted": null,
+    "validationErrors": []
   },
 ]
 ```
@@ -137,7 +140,8 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
         "userDescription": null,
         "created": null,
         "updated": null,
-        "deleted": false
+        "deleted": false,
+        "validationErrors": []
     },
     {
         "id": "88e18a80-bc77-48bf-8eff-db351024be2b",
@@ -158,7 +162,8 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
         "userDescription": "February 2018",
         "created": "2018-01-09T12:56:07.262Z",
         "updated": null,
-        "deleted": null
+        "deleted": null,
+        "validationErrors": []
     },
     {
         "id": "6af19036-f69b-4d2e-abf1-ce442debb51c",
@@ -179,7 +184,8 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
         "userDescription": "March 2018",
         "created": "2018-01-09T12:56:07.485Z",
         "updated": null,
-        "deleted": null
+        "deleted": null,
+        "validationErrors": []
     },
 ]
 ```
@@ -209,7 +215,8 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     "userDescription": "January 2018",
     "created": "2018-01-09T12:56:09.652Z",
     "updated": null,
-    "deleted": null
+    "deleted": null,
+    "validationErrors": []
   },
   {
     "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
@@ -230,7 +237,8 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     "userDescription": "February 2018",
     "created": "2018-01-09T12:56:09.709Z",
     "updated": null,
-    "deleted": null
+    "deleted": null,
+    "validationErrors": []
   }
 ]
 ```
@@ -268,11 +276,69 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     "userDescription": null,
     "created": null,
     "updated": null,
-    "deleted": false
+    "deleted": false,
+    "validationErrors": []
 }
 ```
 
-An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
+## Validation Errors
+
+In the event that errors have occurred validating the collection exercise, there will be an array of validation errors in the resources returned for that collection exercise.  Please note that validation errors are only shown if the collection exercise is in the FAILEDVALIDATION state.
+
+### Example Collection Exercise Representation including validation errors
+```json
+{
+    "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
+    "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "name": "BRES_2017",
+    "actualExecutionDateTime": "2017-11-06T16:06:19.966Z",
+    "scheduledExecutionDateTime": "2017-09-10T23:00:00.000Z",
+    "scheduledStartDateTime": "2017-09-11T23:00:00.000Z",
+    "actualPublishDateTime": "2017-11-06T16:08:26.100Z",
+    "periodStartDateTime": "2017-09-14T23:00:00.000Z",
+    "periodEndDateTime": "2017-09-15T22:59:59.000Z",
+    "scheduledReturnDateTime": "2017-10-06T00:00:00.000Z",
+    "scheduledEndDateTime": "2018-06-29T23:00:00.000Z",
+    "executedBy": null,
+    "state": "PUBLISHED",
+    "caseTypes": [
+        {
+            "actionPlanId": "e71002ac-3575-47eb-b87f-cd9db92bf9a7",
+            "sampleUnitType": "B"
+        },
+        {
+            "actionPlanId": "0009e978-0932-463b-a2a1-b45cb3ffcb2a",
+            "sampleUnitType": "BI"
+        }
+    ],
+    "exerciseRef": "221_201712",
+    "userDescription": null,
+    "created": null,
+    "updated": null,
+    "deleted": false,
+    "validationErrors": [
+        {
+            "sampleUnitRef": "49900000037",
+            "errors": [
+                "MISSING_PARTY"
+            ]
+        },
+        {
+            "sampleUnitRef": "49900000038",
+            "errors": [
+                "MISSING_COLLECTION_INSTRUMENT",
+                "MISSING_PARTY"
+            ]
+        },
+        {
+            "sampleUnitRef": "49900000006",
+            "errors": [
+                "MISSING_COLLECTION_INSTRUMENT"
+            ]
+        }
+    ]
+}
+```
 
 ## Create Collection Exercise
 * `POST /collectionexercises` will create a new collection exercise
@@ -428,13 +494,10 @@ This part of the page  documents the Collection Exercise event service API endpo
 * Returns 200 OK if the resource is updated
 
 
-### Example JSON Request Body
+### Example text Request Body
 
 ```
-json
-{
-    "date": "2017-10-09T00:00:00.000+0000"
-}
+2017-10-09T00:00:00.000+0000
 ```
 
 ## Get Event Linked To Collection Exercise event
