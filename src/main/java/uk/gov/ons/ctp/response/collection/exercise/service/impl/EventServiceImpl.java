@@ -254,7 +254,7 @@ public class EventServiceImpl implements EventService {
             SchedulerConfiguration.unscheduleEvent(this.scheduler, event);
         } catch (SchedulerException e) {
             throw new CTPException(CTPException.Fault.SYSTEM_ERROR, String.format("Error unscheduling event %s",
-                    event.getId()));
+                    event.getId()), e.getLocalizedMessage());
         }
     }
 
@@ -269,7 +269,7 @@ public class EventServiceImpl implements EventService {
             SchedulerConfiguration.scheduleEvent(this.scheduler, event);
         } catch (SchedulerException e) {
             throw new CTPException(CTPException.Fault.SYSTEM_ERROR, String.format("Error scheduling event %s",
-                    event.getId()));
+                    event.getId()), e.getLocalizedMessage());
         }
     }
 }
