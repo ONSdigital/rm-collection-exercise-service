@@ -20,6 +20,7 @@ public class CollectionInstrumentClassifierTypesTest {
 
   private static final String COLLECTION_EXERCISE = "COLLECTION_EXERCISE";
   private static final String RU_REF = "RU_REF";
+  private static final String FORM_TYPE = "FORM_TYPE";
 
   /**
    * Test have correct classifierTypes and value is set correctly.
@@ -38,6 +39,10 @@ public class CollectionInstrumentClassifierTypesTest {
     CollectionInstrumentClassifierTypes classifierTypeSampleUnitRef = CollectionInstrumentClassifierTypes
         .valueOf(RU_REF);
     assertEquals("50000065975", classifierTypeSampleUnitRef.apply(sampleUnit));
+
+    CollectionInstrumentClassifierTypes classifierTypeFormType = CollectionInstrumentClassifierTypes
+            .valueOf(FORM_TYPE);
+    assertEquals("0015", classifierTypeFormType.apply(sampleUnit));
 
   }
 }
