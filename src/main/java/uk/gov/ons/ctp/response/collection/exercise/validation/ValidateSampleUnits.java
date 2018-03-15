@@ -115,12 +115,8 @@ public class ValidateSampleUnits {
             .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
 
         collections.forEach((exercise, groups) -> {
-          if (!validateSampleUnits(exercise, groups)) {
-            log.error("Exited without validating Collection Exercise: {}, Survey: {}", exercise.getId(),
-                exercise.getSurveyId());
-            return; // Exit collection forEach for exercise as no
-                    // classifierTypes, fatal error.
-          }
+
+          generateSampleUnits(exercise, groups);
 
           try {
             CollectionExerciseEvent event = getCollectionExerciseTransitionState(exercise);
@@ -149,18 +145,19 @@ public class ValidateSampleUnits {
   }
 
   /**
-   * Validate the SampleUnitGroups for a CollectionExercise.
-   *
+   * Populate Sample units for the SampleUnitGroups for a CollectionExercise.
+   * Creates the sample units for parent sample units, populating the party id by calling the party service.
+   * Also adds sample units for any enrolled respondents associated with the sample unit.
    * @param exercise for which to validate the SampleUnitGroups
    * @param sampleUnitGroups in exercise.
    * @return boolean false if fatal error validating, for example no
    *         classifierTypes
    */
-  private boolean validateSampleUnits(CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
+  private void generateSampleUnits(CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
 
-    List<ExerciseSampleUnit> updatedSampleUnitsForGroup = new ArrayList<>();
+    List<ExerciseSampleUnit> sampleUnitsWithRespondents = new ArrayList<>();
 
     for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
 
@@ -176,8 +173,8 @@ public class ValidateSampleUnits {
         try {
           String surveyId = exercise.getSurveyId().toString();
           UUID collectionInstrumentId = requestCollectionInstrumentId(classifierTypes, sampleUnitParent, surveyId);
-          updatedSampleUnitsForGroup = createEnrolledRespondentSampleUnits(sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
-          updatedSampleUnitsForGroup.forEach(updatedSampleUnit -> {
+          sampleUnitsWithRespondents = createEnrolledRespondentSampleUnits(sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
+          sampleUnitsWithRespondents.forEach(updatedSampleUnit -> {
             updatedSampleUnit.setCollectionInstrumentId(collectionInstrumentId);
           });
         } catch (RestClientException ex) {
@@ -186,14 +183,17 @@ public class ValidateSampleUnits {
           log.error("Stack trace: " + ex);
         }
       }
-      sampleUnitGroup = sampleUnitGroupTransitionState(sampleUnitGroup, updatedSampleUnitsForGroup);
-      sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-      // Update sampleUnits and group in transaction to ensure no inconsistent
-      // state arises between them.
-      sampleUnitGroupSvc.storeExerciseSampleUnitGroup(sampleUnitGroup, updatedSampleUnitsForGroup);
-    } // End looping group
 
-    return true;
+      saveUpdatedSampleUnits(sampleUnitGroup, sampleUnitsWithRespondents);
+    }
+
+  }
+
+  private void saveUpdatedSampleUnits(final ExerciseSampleUnitGroup sampleUnitGroup,
+                                      final List<ExerciseSampleUnit> sampleUnitsWithRespondents) {
+      ExerciseSampleUnitGroup updatedSampleUnitGroup = transitionSampleUnitGroupState(sampleUnitGroup, sampleUnitsWithRespondents);
+      updatedSampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
+      sampleUnitGroupSvc.storeExerciseSampleUnitGroup(updatedSampleUnitGroup, sampleUnitsWithRespondents);
   }
 
   /**
@@ -427,8 +427,8 @@ public class ValidateSampleUnits {
    * @param sampleUnits in SampleUnitGroup.
    * @return sampleUnitGroup with new state.
    */
-  private ExerciseSampleUnitGroup sampleUnitGroupTransitionState(ExerciseSampleUnitGroup sampleUnitGroup,
-      List<ExerciseSampleUnit> sampleUnits) {
+  private ExerciseSampleUnitGroup transitionSampleUnitGroupState(ExerciseSampleUnitGroup sampleUnitGroup,
+                                                                 List<ExerciseSampleUnit> sampleUnits) {
 
     Predicate<ExerciseSampleUnit> stateTest = su -> su.getPartyId() instanceof UUID
         && su.getCollectionInstrumentId() instanceof UUID;
