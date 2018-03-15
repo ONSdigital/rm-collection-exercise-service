@@ -31,10 +31,8 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
@@ -42,6 +40,8 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.party.representation.Association;
+import uk.gov.ons.ctp.response.party.representation.Enrolment;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
@@ -56,6 +56,7 @@ public class ValidateSampleUnits {
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
   private static final String VALIDATION_LIST_ID = "group";
+  private static final String ENABLED = "ENABLED";
   // this is a bit of a kludge - jpa does not like having an IN clause with an
   // empty list
   // it does not return results when you expect it to - so ... always have this
@@ -175,7 +176,7 @@ public class ValidateSampleUnits {
         try {
           String surveyId = exercise.getSurveyId().toString();
           UUID collectionInstrumentId = requestCollectionInstrumentId(classifierTypes, sampleUnitParent, surveyId);
-          updatedSampleUnitsForGroup = requestPartyDetails(sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
+          updatedSampleUnitsForGroup = createEnrolledRespondentSampleUnits(sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
           updatedSampleUnitsForGroup.forEach(updatedSampleUnit -> {
             updatedSampleUnit.setCollectionInstrumentId(collectionInstrumentId);
           });
@@ -247,8 +248,10 @@ public class ValidateSampleUnits {
    * @return List<ExerciseSampleUnit> of updated, created sampleUnits
    * @throws RestClientException something went wrong making http call.
    */
-  private List<ExerciseSampleUnit> requestPartyDetails(ExerciseSampleUnit sampleUnit,
-      List<ExerciseSampleUnit> sampleUnits, ExerciseSampleUnitGroup sampleUnitGroup, String surveyId)
+  private List<ExerciseSampleUnit> createEnrolledRespondentSampleUnits( ExerciseSampleUnit sampleUnit,
+                                                                        List<ExerciseSampleUnit> sampleUnits,
+                                                                        ExerciseSampleUnitGroup sampleUnitGroup,
+                                                                        String surveyId)
       throws RestClientException {
     List<ExerciseSampleUnit> updatedSampleUnits = new ArrayList<>();
     PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
@@ -256,23 +259,14 @@ public class ValidateSampleUnits {
     updatedSampleUnits.add(sampleUnit);
     party.getAssociations().forEach(association -> {
       association.getEnrolments().forEach(enrolment -> {
-        if (enrolment.getSurveyId().equals(surveyId)) {
-          // Make sure respondent unit doesn't already exist.
-          Optional<ExerciseSampleUnit> match = sampleUnits.stream()
-                  .filter(existingSampleUnit -> association.getPartyId()
-                          .equals(existingSampleUnit.getPartyId().toString()))
-              .findFirst();
-          if (match.isPresent()) {
+        if (surveyHasEnrolledRespondent(enrolment, surveyId)) {
+          Optional<ExerciseSampleUnit> existingRespondent = findExistingRespondent(sampleUnits, association);
+          if (existingRespondent.isPresent()) {
             log.warn("Validation for SampleUnit PK: {} Respondent already exists {}", sampleUnit.getSampleUnitPK(),
                 association.getPartyId());
-            updatedSampleUnits.add(match.get());
+            updatedSampleUnits.add(existingRespondent.get());
           } else {
-            // Doesn't already exist, create new sampleUnit for respondent.
-            ExerciseSampleUnit respondent = new ExerciseSampleUnit();
-            respondent.setSampleUnitGroup(sampleUnitGroup);
-            respondent.setPartyId(UUID.fromString(association.getPartyId()));
-            respondent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-            respondent.setSampleUnitType(sampleUnit.getSampleUnitType().getChild());
+            ExerciseSampleUnit respondent = createNewRespondent(sampleUnitGroup, sampleUnit, association);
             updatedSampleUnits.add(respondent);
           }
         }
@@ -280,6 +274,29 @@ public class ValidateSampleUnits {
     });
     return updatedSampleUnits;
 
+  }
+
+  private boolean surveyHasEnrolledRespondent(final Enrolment enrolment, String surveyId) {
+    return enrolment.getSurveyId().equals(surveyId) && enrolment.getEnrolmentStatus().equalsIgnoreCase(ENABLED);
+  }
+
+  private Optional<ExerciseSampleUnit> findExistingRespondent(List<ExerciseSampleUnit> sampleUnits,
+                                                              Association association) {
+    return sampleUnits.stream()
+            .filter(existingSampleUnit -> association.getPartyId()
+                    .equals(existingSampleUnit.getPartyId().toString()))
+            .findFirst();
+  }
+
+  private ExerciseSampleUnit createNewRespondent(final ExerciseSampleUnitGroup sampleUnitGroup,
+                                                 ExerciseSampleUnit sampleUnit,
+                                                 Association association) {
+    ExerciseSampleUnit respondent = new ExerciseSampleUnit();
+    respondent.setSampleUnitGroup(sampleUnitGroup);
+    respondent.setPartyId(UUID.fromString(association.getPartyId()));
+    respondent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+    respondent.setSampleUnitType(sampleUnit.getSampleUnitType().getChild());
+    return respondent;
   }
 
   /**

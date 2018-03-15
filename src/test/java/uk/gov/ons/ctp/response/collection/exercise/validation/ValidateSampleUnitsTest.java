@@ -226,7 +226,7 @@ public class ValidateSampleUnitsTest {
     List<List<ExerciseSampleUnit>> savedSampleUnits = sampleUnitSave.getAllValues();
     assertTrue(savedSampleUnits.size() == 4);
     savedSampleUnits.forEach((sampleUnits) -> {
-      assertTrue(sampleUnits.stream().filter(item -> item.getSampleUnitType() == SampleUnitType.BI).count() == 2L);
+      assertTrue(sampleUnits.stream().filter(item -> item.getSampleUnitType() == SampleUnitType.BI).count() == 1L);
       assertTrue(sampleUnits.stream().filter(item -> item.getSampleUnitType() == SampleUnitType.B).count() == 1L);
       sampleUnits.forEach((unit) -> {
         assertTrue(PARTY_ID.contains(unit.getPartyId().toString()));

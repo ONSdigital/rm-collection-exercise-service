@@ -3,7 +3,7 @@
     {
       "enrolments": [
         {
-          "enrolmentStatus": "PENDING", 
+          "enrolmentStatus": "PENDING",
           "name": "Business Register and Employment Survey", 
           "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"
         }
@@ -13,7 +13,7 @@
     {
       "enrolments": [
         {
-          "enrolmentStatus": "PENDING", 
+          "enrolmentStatus": "ENABLED",
           "name": "Business Register and Employment Survey", 
           "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87"
         }
@@ -23,7 +23,7 @@
     {
       "enrolments": [
         {
-          "enrolmentStatus": "PENDING", 
+          "enrolmentStatus": "ENABLED",
           "name": "Something Different Survey", 
           "surveyId": "cb0812d4-9df4-53r2-dr0y-568h5ea1xy99"
         }
