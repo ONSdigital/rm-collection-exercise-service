@@ -62,6 +62,7 @@ spring:
     username: collectionexercisesvc
     password: collectionexercisesvc
     driverClassName: org.postgresql.Driver
+    continue-on-error: true
     tomcat:
       initial-size: 5
       max-active: 10
