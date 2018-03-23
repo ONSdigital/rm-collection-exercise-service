@@ -111,7 +111,8 @@ public class SampleServiceImpl implements SampleService {
 
             if (replyDTO != null && replyDTO.getSampleUnitsTotal() > 0) {
 
-                List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(collectionExercise.getId());
+                List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(
+                        collectionExercise.getId());
                 for (SampleLink samplelink : sampleLinks) {
                     partySvcClient.linkSampleSummaryId(samplelink.getSampleSummaryId().toString(),
                             collectionExercise.getId().toString());
