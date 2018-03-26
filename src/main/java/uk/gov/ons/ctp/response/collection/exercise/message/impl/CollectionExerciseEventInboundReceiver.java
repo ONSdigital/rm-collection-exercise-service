@@ -45,7 +45,9 @@ public class CollectionExerciseEventInboundReceiver {
                 this.collectionExerciseService.transitionCollectionExercise(collexId,
                         CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
             } catch (CTPException e) {
-                log.error("Failed to set collection exerise to live state - {}", e);
+                // The most likely cause for this exception is because the collection exercise is already in the live
+                // state
+                log.warn("Failed to transition collection exercise to live state: {}", e.getMessage());
             }
         }
     }
