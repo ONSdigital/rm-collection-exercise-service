@@ -46,7 +46,7 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
                 ceEvent = CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_DELETED;
                 this.collectionExerciseService.transitionCollectionExercise(collectionExercise, ceEvent);
             }
-        } catch(CTPException e){
+        } catch(CTPException e) {
             // As the events are deliberately fired indiscriminately (i.e. the collection exercise state is not
             // checked first) there is a reasonable likelihood that the transition will fail harmlessly. Hence this
             // exception is being logged as a warning minus the stack trace
