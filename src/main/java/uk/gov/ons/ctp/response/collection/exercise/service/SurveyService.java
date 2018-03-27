@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import java.util.UUID;

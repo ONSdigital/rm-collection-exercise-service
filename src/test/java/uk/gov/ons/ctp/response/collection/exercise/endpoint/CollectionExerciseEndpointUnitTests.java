@@ -45,7 +45,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
@@ -118,7 +117,6 @@ public class CollectionExerciseEndpointUnitTests {
 
   private MockMvc mockCollectionExerciseMvc;
   private MockMvc textPlainMock;
-  private List<Survey> surveyResults;
   private List<SurveyDTO> surveyDtoResults;
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
@@ -146,7 +144,6 @@ public class CollectionExerciseEndpointUnitTests {
             .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
             .build();
 
-    this.surveyResults = FixtureHelper.loadClassFixtures(Survey[].class);
     this.surveyDtoResults = FixtureHelper.loadClassFixtures(SurveyDTO[].class);
     this.collectionExerciseResults = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     this.sampleUnitsRequestDTOResults = FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
