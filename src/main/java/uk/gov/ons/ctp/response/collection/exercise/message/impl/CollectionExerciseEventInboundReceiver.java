@@ -34,21 +34,30 @@ public class CollectionExerciseEventInboundReceiver {
     public void handleEventMessage(final EventMessageDTO message) {
         EventDTO event = message.getEvent();
         CollectionExerciseEventPublisher.MessageType messageType = message.getMessageType();
-        EventService.Tag tag = EventService.Tag.valueOf(event.getTag());
+        String tagString = event.getTag();
+        EventService.Tag tag = null;
 
-        // If it's a go_live event then attempt to transition the state of the collection exercise to live
-        if (tag == EventService.Tag.go_live
-                && messageType == CollectionExerciseEventPublisher.MessageType.EventElapsed) {
-            UUID collexId = event.getCollectionExerciseId();
+        try {
+            tag = EventService.Tag.valueOf(tagString);
 
-            try {
-                this.collectionExerciseService.transitionCollectionExercise(collexId,
-                        CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-            } catch (CTPException e) {
-                // The most likely cause for this exception is because the collection exercise is already in the live
-                // state
-                log.warn("Failed to transition collection exercise to live state: {}", e.getMessage());
+            // If it's a go_live event then attempt to transition the state of the collection exercise to live
+            if (tag == EventService.Tag.go_live
+                    && messageType == CollectionExerciseEventPublisher.MessageType.EventElapsed) {
+                UUID collexId = event.getCollectionExerciseId();
+
+                try {
+                    this.collectionExerciseService.transitionCollectionExercise(collexId,
+                            CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+                } catch (CTPException e) {
+                    log.error("Failed to set collection exerise to live state - {}", e);
+                }
+            } else {
+                log.info("Ignoring event {} - not {}", tag.name(), EventService.Tag.go_live.name());
             }
+        } catch (IllegalArgumentException e) {
+            // This means that the event isn't one of the mandatory events that is represented in the enum - which is
+            // fine.
+            log.info("Ignoring event {} - not {}", tagString, EventService.Tag.go_live.name());
         }
     }
 }
