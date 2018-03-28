@@ -17,11 +17,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.ScheduledEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.quartz.JobBuilder.newJob;
@@ -46,6 +49,11 @@ public class SchedulerConfiguration {
      */
     public static Date scheduleEvent(final Scheduler scheduler, final Event event) throws SchedulerException {
         EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
+        JobKey jobKey = detail.getJobDetail().getKey();
+
+        if (scheduler.checkExists(jobKey)){
+            scheduler.deleteJob(jobKey);
+        }
 
         return scheduler.scheduleJob(detail.getJobDetail(), detail.getTrigger());
     }
@@ -90,6 +98,22 @@ public class SchedulerConfiguration {
         return jobFactory;
     }
 
+    /**
+     * Schedules within quartz all the collection exercise events for which a message has not already been sent
+     * @param scheduler the scheduler to use to schedule the events
+     */
+    private void scheduleOutstandingEvents(Scheduler scheduler){
+        List<Event> outstandingEvents = this.eventService.getOutstandingEvents();
+
+        outstandingEvents.stream().forEach(e -> {
+            try {
+                scheduleEvent(scheduler, e);
+            } catch (SchedulerException e1) {
+                throw new RuntimeException(e1);
+            }
+        });
+    }
+
     @Bean
     public Scheduler scheduler() throws SchedulerException, IOException {
         // Force creation of the fanout exchange before any jobs are scheduled
@@ -102,13 +126,7 @@ public class SchedulerConfiguration {
         Scheduler scheduler = factory.getScheduler();
         scheduler.setJobFactory(springBeanJobFactory());
 
-        this.eventService.getOutstandingEvents().stream().map(e -> {
-            try {
-                return scheduleEvent(scheduler, e);
-            } catch (SchedulerException e1) {
-                throw new RuntimeException(e1);
-            }
-        });
+        scheduleOutstandingEvents(scheduler);
 
         log.debug("Starting Scheduler threads");
         scheduler.start();
