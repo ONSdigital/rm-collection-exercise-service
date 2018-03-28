@@ -8,12 +8,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.distribution.SampleUnitDistributor;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
@@ -41,6 +44,12 @@ import java.util.function.Predicate;
 public class SampleServiceImpl implements SampleService {
 
     private static final int TRANSACTION_TIMEOUT = 60;
+
+    @Autowired
+    private PartySvcClient partySvcClient;
+
+    @Autowired
+    private SampleLinkRepository sampleLinkRepository;
 
     @Autowired
     private SampleUnitRepository sampleUnitRepo;
@@ -101,9 +110,15 @@ public class SampleServiceImpl implements SampleService {
             replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
 
             if (replyDTO != null && replyDTO.getSampleUnitsTotal() > 0) {
-                log.info("HERE");
-                collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
 
+                List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(
+                        collectionExercise.getId());
+                for (SampleLink samplelink : sampleLinks) {
+                    partySvcClient.linkSampleSummaryId(samplelink.getSampleSummaryId().toString(),
+                            collectionExercise.getId().toString());
+                }
+
+                collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
                 collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
                         CollectionExerciseEvent.EXECUTE));
                 collectRepo.saveAndFlush(collectionExercise);

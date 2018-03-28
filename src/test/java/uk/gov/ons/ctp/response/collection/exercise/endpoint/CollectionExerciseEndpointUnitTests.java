@@ -14,7 +14,6 @@ import static uk.gov.ons.ctp.common.MvcHelper.postJson;
 import static uk.gov.ons.ctp.common.MvcHelper.putJson;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
-import java.time.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -340,8 +339,6 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(collectionExerciseResults.get(0));
     when(collectionExerciseService.linkSampleSummaryToCollectionExercise(COLLECTIONEXERCISE_ID1, sampleSummaries))
         .thenReturn(sampleLink);
-    when(partySvcClient.linkSampleSummaryId(SAMPLE_SUMMARY_ID1.toString(), COLLECTIONEXERCISE_ID1.toString())).thenReturn(sampleLinkDTO1);
-    when(partySvcClient.linkSampleSummaryId(SAMPLE_SUMMARY_ID2.toString(), COLLECTIONEXERCISE_ID1.toString())).thenReturn(sampleLinkDTO2);
 
     ResultActions actions = mockCollectionExerciseMvc
         .perform(
@@ -352,11 +349,6 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().methodName("linkSampleSummary"))
         .andExpect(jsonPath("$.collectionExerciseId", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.sampleSummaryIds[*]", containsInAnyOrder(SAMPLE_SUMMARY_ID1.toString(), SAMPLE_SUMMARY_ID2.toString())));
-
-
-    InOrder inOrder = Mockito.inOrder((partySvcClient));
-    inOrder.verify(partySvcClient).linkSampleSummaryId(SAMPLE_SUMMARY_ID1.toString(), COLLECTIONEXERCISE_ID1.toString());
-    inOrder.verify(partySvcClient).linkSampleSummaryId(SAMPLE_SUMMARY_ID2.toString(), COLLECTIONEXERCISE_ID1.toString());
   }
 
   /**
