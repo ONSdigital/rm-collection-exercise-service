@@ -120,7 +120,7 @@ collection-instrument-svc:
   connection-config:
     scheme: http
     host: localhost
-    port: 8002
+    port: 8082
     username: admin
     password: secret
     retry-attempts: 5
