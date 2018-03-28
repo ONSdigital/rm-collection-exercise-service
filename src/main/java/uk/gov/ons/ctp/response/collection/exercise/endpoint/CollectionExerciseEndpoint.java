@@ -483,10 +483,6 @@ public class CollectionExerciseEndpoint {
                 .linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO.getSampleSummaryIds());
         LinkedSampleSummariesDTO result = new LinkedSampleSummariesDTO();
 
-        for (UUID summaryId : linkSampleSummaryDTO.getSampleSummaryIds()) {
-            partySvcClient.linkSampleSummaryId(summaryId.toString(), collectionExerciseId.toString());
-        }
-
         if (linkSampleSummaryToCollectionExercise != null) {
             List<UUID> summaryIds = new ArrayList<UUID>();
             for (SampleLink sampleLink : linkSampleSummaryToCollectionExercise) {
