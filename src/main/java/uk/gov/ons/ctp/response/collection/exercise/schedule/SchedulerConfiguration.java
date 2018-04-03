@@ -17,12 +17,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.ScheduledEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
