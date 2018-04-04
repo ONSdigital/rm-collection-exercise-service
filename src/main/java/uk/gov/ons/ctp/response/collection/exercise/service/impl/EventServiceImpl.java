@@ -100,15 +100,14 @@ public class EventServiceImpl implements EventService {
 
                 List<Event> existingEvents = this.eventRepository.findByCollectionExercise(collex);
 
-                if(this.eventValidator.validate(existingEvents, event)){
+                if (this.eventValidator.validate(existingEvents, event)) {
 
                     this.eventRepository.save(event);
 
                     fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventUpdated, event);
                 } else {
-                    //TODO: RETURN ERROR MESSAGES FOR THE CLIENT
                     throw new CTPException(CTPException.Fault.BAD_REQUEST,
-                            String.format("Invalid event type, dates incorrect"));
+                            String.format("Invalid event update"));
                 }
 
             }

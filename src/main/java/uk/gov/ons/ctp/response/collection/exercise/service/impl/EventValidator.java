@@ -4,15 +4,26 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 
 public class EventValidator {
 
-    public boolean validate(final List<Event> existingEvents, Event updatedEvent) {
+    /**
+     * Validates the events timestamps are in the correct order and the updated event isn't already past.
+     * @param existingEvents
+     * @param updatedEvent
+     * @return
+     */
+    public boolean validate(final List<Event> existingEvents, final Event updatedEvent) {
 
-        Optional<Event> existingEvent = existingEvents.stream().findFirst().filter(event ->event.getTag().equals(updatedEvent.getTag()));
+        Optional<Event> existingEvent = existingEvents.stream().findFirst().filter(
+                event -> event.getTag().equals(updatedEvent.getTag()));
 
-        if(isEventInPast(existingEvent)) {
+        if (isEventInPast(existingEvent)) {
             return false;
         }
 
@@ -24,11 +35,11 @@ public class EventValidator {
         Event exerciseEndEvent = eventMap.get(EventService.Tag.exercise_end.toString());
 
 
-        if (!mpsEvent.getTimestamp().before(goLiveEvent.getTimestamp())){
+        if (!mpsEvent.getTimestamp().before(goLiveEvent.getTimestamp())) {
             return false;
         }
 
-        if(!goLiveEvent.getTimestamp().before(returnByEvent.getTimestamp())) {
+        if (!goLiveEvent.getTimestamp().before(returnByEvent.getTimestamp())) {
             return false;
         }
 
