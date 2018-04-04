@@ -43,6 +43,9 @@ public class EventServiceImpl implements EventService {
     private EventChangeHandler[] changeHandlers;
 
     @Autowired
+    private EventValidator eventValidator;
+
+    @Autowired
     private Scheduler scheduler;
 
     @Override
@@ -95,9 +98,19 @@ public class EventServiceImpl implements EventService {
             {
                 event.setTimestamp(new Timestamp(date.getTime()));
 
-                this.eventRepository.save(event);
+                List<Event> existingEvents = this.eventRepository.findByCollectionExercise(collex);
 
-                fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventUpdated, event);
+                if(this.eventValidator.validate(existingEvents, event)){
+
+                    this.eventRepository.save(event);
+
+                    fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventUpdated, event);
+                } else {
+                    //TODO: RETURN ERROR MESSAGES FOR THE CLIENT
+                    throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                            String.format("Invalid event type, dates incorrect"));
+                }
+
             }
             else
                 {
