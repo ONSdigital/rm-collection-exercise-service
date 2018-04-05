@@ -25,7 +25,7 @@ public class EventValidatorTest {
     @Before
     public void setUp() {
         this.validator = new EventValidator();
-        this.events = createEvents();
+        this.events = createMandatoryEvents();
 
     }
 
@@ -121,7 +121,7 @@ public class EventValidatorTest {
     @Test
     public void testInvalidEventInPastUpdate() {
 
-        List<Event> eventListWithPastMPS = createEvents(-1000000);
+        List<Event> eventListWithPastMPS = createMandatoryEvents(-1000000);
 
         long now = System.currentTimeMillis();
 
@@ -134,7 +134,7 @@ public class EventValidatorTest {
 
     @Test
     public void testUpdateNonExistentEvent() {
-        List<Event> eventListWithoutExerciseEnd = createEvents();
+        List<Event> eventListWithoutExerciseEnd = createMandatoryEvents();
         eventListWithoutExerciseEnd.remove(eventListWithoutExerciseEnd.size()-1);
 
         long now = System.currentTimeMillis();
@@ -146,12 +146,109 @@ public class EventValidatorTest {
         assertFalse(this.validator.validate(eventListWithoutExerciseEnd, exerciseEndEvent));
     }
 
+    @Test
+    public void testReferencePeriodIncorrectOrder() {
+        List<Event> allEvents = createAllEvents();
 
-    private List<Event> createEvents() {
-        return createEvents(0);
+        long now = System.currentTimeMillis();
+
+        Event referencePeriodStart = new Event();
+        referencePeriodStart.setTag(EventService.Tag.ref_period_start.toString());
+        referencePeriodStart.setTimestamp(new Timestamp(now-1000));
+
+        assertFalse(this.validator.validate(allEvents, referencePeriodStart));
     }
 
-    private List<Event> createEvents(final long offset) {
+    @Test
+    public void testReminderBeforeGoLive() {
+        List<Event> allEvents = createAllEvents();
+
+        long now = System.currentTimeMillis();
+
+        Event reminder1Event = new Event();
+        reminder1Event.setTag(EventService.Tag.reminder_1.toString());
+        reminder1Event.setTimestamp(new Timestamp(now));
+
+        assertFalse(this.validator.validate(allEvents, reminder1Event));
+    }
+
+    @Test
+    public void testReminderBeforeAfterExerciseEnd() {
+        List<Event> allEvents = createAllEvents();
+
+        long now = System.currentTimeMillis();
+
+        Event reminder1Event = new Event();
+        reminder1Event.setTag(EventService.Tag.reminder_1.toString());
+        reminder1Event.setTimestamp(new Timestamp(now + 5000000));
+
+        assertFalse(this.validator.validate(allEvents, reminder1Event));
+    }
+
+    @Test
+    public void testCantUpdatePastReminder() {
+        List<Event> events = createMandatoryEvents(-230000);
+        List<Event> nonMandatoryEventsWithPastReminder = createNonMandatoryEvents(-230000);
+
+        events.addAll(nonMandatoryEventsWithPastReminder);
+
+        long now = System.currentTimeMillis();
+
+        Event reminder1Event = new Event();
+        reminder1Event.setTag(EventService.Tag.reminder_1.toString());
+        reminder1Event.setTimestamp(new Timestamp(now));
+
+        assertFalse(this.validator.validate(events, reminder1Event));
+    }
+
+    private List<Event> createAllEvents() {
+        List<Event> events = createMandatoryEvents();
+        events.addAll(createNonMandatoryEvents());
+        return events;
+    }
+
+    private List<Event> createNonMandatoryEvents() {
+        return createNonMandatoryEvents(0);
+    }
+
+    private List<Event> createNonMandatoryEvents(final long offset) {
+        List<Event> nonMandatoryEvents = new ArrayList<>();
+
+        long now = System.currentTimeMillis();
+
+        Event reminder1 = new Event();
+        reminder1.setTag(EventService.Tag.reminder_1.toString());
+        reminder1.setTimestamp(new Timestamp(now + 220000 + offset));
+        nonMandatoryEvents.add(reminder1);
+
+        Event reminder2 = new Event();
+        reminder2.setTag(EventService.Tag.reminder_2.toString());
+        reminder2.setTimestamp(new Timestamp(now + 240000 + offset));
+        nonMandatoryEvents.add(reminder2);
+
+        Event reminder3 = new Event();
+        reminder3.setTag(EventService.Tag.reminder_3.toString());
+        reminder3.setTimestamp(new Timestamp(now + 320000 + offset));
+        nonMandatoryEvents.add(reminder2);
+
+        Event refPeriodStart = new Event();
+        refPeriodStart.setTag(EventService.Tag.ref_period_start.toString());
+        refPeriodStart.setTimestamp(new Timestamp(now - 20000 + offset));
+        nonMandatoryEvents.add(refPeriodStart);
+
+        Event refPeriodEnd = new Event();
+        refPeriodEnd.setTag(EventService.Tag.ref_period_end.toString());
+        refPeriodEnd.setTimestamp(new Timestamp(now - 10000 + offset));
+        nonMandatoryEvents.add(refPeriodEnd);
+
+        return nonMandatoryEvents;
+    }
+
+    private List<Event> createMandatoryEvents() {
+        return createMandatoryEvents(0);
+    }
+
+    private List<Event> createMandatoryEvents(final long offset) {
         List<Event> eventList = new ArrayList<>();
 
         long now = System.currentTimeMillis();

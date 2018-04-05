@@ -25,7 +25,7 @@ public class EventValidator {
                 event -> event.getTag().equals(updatedEvent.getTag()));
 
         // Mandatory & Reminder events can't be updated if already past
-        if (isEventInPast(existingEvent) && (isMandatory(updatedEvent) || isReminder(updatedEvent))) {
+        if ((isMandatory(updatedEvent) || isReminder(updatedEvent)) && isEventInPast(existingEvent)) {
             return false;
         }
 
