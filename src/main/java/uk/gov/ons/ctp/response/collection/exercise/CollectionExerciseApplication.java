@@ -31,7 +31,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.impl.EventValidator;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
-import uk.gov.ons.ctp.response.collection.exercise.util.MultiIsoDateFormat;
 
 /**
  * The main entry point into the Collection Exercise Service SpringBoot

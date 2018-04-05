@@ -13,7 +13,20 @@ public interface EventService {
     /**
      * An enum to represent the collection exercise events that are mandatory for all surveys
      */
-    enum Tag { mps, go_live, return_by, exercise_end }
+    enum Tag {
+        mps(true), go_live(true), return_by(true), exercise_end(true), reminder_1(false), reminder_2(false),
+        reminder_3(false), ref_period_start(false), ref_period_end(false), employment_date(false) ;
+
+        Tag(final boolean mandatory){
+            this.mandatory = mandatory;
+        }
+
+        public boolean isMandatory(){
+            return mandatory;
+        }
+
+        private boolean mandatory;
+    }
 
     Event createEvent(EventDTO eventDto) throws CTPException;
 

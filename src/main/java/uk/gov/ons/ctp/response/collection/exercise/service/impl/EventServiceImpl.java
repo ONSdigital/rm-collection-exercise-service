@@ -248,6 +248,7 @@ public class EventServiceImpl implements EventService {
         );
 
         return Arrays.stream(Tag.values())
+                .filter(Tag::isMandatory)
                 .map(t -> events.get(t.name()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList())

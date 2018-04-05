@@ -132,6 +132,20 @@ public class EventValidatorTest {
         assertFalse(this.validator.validate(eventListWithPastMPS, mpsEvent));
     }
 
+    @Test
+    public void testUpdateNonExistentEvent() {
+        List<Event> eventListWithoutExerciseEnd = createEvents();
+        eventListWithoutExerciseEnd.remove(eventListWithoutExerciseEnd.size()-1);
+
+        long now = System.currentTimeMillis();
+
+        Event exerciseEndEvent = new Event();
+        exerciseEndEvent.setTag(EventService.Tag.exercise_end.toString());
+        exerciseEndEvent.setTimestamp(new Timestamp(now));
+
+        assertFalse(this.validator.validate(eventListWithoutExerciseEnd, exerciseEndEvent));
+    }
+
 
     private List<Event> createEvents() {
         return createEvents(0);

@@ -29,6 +29,44 @@ public class EventValidator {
 
         Map<String, Event> eventMap = generateEventsMap(existingEvents, updatedEvent);
 
+        return validateMandatoryEvents(eventMap) && validateNonMandatoryEvents(eventMap);
+    }
+
+    /**
+     * Validates the dates which aren't mandatory for a collection exercise to be executed.
+     *  Checks that reference period start before reference period end and
+     * all reminder timestamps are during the collection exercise
+     * @param eventMap
+     * @return
+     */
+    private boolean validateNonMandatoryEvents(final Map<String, Event>eventMap) {
+        Event referencePeriodStart = eventMap.get(EventService.Tag.ref_period_start.toString());
+        Event referencePeriodEnd = eventMap.get(EventService.Tag.ref_period_end.toString());
+
+        return (referencePeriodStart.getTimestamp().before(referencePeriodEnd.getTimestamp())
+                && remindersDuringExercise(eventMap));
+    }
+
+    private boolean remindersDuringExercise(final Map<String, Event>eventMap) {
+        Event goLive = eventMap.get(EventService.Tag.go_live.toString());
+        Event exerciseEnd = eventMap.get(EventService.Tag.exercise_end.toString());
+
+        Event reminder1 = eventMap.get(EventService.Tag.reminder_1.toString());
+        Event reminder2 = eventMap.get(EventService.Tag.reminder_2.toString());
+        Event reminder3 = eventMap.get(EventService.Tag.reminder_3.toString());
+
+        return eventDuringExercise(goLive,reminder1, exerciseEnd) &&
+                eventDuringExercise(goLive, reminder2, exerciseEnd) &&
+                eventDuringExercise(goLive, reminder3, exerciseEnd);
+
+    }
+
+    private boolean eventDuringExercise(Event goLive, Event event, Event exerciseEnd) {
+        return (goLive.getTimestamp().before(event.getTimestamp())
+                && event.getTimestamp().before(exerciseEnd.getTimestamp()));
+    }
+
+    private boolean validateMandatoryEvents(final Map<String, Event> eventMap) {
         Event mpsEvent = eventMap.get(EventService.Tag.mps.toString());
         Event goLiveEvent = eventMap.get(EventService.Tag.go_live.toString());
         Event returnByEvent = eventMap.get(EventService.Tag.return_by.toString());
