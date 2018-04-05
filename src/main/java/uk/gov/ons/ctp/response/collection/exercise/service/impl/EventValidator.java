@@ -23,7 +23,8 @@ public class EventValidator {
         Optional<Event> existingEvent = existingEvents.stream().findFirst().filter(
                 event -> event.getTag().equals(updatedEvent.getTag()));
 
-        if (isEventInPast(existingEvent)) {
+        if (isEventInPast(existingEvent) && isEventMandatory(updatedEvent)) {
+            //TODO: need to check if reminders can't also be set to past
             return false;
         }
 
@@ -101,5 +102,9 @@ public class EventValidator {
     private boolean isEventInPast(final Optional<Event> existingEvent) {
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
         return existingEvent.isPresent() && existingEvent.get().getTimestamp().before(currentTimestamp);
+    }
+
+    private boolean isEventMandatory(final Event updatedEvent) {
+        return EventService.Tag.valueOf(updatedEvent.getTag()).isMandatory();
     }
 }
