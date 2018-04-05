@@ -18,7 +18,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -242,8 +241,7 @@ public class CollectionExerciseServiceImplTest {
   public void testUpdateCollectionExerciseInvalidSurvey() throws Exception {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyId(survey.getId());
+    existing.setSurveyId(UUID.randomUUID());
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
     try {
@@ -258,8 +256,7 @@ public class CollectionExerciseServiceImplTest {
   public void testUpdateCollectionExerciseNonUnique() throws Exception {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyId(survey.getId());
+    existing.setSurveyId(UUID.randomUUID());
     // Set up the mock to return the one we are attempting to update
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
@@ -340,8 +337,7 @@ public class CollectionExerciseServiceImplTest {
    */
   private CollectionExercise setupCollectionExercise() throws Exception {
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyId(survey.getId());
+    existing.setSurveyId(UUID.randomUUID());
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
     return existing;
@@ -402,8 +398,7 @@ public class CollectionExerciseServiceImplTest {
   public void testPatchCollectionExerciseNonUnique() throws Exception {
     CollectionExerciseDTO toUpdate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    Survey survey = FixtureHelper.loadClassFixtures(Survey[].class).get(0);
-    existing.setSurveyId(survey.getId());
+    existing.setSurveyId(UUID.randomUUID());
     // Set up the mock to return the one we are attempting to update
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
 
