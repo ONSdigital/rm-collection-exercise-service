@@ -1,4 +1,4 @@
-FROM openjdk:8-jre
+FROM openjdk:8-jre-slim
 
 ARG JAR_FILE=collectionexercisesvc*.jar
 COPY target/$JAR_FILE /opt/collectionexercisesvc.jar
