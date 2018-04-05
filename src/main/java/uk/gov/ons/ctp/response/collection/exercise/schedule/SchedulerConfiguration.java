@@ -104,7 +104,7 @@ public class SchedulerConfiguration {
      *
      * @param scheduler the scheduler to use to schedule the events
      */
-    private void scheduleOutstandingEvents(final Scheduler scheduler) {
+    protected void scheduleOutstandingEvents(final Scheduler scheduler) {
         List<Event> outstandingEvents = this.eventService.getOutstandingEvents();
 
         outstandingEvents.stream().forEach(e -> {
