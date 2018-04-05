@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.sql.Timestamp;
@@ -19,7 +20,14 @@ public class EventValidator {
      * @param updatedEvent
      * @return
      */
-    public boolean validate(final List<Event> existingEvents, final Event updatedEvent) {
+    public boolean validate(final List<Event> existingEvents, final Event updatedEvent,
+                            final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
+
+        // Can only update reminders of the non mandatory events when READY_FOR_LIVE
+        if (collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE)
+                && (!isReminder(updatedEvent) && !isMandatory(updatedEvent))) {
+            return false;
+        }
 
         Optional<Event> existingEvent = existingEvents.stream().findFirst().filter(
                 event -> event.getTag().equals(updatedEvent.getTag()));

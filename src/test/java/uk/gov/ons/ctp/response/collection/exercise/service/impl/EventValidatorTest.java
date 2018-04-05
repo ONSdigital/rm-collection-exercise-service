@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import java.sql.Timestamp;
@@ -20,13 +21,15 @@ public class EventValidatorTest {
 
     private EventValidator validator;
 
-    private List<Event> events;
+    private List<Event> mandatoryEvents;
+
+    private List<Event> allEvents;
 
     @Before
     public void setUp() {
         this.validator = new EventValidator();
-        this.events = createMandatoryEvents();
-
+        this.mandatoryEvents = createMandatoryEvents();
+        this.allEvents = createAllEvents();
     }
 
     @Test
@@ -37,7 +40,8 @@ public class EventValidatorTest {
         mpsEvent.setTag(EventService.Tag.mps.toString());
         mpsEvent.setTimestamp(new Timestamp(now + 1500000));
 
-        assertTrue(this.validator.validate(this.events, mpsEvent));
+        assertTrue(this.validator.validate(this.mandatoryEvents, mpsEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -48,7 +52,8 @@ public class EventValidatorTest {
         goLiveEvent.setTag(EventService.Tag.go_live.toString());
         goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
 
-        assertTrue(this.validator.validate(this.events, goLiveEvent));
+        assertTrue(this.validator.validate(this.mandatoryEvents, goLiveEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -59,7 +64,8 @@ public class EventValidatorTest {
         returnByEvent.setTag(EventService.Tag.return_by.toString());
         returnByEvent.setTimestamp(new Timestamp(now + 3500000));
 
-        assertTrue(this.validator.validate(this.events, returnByEvent));
+        assertTrue(this.validator.validate(this.mandatoryEvents, returnByEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -70,7 +76,8 @@ public class EventValidatorTest {
         exerciseEndEvent.setTag(EventService.Tag.exercise_end.toString());
         exerciseEndEvent.setTimestamp(new Timestamp(now + 4500000));
 
-        assertTrue(this.validator.validate(this.events, exerciseEndEvent));
+        assertTrue(this.validator.validate(this.mandatoryEvents, exerciseEndEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -81,7 +88,8 @@ public class EventValidatorTest {
         mpsEvent.setTag(EventService.Tag.mps.toString());
         mpsEvent.setTimestamp(new Timestamp(now + 3500000));
 
-        assertFalse(this.validator.validate(this.events, mpsEvent));
+        assertFalse(this.validator.validate(this.mandatoryEvents, mpsEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -92,7 +100,8 @@ public class EventValidatorTest {
         goLiveEvent.setTag(EventService.Tag.go_live.toString());
         goLiveEvent.setTimestamp(new Timestamp(now + 3500000));
 
-        assertFalse(this.validator.validate(this.events, goLiveEvent));
+        assertFalse(this.validator.validate(this.mandatoryEvents, goLiveEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -103,7 +112,8 @@ public class EventValidatorTest {
         returnByEvent.setTag(EventService.Tag.return_by.toString());
         returnByEvent.setTimestamp(new Timestamp(now + 4500000));
 
-        assertFalse(this.validator.validate(this.events, returnByEvent));
+        assertFalse(this.validator.validate(this.mandatoryEvents, returnByEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -114,7 +124,8 @@ public class EventValidatorTest {
         exerciseEndEvent.setTag(EventService.Tag.exercise_end.toString());
         exerciseEndEvent.setTimestamp(new Timestamp(now + 1500000));
 
-        assertFalse(this.validator.validate(this.events, exerciseEndEvent));
+        assertFalse(this.validator.validate(this.mandatoryEvents, exerciseEndEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
 
@@ -129,7 +140,8 @@ public class EventValidatorTest {
         mpsEvent.setTag(EventService.Tag.mps.toString());
         mpsEvent.setTimestamp(new Timestamp(now+1500000));
 
-        assertFalse(this.validator.validate(eventListWithPastMPS, mpsEvent));
+        assertFalse(this.validator.validate(eventListWithPastMPS, mpsEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
@@ -143,46 +155,80 @@ public class EventValidatorTest {
         exerciseEndEvent.setTag(EventService.Tag.exercise_end.toString());
         exerciseEndEvent.setTimestamp(new Timestamp(now));
 
-        assertFalse(this.validator.validate(eventListWithoutExerciseEnd, exerciseEndEvent));
+        assertFalse(this.validator.validate(eventListWithoutExerciseEnd, exerciseEndEvent,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
     public void testReferencePeriodIncorrectOrder() {
-        List<Event> allEvents = createAllEvents();
-
         long now = System.currentTimeMillis();
 
         Event referencePeriodStart = new Event();
         referencePeriodStart.setTag(EventService.Tag.ref_period_start.toString());
         referencePeriodStart.setTimestamp(new Timestamp(now-1000));
 
-        assertFalse(this.validator.validate(allEvents, referencePeriodStart));
+        assertFalse(this.validator.validate(this.allEvents, referencePeriodStart,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
     public void testReminderBeforeGoLive() {
-        List<Event> allEvents = createAllEvents();
-
         long now = System.currentTimeMillis();
 
         Event reminder1Event = new Event();
         reminder1Event.setTag(EventService.Tag.reminder_1.toString());
         reminder1Event.setTimestamp(new Timestamp(now));
 
-        assertFalse(this.validator.validate(allEvents, reminder1Event));
+        assertFalse(this.validator.validate(this.allEvents, reminder1Event,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     @Test
     public void testReminderBeforeAfterExerciseEnd() {
-        List<Event> allEvents = createAllEvents();
-
         long now = System.currentTimeMillis();
 
         Event reminder1Event = new Event();
         reminder1Event.setTag(EventService.Tag.reminder_1.toString());
         reminder1Event.setTimestamp(new Timestamp(now + 5000000));
 
-        assertFalse(this.validator.validate(allEvents, reminder1Event));
+        assertFalse(this.validator.validate(this.allEvents, reminder1Event,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
+    }
+
+    @Test
+    public void testCanUpdateReminderWhenReadyForLive() {
+        long now = System.currentTimeMillis();
+
+        Event reminder1Event = new Event();
+        reminder1Event.setTag(EventService.Tag.reminder_1.toString());
+        reminder1Event.setTimestamp(new Timestamp(now + 3000000));
+
+        assertTrue(this.validator.validate(this.allEvents, reminder1Event,
+                CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+    }
+
+    @Test
+    public void testUpdateNonMandatoryNonReminderWhenReadyForLive() {
+        long now = System.currentTimeMillis();
+
+        Event referencePeriodStart = new Event();
+        referencePeriodStart.setTag(EventService.Tag.ref_period_start.toString());
+        referencePeriodStart.setTimestamp(new Timestamp(now - 20000));
+
+        assertFalse(this.validator.validate(this.allEvents, referencePeriodStart,
+                CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+    }
+
+    @Test
+    public void testUpdateMandatoryEventWhenReadyForLive() {
+        long now = System.currentTimeMillis();
+
+        Event mpsEvent = new Event();
+        mpsEvent.setTag(EventService.Tag.mps.toString());
+        mpsEvent.setTimestamp(new Timestamp(now + 1000000));
+
+        assertTrue(this.validator.validate(this.allEvents, mpsEvent,
+                CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
     }
 
     @Test
@@ -198,7 +244,8 @@ public class EventValidatorTest {
         reminder1Event.setTag(EventService.Tag.reminder_1.toString());
         reminder1Event.setTimestamp(new Timestamp(now));
 
-        assertFalse(this.validator.validate(events, reminder1Event));
+        assertFalse(this.validator.validate(events, reminder1Event,
+                CollectionExerciseDTO.CollectionExerciseState.CREATED));
     }
 
     private List<Event> createAllEvents() {
@@ -218,17 +265,17 @@ public class EventValidatorTest {
 
         Event reminder1 = new Event();
         reminder1.setTag(EventService.Tag.reminder_1.toString());
-        reminder1.setTimestamp(new Timestamp(now + 220000 + offset));
+        reminder1.setTimestamp(new Timestamp(now + 3000000 + offset));
         nonMandatoryEvents.add(reminder1);
 
         Event reminder2 = new Event();
         reminder2.setTag(EventService.Tag.reminder_2.toString());
-        reminder2.setTimestamp(new Timestamp(now + 240000 + offset));
+        reminder2.setTimestamp(new Timestamp(now + 3000000 + offset));
         nonMandatoryEvents.add(reminder2);
 
         Event reminder3 = new Event();
         reminder3.setTag(EventService.Tag.reminder_3.toString());
-        reminder3.setTimestamp(new Timestamp(now + 320000 + offset));
+        reminder3.setTimestamp(new Timestamp(now + 3000000 + offset));
         nonMandatoryEvents.add(reminder2);
 
         Event refPeriodStart = new Event();

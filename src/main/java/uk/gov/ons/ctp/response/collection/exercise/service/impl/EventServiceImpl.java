@@ -13,6 +13,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -100,7 +101,7 @@ public class EventServiceImpl implements EventService {
 
                 List<Event> existingEvents = this.eventRepository.findByCollectionExercise(collex);
 
-                if (this.eventValidator.validate(existingEvents, event)) {
+                if (this.eventValidator.validate(existingEvents, event, collex.getState())) {
 
                     this.eventRepository.save(event);
 
