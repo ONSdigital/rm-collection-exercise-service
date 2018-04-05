@@ -40,8 +40,9 @@ public class SchedulerConfiguration {
 
     /**
      * Method to schedule a collection exercise event
+     *
      * @param scheduler a Quartz scheduler (can be autowired)
-     * @param event the collection exercise event to schedule
+     * @param event     the collection exercise event to schedule
      * @return the date and time the event is scheduled for
      * @throws SchedulerException thrown if an error occurred scheduling event
      */
@@ -49,7 +50,7 @@ public class SchedulerConfiguration {
         EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
         JobKey jobKey = detail.getJobDetail().getKey();
 
-        if (scheduler.checkExists(jobKey)){
+        if (scheduler.checkExists(jobKey)) {
             scheduler.deleteJob(jobKey);
         }
 
@@ -58,8 +59,9 @@ public class SchedulerConfiguration {
 
     /**
      * Method to unschedule a collection exercise event
+     *
      * @param scheduler a Quartz scheduler (can be autowired)
-     * @param event the collection exercise event to unschedule
+     * @param event     the collection exercise event to unschedule
      * @return true if the event was unscheduled, false otherwise
      * @throws SchedulerException thrown if an error occurred unscheduling event
      */
@@ -72,8 +74,9 @@ public class SchedulerConfiguration {
 
     /**
      * Utility method to generate a JobKey from a collection exercise id and an event
+     *
      * @param collexId a collection exercise id
-     * @param event an event
+     * @param event    an event
      * @return a String that can be used as a JobKey
      */
     public static String getJobKey(final UUID collexId, final Event event) {
@@ -98,9 +101,10 @@ public class SchedulerConfiguration {
 
     /**
      * Schedules within quartz all the collection exercise events for which a message has not already been sent
+     *
      * @param scheduler the scheduler to use to schedule the events
      */
-    private void scheduleOutstandingEvents(Scheduler scheduler){
+    private void scheduleOutstandingEvents(final Scheduler scheduler) {
         List<Event> outstandingEvents = this.eventService.getOutstandingEvents();
 
         outstandingEvents.stream().forEach(e -> {
@@ -148,6 +152,7 @@ public class SchedulerConfiguration {
     private static class EventJobTriggerDetail {
         private Trigger trigger;
         private JobDetail jobDetail;
+
         public EventJobTriggerDetail(final Event event) {
             UUID collexId = event.getCollectionExercise().getId();
             String jobKey = getJobKey(collexId, event);

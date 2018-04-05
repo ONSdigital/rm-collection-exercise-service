@@ -41,7 +41,8 @@ public class CollectionExerciseEventInboundReceiver {
             tag = EventService.Tag.valueOf(tagString);
 
             // If it's a go_live EventElapsed then attempt to transition the state of the collection exercise to live
-            if (tag == EventService.Tag.go_live && messageType == CollectionExerciseEventPublisher.MessageType.EventElapsed){
+            if (tag == EventService.Tag.go_live
+                    && messageType == CollectionExerciseEventPublisher.MessageType.EventElapsed) {
                 UUID collexId = event.getCollectionExerciseId();
 
                 transitionCollectionExerciseToLive(collexId);
@@ -57,19 +58,22 @@ public class CollectionExerciseEventInboundReceiver {
 
     /**
      * Logs a message stating the event message is being ignored as it's not go_live/EventElapsed
+     *
      * @param message the event message being ignored
      */
-    private void logIgnoreMessage(final EventMessageDTO message){
+    private void logIgnoreMessage(final EventMessageDTO message) {
         EventDTO event = message.getEvent();
 
-        log.info("Ignoring event message {}/{} - not {}/{}", event.getTag(), message.getMessageType(), EventService.Tag.go_live.name(), CollectionExerciseEventPublisher.MessageType.EventElapsed);
+        log.info("Ignoring event message {}/{} - not {}/{}", event.getTag(), message.getMessageType(),
+                EventService.Tag.go_live.name(), CollectionExerciseEventPublisher.MessageType.EventElapsed);
     }
 
     /**
      * Sends a GO_LIVE event to the state machine for a collection exercise
+     *
      * @param collexId the UUID of the collection exercise
      */
-    private void transitionCollectionExerciseToLive(final UUID collexId){
+    private void transitionCollectionExerciseToLive(final UUID collexId) {
         try {
             this.collectionExerciseService.transitionCollectionExercise(collexId,
                     CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
