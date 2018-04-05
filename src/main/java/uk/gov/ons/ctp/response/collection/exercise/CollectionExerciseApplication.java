@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.EventValidator;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.util.MultiIsoDateFormat;
 
@@ -244,6 +245,11 @@ public class CollectionExerciseApplication {
     CustomObjectMapper mapper = new CustomObjectMapper();
 
     return mapper;
+  }
+
+  @Bean
+  public EventValidator eventValidator() {
+    return new EventValidator();
   }
 
   /**
