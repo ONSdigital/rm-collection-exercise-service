@@ -13,7 +13,8 @@ import java.util.List;
 public class EventValidator {
 
     /**
-     * Validates the events timestamps are in the correct order and the updated event isn't already past.
+     * Validates the events timestamps are in the correct order and the updated event can be updated,
+     * i.e is not a mandatory or reminder event.
      * @param existingEvents
      * @param updatedEvent
      * @return
@@ -23,8 +24,8 @@ public class EventValidator {
         Optional<Event> existingEvent = existingEvents.stream().findFirst().filter(
                 event -> event.getTag().equals(updatedEvent.getTag()));
 
-        if (isEventInPast(existingEvent) && isEventMandatory(updatedEvent)) {
-            //TODO: need to check if reminders can't also be set to past
+        // Mandatory & Reminder events can't be updated if already past
+        if (isEventInPast(existingEvent) && (isMandatory(updatedEvent) || isReminder(updatedEvent))) {
             return false;
         }
 
@@ -35,8 +36,8 @@ public class EventValidator {
 
     /**
      * Validates the dates which aren't mandatory for a collection exercise to be executed.
-     *  Checks that reference period start before reference period end and
-     * all reminder timestamps are during the collection exercise
+     *  If the events exist it checks that reference period start before referencePeriodEnd and
+     *  all reminders are during the collection exercise.
      * @param eventMap
      * @return
      */
@@ -44,9 +45,18 @@ public class EventValidator {
         Event referencePeriodStart = eventMap.get(EventService.Tag.ref_period_start.toString());
         Event referencePeriodEnd = eventMap.get(EventService.Tag.ref_period_end.toString());
 
-        return (referencePeriodStart.getTimestamp().before(referencePeriodEnd.getTimestamp())
-                && remindersDuringExercise(eventMap));
+        return referencePeriodInCorrectOrder(referencePeriodStart, referencePeriodEnd)
+                && remindersDuringExercise(eventMap);
     }
+
+    private boolean referencePeriodInCorrectOrder(final Event referencePeriodStart, final Event referencePeriodEnd) {
+        boolean isValid = true;
+        if (referencePeriodStart != null && referencePeriodEnd != null) {
+            isValid = referencePeriodStart.getTimestamp().before(referencePeriodEnd.getTimestamp());
+        }
+        return isValid;
+    }
+
 
     private boolean remindersDuringExercise(final Map<String, Event>eventMap) {
         Event goLive = eventMap.get(EventService.Tag.go_live.toString());
@@ -56,37 +66,37 @@ public class EventValidator {
         Event reminder2 = eventMap.get(EventService.Tag.reminder_2.toString());
         Event reminder3 = eventMap.get(EventService.Tag.reminder_3.toString());
 
-        return eventDuringExercise(goLive,reminder1, exerciseEnd) &&
-                eventDuringExercise(goLive, reminder2, exerciseEnd) &&
-                eventDuringExercise(goLive, reminder3, exerciseEnd);
+        return eventDuringExercise(goLive, reminder1, exerciseEnd)
+                && eventDuringExercise(goLive, reminder2, exerciseEnd)
+                && eventDuringExercise(goLive, reminder3, exerciseEnd);
 
     }
 
     private boolean eventDuringExercise(Event goLive, Event event, Event exerciseEnd) {
-        return (goLive.getTimestamp().before(event.getTimestamp())
-                && event.getTimestamp().before(exerciseEnd.getTimestamp()));
+        boolean isValid = true;
+        if(event != null) {
+            isValid = goLive.getTimestamp().before(event.getTimestamp())
+                    && event.getTimestamp().before(exerciseEnd.getTimestamp());
+        }
+        return isValid;
     }
 
+    /**
+     * Validates the mandatory events are in the following order:
+     * MPS
+     * Go Live
+     * Return By
+     * Exercise End
+     */
     private boolean validateMandatoryEvents(final Map<String, Event> eventMap) {
         Event mpsEvent = eventMap.get(EventService.Tag.mps.toString());
         Event goLiveEvent = eventMap.get(EventService.Tag.go_live.toString());
         Event returnByEvent = eventMap.get(EventService.Tag.return_by.toString());
         Event exerciseEndEvent = eventMap.get(EventService.Tag.exercise_end.toString());
 
-
-        if (!mpsEvent.getTimestamp().before(goLiveEvent.getTimestamp())) {
-            return false;
-        }
-
-        if (!goLiveEvent.getTimestamp().before(returnByEvent.getTimestamp())) {
-            return false;
-        }
-
-        if (!returnByEvent.getTimestamp().before(exerciseEndEvent.getTimestamp())) {
-            return false;
-        }
-
-        return true;
+        return mpsEvent.getTimestamp().before(goLiveEvent.getTimestamp())
+                && goLiveEvent.getTimestamp().before(returnByEvent.getTimestamp())
+                && returnByEvent.getTimestamp().before(exerciseEndEvent.getTimestamp());
     }
 
     private Map<String, Event> generateEventsMap(final List<Event> existingEvents, final Event updatedEvent) {
@@ -104,7 +114,13 @@ public class EventValidator {
         return existingEvent.isPresent() && existingEvent.get().getTimestamp().before(currentTimestamp);
     }
 
-    private boolean isEventMandatory(final Event updatedEvent) {
+    private boolean isMandatory(final Event updatedEvent) {
         return EventService.Tag.valueOf(updatedEvent.getTag()).isMandatory();
+    }
+
+    private boolean isReminder(final Event updatedEvent) {
+        return EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder_1)
+                || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder_2)
+                || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder_3);
     }
 }

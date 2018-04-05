@@ -247,12 +247,15 @@ public class EventServiceImpl implements EventService {
                 Collectors.toMap(Event::getTag, Function.identity())
         );
 
+        int numberOfMandatoryEvents = Arrays.stream(Tag.values())
+                .filter(Tag::isMandatory).collect(Collectors.toList()).size();
+
         return Arrays.stream(Tag.values())
                 .filter(Tag::isMandatory)
                 .map(t -> events.get(t.name()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList())
-                .size() >= Tag.values().length;
+                .size() >= numberOfMandatoryEvents;
 
     }
 
