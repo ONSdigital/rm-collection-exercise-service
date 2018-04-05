@@ -89,3 +89,12 @@ databaseChangeLog:
             comment: US042 - deprecate PUBLISHED
             path: us042-deprecate-published.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-11
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: Remove remaining vestiges of cached survey data
+            path: drop-survey-table.sql
+            relativeToChangelogFile: true
