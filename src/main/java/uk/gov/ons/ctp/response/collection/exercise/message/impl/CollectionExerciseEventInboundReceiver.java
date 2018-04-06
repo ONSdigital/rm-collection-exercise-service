@@ -65,7 +65,7 @@ public class CollectionExerciseEventInboundReceiver {
         EventDTO event = message.getEvent();
 
         log.info("Ignoring event message {}/{} - not {}/{}", event.getTag(), message.getMessageType(),
-                EventService.Tag.go_live.name(), CollectionExerciseEventPublisher.MessageType.EventElapsed);
+                EventService.Tag.go_live.name(), CollectionExerciseEventPublisher.MessageType.EventElapsed.name());
     }
 
     /**
