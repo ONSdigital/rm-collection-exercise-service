@@ -35,29 +35,52 @@ public class CollectionExerciseEventInboundReceiver {
         EventDTO event = message.getEvent();
         CollectionExerciseEventPublisher.MessageType messageType = message.getMessageType();
         String tagString = event.getTag();
-        EventService.Tag tag = null;
+        EventService.Tag tag;
 
         try {
             tag = EventService.Tag.valueOf(tagString);
 
-            // If it's a go_live event then attempt to transition the state of the collection exercise to live
+            // If it's a go_live EventElapsed then attempt to transition the state of the collection exercise to live
             if (tag == EventService.Tag.go_live
                     && messageType == CollectionExerciseEventPublisher.MessageType.EventElapsed) {
                 UUID collexId = event.getCollectionExerciseId();
 
-                try {
-                    this.collectionExerciseService.transitionCollectionExercise(collexId,
-                            CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-                } catch (CTPException e) {
-                    log.error("Failed to set collection exerise to live state - {}", e);
-                }
+                transitionCollectionExerciseToLive(collexId);
             } else {
-                log.info("Ignoring event {} - not {}", tag.name(), EventService.Tag.go_live.name());
+                logIgnoreMessage(message);
             }
         } catch (IllegalArgumentException e) {
             // This means that the event isn't one of the mandatory events that is represented in the enum - which is
             // fine.
-            log.info("Ignoring event {} - not {}", tagString, EventService.Tag.go_live.name());
+            logIgnoreMessage(message);
         }
     }
+
+    /**
+     * Logs a message stating the event message is being ignored as it's not go_live/EventElapsed
+     *
+     * @param message the event message being ignored
+     */
+    private void logIgnoreMessage(final EventMessageDTO message) {
+        EventDTO event = message.getEvent();
+
+        log.info("Ignoring event message {}/{} - not {}/{}", event.getTag(), message.getMessageType(),
+                EventService.Tag.go_live.name(), CollectionExerciseEventPublisher.MessageType.EventElapsed.name());
+    }
+
+    /**
+     * Sends a GO_LIVE event to the state machine for a collection exercise
+     *
+     * @param collexId the UUID of the collection exercise
+     */
+    private void transitionCollectionExerciseToLive(final UUID collexId) {
+        try {
+            this.collectionExerciseService.transitionCollectionExercise(collexId,
+                    CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+            log.info("Set collection exercise {} to LIVE state", collexId);
+        } catch (CTPException e) {
+            log.error("Failed to set collection exercise {} to LIVE state - {}", collexId, e);
+        }
+    }
+
 }

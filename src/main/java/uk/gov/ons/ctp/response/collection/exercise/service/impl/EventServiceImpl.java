@@ -216,7 +216,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<Event> getOutstandingEvents() {
-        return this.eventRepository.findByMessageSentNotNull();
+        return this.eventRepository.findByMessageSentNull();
     }
 
     @Override
