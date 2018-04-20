@@ -203,12 +203,14 @@ public class EventServiceImpl implements EventService {
      * @param messageType the type of change
      * @param event the event to which the change occurred
      */
-    private void fireEventChangeHandlers(final CollectionExerciseEventPublisher.MessageType messageType, final Event event) {
+    private void fireEventChangeHandlers(final CollectionExerciseEventPublisher.MessageType messageType,
+                                         final Event event) {
         Arrays.stream(this.changeHandlers).forEach(handler -> {
             try {
                 handler.handleEventLifecycle(messageType, event);
             } catch (CTPException e) {
-                log.error("Failed to handle event change for {} of {} - {}", messageType, event, e);
+                log.error("Failed to handle event change for {} of {} - {} ({})",
+                        messageType, event.getId(), e.getMessage(), e.getFault());
             }
         });
     }

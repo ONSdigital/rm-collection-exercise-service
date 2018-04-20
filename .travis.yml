@@ -8,11 +8,14 @@ jdk: openjdk8
 
 before_install: "cp .maven.settings.xml $HOME/.m2/settings.xml"
 
+script: "mvn cobertura:cobertura"
+
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
     docker push sdcplatform/collectionexercisesvc;
     fi
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   slack:
