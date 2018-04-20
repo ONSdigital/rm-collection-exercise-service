@@ -24,16 +24,19 @@ public class EventValidator {
                             final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
 
         // Can only update reminders of the non mandatory events when READY_FOR_LIVE
-        if (collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE)
-                && (!isReminder(updatedEvent) && !isMandatory(updatedEvent))) {
+        if ((collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE)
+                || collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.LIVE))
+                && !isReminder(updatedEvent)
+                && !isMandatory(updatedEvent)) {
             return false;
         }
 
         Optional<Event> existingEvent = existingEvents.stream().findFirst().filter(
                 event -> event.getTag().equals(updatedEvent.getTag()));
 
-        // Mandatory & Reminder events can't be updated if already past
-        if ((isMandatory(updatedEvent) || isReminder(updatedEvent)) && isEventInPast(existingEvent)) {
+        // Events can't be updated if already past or updated date is in the past
+        if ((existingEvent.isPresent() && isEventInPast(existingEvent.get()))
+                || isEventInPast(updatedEvent)) {
             return false;
         }
 
@@ -117,9 +120,9 @@ public class EventValidator {
         return eventMap;
     }
 
-    private boolean isEventInPast(final Optional<Event> existingEvent) {
+    private boolean isEventInPast(final Event existingEvent) {
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
-        return existingEvent.isPresent() && existingEvent.get().getTimestamp().before(currentTimestamp);
+        return existingEvent.getTimestamp().before(currentTimestamp);
     }
 
     private boolean isMandatory(final Event updatedEvent) {
