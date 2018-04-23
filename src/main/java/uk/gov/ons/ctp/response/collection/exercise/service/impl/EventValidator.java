@@ -13,7 +13,7 @@ import java.util.List;
 
 public class EventValidator {
 
-    /**
+    /**q
      * Validates the events timestamps are in the correct order and the updated event can be updated,
      * i.e is not a mandatory or reminder event.
      * @param existingEvents
@@ -26,8 +26,7 @@ public class EventValidator {
         // Can only update reminders of the non mandatory events when READY_FOR_LIVE
         if ((collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE)
                 || collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.LIVE))
-                && !isReminder(updatedEvent)
-                && !isMandatory(updatedEvent)) {
+                && (isMandatory(updatedEvent) || !isReminder(updatedEvent))) {
             return false;
         }
 
@@ -73,11 +72,10 @@ public class EventValidator {
         Event goLive = eventMap.get(EventService.Tag.go_live.toString());
         Event exerciseEnd = eventMap.get(EventService.Tag.exercise_end.toString());
 
-        Event reminder1 = eventMap.get(EventService.Tag.reminder_1.toString());
-        Event reminder2 = eventMap.get(EventService.Tag.reminder_2.toString());
-        Event reminder3 = eventMap.get(EventService.Tag.reminder_3.toString());
-
-        return eventDuringExercise(goLive, reminder1, exerciseEnd)
+        Event reminder = eventMap.get(EventService.Tag.reminder.toString());
+        Event reminder2 = eventMap.get(EventService.Tag.reminder2.toString());
+        Event reminder3 = eventMap.get(EventService.Tag.reminder3.toString());
+        return eventDuringExercise(goLive, reminder, exerciseEnd)
                 && eventDuringExercise(goLive, reminder2, exerciseEnd)
                 && eventDuringExercise(goLive, reminder3, exerciseEnd);
 
@@ -130,8 +128,8 @@ public class EventValidator {
     }
 
     private boolean isReminder(final Event updatedEvent) {
-        return EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder_1)
-                || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder_2)
-                || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder_3);
+        return EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder)
+                || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder2)
+                || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder3);
     }
 }
