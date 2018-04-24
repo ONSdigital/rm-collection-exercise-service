@@ -39,6 +39,7 @@ import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.common.matcher.DateMatcher;
+import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
@@ -572,11 +573,10 @@ public class CollectionExerciseEndpointUnitTests {
    * @throws Exception exception thrown
    */
 @Test
-public void testUpdateEvent() throws Exception
-{
+public void testUpdateEvent() throws Exception {
 
   UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
-  String newDate = "2017-10-07T00:00:00.000+0000";
+  String newDate = "2017-10-07T00:00:00.000+0100";
   MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
           String.format("/collectionexercises/%s/events/End", uuid.toString()),
           new Object[0])
@@ -588,26 +588,17 @@ public void testUpdateEvent() throws Exception
   actions.andExpect(status().isNoContent());
 
   ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
-  ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
   ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);
   ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
 
-  SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  Date parseDate= null;
-  try {
-        parseDate = formatter.parse(newDate);
+  MultiIsoDateFormat dateParser = new MultiIsoDateFormat();
+  Date expectedDate = dateParser.parse(newDate);
 
-      }
-      catch (ParseException e)
-      {
-          throw new ParseException("Date parse exception",e.getErrorOffset());
-      }
-
-      verify(this.eventService).updateEvent(uuidCaptor.capture(), tagCaptor.capture(), dateCaptor.capture());
+  verify(this.eventService).updateEvent(uuidCaptor.capture(), tagCaptor.capture(), dateCaptor.capture());
 
   assertEquals(uuid, uuidCaptor.getValue());
   assertEquals("End", tagCaptor.getValue());
-  assertEquals(parseDate, dateCaptor.getValue());
+  assertEquals(expectedDate, dateCaptor.getValue());
 
 }
 
