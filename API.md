@@ -190,59 +190,6 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
 ]
 ```
 
-## Get Collection Exercises for Party
-* `GET /collectionexercises/party/{party_id}` will return a list of known collection exercises for the party id.
-
-### Example JSON Response
-```json
-[
-  {
-    "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
-    "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
-    "name": "Monthly Survey of Building Materials Bricks",
-    "actualExecutionDateTime": null,
-    "scheduledExecutionDateTime": null,
-    "scheduledStartDateTime": null,
-    "actualPublishDateTime": null,
-    "periodStartDateTime": null,
-    "periodEndDateTime": null,
-    "scheduledReturnDateTime": null,
-    "scheduledEndDateTime": null,
-    "executedBy": null,
-    "state": "INIT",
-    "caseTypes": null,
-    "exerciseRef": "201801",
-    "userDescription": "January 2018",
-    "created": "2018-01-09T12:56:09.652Z",
-    "updated": null,
-    "deleted": null,
-    "validationErrors": []
-  },
-  {
-    "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
-    "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
-    "name": "Monthly Survey of Building materials Bricks",
-    "actualExecutionDateTime": null,
-    "scheduledExecutionDateTime": null,
-    "scheduledStartDateTime": null,
-    "actualPublishDateTime": null,
-    "periodStartDateTime": null,
-    "periodEndDateTime": null,
-    "scheduledReturnDateTime": null,
-    "scheduledEndDateTime": null,
-    "executedBy": null,
-    "state": "INIT",
-    "caseTypes": null,
-    "exerciseRef": "201802",
-    "userDescription": "February 2018",
-    "created": "2018-01-09T12:56:09.709Z",
-    "updated": null,
-    "deleted": null,
-    "validationErrors": []
-  }
-]
-```
-
 ## Get Collection Exercise
 * `GET /collectionexercises/{collection_exercise_id}` will return the details of the collection exercise with the given id.
 
