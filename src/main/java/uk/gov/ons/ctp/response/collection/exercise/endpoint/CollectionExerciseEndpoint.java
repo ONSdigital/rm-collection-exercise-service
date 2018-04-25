@@ -24,6 +24,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.ScheduledEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -665,6 +666,13 @@ public class CollectionExerciseEndpoint {
         eventService.deleteEvent(id, tag);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value = "/events/scheduled", method = RequestMethod.GET)
+    public ResponseEntity<List<EventDTO>> getAllScheduledEvents() throws SchedulerException {
+        List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);
+
+        return ResponseEntity.ok(scheduledEvents);
     }
 
     /**
