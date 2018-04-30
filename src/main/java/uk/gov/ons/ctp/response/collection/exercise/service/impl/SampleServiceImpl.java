@@ -196,11 +196,6 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public boolean partyExists(final UUID id) {
-        return this.sampleUnitRepo.partyExists(id);
-    }
-
-    @Override
     public SampleUnitValidationErrorDTO[] getValidationErrors(final UUID collectionExerciseId) {
         List<ExerciseSampleUnit> sampleUnits = this.sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
         Predicate<ExerciseSampleUnit> validTest = su -> !(su.getPartyId() instanceof UUID)

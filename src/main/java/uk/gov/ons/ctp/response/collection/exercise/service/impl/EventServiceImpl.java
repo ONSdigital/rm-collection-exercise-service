@@ -43,6 +43,9 @@ public class EventServiceImpl implements EventService {
     private EventChangeHandler[] changeHandlers;
 
     @Autowired
+    private EventValidator eventValidator;
+
+    @Autowired
     private Scheduler scheduler;
 
     @Override
@@ -95,9 +98,18 @@ public class EventServiceImpl implements EventService {
             {
                 event.setTimestamp(new Timestamp(date.getTime()));
 
-                this.eventRepository.save(event);
+                List<Event> existingEvents = this.eventRepository.findByCollectionExercise(collex);
 
-                fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventUpdated, event);
+                if (this.eventValidator.validate(existingEvents, event)) {
+
+                    this.eventRepository.save(event);
+
+                    fireEventChangeHandlers(CollectionExerciseEventPublisher.MessageType.EventUpdated, event);
+                } else {
+                    throw new CTPException(CTPException.Fault.BAD_REQUEST,
+                            String.format("Invalid event update"));
+                }
+
             }
             else
                 {
@@ -190,19 +202,21 @@ public class EventServiceImpl implements EventService {
      * @param messageType the type of change
      * @param event the event to which the change occurred
      */
-    private void fireEventChangeHandlers(final CollectionExerciseEventPublisher.MessageType messageType, final Event event) {
+    private void fireEventChangeHandlers(final CollectionExerciseEventPublisher.MessageType messageType,
+                                         final Event event) {
         Arrays.stream(this.changeHandlers).forEach(handler -> {
             try {
                 handler.handleEventLifecycle(messageType, event);
             } catch (CTPException e) {
-                log.error("Failed to handle event change for {} of {} - {}", messageType, event, e);
+                log.error("Failed to handle event change for {} of {} - {} ({})",
+                        messageType, event.getId(), e.getMessage(), e.getFault());
             }
         });
     }
 
     @Override
     public List<Event> getOutstandingEvents() {
-        return this.eventRepository.findByMessageSentNotNull();
+        return this.eventRepository.findByMessageSentNull();
     }
 
     @Override

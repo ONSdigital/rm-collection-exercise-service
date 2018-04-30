@@ -44,7 +44,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Survey;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
@@ -117,7 +116,6 @@ public class CollectionExerciseEndpointUnitTests {
 
   private MockMvc mockCollectionExerciseMvc;
   private MockMvc textPlainMock;
-  private List<Survey> surveyResults;
   private List<SurveyDTO> surveyDtoResults;
   private List<CollectionExercise> collectionExerciseResults;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
@@ -145,7 +143,6 @@ public class CollectionExerciseEndpointUnitTests {
             .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
             .build();
 
-    this.surveyResults = FixtureHelper.loadClassFixtures(Survey[].class);
     this.surveyDtoResults = FixtureHelper.loadClassFixtures(SurveyDTO[].class);
     this.collectionExerciseResults = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     this.sampleUnitsRequestDTOResults = FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
@@ -197,48 +194,6 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
         .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
-
-  }
-
-  /**
-   * Tests if collection exercise found for party.
-   *
-   * @throws Exception exception thrown
-   */
-  @Test
-  public void findCollectionExercisesForParty() throws Exception {
-    when(sampleService.partyExists(PARTY_ID_1)).thenReturn(true);
-    when(collectionExerciseService.findCollectionExercisesForParty(PARTY_ID_1))
-            .thenReturn(collectionExerciseResults);
-
-    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/party/%s", PARTY_ID_1)));
-
-    actions.andExpect(status().isOk())
-            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-            .andExpect(handler().methodName("getCollectionExercisesForParty"))
-            .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[*].id",
-                    containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
-            .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
-            .andExpect(jsonPath("$[*].scheduledExecutionDateTime",
-                    containsInAnyOrder(new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
-                            new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
-  }
-
-  /**
-   * Tests collection exercise not found.
-   *
-   * @throws Exception exception thrown
-   */
-  @Test
-  public void findCollectionExercisesForPartyNotFound() throws Exception {
-    ResultActions actions = mockCollectionExerciseMvc
-            .perform(getJson(String.format("/collectionexercises/party/%s", Party_IDNOTFOUND)));
-
-    actions.andExpect(status().isNotFound())
-            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-            .andExpect(handler().methodName("getCollectionExercisesForParty"))
-            .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
 
   }
 
