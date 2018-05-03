@@ -20,7 +20,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
-import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -68,11 +67,8 @@ public class CollectionExerciseEndpoint {
     private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
             "Collection Exercise not found for collection exercise Id";
     private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
-    private static final String RETURN_PARTYNOTFOUND = "Party not found for party Id";
     private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
 
-    @Autowired
-    private PartySvcClient partySvcClient;
 
     @Autowired
     private CollectionExerciseService collectionExerciseService;
@@ -133,38 +129,6 @@ public class CollectionExerciseEndpoint {
             if (collectionExerciseList.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-        }
-
-        return ResponseEntity.ok(collectionExerciseSummaryDTOList);
-    }
-
-    /**
-     * GET to find collection exercises from the collection exercise service for
-     * the given party Id.
-     *
-     * @param id party Id for which to trigger delivery of collection exercises
-     * @return list of collection exercises associated to party
-     * @throws CTPException on resource not found
-     */
-    @RequestMapping(value = "/party/{id}", method = RequestMethod.GET)
-    public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForParty(
-            @PathVariable("id") final UUID id) throws CTPException {
-
-        Boolean partyExists = sampleService.partyExists(id);
-
-        List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
-
-        if (!partyExists) {
-            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_PARTYNOTFOUND, id));
-        }
-
-        log.debug("Entering collection exercise fetch with party Id {}", id);
-        List<CollectionExercise> collectionExerciseList = collectionExerciseService
-                .findCollectionExercisesForParty(id);
-        collectionExerciseSummaryDTOList = collectionExerciseList.stream().map(collex -> getCollectionExerciseDTO(collex)).collect(Collectors.toList());
-        if (collectionExerciseList.isEmpty()) {
-            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(collectionExerciseSummaryDTOList);
