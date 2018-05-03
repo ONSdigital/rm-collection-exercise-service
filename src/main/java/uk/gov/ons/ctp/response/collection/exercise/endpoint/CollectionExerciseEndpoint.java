@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
+import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -41,13 +42,12 @@ import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import java.net.URI;
+import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -572,24 +572,16 @@ public class CollectionExerciseEndpoint {
             final @RequestBody String date)
             throws CTPException {
 
-        Date finalDate = null;
-
         log.info("Adding collection exercise {}, setting date to {}", id, date);
 
         try {
-            LocalDateTime parseDate = LocalDateTime.parse(date,
-                    DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
-            finalDate = Date.from(parseDate.atZone(ZoneId.systemDefault()).toInstant());
-
-        } catch (DateTimeParseException e) {
+            MultiIsoDateFormat dateParser = new MultiIsoDateFormat();
+            eventService.updateEvent(id, tag, dateParser.parse(date));
+            return ResponseEntity.noContent().build();
+        } catch (ParseException e) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", date,
                     e.getLocalizedMessage()));
         }
-
-        Event event = eventService.updateEvent(id, tag, finalDate);
-
-        return ResponseEntity.noContent().build();
-
     }
 
 
