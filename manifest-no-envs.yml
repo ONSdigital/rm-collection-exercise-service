@@ -1,0 +1,10 @@
+applications:
+- name: collectionexercisesvc
+  instances: 1
+  timeout: 180
+  memory: 1024M
+  path: target/collectionexercisesvc.jar
+  services:
+    - rm-pg-db
+    - rm-redis
+    - rm-rabbitmq
