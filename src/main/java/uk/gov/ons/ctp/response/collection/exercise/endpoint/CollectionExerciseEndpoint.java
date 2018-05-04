@@ -24,7 +24,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.ScheduledEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -624,6 +623,12 @@ public class CollectionExerciseEndpoint {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Get's the list of all scheduled events from quartz (i.e. it's not the list of events as stored in the database,
+     * it's the actual jobs scheduled in quartz)
+     * @return the list of events derived from quartz jobs
+     * @throws SchedulerException thrown if issues getting data from quartz
+     */
     @RequestMapping(value = "/events/scheduled", method = RequestMethod.GET)
     public ResponseEntity<List<EventDTO>> getAllScheduledEvents() throws SchedulerException {
         List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);

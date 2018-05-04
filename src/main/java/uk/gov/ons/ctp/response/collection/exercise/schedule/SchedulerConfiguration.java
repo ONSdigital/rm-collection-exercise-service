@@ -19,13 +19,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.ScheduledEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -94,13 +92,83 @@ public class SchedulerConfiguration {
      * Utility method to generate a JobKey from a collection exercise id and an event tag
      *
      * @param collexId a collection exercise id
-     * @param eventTag    an event tag
+     * @param eventTag an event tag
      * @return a String that can be used as a JobKey
      */
     public static String getJobKey(final UUID collexId, final String eventTag) {
         String jobKey = eventTag + ":" + collexId.toString();
 
         return jobKey;
+    }
+
+    /**
+     * Creates a new event DTO from a quartz job
+     *
+     * @param scheduler the scheduler containing the job
+     * @param jobKey    the key for the quartz job
+     * @return a new EventDTO
+     */
+    private static EventDTO getEventDTOFromJobKey(final Scheduler scheduler, final JobKey jobKey) {
+        try {
+            EventDTO result = new EventDTO();
+            JobDetail detail = scheduler.getJobDetail(jobKey);
+            JobDataMap jobDataMap = detail.getJobDataMap();
+
+            String tagStr = jobDataMap.getString(DataKey.tag.name());
+            result.setTag(tagStr);
+
+            String collexIdStr = jobDataMap.getString(DataKey.collectionExercise.name());
+            UUID collexId = UUID.fromString(collexIdStr);
+            result.setCollectionExerciseId(collexId);
+
+            String eventIdStr = jobDataMap.getString(DataKey.id.name());
+            result.setId(UUID.fromString(eventIdStr));
+
+            Trigger trigger = scheduler.getTrigger(TriggerKey.triggerKey(getJobKey(collexId, tagStr)));
+            result.setTimestamp(trigger.getStartTime());
+
+            return result;
+        } catch (SchedulerException e) {
+            log.error("Failed to get event information for job with key {} - {}", jobKey, e.getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Gets EventDTOs for all the quartz jobs associated with a group name
+     * @param scheduler the scheduler containing the group
+     * @param groupName the name of the group in question
+     * @return a list of EventDTOs representing the jobs in the group
+     */
+    private static List<EventDTO> getEventDTOsFromJobGroupName(final Scheduler scheduler, final String groupName) {
+        try {
+            return scheduler
+                    .getJobKeys(GroupMatcher.jobGroupEquals(groupName))
+                    .stream()
+                    .map(jobKey -> getEventDTOFromJobKey(scheduler, jobKey))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (SchedulerException e) {
+            log.error("Failed to get job keys for group {} - {}", groupName, e.getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Returns all the events scheduled in the supplied quartz scheduler
+     *
+     * @param scheduler the scheduler to get the events for
+     * @return a list of EventDTO
+     */
+    public static List<EventDTO> getAllScheduledEvents(final Scheduler scheduler) throws SchedulerException {
+        return scheduler.getJobGroupNames()
+                .stream()
+                .map(name -> getEventDTOsFromJobGroupName(scheduler, name))
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     @PostConstruct
@@ -194,61 +262,5 @@ public class SchedulerConfiguration {
             this.trigger = trigger;
             this.jobDetail = job;
         }
-    }
-
-    private static EventDTO getEventDTOFromJobKey(Scheduler scheduler, JobKey jobKey) {
-        try {
-            EventDTO result = new EventDTO();
-            JobDetail detail = scheduler.getJobDetail(jobKey);
-            JobDataMap jobDataMap = detail.getJobDataMap();
-
-            String tagStr = jobDataMap.getString(DataKey.tag.name());
-            result.setTag(tagStr);
-
-            String collexIdStr = jobDataMap.getString(DataKey.collectionExercise.name());
-            UUID collexId = UUID.fromString(collexIdStr);
-            result.setCollectionExerciseId(collexId);
-
-            String eventIdStr = jobDataMap.getString(DataKey.id.name());
-            result.setId(UUID.fromString(eventIdStr));
-
-            Trigger trigger = scheduler.getTrigger(TriggerKey.triggerKey(getJobKey(collexId, tagStr)));
-            result.setTimestamp(trigger.getStartTime());
-
-            return result;
-        } catch(SchedulerException e){
-            log.error("Failed to get event information for job with key {} - {}", jobKey, e.getMessage());
-
-            return null;
-        }
-    }
-
-    private static List<EventDTO> getEventDTOsFromJobGroupName(Scheduler scheduler, String groupName){
-        try {
-            return scheduler
-                    .getJobKeys(GroupMatcher.jobGroupEquals(groupName))
-                    .stream()
-                    .map(jobKey -> getEventDTOFromJobKey(scheduler, jobKey))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } catch (SchedulerException e) {
-            log.error("Failed to get job keys for group {} - {}", groupName, e.getMessage());
-
-            return null;
-        }
-    }
-
-    /**
-     * Returns all the events scheduled in the supplied quartz scheduler
-     * @param scheduler
-     * @return a list of ScheduledEventDTO
-     */
-    public static List<EventDTO> getAllScheduledEvents(final Scheduler scheduler) throws SchedulerException {
-        return scheduler.getJobGroupNames()
-                .stream()
-                .map(name -> getEventDTOsFromJobGroupName(scheduler, name))
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
     }
 }
