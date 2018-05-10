@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
-import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
+import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -42,13 +42,12 @@ import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import java.net.URI;
+import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -68,11 +67,8 @@ public class CollectionExerciseEndpoint {
     private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
             "Collection Exercise not found for collection exercise Id";
     private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
-    private static final String RETURN_PARTYNOTFOUND = "Party not found for party Id";
     private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
 
-    @Autowired
-    private PartySvcClient partySvcClient;
 
     @Autowired
     private CollectionExerciseService collectionExerciseService;
@@ -133,38 +129,6 @@ public class CollectionExerciseEndpoint {
             if (collectionExerciseList.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-        }
-
-        return ResponseEntity.ok(collectionExerciseSummaryDTOList);
-    }
-
-    /**
-     * GET to find collection exercises from the collection exercise service for
-     * the given party Id.
-     *
-     * @param id party Id for which to trigger delivery of collection exercises
-     * @return list of collection exercises associated to party
-     * @throws CTPException on resource not found
-     */
-    @RequestMapping(value = "/party/{id}", method = RequestMethod.GET)
-    public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForParty(
-            @PathVariable("id") final UUID id) throws CTPException {
-
-        Boolean partyExists = sampleService.partyExists(id);
-
-        List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
-
-        if (!partyExists) {
-            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_PARTYNOTFOUND, id));
-        }
-
-        log.debug("Entering collection exercise fetch with party Id {}", id);
-        List<CollectionExercise> collectionExerciseList = collectionExerciseService
-                .findCollectionExercisesForParty(id);
-        collectionExerciseSummaryDTOList = collectionExerciseList.stream().map(collex -> getCollectionExerciseDTO(collex)).collect(Collectors.toList());
-        if (collectionExerciseList.isEmpty()) {
-            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(collectionExerciseSummaryDTOList);
@@ -608,24 +572,16 @@ public class CollectionExerciseEndpoint {
             final @RequestBody String date)
             throws CTPException {
 
-        Date finalDate = null;
-
         log.info("Adding collection exercise {}, setting date to {}", id, date);
 
         try {
-            LocalDateTime parseDate = LocalDateTime.parse(date,
-                    DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
-            finalDate = Date.from(parseDate.atZone(ZoneId.systemDefault()).toInstant());
-
-        } catch (DateTimeParseException e) {
+            MultiIsoDateFormat dateParser = new MultiIsoDateFormat();
+            eventService.updateEvent(id, tag, dateParser.parse(date));
+            return ResponseEntity.noContent().build();
+        } catch (ParseException e) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", date,
                     e.getLocalizedMessage()));
         }
-
-        Event event = eventService.updateEvent(id, tag, finalDate);
-
-        return ResponseEntity.noContent().build();
-
     }
 
 

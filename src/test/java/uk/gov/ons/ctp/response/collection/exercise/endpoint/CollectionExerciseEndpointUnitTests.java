@@ -17,9 +17,7 @@ import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAd
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
 import java.util.*;
-import java.text.SimpleDateFormat;
 
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
@@ -39,6 +37,7 @@ import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.common.matcher.DateMatcher;
+import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
@@ -59,11 +58,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.verify;
 
 /**
  * Collection Exercise Endpoint Unit tests
@@ -194,48 +188,6 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
         .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
         .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
-
-  }
-
-  /**
-   * Tests if collection exercise found for party.
-   *
-   * @throws Exception exception thrown
-   */
-  @Test
-  public void findCollectionExercisesForParty() throws Exception {
-    when(sampleService.partyExists(PARTY_ID_1)).thenReturn(true);
-    when(collectionExerciseService.findCollectionExercisesForParty(PARTY_ID_1))
-            .thenReturn(collectionExerciseResults);
-
-    ResultActions actions = mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/party/%s", PARTY_ID_1)));
-
-    actions.andExpect(status().isOk())
-            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-            .andExpect(handler().methodName("getCollectionExercisesForParty"))
-            .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[*].id",
-                    containsInAnyOrder(COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
-            .andExpect(jsonPath("$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
-            .andExpect(jsonPath("$[*].scheduledExecutionDateTime",
-                    containsInAnyOrder(new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
-                            new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
-  }
-
-  /**
-   * Tests collection exercise not found.
-   *
-   * @throws Exception exception thrown
-   */
-  @Test
-  public void findCollectionExercisesForPartyNotFound() throws Exception {
-    ResultActions actions = mockCollectionExerciseMvc
-            .perform(getJson(String.format("/collectionexercises/party/%s", Party_IDNOTFOUND)));
-
-    actions.andExpect(status().isNotFound())
-            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-            .andExpect(handler().methodName("getCollectionExercisesForParty"))
-            .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
 
   }
 
@@ -572,11 +524,10 @@ public class CollectionExerciseEndpointUnitTests {
    * @throws Exception exception thrown
    */
 @Test
-public void testUpdateEvent() throws Exception
-{
+public void testUpdateEvent() throws Exception {
 
   UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
-  String newDate = "2017-10-07T00:00:00.000+0000";
+  String newDate = "2017-10-07T00:00:00.000+0100";
   MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
           String.format("/collectionexercises/%s/events/End", uuid.toString()),
           new Object[0])
@@ -588,26 +539,17 @@ public void testUpdateEvent() throws Exception
   actions.andExpect(status().isNoContent());
 
   ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
-  ArgumentCaptor<CollectionExerciseDTO> dtoCaptor = ArgumentCaptor.forClass(CollectionExerciseDTO.class);
   ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);
   ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
 
-  SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  Date parseDate= null;
-  try {
-        parseDate = formatter.parse(newDate);
+  MultiIsoDateFormat dateParser = new MultiIsoDateFormat();
+  Date expectedDate = dateParser.parse(newDate);
 
-      }
-      catch (ParseException e)
-      {
-          throw new ParseException("Date parse exception",e.getErrorOffset());
-      }
-
-      verify(this.eventService).updateEvent(uuidCaptor.capture(), tagCaptor.capture(), dateCaptor.capture());
+  verify(this.eventService).updateEvent(uuidCaptor.capture(), tagCaptor.capture(), dateCaptor.capture());
 
   assertEquals(uuid, uuidCaptor.getValue());
   assertEquals("End", tagCaptor.getValue());
-  assertEquals(parseDate, dateCaptor.getValue());
+  assertEquals(expectedDate, dateCaptor.getValue());
 
 }
 
