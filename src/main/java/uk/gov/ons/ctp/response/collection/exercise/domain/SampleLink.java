@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +17,7 @@ import org.hibernate.annotations.Parameter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sourceforge.cobertura.CoverageIgnore;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 
 @CoverageIgnore
 @Data
@@ -39,4 +42,7 @@ public class SampleLink {
   @Column(name = "samplesummaryid")
   private UUID sampleSummaryId;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "statefk")
+  private LinkSampleSummaryDTO.SampleLinkState state;
 }

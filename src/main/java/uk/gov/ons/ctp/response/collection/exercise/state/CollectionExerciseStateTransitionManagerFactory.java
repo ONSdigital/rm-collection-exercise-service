@@ -10,6 +10,7 @@ import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
@@ -22,6 +23,8 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
   public static final String COLLLECTIONEXERCISE_ENTITY = "CollectionExercise";
 
   public static final String SAMPLEUNITGROUP_ENTITY = "SampleUnitGroup";
+
+  public static final String SAMPLELINK_ENTITY = "SampleLink";
 
   private Map<String, StateTransitionManager<?, ?>> managers;
 
@@ -40,6 +43,9 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
         createSampleUnitGroupStateTransitionManager();
     managers.put(SAMPLEUNITGROUP_ENTITY, sampleUnitGroupStateTransitionManager);
 
+    StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState, LinkSampleSummaryDTO.SampleLinkEvent>
+            sampleLinkStateTransitionManager = createSampleLinkStateTransitionManager();
+    managers.put(SAMPLELINK_ENTITY, sampleLinkStateTransitionManager);
   }
 
   /**
@@ -118,7 +124,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
    * @return StateTransitionManager
    */
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent>
-      createSampleUnitGroupStateTransitionManager() {
+  createSampleUnitGroupStateTransitionManager() {
 
     Map<SampleUnitGroupState, Map<SampleUnitGroupEvent, SampleUnitGroupState>> transitions = new HashMap<>();
 
@@ -134,10 +140,36 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
     transitions.put(SampleUnitGroupState.VALIDATED, transitionForValidated);
 
     StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitTransitionManager =
+            new BasicStateTransitionManager<>(transitions);
+
+    return sampleUnitTransitionManager;
+  }
+
+  /**
+   * Create and initialise the factory with the concrete StateTransitionManager
+   * for the SampleLink entity
+   *
+   * @return StateTransitionManager
+   */
+  private StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState, LinkSampleSummaryDTO.SampleLinkEvent>
+      createSampleLinkStateTransitionManager() {
+
+    Map<LinkSampleSummaryDTO.SampleLinkState,
+        Map<LinkSampleSummaryDTO.SampleLinkEvent, LinkSampleSummaryDTO.SampleLinkState>> transitions = new HashMap<>();
+
+    // INIT
+    Map<LinkSampleSummaryDTO.SampleLinkEvent, LinkSampleSummaryDTO.SampleLinkState> transitionForInit = new HashMap<>();
+    transitionForInit.put(LinkSampleSummaryDTO.SampleLinkEvent.ACTIVATE, LinkSampleSummaryDTO.SampleLinkState.ACTIVE);
+
+    transitions.put(LinkSampleSummaryDTO.SampleLinkState.INIT, transitionForInit);
+
+    StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState,
+            LinkSampleSummaryDTO.SampleLinkEvent> sampleUnitTransitionManager =
         new BasicStateTransitionManager<>(transitions);
 
     return sampleUnitTransitionManager;
   }
+
 
   @SuppressWarnings("unchecked")
   @Override

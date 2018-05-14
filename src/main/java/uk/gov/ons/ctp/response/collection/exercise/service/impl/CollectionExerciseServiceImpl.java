@@ -19,6 +19,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * The implementation of the SampleService
@@ -156,11 +158,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             linkedSummaries.add(createLink(summaryId, collectionExerciseId));
         }
 
-        try {
-            transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
-        } catch (CTPException e) {
-            log.error("Failed to set state for collection exercise {} - {}", collectionExerciseId, e);
-        }
+        // This used to transition the collection exercise to ready for review, but now that only happens if
+        // the sample link is ACTIVE
 
         return linkedSummaries;
     }
@@ -422,17 +421,27 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         }
     }
 
+    private boolean validateSampleLinks(UUID collexId){
+        List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
+        List<SampleLink> nonActiveSampleLinks = sampleLinks
+                .stream()
+                .filter(sl -> LinkSampleSummaryDTO.SampleLinkState.ACTIVE != sl.getState())
+                .collect(Collectors.toList());
+
+        return sampleLinks.size() > 0 && nonActiveSampleLinks.size() == 0;
+    }
+
     @Override
     public void transitionScheduleCollectionExerciseToReadyToReview(final CollectionExercise collectionExercise)
             throws CTPException {
         UUID collexId = collectionExercise.getId();
-        List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
 
         Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE",
                 collectionExercise.getId().toString());
         String searchStringJson = new JSONObject(searchStringMap).toString();
         Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
-        if (sampleLinks.size() > 0 && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0) {
+        boolean sampleLinksValid = validateSampleLinks(collexId);
+        if (sampleLinksValid && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0) {
             transitionCollectionExercise(collectionExercise,
                     CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
         } else {
@@ -452,6 +461,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         SampleLink sampleLink = new SampleLink();
         sampleLink.setSampleSummaryId(sampleSummaryId);
         sampleLink.setCollectionExerciseId(collectionExerciseId);
+        sampleLink.setState(LinkSampleSummaryDTO.SampleLinkState.INIT);
         return sampleLinkRepository.saveAndFlush(sampleLink);
     }
 
