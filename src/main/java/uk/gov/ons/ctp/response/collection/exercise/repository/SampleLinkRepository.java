@@ -20,6 +20,14 @@ public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer>
   void deleteByCollectionExerciseId(UUID id);
 
   /**
+   * delete sample summaries linked to collection exercise
+   *
+   * @param sampleSummaryId the UUID of the sample to delete link for
+   * @param collectionExerciseId the UUID of the collection exercise to delete link for
+   */
+  void deleteBySampleSummaryIdAndCollectionExerciseId(UUID sampleSummaryId, UUID collectionExerciseId);
+
+  /**
    * find sample summaries linked to collection exercise
    *
    * @param id UUID for collection exercise

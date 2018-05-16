@@ -166,6 +166,25 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
 
     /**
+     * Delete SampleSummary link
+     * @param sampleSummaryId a sample summary uuid
+     * @param collectionExerciseId a collection exercise uuid
+     */
+    @Override
+    @Transactional
+    public void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId){
+        sampleLinkRepository.deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
+
+        try {
+            transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
+        } catch (CTPException e) {
+            log.error("Failed to transition state of collection exercise {} after unlinking sample summary {} - {}",
+                    collectionExerciseId, sampleSummaryId, e);
+        }
+
+    }
+
+    /**
      * Sets the values in a supplied collection exercise from a supplied DTO.
      * WARNING: Mutates collection exercise
      *
