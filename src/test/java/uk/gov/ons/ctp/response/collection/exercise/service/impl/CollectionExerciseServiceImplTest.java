@@ -21,7 +21,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -425,7 +426,7 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     SampleLink testSampleLink = new SampleLink();
-    testSampleLink.setState(LinkSampleSummaryDTO.SampleLinkState.ACTIVE);
+    testSampleLink.setState(SampleLinkState.ACTIVE);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(testSampleLink));
     String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
     given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(1);

@@ -20,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -425,7 +426,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
         List<SampleLink> nonActiveSampleLinks = sampleLinks
                 .stream()
-                .filter(sl -> LinkSampleSummaryDTO.SampleLinkState.ACTIVE != sl.getState())
+                .filter(sl -> SampleLinkState.ACTIVE != sl.getState())
                 .collect(Collectors.toList());
 
         return sampleLinks.size() > 0 && nonActiveSampleLinks.size() == 0;
@@ -461,7 +462,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         SampleLink sampleLink = new SampleLink();
         sampleLink.setSampleSummaryId(sampleSummaryId);
         sampleLink.setCollectionExerciseId(collectionExerciseId);
-        sampleLink.setState(LinkSampleSummaryDTO.SampleLinkState.INIT);
+        sampleLink.setState(SampleLinkState.INIT);
         return sampleLinkRepository.saveAndFlush(sampleLink);
     }
 

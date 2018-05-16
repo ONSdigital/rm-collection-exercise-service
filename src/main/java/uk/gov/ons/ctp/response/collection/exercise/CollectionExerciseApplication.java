@@ -28,6 +28,8 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.impl.EventValidator;
@@ -200,7 +202,7 @@ public class CollectionExerciseApplication {
    */
   @Bean
   @Qualifier("sampleLink")
-  public StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState, LinkSampleSummaryDTO.SampleLinkEvent>
+  public StateTransitionManager<SampleLinkState, SampleLinkEvent>
   sampleLinkStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
         .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLELINK_ENTITY);

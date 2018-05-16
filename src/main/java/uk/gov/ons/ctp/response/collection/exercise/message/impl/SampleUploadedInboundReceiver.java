@@ -8,7 +8,8 @@ import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
@@ -30,14 +31,14 @@ public class SampleUploadedInboundReceiver {
 
     @Autowired
     @Qualifier("sampleLink")
-    private StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState, LinkSampleSummaryDTO.SampleLinkEvent>
+    private StateTransitionManager<SampleLinkState, SampleLinkEvent>
             sampleLinkState;
 
     private void activateSampleLink(SampleLink sampleLink){
         try {
-            LinkSampleSummaryDTO.SampleLinkState newState =
+            SampleLinkState newState =
                     this.sampleLinkState.transition(sampleLink.getState(),
-                            LinkSampleSummaryDTO.SampleLinkEvent.ACTIVATE);
+                            SampleLinkEvent.ACTIVATE);
 
             sampleLink.setState(newState);
 

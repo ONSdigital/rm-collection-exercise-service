@@ -17,7 +17,7 @@ import org.hibernate.annotations.Parameter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sourceforge.cobertura.CoverageIgnore;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 
 @CoverageIgnore
 @Data
@@ -44,5 +44,5 @@ public class SampleLink {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "statefk")
-  private LinkSampleSummaryDTO.SampleLinkState state;
+  private SampleLinkState state;
 }

@@ -11,6 +11,8 @@ import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
@@ -43,7 +45,7 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
         createSampleUnitGroupStateTransitionManager();
     managers.put(SAMPLEUNITGROUP_ENTITY, sampleUnitGroupStateTransitionManager);
 
-    StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState, LinkSampleSummaryDTO.SampleLinkEvent>
+    StateTransitionManager<SampleLinkState, SampleLinkEvent>
             sampleLinkStateTransitionManager = createSampleLinkStateTransitionManager();
     managers.put(SAMPLELINK_ENTITY, sampleLinkStateTransitionManager);
   }
@@ -151,25 +153,24 @@ public class CollectionExerciseStateTransitionManagerFactory implements StateTra
    *
    * @return StateTransitionManager
    */
-  private StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState, LinkSampleSummaryDTO.SampleLinkEvent>
+  private StateTransitionManager<SampleLinkState, SampleLinkEvent>
       createSampleLinkStateTransitionManager() {
 
-    Map<LinkSampleSummaryDTO.SampleLinkState,
-        Map<LinkSampleSummaryDTO.SampleLinkEvent, LinkSampleSummaryDTO.SampleLinkState>> transitions = new HashMap<>();
+    Map<SampleLinkState,
+        Map<SampleLinkEvent, SampleLinkState>> transitions = new HashMap<>();
 
     // INIT
-    Map<LinkSampleSummaryDTO.SampleLinkEvent, LinkSampleSummaryDTO.SampleLinkState> transitionForInit = new HashMap<>();
-    transitionForInit.put(LinkSampleSummaryDTO.SampleLinkEvent.ACTIVATE, LinkSampleSummaryDTO.SampleLinkState.ACTIVE);
+    Map<SampleLinkEvent, SampleLinkState> transitionForInit = new HashMap<>();
+    transitionForInit.put(SampleLinkEvent.ACTIVATE, SampleLinkState.ACTIVE);
 
-    transitions.put(LinkSampleSummaryDTO.SampleLinkState.INIT, transitionForInit);
+    transitions.put(SampleLinkState.INIT, transitionForInit);
 
-    StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState,
-            LinkSampleSummaryDTO.SampleLinkEvent> sampleUnitTransitionManager =
+    StateTransitionManager<SampleLinkState,
+            SampleLinkEvent> sampleUnitTransitionManager =
         new BasicStateTransitionManager<>(transitions);
 
     return sampleUnitTransitionManager;
   }
-
 
   @SuppressWarnings("unchecked")
   @Override
