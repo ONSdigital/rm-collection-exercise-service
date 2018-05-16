@@ -442,7 +442,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         String searchStringJson = new JSONObject(searchStringMap).toString();
         Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
         boolean sampleLinksValid = validateSampleLinks(collexId);
-        if (sampleLinksValid && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0) {
+        boolean shouldTransition = sampleLinksValid && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0;
+        log.info("READY_FOR_REVIEW TRANSITION CHECK: sampleLinksValid: {}, numberOfCollectionInstruments: {}," +
+                " shouldTransition: {}", sampleLinksValid, numberOfCollectionInstruments, shouldTransition);
+        if (shouldTransition) {
             transitionCollectionExercise(collectionExercise,
                     CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
         } else {
