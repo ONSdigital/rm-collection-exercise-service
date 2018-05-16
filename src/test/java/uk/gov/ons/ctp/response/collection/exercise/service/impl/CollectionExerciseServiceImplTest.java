@@ -37,9 +37,7 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * UnitTests for CollectionExerciseServiceImpl
@@ -69,6 +67,7 @@ public class CollectionExerciseServiceImplTest {
           .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
 
   @InjectMocks
+  @Spy
   private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
 
   /**
@@ -485,6 +484,23 @@ public class CollectionExerciseServiceImplTest {
     // Then
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
     verify(collexRepo, times(0)).saveAndFlush(exercise);
+  }
+
+  @Test
+  public void testRemoveSampleSummaryLink() throws Exception {
+    // Given
+    final UUID COLLECTIONEXERCISE_ID1 = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    final UUID SAMPLE_SUMMARY_ID1 = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
+    doNothing().when(collectionExerciseServiceImpl).transitionScheduleCollectionExerciseToReadyToReview(COLLECTIONEXERCISE_ID1);
+
+    // When
+    collectionExerciseServiceImpl.removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
+
+    // Then
+    verify(sampleLinkRepository, times(1))
+            .deleteBySampleSummaryIdAndCollectionExerciseId(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
+    verify(collectionExerciseServiceImpl, times(1))
+            .transitionScheduleCollectionExerciseToReadyToReview(COLLECTIONEXERCISE_ID1);
   }
 
 }

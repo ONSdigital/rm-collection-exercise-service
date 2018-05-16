@@ -196,5 +196,5 @@ public interface CollectionExerciseService {
    * @param sampleSummaryId a sample summary uuid
    * @param collectionExerciseId a collection exercise uuid
    */
-  void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId);
+  void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId) throws CTPException;
 }

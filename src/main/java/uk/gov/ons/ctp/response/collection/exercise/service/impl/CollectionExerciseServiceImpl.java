@@ -172,15 +172,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
     @Override
     @Transactional
-    public void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId){
+    public void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId) throws CTPException {
         sampleLinkRepository.deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
 
-        try {
-            transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
-        } catch (CTPException e) {
-            log.error("Failed to transition state of collection exercise {} after unlinking sample summary {} - {}",
-                    collectionExerciseId, sampleSummaryId, e);
-        }
+        transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
 
     }
 
