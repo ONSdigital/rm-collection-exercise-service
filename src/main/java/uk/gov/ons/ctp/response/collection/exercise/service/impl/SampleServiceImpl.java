@@ -208,12 +208,12 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public List<SampleLink> getSampleLinksForSummary(UUID sampleSummaryId) {
+    public List<SampleLink> getSampleLinksForSummary(final UUID sampleSummaryId) {
         return this.sampleLinkRepository.findBySampleSummaryId(sampleSummaryId);
     }
 
     @Override
-    public SampleLink saveSampleLink(SampleLink sampleLink) {
+    public SampleLink saveSampleLink(final SampleLink sampleLink) {
         return this.sampleLinkRepository.saveAndFlush(sampleLink);
     }
 }

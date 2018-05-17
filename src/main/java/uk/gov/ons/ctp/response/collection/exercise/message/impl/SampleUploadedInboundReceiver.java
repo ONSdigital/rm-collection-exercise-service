@@ -8,8 +8,8 @@ import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
@@ -34,7 +34,11 @@ public class SampleUploadedInboundReceiver {
     private StateTransitionManager<SampleLinkState, SampleLinkEvent>
             sampleLinkState;
 
-    private void activateSampleLink(SampleLink sampleLink){
+    /**
+     * Method to set the state of a SampleLink to ACTIVATED
+     * @param sampleLink the SampleLink to change
+     */
+    private void activateSampleLink(final SampleLink sampleLink) {
         try {
             SampleLinkState newState =
                     this.sampleLinkState.transition(sampleLink.getState(),
@@ -57,10 +61,10 @@ public class SampleUploadedInboundReceiver {
      * @param sampleSummary the sample summary for which the upload has completed
      */
     @ServiceActivator(inputChannel = "sampleSummaryInMessage")
-    public void sampleUploaded(final SampleSummaryDTO sampleSummary){
-            List<SampleLink> links = this.sampleService.getSampleLinksForSummary(sampleSummary.getId());
+    public void sampleUploaded(final SampleSummaryDTO sampleSummary) {
+        List<SampleLink> links = this.sampleService.getSampleLinksForSummary(sampleSummary.getId());
 
-            links.stream().forEach(l -> activateSampleLink(l));
+        links.stream().forEach(l -> activateSampleLink(l));
     }
 }
 

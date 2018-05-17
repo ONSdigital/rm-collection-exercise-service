@@ -19,7 +19,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
@@ -422,7 +421,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         }
     }
 
-    private boolean validateSampleLinks(UUID collexId){
+    /**
+     * Method to validate the sample links for a collection exercise by ensuring that all associated SampleLinks are
+     * in the ACTIVE state
+     * @param collexId the collection exercise to validate
+     * @return true if the associated sample links are valid, false otherwise
+     */
+    private boolean validateSampleLinks(final UUID collexId) {
         List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
         List<SampleLink> nonActiveSampleLinks = sampleLinks
                 .stream()
@@ -442,9 +447,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         String searchStringJson = new JSONObject(searchStringMap).toString();
         Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
         boolean sampleLinksValid = validateSampleLinks(collexId);
-        boolean shouldTransition = sampleLinksValid && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0;
-        log.info("READY_FOR_REVIEW TRANSITION CHECK: sampleLinksValid: {}, numberOfCollectionInstruments: {}," +
-                " shouldTransition: {}", sampleLinksValid, numberOfCollectionInstruments, shouldTransition);
+        boolean shouldTransition =sampleLinksValid
+                && numberOfCollectionInstruments != null
+                && numberOfCollectionInstruments > 0;
+        log.info("READY_FOR_REVIEW TRANSITION CHECK: sampleLinksValid: {}, numberOfCollectionInstruments: {},"
+                + " shouldTransition: {}", sampleLinksValid, numberOfCollectionInstruments, shouldTransition);
         if (shouldTransition) {
             transitionCollectionExercise(collectionExercise,
                     CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
