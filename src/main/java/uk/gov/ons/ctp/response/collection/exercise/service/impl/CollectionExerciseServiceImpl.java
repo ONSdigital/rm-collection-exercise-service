@@ -447,7 +447,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         String searchStringJson = new JSONObject(searchStringMap).toString();
         Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
         boolean sampleLinksValid = validateSampleLinks(collexId);
-        boolean shouldTransition =sampleLinksValid
+        boolean shouldTransition = sampleLinksValid
                 && numberOfCollectionInstruments != null
                 && numberOfCollectionInstruments > 0;
         log.info("READY_FOR_REVIEW TRANSITION CHECK: sampleLinksValid: {}, numberOfCollectionInstruments: {},"
