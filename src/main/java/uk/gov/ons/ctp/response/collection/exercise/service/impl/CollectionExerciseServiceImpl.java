@@ -450,7 +450,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         boolean shouldTransition = sampleLinksValid
                 && numberOfCollectionInstruments != null
                 && numberOfCollectionInstruments > 0;
-        log.info("READY_FOR_REVIEW TRANSITION CHECK: sampleLinksValid: {}, numberOfCollectionInstruments: {},"
+        log.info("ready_for_review transition check: sampleLinksValid: {}, numberOfCollectionInstruments: {},"
                 + " shouldTransition: {}", sampleLinksValid, numberOfCollectionInstruments, shouldTransition);
         if (shouldTransition) {
             transitionCollectionExercise(collectionExercise,
