@@ -173,7 +173,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
     @Override
     @Transactional
-    public void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId) throws CTPException {
+    public void removeSampleSummaryLink(final UUID sampleSummaryId, final UUID collectionExerciseId)
+            throws CTPException {
         sampleLinkRepository.deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
 
         transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);

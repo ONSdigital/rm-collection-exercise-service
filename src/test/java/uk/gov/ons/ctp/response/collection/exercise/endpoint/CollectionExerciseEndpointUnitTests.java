@@ -337,14 +337,15 @@ public class CollectionExerciseEndpointUnitTests {
             .thenReturn(null);
 
     ResultActions actions = mockCollectionExerciseMvc
-            .perform(
-                    put(String.format("/collectionexercises/unlink/%s/sample/%s", COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
+            .perform(put(String.format("/collectionexercises/unlink/%s/sample/%s",
+                    COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
 
     actions.andExpect(status().isNotFound())
             .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
             .andExpect(handler().methodName("unlinkSampleSummary"));
 
-    verify(collectionExerciseService, times(0)).removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
+    verify(collectionExerciseService, times(0))
+            .removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
   }
 
   /**
