@@ -316,8 +316,8 @@ public class CollectionExerciseEndpointUnitTests {
             .thenReturn(collectionExerciseResults.get(0));
 
     ResultActions actions = mockCollectionExerciseMvc
-            .perform(
-                    put(String.format("/collectionexercises/unlink/%s/sample/%s", COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
+            .perform(put(String.format("/collectionexercises/unlink/%s/sample/%s",
+                    COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
 
     actions.andExpect(status().isOk())
             .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))

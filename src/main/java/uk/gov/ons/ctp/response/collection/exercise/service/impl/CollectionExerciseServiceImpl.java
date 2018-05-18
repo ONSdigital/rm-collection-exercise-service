@@ -169,6 +169,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * Delete SampleSummary link
      * @param sampleSummaryId a sample summary uuid
      * @param collectionExerciseId a collection exercise uuid
+     * @throws CTPException thrown if transition fails
      */
     @Override
     @Transactional
