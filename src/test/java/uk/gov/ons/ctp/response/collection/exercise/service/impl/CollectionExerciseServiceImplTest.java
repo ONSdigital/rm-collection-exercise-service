@@ -37,7 +37,6 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doNothing;
@@ -496,7 +495,7 @@ public class CollectionExerciseServiceImplTest {
     // Given
     final UUID collectionExerciseId = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
     final UUID sampleSummaryId = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
-    final List<SampleLink> emptySampleLinks= new ArrayList<>();
+    final List<SampleLink> emptySampleLinks = new ArrayList<>();
 
     doNothing().when(collectionExerciseServiceImpl)
             .transitionCollectionExercise(collectionExerciseId, CI_SAMPLE_DELETED);
