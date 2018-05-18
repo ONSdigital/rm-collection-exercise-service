@@ -9,6 +9,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.common.MvcHelper.getJson;
@@ -316,10 +317,10 @@ public class CollectionExerciseEndpointUnitTests {
             .thenReturn(collectionExerciseResults.get(0));
 
     ResultActions actions = mockCollectionExerciseMvc
-            .perform(put(String.format("/collectionexercises/unlink/%s/sample/%s",
+            .perform(delete(String.format("/collectionexercises/unlink/%s/sample/%s",
                     COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
 
-    actions.andExpect(status().isOk())
+    actions.andExpect(status().isNoContent())
             .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
             .andExpect(handler().methodName("unlinkSampleSummary"));
 
@@ -337,7 +338,7 @@ public class CollectionExerciseEndpointUnitTests {
             .thenReturn(null);
 
     ResultActions actions = mockCollectionExerciseMvc
-            .perform(put(String.format("/collectionexercises/unlink/%s/sample/%s",
+            .perform(delete(String.format("/collectionexercises/unlink/%s/sample/%s",
                     COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
 
     actions.andExpect(status().isNotFound())

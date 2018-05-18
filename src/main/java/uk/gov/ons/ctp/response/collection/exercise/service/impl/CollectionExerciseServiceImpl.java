@@ -177,8 +177,12 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             throws CTPException {
         sampleLinkRepository.deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
 
-        transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
+        List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId);
 
+        if (sampleLinks.size() == 0) {
+            transitionCollectionExercise(collectionExerciseId,
+                    CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
+        }
     }
 
     /**

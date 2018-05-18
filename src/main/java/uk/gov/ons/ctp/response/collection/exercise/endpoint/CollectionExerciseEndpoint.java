@@ -465,11 +465,11 @@ public class CollectionExerciseEndpoint {
      *
      * @param collectionExerciseId the collection exercise to unlink from sample
      * @param sampleSummaryId the collection exercise to unlink from collection exercise
-     * @return successful unlink message
+     * @return noContent response
      * @throws CTPException            on resource not found
      */
-    @RequestMapping(value = "/unlink/{collectionExerciseId}/sample/{sampleSummaryId}", method = RequestMethod.PUT)
-    public ResponseEntity<String> unlinkSampleSummary(
+    @RequestMapping(value = "/unlink/{collectionExerciseId}/sample/{sampleSummaryId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> unlinkSampleSummary(
             @PathVariable("collectionExerciseId") final UUID collectionExerciseId,
             @PathVariable("sampleSummaryId") final UUID sampleSummaryId) throws CTPException {
         log.debug("Entering unlinkSampleSummary with collectionExerciseID {} and sampleSummaryId {}",
@@ -483,9 +483,7 @@ public class CollectionExerciseEndpoint {
 
         collectionExerciseService.removeSampleSummaryLink(sampleSummaryId, collectionExerciseId);
 
-        String responseMessage = "Successfully unlinked collection exercise "
-                + collectionExerciseId + " and sample " + sampleSummaryId;
-        return ResponseEntity.ok(responseMessage);
+        return ResponseEntity.noContent().build();
 
     }
 

@@ -417,8 +417,8 @@ The endpoint will also delete any entries currently in the samplelink table for 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
 ## Unlink Sample Summary To Collection Exercise
-* `PUT /collectionexercises/unlink/{collection_exercise_id}/sample/{sample_summary_id}` will unlink the Sample Summary specified from the collection exercise with the given id.
-* Returns 200 OK if successfully unlinked
+* `DELETE /collectionexercises/unlink/{collection_exercise_id}/sample/{sample_summary_id}` will unlink the Sample Summary specified from the collection exercise with the given id.
+* Returns 204 noContent if successfully unlinked
 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
