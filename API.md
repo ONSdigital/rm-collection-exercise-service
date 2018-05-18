@@ -442,7 +442,20 @@ This part of the page  documents the Collection Exercise event service API endpo
 
 ## Service Information
 
-## Update Collection Event Exercise
+## Create Collection Exercise Event
+* `POST /collectionexercises/{collection_exercise_id}/events` will create a new collection exercise event timestamp with the given id.
+* Returns 201 OK if the resource is updated
+
+### Example Request Body
+
+```
+    {
+        "tag": "exercise_end_2",
+        "timestamp": "2018-04-01T00:00:00.000Z"
+    }
+```
+
+## Update Collection Exercise Event
 * `PUT /collectionexercises/{collection_exercise_id}/events/{event-tag}` will update the collection exercise event timestamp with the given id.
 * Returns 200 OK if the resource is updated
 
