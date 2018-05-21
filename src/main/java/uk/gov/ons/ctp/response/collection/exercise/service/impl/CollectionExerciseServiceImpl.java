@@ -468,7 +468,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collectionExerciseId the Id of the Sample summary to be linked
      * @return sampleLink stored in database
      */
-    private SampleLink createLink(final UUID sampleSummaryId, final UUID collectionExerciseId) {
+    SampleLink createLink(final UUID sampleSummaryId, final UUID collectionExerciseId) {
         SampleLink sampleLink = new SampleLink();
         sampleLink.setSampleSummaryId(sampleSummaryId);
         sampleLink.setCollectionExerciseId(collectionExerciseId);
