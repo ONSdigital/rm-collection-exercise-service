@@ -27,6 +27,8 @@ import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.impl.EventValidator;
@@ -189,7 +191,20 @@ public class CollectionExerciseApplication {
   @Qualifier("sampleUnitGroup")
   public StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory
-        .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
+            .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
+  }
+
+  /**
+   * Bean to allow controlled state transitions of SampleLinks.
+   *
+   * @return the state transition manager specifically for SampleLinks
+   */
+  @Bean
+  @Qualifier("sampleLink")
+  public StateTransitionManager<SampleLinkState, SampleLinkEvent>
+  sampleLinkStateTransitionManager() {
+    return collectionExerciseStateTransitionManagerFactory
+        .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLELINK_ENTITY);
   }
 
   /**
