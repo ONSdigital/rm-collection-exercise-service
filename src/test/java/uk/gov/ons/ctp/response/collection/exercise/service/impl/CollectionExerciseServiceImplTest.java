@@ -37,6 +37,7 @@ import java.util.UUID;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
@@ -503,6 +504,8 @@ public class CollectionExerciseServiceImplTest {
   public void testCreateLink(){
       UUID sampleSummaryUuid = UUID.randomUUID(),
            collexUuid = UUID.randomUUID();
+
+      when(this.sampleLinkRepository.saveAndFlush(any(SampleLink.class))).then(returnsFirstArg());
 
       SampleLink sampleLink = this.collectionExerciseServiceImpl.createLink(sampleSummaryUuid, collexUuid);
 

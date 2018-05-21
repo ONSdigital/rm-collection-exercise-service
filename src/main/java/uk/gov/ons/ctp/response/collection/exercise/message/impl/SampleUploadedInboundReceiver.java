@@ -60,7 +60,7 @@ public class SampleUploadedInboundReceiver {
      *
      * @param sampleSummary the sample summary for which the upload has completed
      */
-    @ServiceActivator(inputChannel = "sampleSummaryInMessage")
+    @ServiceActivator(inputChannel = "sampleUploadedSampleSummaryInMessage")
     public void sampleUploaded(final SampleSummaryDTO sampleSummary) {
         List<SampleLink> links = this.sampleService.getSampleLinksForSummary(sampleSummary.getId());
 

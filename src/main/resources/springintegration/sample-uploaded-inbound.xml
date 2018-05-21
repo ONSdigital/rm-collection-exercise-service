@@ -18,7 +18,7 @@
     <!-- JSON input channel bound to incoming AMQP message -->
     <int:channel id="sampleSummaryInJson" />
     <!-- Channel containing Java object parsed from incoming JSON -->
-    <int:channel id="sampleSummaryInMessage" />
+    <int:channel id="sampleUploadedSampleSummaryInMessage" />
 
     <bean id="simpleMessageConverter"
           class="org.springframework.amqp.support.converter.SimpleMessageConverter" />
@@ -31,7 +31,7 @@
 
     <int:logging-channel-adapter id="logger" level="ERROR"/>
 
-    <int:json-to-object-transformer input-channel="sampleSummaryInJson" output-channel="sampleSummaryInMessage"
+    <int:json-to-object-transformer input-channel="sampleSummaryInJson" output-channel="sampleUploadedSampleSummaryInMessage"
                                     type="uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO"/>
 
     <rabbit:queue name="collex.sample.uploaded.inbound" durable="false"/>
