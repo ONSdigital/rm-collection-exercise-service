@@ -307,12 +307,12 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   /**
-   * Tests put request to unlink sample.
+   * Tests request to unlink sample.
    *
    * @throws Exception exception thrown
    */
   @Test
-  public void testUnlinkSampleUnitsPut() throws Exception {
+  public void testUnlinkSampleUnits() throws Exception {
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
             .thenReturn(collectionExerciseResults.get(0));
 
@@ -328,12 +328,12 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   /**
-   * Tests put request to unlink sample with unknown collection exercise
+   * Tests request to unlink sample with unknown collection exercise
    *
    * @throws Exception exception thrown
    */
   @Test
-  public void testUnlinkSampleUnitsPutNotFound() throws Exception {
+  public void testUnlinkSampleUnitsNotFound() throws Exception {
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
             .thenReturn(null);
 

@@ -461,7 +461,7 @@ public class CollectionExerciseEndpoint {
     }
 
     /**
-     * PUT request for unlinking sample summary from a collection exercise
+     * for unlinking sample summary from a collection exercise
      *
      * @param collectionExerciseId the collection exercise to unlink from sample
      * @param sampleSummaryId the collection exercise to unlink from collection exercise
