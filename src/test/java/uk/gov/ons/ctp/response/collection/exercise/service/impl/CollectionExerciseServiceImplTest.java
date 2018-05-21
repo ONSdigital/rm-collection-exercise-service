@@ -37,9 +37,11 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED;
 
 /**
  * UnitTests for CollectionExerciseServiceImpl
@@ -69,6 +71,7 @@ public class CollectionExerciseServiceImplTest {
           .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
 
   @InjectMocks
+  @Spy
   private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
 
   /**
@@ -485,6 +488,27 @@ public class CollectionExerciseServiceImplTest {
     // Then
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW);
     verify(collexRepo, times(0)).saveAndFlush(exercise);
+  }
+
+  @Test
+  public void testRemoveSampleSummaryLink() throws Exception {
+    // Given
+    final UUID collectionExerciseId = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    final UUID sampleSummaryId = UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
+    final List<SampleLink> emptySampleLinks = new ArrayList<>();
+
+    doNothing().when(collectionExerciseServiceImpl)
+            .transitionCollectionExercise(collectionExerciseId, CI_SAMPLE_DELETED);
+    when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId)).thenReturn(emptySampleLinks);
+
+    // When
+    collectionExerciseServiceImpl.removeSampleSummaryLink(sampleSummaryId, collectionExerciseId);
+
+    // Then
+    verify(sampleLinkRepository, times(1))
+            .deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
+    verify(collectionExerciseServiceImpl, times(1))
+            .transitionCollectionExercise(collectionExerciseId, CI_SAMPLE_DELETED);
   }
 
 }
