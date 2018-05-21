@@ -6,8 +6,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.common.MvcHelper.getJson;
 import static uk.gov.ons.ctp.common.MvcHelper.postJson;
@@ -304,6 +307,49 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   /**
+   * Tests request to unlink sample.
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void testUnlinkSampleUnits() throws Exception {
+    when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
+            .thenReturn(collectionExerciseResults.get(0));
+
+    ResultActions actions = mockCollectionExerciseMvc
+            .perform(delete(String.format("/collectionexercises/unlink/%s/sample/%s",
+                    COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
+
+    actions.andExpect(status().isNoContent())
+            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+            .andExpect(handler().methodName("unlinkSampleSummary"));
+
+    verify(collectionExerciseService, times(1)).removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
+  }
+
+  /**
+   * Tests request to unlink sample with unknown collection exercise
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void testUnlinkSampleUnitsNotFound() throws Exception {
+    when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
+            .thenReturn(null);
+
+    ResultActions actions = mockCollectionExerciseMvc
+            .perform(delete(String.format("/collectionexercises/unlink/%s/sample/%s",
+                    COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
+
+    actions.andExpect(status().isNotFound())
+            .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+            .andExpect(handler().methodName("unlinkSampleSummary"));
+
+    verify(collectionExerciseService, times(0))
+            .removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
+  }
+
+  /**
    * Tests to get a list of UUIDs linked to a collection exercise
    *
    * @throws Exception exception thrown
@@ -401,7 +447,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testPatchCollectionExerciseExerciseRef() throws Exception {
     UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
     String newExerciseRef = "299909";
-    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+    MockHttpServletRequestBuilder builder = put(
             String.format("/collectionexercises/%s/exerciseRef", uuid.toString()),
             new Object[0])
             .content(newExerciseRef)
@@ -427,7 +473,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testPatchCollectionExerciseName() throws Exception {
     UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
     String newName = "New Collex Name";
-    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+    MockHttpServletRequestBuilder builder = put(
             String.format("/collectionexercises/%s/name", uuid.toString()),
             new Object[0])
             .content(newName)
@@ -454,7 +500,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testPatchCollectionExerciseUserDescription() throws Exception {
     UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
     String newUserDesc = "Collection exercise description";
-    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+    MockHttpServletRequestBuilder builder = put(
             String.format("/collectionexercises/%s/userDescription", uuid.toString()),
             new Object[0])
             .content(newUserDesc)
@@ -480,7 +526,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testPatchCollectionExerciseSurveyId() throws Exception {
     UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
     String newSurveyId = "4cacb120-3bed-430f-90fd-dddc6256f856";
-    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+    MockHttpServletRequestBuilder builder = put(
                 String.format("/collectionexercises/%s/surveyId", uuid.toString()),
                 new Object[0])
             .content(newSurveyId)
@@ -528,7 +574,7 @@ public void testUpdateEvent() throws Exception {
 
   UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
   String newDate = "2017-10-07T00:00:00.000+0100";
-  MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(
+  MockHttpServletRequestBuilder builder = put(
           String.format("/collectionexercises/%s/events/End", uuid.toString()),
           new Object[0])
           .content(newDate)
