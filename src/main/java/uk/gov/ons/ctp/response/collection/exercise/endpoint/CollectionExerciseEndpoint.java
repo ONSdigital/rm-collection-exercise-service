@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -460,6 +461,16 @@ public class CollectionExerciseEndpoint {
 
     }
 
+    @RequestMapping(value = "/link/{collectionExerciseId}", method = RequestMethod.GET, produces = "application/vnd.ons.sdc.samplelink.v1+json")
+    public ResponseEntity<List<SampleLinkDTO>> getSampleLinks(
+            @PathVariable("collectionExerciseId") final UUID collectionExerciseId){
+        log.debug("Getting linked sample summaries for {}", collectionExerciseId);
+        List<SampleLink> sampleLinks = this.collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
+        List<SampleLinkDTO> sampleLinkDtoList = mapperFacade.mapAsList(sampleLinks, SampleLinkDTO.class);
+
+        return ResponseEntity.ok(sampleLinkDtoList);
+    }
+
     /**
      * for unlinking sample summary from a collection exercise
      *
@@ -488,7 +499,7 @@ public class CollectionExerciseEndpoint {
     }
 
     /**
-     * return a list of UUIDs for the sample summaries linked to a specific
+     * return a list of UUIDs for the sample summaries lcollectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);inked to a specific
      * collection exercise
      *
      * @param collectionExerciseId the id of the collection exercise to get linked
