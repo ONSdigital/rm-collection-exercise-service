@@ -35,4 +35,11 @@ public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer>
    */
   List<SampleLink> findByCollectionExerciseId(UUID id);
 
+  /**
+   * Find sample link for a sample summary
+   *
+   * @param sampleSummaryId the id of the sample summary to find the links for
+   * @return a list of SampleLinks with the given sample summary
+   */
+  List<SampleLink> findBySampleSummaryId(UUID sampleSummaryId);
 }

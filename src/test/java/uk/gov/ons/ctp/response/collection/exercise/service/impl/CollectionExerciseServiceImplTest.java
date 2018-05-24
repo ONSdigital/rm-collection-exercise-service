@@ -21,6 +21,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -36,12 +37,14 @@ import java.util.UUID;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED;
+import static org.mockito.Matchers.any;
 
 /**
  * UnitTests for CollectionExerciseServiceImpl
@@ -426,8 +429,12 @@ public class CollectionExerciseServiceImplTest {
     // Given
     CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
-    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
-    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    SampleLink testSampleLink = new SampleLink();
+    testSampleLink.setState(SampleLinkState.ACTIVE);
+    given(sampleLinkRepository.findByCollectionExerciseId(
+            exercise.getId())).willReturn(Collections.singletonList(testSampleLink));
+    String searchStringJson = new JSONObject(
+            Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
     given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(1);
 
     // When
@@ -444,7 +451,8 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.emptyList());
-    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    String searchStringJson = new JSONObject(
+            Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
     given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(1);
 
     // When
@@ -460,8 +468,10 @@ public class CollectionExerciseServiceImplTest {
     // Given
     CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
-    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
-    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(
+            Collections.singletonList(new SampleLink()));
+    String searchStringJson = new JSONObject(
+            Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
     given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(0);
 
     // When
@@ -478,8 +488,10 @@ public class CollectionExerciseServiceImplTest {
     // Given
     CollectionExercise exercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
-    given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
-    String searchStringJson = new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
+    given(sampleLinkRepository
+            .findByCollectionExerciseId(exercise.getId())).willReturn(Collections.singletonList(new SampleLink()));
+    String searchStringJson = new JSONObject(
+            Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString())).toString();
     given(collectionInstrument.countCollectionInstruments(searchStringJson)).willReturn(null);
 
     // When
@@ -491,6 +503,21 @@ public class CollectionExerciseServiceImplTest {
   }
 
   @Test
+  public void testCreateLink(){
+      UUID sampleSummaryUuid = UUID.randomUUID(),
+           collexUuid = UUID.randomUUID();
+
+      when(this.sampleLinkRepository.saveAndFlush(any(SampleLink.class))).then(returnsFirstArg());
+
+      SampleLink sampleLink = this.collectionExerciseServiceImpl.createLink(sampleSummaryUuid, collexUuid);
+
+      assertEquals(sampleSummaryUuid, sampleLink.getSampleSummaryId());
+      assertEquals(collexUuid, sampleLink.getCollectionExerciseId());
+      assertEquals(SampleLinkState.INIT, sampleLink.getState());
+
+      verify(sampleLinkRepository, times(1)).saveAndFlush(any());
+  }
+
   public void testRemoveSampleSummaryLink() throws Exception {
     // Given
     final UUID collectionExerciseId = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
