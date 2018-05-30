@@ -62,13 +62,14 @@ public class CollectionExerciseEndpointIT {
      * - Get the collection exercise from the returned Location header
      * - Assert the collection exercise fields match those expected
      *
-     * @throws CTPException
+     * @throws CTPException thrown by error creating collection exercise
      */
     @Test
     public void shouldCreateCollectionExercise() throws CTPException {
         String exerciseRef = "899990";
         String userDescription = "Test Description";
-        Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
+        Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef,
+                userDescription);
 
         assertEquals(201, (int) result.getLeft());
 
@@ -79,6 +80,10 @@ public class CollectionExerciseEndpointIT {
         assertEquals(userDescription, newCollex.getUserDescription());
     }
 
+    /**
+     * Creates a new SimpleMessageSender based on the config in AppConfig
+     * @return a new SimpleMessageSender
+     */
     private SimpleMessageSender getMessageSender() {
         Rabbitmq config = this.appConfig.getRabbitmq();
 

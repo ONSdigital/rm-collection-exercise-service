@@ -6,6 +6,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
@@ -23,6 +24,7 @@ import java.util.UUID;
 /**
  * A class to wrap the collection exercise REST API in Java using Unirest
  */
+@Slf4j
 public class CollectionExerciseClient {
 
     private ObjectMapper jacksonMapper;
@@ -52,19 +54,19 @@ public class CollectionExerciseClient {
      */
     private void initialiseUnirestObjectMapper() {
         Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
-            public <T> T readValue(String value, Class<T> valueType) {
+            public <T> T readValue(final String value, final Class<T> valueType) {
                 try {
                     return jacksonMapper.readValue(value, valueType);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    log.error("Error reading value {} - {}", value, e);
                 }
             }
 
-            public String writeValue(Object value) {
+            public String writeValue(final Object value) {
                 try {
                     return jacksonMapper.writeValueAsString(value);
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                    log.error("Error writing value {} - {}", value, e);
                 }
             }
         });
@@ -78,7 +80,8 @@ public class CollectionExerciseClient {
      * @return a Pair of the status code of the operation and the location at which the new resource has been created
      * @throws CTPException thrown if an error occurred creating the collection exercise
      */
-    public Pair<Integer, String> createCollectionExercise(final UUID surveyId, final String exerciseRef, final String userDescription)
+    public Pair<Integer, String> createCollectionExercise(final UUID surveyId, final String exerciseRef,
+                                                          final String userDescription)
             throws CTPException {
         CollectionExerciseDTO inputDto = new CollectionExerciseDTO();
 
@@ -159,7 +162,7 @@ public class CollectionExerciseClient {
      * @param collexId the uuid of the collection exercise to link
      * @param sampleSummaryId the uuid of the sample summary to link
      * @return the http status code of the operation
-     * @throws CTPException
+     * @throws CTPException thrown if there was an error linking the sample summary to the collection exercise
      * @see CollectionExerciseClient#linkSampleSummaries
      */
     public int linkSampleSummary(final UUID collexId, final UUID sampleSummaryId) throws CTPException {
