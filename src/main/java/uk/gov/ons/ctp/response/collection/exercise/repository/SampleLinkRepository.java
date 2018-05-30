@@ -20,6 +20,14 @@ public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer>
   void deleteByCollectionExerciseId(UUID id);
 
   /**
+   * delete sample summaries linked to collection exercise
+   *
+   * @param sampleSummaryId the UUID of the sample to delete link for
+   * @param collectionExerciseId the UUID of the collection exercise to delete link for
+   */
+  void deleteBySampleSummaryIdAndCollectionExerciseId(UUID sampleSummaryId, UUID collectionExerciseId);
+
+  /**
    * find sample summaries linked to collection exercise
    *
    * @param id UUID for collection exercise
@@ -27,4 +35,11 @@ public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer>
    */
   List<SampleLink> findByCollectionExerciseId(UUID id);
 
+  /**
+   * Find sample link for a sample summary
+   *
+   * @param sampleSummaryId the id of the sample summary to find the links for
+   * @return a list of SampleLinks with the given sample summary
+   */
+  List<SampleLink> findBySampleSummaryId(UUID sampleSummaryId);
 }

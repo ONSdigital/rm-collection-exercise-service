@@ -98,3 +98,12 @@ databaseChangeLog:
             comment: Remove remaining vestiges of cached survey data
             path: drop-survey-table.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-12
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: Adds state to samplelink
+            path: add-state-to-samplelink.sql
+            relativeToChangelogFile: true

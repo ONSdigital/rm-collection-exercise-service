@@ -19,6 +19,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * The implementation of the SampleService
@@ -156,13 +158,30 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             linkedSummaries.add(createLink(summaryId, collectionExerciseId));
         }
 
-        try {
-            transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
-        } catch (CTPException e) {
-            log.error("Failed to set state for collection exercise {} - {}", collectionExerciseId, e);
-        }
+        // This used to transition the collection exercise to ready for review, but now that only happens if
+        // the sample link is ACTIVE
 
         return linkedSummaries;
+    }
+
+    /**
+     * Delete SampleSummary link
+     * @param sampleSummaryId a sample summary uuid
+     * @param collectionExerciseId a collection exercise uuid
+     * @throws CTPException thrown if transition fails
+     */
+    @Override
+    @Transactional
+    public void removeSampleSummaryLink(final UUID sampleSummaryId, final UUID collectionExerciseId)
+            throws CTPException {
+        sampleLinkRepository.deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
+
+        List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId);
+
+        if (sampleLinks.size() == 0) {
+            transitionCollectionExercise(collectionExerciseId,
+                    CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
+        }
     }
 
     /**
@@ -422,17 +441,38 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         }
     }
 
+    /**
+     * Method to validate the sample links for a collection exercise by ensuring that all associated SampleLinks are
+     * in the ACTIVE state
+     * @param collexId the collection exercise to validate
+     * @return true if the associated sample links are valid, false otherwise
+     */
+    private boolean validateSampleLinks(final UUID collexId) {
+        List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
+        List<SampleLink> nonActiveSampleLinks = sampleLinks
+                .stream()
+                .filter(sl -> SampleLinkState.ACTIVE != sl.getState())
+                .collect(Collectors.toList());
+
+        return sampleLinks.size() > 0 && nonActiveSampleLinks.size() == 0;
+    }
+
     @Override
     public void transitionScheduleCollectionExerciseToReadyToReview(final CollectionExercise collectionExercise)
             throws CTPException {
         UUID collexId = collectionExercise.getId();
-        List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
 
         Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE",
                 collectionExercise.getId().toString());
         String searchStringJson = new JSONObject(searchStringMap).toString();
         Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
-        if (sampleLinks.size() > 0 && numberOfCollectionInstruments != null && numberOfCollectionInstruments > 0) {
+        boolean sampleLinksValid = validateSampleLinks(collexId);
+        boolean shouldTransition = sampleLinksValid
+                && numberOfCollectionInstruments != null
+                && numberOfCollectionInstruments > 0;
+        log.info("ready_for_review transition check: sampleLinksValid: {}, numberOfCollectionInstruments: {},"
+                + " shouldTransition: {}", sampleLinksValid, numberOfCollectionInstruments, shouldTransition);
+        if (shouldTransition) {
             transitionCollectionExercise(collectionExercise,
                     CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
         } else {
@@ -448,10 +488,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collectionExerciseId the Id of the Sample summary to be linked
      * @return sampleLink stored in database
      */
-    private SampleLink createLink(final UUID sampleSummaryId, final UUID collectionExerciseId) {
+    SampleLink createLink(final UUID sampleSummaryId, final UUID collectionExerciseId) {
         SampleLink sampleLink = new SampleLink();
         sampleLink.setSampleSummaryId(sampleSummaryId);
         sampleLink.setCollectionExerciseId(collectionExerciseId);
+        sampleLink.setState(SampleLinkState.INIT);
         return sampleLinkRepository.saveAndFlush(sampleLink);
     }
 

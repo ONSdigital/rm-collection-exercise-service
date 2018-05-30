@@ -461,6 +461,33 @@ public class CollectionExerciseEndpoint {
     }
 
     /**
+     * for unlinking sample summary from a collection exercise
+     *
+     * @param collectionExerciseId the collection exercise to unlink from sample
+     * @param sampleSummaryId the collection exercise to unlink from collection exercise
+     * @return noContent response
+     * @throws CTPException            on resource not found
+     */
+    @RequestMapping(value = "/unlink/{collectionExerciseId}/sample/{sampleSummaryId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> unlinkSampleSummary(
+            @PathVariable("collectionExerciseId") final UUID collectionExerciseId,
+            @PathVariable("sampleSummaryId") final UUID sampleSummaryId) throws CTPException {
+        log.debug("Entering unlinkSampleSummary with collectionExerciseID {} and sampleSummaryId {}",
+                collectionExerciseId, sampleSummaryId);
+
+        CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(collectionExerciseId);
+        if (collectionExercise == null) {
+            throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
+                    String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
+        }
+
+        collectionExerciseService.removeSampleSummaryLink(sampleSummaryId, collectionExerciseId);
+
+        return ResponseEntity.noContent().build();
+
+    }
+
+    /**
      * return a list of UUIDs for the sample summaries linked to a specific
      * collection exercise
      *
