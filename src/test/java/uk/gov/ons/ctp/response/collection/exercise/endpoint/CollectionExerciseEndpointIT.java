@@ -34,42 +34,43 @@ import static org.junit.Assert.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CollectionExerciseEndpointIT {
 
+    // TODO pull these from config
+    private static final UUID TEST_SURVEY_ID = UUID.fromString("c23bb1c1-5202-43bb-8357-7a07c844308f");
+    private static final String TEST_USERNAME = "admin";
+    private static final String TEST_PASSWORD = "secret";
+
     @LocalServerPort
     private int port;
 
     @Autowired
     private ObjectMapper mapper;
-
     @Autowired
     private AppConfig appConfig;
-
     private CollectionExerciseClient client;
 
+    /**
+     * Method to set up integration test
+     */
     @Before
-    public void setUp(){
+    public void setUp() {
         client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
     }
-
-    // TODO pull these from config
-
-    private static final UUID TEST_SURVEY_ID = UUID.fromString("c23bb1c1-5202-43bb-8357-7a07c844308f");
-    private static final String TEST_USERNAME = "admin";
-    private static final String TEST_PASSWORD = "secret";
 
     /**
      * Method to test construction of a collection exercise via the API
      * - Create a collection exercise
      * - Get the collection exercise from the returned Location header
      * - Assert the collection exercise fields match those expected
+     *
      * @throws CTPException
      */
     @Test
     public void shouldCreateCollectionExercise() throws CTPException {
         String exerciseRef = "899990";
         String userDescription = "Test Description";
-        Pair<Integer, String> result = this.client.createCollectionExercise( TEST_SURVEY_ID, exerciseRef, userDescription);
+        Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
 
-        assertEquals(201, (int)result.getLeft());
+        assertEquals(201, (int) result.getLeft());
 
         CollectionExerciseDTO newCollex = this.client.getCollectionExercise(result.getRight());
 
@@ -78,7 +79,7 @@ public class CollectionExerciseEndpointIT {
         assertEquals(userDescription, newCollex.getUserDescription());
     }
 
-    private SimpleMessageSender getMessageSender(){
+    private SimpleMessageSender getMessageSender() {
         Rabbitmq config = this.appConfig.getRabbitmq();
 
         return new SimpleMessageSender(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
@@ -92,6 +93,7 @@ public class CollectionExerciseEndpointIT {
      * - Send a message to Sample.SampleUploadFinished.binding key on sample-outbound-exchange
      * - Get the sample links for the collection exercise
      * - Assert the sample link is active (and the sample summary ids match)
+     *
      * @throws CTPException throw if errors occur in any of the interactions
      */
     @Test
@@ -99,9 +101,9 @@ public class CollectionExerciseEndpointIT {
         try {
             String exerciseRef = "899991";
             String userDescription = "Test Description";
-            Pair<Integer, String> result = this.client.createCollectionExercise( TEST_SURVEY_ID, exerciseRef, userDescription);
+            Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
 
-            assertEquals(201, (int)result.getLeft());
+            assertEquals(201, (int) result.getLeft());
             CollectionExerciseDTO newCollex = this.client.getCollectionExercise(result.getRight());
 
             log.info("Collection exercise to link: {}", newCollex);
