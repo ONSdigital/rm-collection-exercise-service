@@ -6,7 +6,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
@@ -24,7 +23,6 @@ import java.util.UUID;
 /**
  * A class to wrap the collection exercise REST API in Java using Unirest
  */
-@Slf4j
 public class CollectionExerciseClient {
 
     private ObjectMapper jacksonMapper;
@@ -58,7 +56,7 @@ public class CollectionExerciseClient {
                 try {
                     return jacksonMapper.readValue(value, valueType);
                 } catch (IOException e) {
-                    log.error("Error reading value {} - {}", value, e);
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -66,7 +64,7 @@ public class CollectionExerciseClient {
                 try {
                     return jacksonMapper.writeValueAsString(value);
                 } catch (JsonProcessingException e) {
-                    log.error("Error writing value {} - {}", value, e);
+                    throw new RuntimeException(e);
                 }
             }
         });
