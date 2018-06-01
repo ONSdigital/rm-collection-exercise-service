@@ -21,6 +21,8 @@ import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.DistributedListManagerRedissonImpl;
 import uk.gov.ons.ctp.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
+import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
+import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
@@ -264,6 +266,18 @@ public class CollectionExerciseApplication {
   @Bean
   public EventValidator eventValidator() {
     return new EventValidator();
+  }
+
+  /**
+   * Generic bean for sending rabbit messages
+   * @return
+   */
+  @Bean
+  public SimpleMessageSender simpleMessageSender(){
+    Rabbitmq config = this.appConfig.getRabbitmq();
+
+    return new SimpleMessageSender(
+            config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
   }
 
   /**

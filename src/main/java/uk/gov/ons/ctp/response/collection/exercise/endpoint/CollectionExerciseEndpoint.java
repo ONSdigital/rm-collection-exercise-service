@@ -477,9 +477,9 @@ public class CollectionExerciseEndpoint {
             @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
         log.debug("Getting linked sample summaries for {}", collectionExerciseId);
         List<SampleLink> sampleLinks = this.collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
-        List<SampleLinkDTO> sampleLinkDtoList = mapperFacade.mapAsList(sampleLinks, SampleLinkDTO.class);
+        List<SampleLinkDTO> sampleLinkList = mapperFacade.mapAsList(sampleLinks, SampleLinkDTO.class);
 
-        return ResponseEntity.ok(sampleLinkDtoList);
+        return ResponseEntity.ok(sampleLinkList);
     }
 
     /**

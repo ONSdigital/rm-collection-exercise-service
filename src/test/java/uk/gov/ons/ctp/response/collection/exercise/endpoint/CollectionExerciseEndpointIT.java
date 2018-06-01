@@ -14,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
+import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageBase;
+import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageListener;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -22,6 +24,7 @@ import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,8 +47,10 @@ public class CollectionExerciseEndpointIT {
 
     @Autowired
     private ObjectMapper mapper;
+
     @Autowired
     private AppConfig appConfig;
+
     private CollectionExerciseClient client;
 
     /**
@@ -91,6 +96,16 @@ public class CollectionExerciseEndpointIT {
     }
 
     /**
+     * Creates a new SimpleMessageListener based on the config in AppConfig
+     * @return a new SimpleMessageListener
+     */
+    private SimpleMessageListener getMessageListener() {
+        Rabbitmq config = this.appConfig.getRabbitmq();
+
+        return new SimpleMessageListener(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+    }
+
+    /**
      * Method to test the flow receving a message that a sample upload has finished.
      * - Create a collection exercise
      * - Get the collection exercise
@@ -102,49 +117,45 @@ public class CollectionExerciseEndpointIT {
      * @throws CTPException throw if errors occur in any of the interactions
      */
     @Test
-    public void shouldActivateSampleLink() throws CTPException {
-        try {
-            String exerciseRef = "899991";
-            String userDescription = "Test Description";
-            Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
+    public void shouldActivateSampleLink() throws Exception {
+        String exerciseRef = "899991";
+        String userDescription = "Test Description";
+        Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
 
-            assertEquals(201, (int) result.getLeft());
-            CollectionExerciseDTO newCollex = this.client.getCollectionExercise(result.getRight());
+        assertEquals(201, (int) result.getLeft());
+        CollectionExerciseDTO newCollex = this.client.getCollectionExercise(result.getRight());
 
-            log.info("Collection exercise to link: {}", newCollex);
+        log.info("Collection exercise to link: {}", newCollex);
 
-            UUID sampleSummaryId = UUID.randomUUID();
+        UUID sampleSummaryId = UUID.randomUUID();
 
-            int status = this.client.linkSampleSummary(newCollex.getId(), sampleSummaryId);
-            assertEquals(200, status);
+        final int status = this.client.linkSampleSummary(newCollex.getId(), sampleSummaryId);
+        assertEquals(200, status);
 
-            SimpleMessageSender sender = getMessageSender();
+        SimpleMessageSender sender = getMessageSender();
 
-            SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
-            sampleSummary.setId(sampleSummaryId);
+        SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+        sampleSummary.setId(sampleSummaryId);
 
-            // This will cause an exception to be thrown as there is no collection instrument service but this is
-            // harmless to our purpose
-            sender.sendMessage("sample-outbound-exchange",
-                    "Sample.SampleUploadFinished.binding",
-                    this.mapper.writeValueAsString(sampleSummary));
+        SimpleMessageListener listener = getMessageListener();
+        BlockingQueue<String> queue = listener.listen( SimpleMessageBase.ExchangeType.Direct,
+                "collection-outbound-exchange", "SampleLink.Activated.binding");
 
-            Thread.sleep(500);
+        // This will cause an exception to be thrown as there is no collection instrument service but this is
+        // harmless to our purpose
+        sender.sendMessage("sample-outbound-exchange", "Sample.SampleUploadFinished.binding",
+                this.mapper.writeValueAsString(sampleSummary));
 
-            List<SampleLinkDTO> links = this.client.getSampleLinks(newCollex.getId());
+        queue.take();
 
-            assertEquals(1, links.size());
+        List<SampleLinkDTO> links = this.client.getSampleLinks(newCollex.getId());
 
-            SampleLinkDTO link = links.get(0);
+        assertEquals(1, links.size());
 
-            assertEquals(sampleSummaryId, UUID.fromString(link.getSampleSummaryId()));
-            assertEquals("ACTIVE", link.getState());
+        SampleLinkDTO link = links.get(0);
 
-        } catch (JsonProcessingException e) {
-            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create summary uploaded payload", e);
-        } catch (InterruptedException e) {
-            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Sleep interrupted", e);
-        }
+        assertEquals(sampleSummaryId, UUID.fromString(link.getSampleSummaryId()));
+        assertEquals("ACTIVE", link.getState());
     }
 }
 
