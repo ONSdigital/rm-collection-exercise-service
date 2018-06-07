@@ -10,6 +10,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +25,7 @@ import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
 import java.net.URI;
-
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -58,6 +60,7 @@ public class ActionSvcClientImplTest {
 
     @Test
     public void testMakesRequest() {
+        // Given
         ActionSvc actionSvcConfig = new ActionSvc();
         actionSvcConfig.setActionsPath(ACTION_PATH);
         Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
@@ -77,10 +80,19 @@ public class ActionSvcClientImplTest {
         actionPlanDTO.setCreatedBy("SYSTEM");
         HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
         when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
-        actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
 
+        ResponseEntity<ActionPlanDTO> responseEntity = new ResponseEntity<>(actionPlanDTO, HttpStatus.CREATED);
+        when(restTemplate.exchange(
+                eq(uriComponents.toUri()), eq(HttpMethod.POST), eq(httpEntity), eq(ActionPlanDTO.class)))
+                .thenReturn(responseEntity);
 
+        // When
+        ActionPlanDTO createdActionPlanDTO = actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
 
+        // Then
+        assertEquals(createdActionPlanDTO.getName(), ACTION_PLAN_NAME);
+        assertEquals(createdActionPlanDTO.getDescription(), ACTION_PLAN_DESCRIPTION);
+        assertEquals(createdActionPlanDTO.getCreatedBy(), "SYSTEM");
         verify(restTemplate).exchange(eq(uriComponents.toUri()), eq(HttpMethod.POST), eq(httpEntity), eq(ActionPlanDTO.class));
     }
 

@@ -45,7 +45,6 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         actionPlanDTO.setCreatedBy("SYSTEM");
         HttpEntity<ActionPlanDTO> httpEntity = restUtility.createHttpEntity(actionPlanDTO);
 
-
         ResponseEntity<ActionPlanDTO> responseEntity = restTemplate.exchange(
                                                                     uriComponents.toUri(),
                                                                     HttpMethod.POST,
