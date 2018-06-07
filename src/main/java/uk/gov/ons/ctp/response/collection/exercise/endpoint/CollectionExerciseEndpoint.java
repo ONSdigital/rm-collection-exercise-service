@@ -392,6 +392,7 @@ public class CollectionExerciseEndpoint {
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newCollex.getId()).toUri();
 
+        log.info("Successfully created collection exercise, %s", newCollex.getId());
         return ResponseEntity.created(location).build();
     }
 
