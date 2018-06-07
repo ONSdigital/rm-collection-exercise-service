@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -33,7 +34,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     }
 
     @Override
-    public void createActionPlan(String name, String description) {
+    public ActionPlanDTO createActionPlan(String name, String description) {
         log.debug("Attempting to post action plan to action service");
         UriComponents uriComponents = restUtility.createUriComponents(appConfig.getActionSvc().getActionsPath(),
                 null);
@@ -45,12 +46,13 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         HttpEntity<ActionPlanDTO> httpEntity = restUtility.createHttpEntity(actionPlanDTO);
 
 
-        restTemplate.exchange(
-                uriComponents.toUri(),
-                HttpMethod.POST,
-                httpEntity,
-                ActionPlanDTO.class
-        );
+        ResponseEntity<ActionPlanDTO> responseEntity = restTemplate.exchange(
+                                                                    uriComponents.toUri(),
+                                                                    HttpMethod.POST,
+                                                                    httpEntity,
+                                                                    ActionPlanDTO.class
+                                                            );
         log.debug("Posted to action service to create action plan");
+        return responseEntity.getBody();
     }
 }

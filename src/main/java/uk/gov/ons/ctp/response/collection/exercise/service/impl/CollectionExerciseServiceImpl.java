@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
@@ -23,6 +24,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import javax.transaction.Transactional;
@@ -227,6 +229,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
         createActionPlans(collectionExercise);
 
+
         return this.collectRepo.saveAndFlush(collectionExercise);
     }
 
@@ -246,16 +249,28 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
 
         String shortName = survey.getShortName();
-        String exerciseRef = collectionExercise.getExerciseRef();
-        createActionPlan(shortName, exerciseRef, "B");
-        createActionPlan(shortName, exerciseRef, "BI");
+        createActionPlan(shortName, collectionExercise, "B");
+        createActionPlan(shortName, collectionExercise, "BI");
     }
 
-    private void createActionPlan(String shortName, String exerciseRef, String caseType) {
+    private void createActionPlan(String shortName, CollectionExercise collectionExercise, String caseType) {
+        String exerciseRef = collectionExercise.getExerciseRef();
         String name = shortName + " " + caseType + " " + exerciseRef;
         String description = shortName + " " + caseType + " Case " + exerciseRef;
 
-        actionSvcClient.createActionPlan(name, description);
+        ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
+
+        createCaseTypeOverride(collectionExercise, caseType, actionPlan);
+
+    }
+
+    private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan) {
+        CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+        caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
+        caseTypeOverride.setSampleUnitTypeFK(sampleUnitType);
+        caseTypeOverride.setActionPlanId(actionPlan.getId());
+
+        this.caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
     }
 
     @Override
