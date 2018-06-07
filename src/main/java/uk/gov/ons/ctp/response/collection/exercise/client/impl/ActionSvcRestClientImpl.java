@@ -33,6 +33,12 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Implementation for request to action service to create action plan
+     * @param name name of action plan
+     * @param description description of action plan
+     * @return action plan
+     */
     @Override
     public ActionPlanDTO createActionPlan(String name, String description) {
         log.debug("Attempting to post action plan to action service");

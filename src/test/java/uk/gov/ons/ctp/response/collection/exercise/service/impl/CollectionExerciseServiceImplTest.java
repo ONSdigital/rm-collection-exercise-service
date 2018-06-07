@@ -210,6 +210,10 @@ public class CollectionExerciseServiceImplTest {
     return CaseTypeOverride.builder().actionPlanId(actionPlanId).sampleUnitTypeFK(sampleUnitTypeFK).build();
   }
 
+  /**
+   * Tests collection exercise is created with the correct details.
+   * @throws Exception
+   */
   @Test
   public void testCreateCollectionExercise() throws Exception {
     // Given
@@ -235,6 +239,10 @@ public class CollectionExerciseServiceImplTest {
     verify(this.caseTypeOverrideRepo, times(2)).saveAndFlush(any());
   }
 
+  /**
+   * Tests that create collection exercise endpoint creates the action plans.
+   * @throws Exception
+   */
   @Test
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
     // Given

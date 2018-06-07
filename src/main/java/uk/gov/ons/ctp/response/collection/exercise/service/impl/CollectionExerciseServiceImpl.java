@@ -24,7 +24,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 import javax.transaction.Transactional;
@@ -223,33 +222,61 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         }
     }
 
+    /**
+     * Create collection exercise and create action plans for collection exercise
+     * @param collex the data to create the collection exercise from
+     * @return created collection exercise
+     */
     @Override
     public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
+        log.debug("Attempting to create collection exercise with action plans");
         CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
         createActionPlans(collectionExercise);
 
+        log.debug("Successfully created collection exercise and action plans.");
         return this.collectRepo.saveAndFlush(collectionExercise);
     }
 
+    /**
+     * Create and populate details of collection exercise.
+     * @param collex collection exercise
+     * @return collection exercise with details
+     */
     private CollectionExercise newCollectionExerciseFromDTO(CollectionExerciseDTO collex) {
+        log.debug("Create new collection exercise from DTO");
         CollectionExercise collectionExercise = new CollectionExercise();
         setCollectionExerciseFromDto(collex, collectionExercise);
         collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
         collectionExercise.setCreated(new Timestamp(new Date().getTime()));
         collectionExercise.setId(UUID.randomUUID());
 
+        log.debug("Successfully created collection exercise from DTO");
         return collectionExercise;
     }
 
+    /**
+     * Set up data for creation of action plans
+     * @param collectionExercise Collection Exercise
+     */
     private void createActionPlans(CollectionExercise collectionExercise) {
+        log.debug("Attempting to create action plans for Collection exercise %s", collectionExercise.getId());
         SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
         String shortName = survey.getShortName();
 
         createActionPlan(shortName, collectionExercise, "B");
         createActionPlan(shortName, collectionExercise, "BI");
+        log.debug("Successfully created action plans for Collection Exercise %s", collectionExercise.getId());
     }
 
+    /**
+     * Create action plan for collection exercise and case type
+     * @param shortName Survey Short Name
+     * @param collectionExercise Collection Exercise
+     * @param caseType Sample Unit Type
+     */
     private void createActionPlan(String shortName, CollectionExercise collectionExercise, String caseType) {
+        log.debug("Attempting to create each action plan and case type overrides for collection exercise %s case type, %s",
+                   collectionExercise.getId(), caseType);
         String exerciseRef = collectionExercise.getExerciseRef();
         String name = shortName + " " + caseType + " " + exerciseRef;
         String description = shortName + " " + caseType + " Case " + exerciseRef;
@@ -257,15 +284,27 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
 
         createCaseTypeOverride(collectionExercise, caseType, actionPlan);
+        log.debug("Successfully created action plan and case type override collection exercise, %s case type, %s",
+                   collectionExercise.getId(), caseType);
     }
 
+    /**
+     * Create case type override for action plan and collection exercise
+     * @param collectionExercise
+     * @param sampleUnitType
+     * @param actionPlan
+     */
     private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan) {
+        log.debug("Creating case type override for Action Plan:%s Collection Exercise:%s Case Type: %s",
+                   actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
         CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
         caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
         caseTypeOverride.setSampleUnitTypeFK(sampleUnitType);
         caseTypeOverride.setActionPlanId(actionPlan.getId());
 
         this.caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
+        log.debug("Successfully created case type override for Action Plan:%s Collection Exercise:%s Case Type: %s",
+                   actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
     }
 
     @Override

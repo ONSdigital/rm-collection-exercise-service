@@ -55,8 +55,11 @@ public class ActionSvcClientImplTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    /**
+     * Test that the action service is called with the correct details when creating action plan.
+     */
     @Test
-    public void testMakesRequest() {
+    public void testCreateActionPlan() {
         // Given
         ActionSvc actionSvcConfig = new ActionSvc();
         actionSvcConfig.setActionsPath(ACTION_PATH);
@@ -93,6 +96,9 @@ public class ActionSvcClientImplTest {
         verify(restTemplate).exchange(eq(uriComponents.toUri()), eq(HttpMethod.POST), eq(httpEntity), eq(ActionPlanDTO.class));
     }
 
+    /**
+     * Test that a rest client exception is thrown when issues contacting the action service to create an action plan.
+     */
     @Test(expected = RestClientException.class)
     public void testCreateActionPlanRestClientException() {
         // Given
