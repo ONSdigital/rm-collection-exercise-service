@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,7 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
+import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -22,6 +26,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +43,12 @@ public class SampleUploadedInboundReceiverTest {
 
     @Mock
     private CollectionExerciseService collectionExerciseService;
+
+    @Mock
+    private SimpleMessageSender sender;
+
+    @Mock
+    private ObjectMapper mapper;
 
     @Mock
     private StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState,
@@ -75,5 +86,7 @@ public class SampleUploadedInboundReceiverTest {
 
         verify(this.collectionExerciseService, times(1))
                 .transitionScheduleCollectionExerciseToReadyToReview(eq(sampleLink.getCollectionExerciseId()));
+        verify(this.sender, times(1)).sendMessage(eq("collection-outbound-exchange"),
+               eq("SampleLink.Activated.binding"), anyString());
     }
 }
