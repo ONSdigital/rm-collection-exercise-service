@@ -55,7 +55,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The REST endpoint controller for Collection Exercises.
@@ -364,9 +363,9 @@ public class CollectionExerciseEndpoint {
         String surveyRef = collex.getSurveyRef();
         SurveyDTO survey;
 
-        if (!isBlank(surveyId)) {
+        if (!StringUtils.isBlank(surveyId)) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
-        } else if (!isBlank(surveyRef)) {
+        } else if (!StringUtils.isBlank(surveyRef)) {
             survey = this.surveyService.findSurveyByRef(surveyRef);
             // Downstream expects the surveyId to be present so add it now
             collex.setSurveyId(survey.getId());

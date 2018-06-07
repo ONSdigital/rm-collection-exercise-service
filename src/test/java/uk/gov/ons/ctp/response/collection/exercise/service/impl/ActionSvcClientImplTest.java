@@ -19,16 +19,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.impl.ActionSvcRestClientImpl;
 import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
-import java.net.URI;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -104,6 +101,7 @@ public class ActionSvcClientImplTest {
      */
     @Test(expected = RestClientException.class)
     public void testCreateActionPlanRestClientException() {
+        // Given
         ActionSvc actionSvcConfig = new ActionSvc();
         actionSvcConfig.setActionsPath(ACTION_PATH);
         Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
@@ -124,7 +122,11 @@ public class ActionSvcClientImplTest {
         HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
         when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
         when(restTemplate.exchange(any(), any(), any(), eq(ActionPlanDTO.class))).thenThrow(RestClientException.class);
+
+        // When
         actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
+
+        // Then RestClientException is thrown
     }
 
 }
