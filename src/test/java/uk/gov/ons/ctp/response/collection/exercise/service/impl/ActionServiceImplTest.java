@@ -6,14 +6,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.response.action.representation.ActionDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.when;
 public class ActionServiceImplTest {
 
     private static final String ACTION_PATH = "/actions";
+    private static final String HTTP = "http";
+    private static final String LOCALHOST = "localhost";
 
     @Mock
     private AppConfig appConfig;
@@ -37,6 +40,7 @@ public class ActionServiceImplTest {
     @InjectMocks
     private ActionServiceImpl actionService;
 
+    @Mock
     private RestTemplate restTemplate;
 
     @Mock
@@ -44,8 +48,7 @@ public class ActionServiceImplTest {
 
     @Before
     public void before() {
-        restTemplate = mock(RestTemplate.class);
-        actionService = new ActionServiceImpl(restTemplate);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -63,12 +66,17 @@ public class ActionServiceImplTest {
         when(restUtility.createUriComponents(any(String.class), any(MultiValueMap.class))).
                 thenReturn(uriComponents);
 
-        ActionDTO actionDTO = new ActionDTO();
+        ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
+        actionPlanDTO.setName("example name");
+        actionPlanDTO.setDescription("example description");
+        actionPlanDTO.setCreatedBy("SYSTEM");
+        HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
+        when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
         actionService.createActionPlan("example name", "example description");
 
-        URI uri = URI.create("http://google.com");
 
-        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), any(), eq(ActionPlanDTO.class));
+
+        verify(restTemplate).exchange(eq(uriComponents.toUri()), eq(HttpMethod.POST), eq(httpEntity), eq(ActionPlanDTO.class));
     }
 
 }
