@@ -55,6 +55,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The REST endpoint controller for Collection Exercises.
@@ -361,11 +362,11 @@ public class CollectionExerciseEndpoint {
         log.info("Creating collection exercise");
         String surveyId = collex.getSurveyId();
         String surveyRef = collex.getSurveyRef();
-        SurveyDTO survey = null;
+        SurveyDTO survey;
 
-        if (StringUtils.isBlank(surveyId) == false) {
+        if (!isBlank(surveyId)) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
-        } else if (StringUtils.isBlank(surveyRef) == false) {
+        } else if (!isBlank(surveyRef)) {
             survey = this.surveyService.findSurveyByRef(surveyRef);
             // Downstream expects the surveyId to be present so add it now
             collex.setSurveyId(survey.getId());
@@ -375,25 +376,23 @@ public class CollectionExerciseEndpoint {
 
         if (survey == null) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
-        } else {
-            CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
-                    collex.getExerciseRef(), survey);
-
-            if (existing != null) {
-                throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                        String.format("Collection exercise with survey %s and exerciseRef %s already exists",
-                                survey.getId().toString(),
-                                collex.getExerciseRef()));
-            } else {
-                CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
-
-                URI location = ServletUriComponentsBuilder
-                        .fromCurrentRequest().path("/{id}")
-                        .buildAndExpand(newCollex.getId()).toUri();
-
-                return ResponseEntity.created(location).build();
-            }
         }
+        CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
+                collex.getExerciseRef(), survey);
+
+        if (existing != null) {
+            throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+                    String.format("Collection exercise with survey %s and exerciseRef %s already exists",
+                            survey.getId(),
+                            collex.getExerciseRef()));
+        }
+        CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(newCollex.getId()).toUri();
+
+        return ResponseEntity.created(location).build();
     }
 
     /**
