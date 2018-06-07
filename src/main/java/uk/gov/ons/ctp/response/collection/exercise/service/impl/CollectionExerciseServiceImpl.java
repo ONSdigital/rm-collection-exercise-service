@@ -226,7 +226,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     @Override
     public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
         CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
-
         createActionPlans(collectionExercise);
 
         return this.collectRepo.saveAndFlush(collectionExercise);
@@ -234,9 +233,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     private CollectionExercise newCollectionExerciseFromDTO(CollectionExerciseDTO collex) {
         CollectionExercise collectionExercise = new CollectionExercise();
-
         setCollectionExerciseFromDto(collex, collectionExercise);
-
         collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
         collectionExercise.setCreated(new Timestamp(new Date().getTime()));
         collectionExercise.setId(UUID.randomUUID());
@@ -246,8 +243,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     private void createActionPlans(CollectionExercise collectionExercise) {
         SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
-
         String shortName = survey.getShortName();
+
         createActionPlan(shortName, collectionExercise, "B");
         createActionPlan(shortName, collectionExercise, "BI");
     }
@@ -260,7 +257,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
 
         createCaseTypeOverride(collectionExercise, caseType, actionPlan);
-
     }
 
     private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan) {
