@@ -113,6 +113,15 @@ survey-svc:
     connect-timeout-milli-seconds: 5000
     # time to read response
     read-timeout-milli-seconds: 5000
+
+action-svc:
+  actions-path: /actions
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8151
+    username: admin
+    password: secret
     
 collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument

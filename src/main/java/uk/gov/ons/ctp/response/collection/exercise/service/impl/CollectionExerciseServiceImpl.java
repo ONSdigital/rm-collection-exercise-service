@@ -20,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.service.ActionService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -51,6 +52,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     @Autowired
     private CaseTypeDefaultRepository caseTypeDefaultRepo;
+
+    @Autowired
+    private ActionService actionService;
 
     @Autowired
     private SurveyService surveyService;
@@ -219,6 +223,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     @Override
     public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
+        CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
+
+        createActionPlans(collectionExercise);
+
+        return this.collectRepo.saveAndFlush(collectionExercise);
+    }
+
+    private CollectionExercise newCollectionExerciseFromDTO(CollectionExerciseDTO collex) {
         CollectionExercise collectionExercise = new CollectionExercise();
 
         setCollectionExerciseFromDto(collex, collectionExercise);
@@ -227,7 +239,23 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         collectionExercise.setCreated(new Timestamp(new Date().getTime()));
         collectionExercise.setId(UUID.randomUUID());
 
-        return this.collectRepo.saveAndFlush(collectionExercise);
+        return collectionExercise;
+    }
+
+    private void createActionPlans(CollectionExercise collectionExercise) {
+        SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
+
+        String shortName = survey.getShortName();
+        String exerciseRef = collectionExercise.getExerciseRef();
+        createActionPlan(shortName, exerciseRef, "B");
+        createActionPlan(shortName, exerciseRef, "BI");
+    }
+
+    private void createActionPlan(String shortName, String exerciseRef, String caseType) {
+        String name = shortName + " " + caseType + " " + exerciseRef;
+        String description = shortName + " " + caseType + " Case " + exerciseRef;
+
+        actionService.createActionPlan(name, description);
     }
 
     @Override
