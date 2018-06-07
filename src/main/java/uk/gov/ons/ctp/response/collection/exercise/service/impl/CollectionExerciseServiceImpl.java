@@ -229,7 +229,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
         createActionPlans(collectionExercise);
 
-
         return this.collectRepo.saveAndFlush(collectionExercise);
     }
 

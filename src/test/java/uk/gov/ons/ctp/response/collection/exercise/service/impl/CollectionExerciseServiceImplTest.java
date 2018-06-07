@@ -12,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
@@ -19,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -59,16 +61,20 @@ public class CollectionExerciseServiceImplTest {
   private static final UUID ACTIONPLANID4 = UUID.fromString("80df56d9-f491-4ac8-b256-a10154290a8b");
 
   @Mock
+  private CaseTypeOverrideRepository caseTypeOverrideRepo;
+
+  @Mock
   private CollectionExerciseRepository collexRepo;
+
+  @Mock
+  private SampleLinkRepository sampleLinkRepository;
+
 
   @Mock
   private SurveyService surveyService;
 
   @Mock
   private ActionSvcClient actionService;
-
-  @Mock
-  private SampleLinkRepository sampleLinkRepository;
 
   @Mock
   private CollectionInstrumentSvcClient collectionInstrument;
@@ -206,33 +212,43 @@ public class CollectionExerciseServiceImplTest {
 
   @Test
   public void testCreateCollectionExercise() throws Exception {
-      CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-      SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
-      when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
-      this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
+    // Given
+    CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
+    actionPlanDTO.setId(UUID.randomUUID());
+    when(actionService.createActionPlan(any(), any())).thenReturn(actionPlanDTO);
 
+    // When
+    this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
 
-      ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
-      verify(this.collexRepo).saveAndFlush(captor.capture());
-
-      CollectionExercise collex = captor.getValue();
-
-      assertEquals(toCreate.getName(), collex.getName());
-      assertEquals(toCreate.getUserDescription(), collex.getUserDescription());
-      assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
-      assertEquals(toCreate.getSurveyId(), collex.getSurveyId().toString());
-      assertNotNull(collex.getCreated());
+    // Then
+    ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(this.collexRepo).saveAndFlush(captor.capture());
+    CollectionExercise collex = captor.getValue();
+    assertEquals(toCreate.getName(), collex.getName());
+    assertEquals(toCreate.getUserDescription(), collex.getUserDescription());
+    assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
+    assertEquals(toCreate.getSurveyId(), collex.getSurveyId().toString());
+    assertNotNull(collex.getCreated());
+    verify(this.caseTypeOverrideRepo, times(2)).saveAndFlush(any());
   }
 
   @Test
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
-
+    // Given
     CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
+    actionPlanDTO.setId(UUID.randomUUID());
+    when(actionService.createActionPlan(any(), any())).thenReturn(actionPlanDTO);
 
+    // When
     this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
 
+    // Then
     verify(actionService).createActionPlan("BRES B 202103", "BRES B Case 202103");
     verify(actionService).createActionPlan("BRES BI 202103", "BRES BI Case 202103");
   }
