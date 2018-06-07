@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -228,7 +229,8 @@ public class CollectionExerciseEndpoint {
      * @return 200 if all is ok, 400 for bad request, 409 for conflict
      * @throws CTPException thrown if constraint violation etc
      */
-    private ResponseEntity<?> patchCollectionExercise(final UUID id, final CollectionExerciseDTO collexDto) throws CTPException {
+    private ResponseEntity<?> patchCollectionExercise(final UUID id, final CollectionExerciseDTO collexDto)
+            throws CTPException {
         validateConstraints(collexDto);
 
         this.collectionExerciseService.patchCollectionExercise(id, collexDto);
@@ -252,12 +254,14 @@ public class CollectionExerciseEndpoint {
         CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
 
         try {
-            LocalDateTime date = LocalDateTime.parse(scheduledStart, DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
+            LocalDateTime date = LocalDateTime.parse(scheduledStart,
+                    DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.ROOT));
             collexDto.setScheduledStartDateTime(java.sql.Timestamp.valueOf(date));
 
             return patchCollectionExercise(id, collexDto);
         } catch (DateTimeParseException e) {
-            throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", scheduledStart, e.getLocalizedMessage()));
+            throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)",
+                    scheduledStart, e.getLocalizedMessage()));
         }
     }
 
@@ -444,7 +448,8 @@ public class CollectionExerciseEndpoint {
         }
 
         List<SampleLink> linkSampleSummaryToCollectionExercise = collectionExerciseService
-                .linkSampleSummaryToCollectionExercise(collectionExerciseId, linkSampleSummaryDTO.getSampleSummaryIds());
+                .linkSampleSummaryToCollectionExercise(collectionExerciseId,
+                        linkSampleSummaryDTO.getSampleSummaryIds());
         LinkedSampleSummariesDTO result = new LinkedSampleSummariesDTO();
 
         if (linkSampleSummaryToCollectionExercise != null) {
@@ -461,12 +466,29 @@ public class CollectionExerciseEndpoint {
     }
 
     /**
+     * Endpoint to return the list of samples linked to a collection exercise
+     *
+     * @param collectionExerciseId the collection exercise for which the links are required
+     * @return a list of sample summaries linked to the collection exercise
+     */
+    @RequestMapping(value = "/link/{collectionExerciseId}", method = RequestMethod.GET,
+            produces = "application/vnd.ons.sdc.samplelink.v1+json")
+    public ResponseEntity<List<SampleLinkDTO>> getSampleLinks(
+            @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
+        log.debug("Getting linked sample summaries for {}", collectionExerciseId);
+        List<SampleLink> sampleLinks = this.collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
+        List<SampleLinkDTO> sampleLinkList = mapperFacade.mapAsList(sampleLinks, SampleLinkDTO.class);
+
+        return ResponseEntity.ok(sampleLinkList);
+    }
+
+    /**
      * for unlinking sample summary from a collection exercise
      *
      * @param collectionExerciseId the collection exercise to unlink from sample
-     * @param sampleSummaryId the collection exercise to unlink from collection exercise
+     * @param sampleSummaryId      the collection exercise to unlink from collection exercise
      * @return noContent response
-     * @throws CTPException            on resource not found
+     * @throws CTPException on resource not found
      */
     @RequestMapping(value = "/unlink/{collectionExerciseId}/sample/{sampleSummaryId}", method = RequestMethod.DELETE)
     public ResponseEntity<?> unlinkSampleSummary(
@@ -579,7 +601,9 @@ public class CollectionExerciseEndpoint {
     public ResponseEntity<List<EventDTO>> getCollectionExerciseEvents(
             @PathVariable("id") final UUID id)
             throws CTPException {
-        List<EventDTO> result = this.eventService.getEvents(id).stream().map(EventService::createEventDTOFromEvent).collect(Collectors.toList());
+        List<EventDTO> result =
+                this.eventService.getEvents(id).stream().map(
+                        EventService::createEventDTOFromEvent).collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
     }
@@ -641,7 +665,8 @@ public class CollectionExerciseEndpoint {
      * @throws CTPException on resource not found
      */
     @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.DELETE)
-    public ResponseEntity<Event> deleteCollectionExerciseEvent(@PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
+    public ResponseEntity<Event> deleteCollectionExerciseEvent(@PathVariable("id") final UUID id,
+                                                               @PathVariable("tag") final String tag)
             throws CTPException {
         log.info("Deleting collection exercise event id {}, event tag ", id, tag);
 
@@ -679,7 +704,8 @@ public class CollectionExerciseEndpoint {
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("Cannot find collection exercise for survey %s and period %s", surveyRef, exerciseRef));
+                    String.format("Cannot find collection exercise for survey %s and period %s", surveyRef,
+                            exerciseRef));
         } else {
             return ResponseEntity.ok(getCollectionExerciseDTO(collex));
         }
