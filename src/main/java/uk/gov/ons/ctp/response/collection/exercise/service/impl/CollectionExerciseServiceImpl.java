@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
@@ -20,7 +21,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
-import uk.gov.ons.ctp.response.collection.exercise.service.ActionService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -54,7 +54,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
     @Autowired
-    private ActionService actionService;
+    private ActionSvcClient actionSvcClient;
 
     @Autowired
     private SurveyService surveyService;
@@ -255,7 +255,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         String name = shortName + " " + caseType + " " + exerciseRef;
         String description = shortName + " " + caseType + " Case " + exerciseRef;
 
-        actionService.createActionPlan(name, description);
+        actionSvcClient.createActionPlan(name, description);
     }
 
     @Override
