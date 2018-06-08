@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.49.14-1
+      author: Andrew Millar/Gemma Irving
+      changes:
+        - sqlFile:
+            comment: Add sequence for casetypedefaultpk
+            path: add-sequence-for-casetypedefaultpk.sql
+            relativeToChangelogFile: true
+            splitStatements: false
