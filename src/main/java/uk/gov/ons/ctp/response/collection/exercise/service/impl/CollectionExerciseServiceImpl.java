@@ -231,10 +231,12 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
         log.debug("Attempting to create collection exercise with action plans");
         CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
+        // Save collection exercise before creating action plans because we need exercisepk
+        collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
         createActionPlans(collectionExercise);
 
         log.debug("Successfully created collection exercise and action plans.");
-        return this.collectRepo.saveAndFlush(collectionExercise);
+        return collectionExercise;
     }
 
     /**

@@ -217,9 +217,12 @@ public class CollectionExerciseServiceImplTest {
   @Test
   public void testCreateCollectionExercise() throws Exception {
     // Given
-    CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise collectionExercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+
     ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
     actionPlanDTO.setId(UUID.randomUUID());
     when(actionService.createActionPlan(any(), any())).thenReturn(actionPlanDTO);
@@ -247,6 +250,9 @@ public class CollectionExerciseServiceImplTest {
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
     // Given
     CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise collectionExercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
+    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
     ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
