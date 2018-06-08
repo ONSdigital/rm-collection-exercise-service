@@ -261,13 +261,58 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collectionExercise Collection Exercise
      */
     private void createActionPlans(CollectionExercise collectionExercise) {
-        log.debug("Attempting to create action plans for Collection exercise %s", collectionExercise.getId());
+        log.debug("Attempting to create action plans for exercise, Collection exercise: %s",
+                collectionExercise.getId());
         SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
-        String shortName = survey.getShortName();
+        createDefaultActionPlan(survey, "B");
+        createDefaultActionPlan(survey, "BI");
+        createOverrideActionPlan(survey.getShortName(), collectionExercise, "B");
+        createOverrideActionPlan(survey.getShortName(), collectionExercise, "BI");
+        log.debug("Successfully created action plans for exercise, Collection Exercise: %s",
+                collectionExercise.getId());
+    }
 
-        createActionPlan(shortName, collectionExercise, "B");
-        createActionPlan(shortName, collectionExercise, "BI");
-        log.debug("Successfully created action plans for Collection Exercise %s", collectionExercise.getId());
+    /**
+     * Create action plan for collection exercise and case type
+     * @param survey survey
+     * @param sampleUnitType Sample Unit Type
+     */
+    private void createDefaultActionPlan(SurveyDTO survey, String sampleUnitType) {
+        log.debug("Creating default action plan, SurveyId: %s , CaseType: %s", survey.getId(), sampleUnitType);
+        CaseTypeDefault existingCaseTypeDefault = caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(
+                UUID.fromString(survey.getId()), sampleUnitType);
+        if (existingCaseTypeDefault != null) {
+            log.debug("Default action plan already exists, %s SurveyId: %s CaseType: %s", survey.getId(), sampleUnitType);
+            return;
+        }
+
+        String shortName = survey.getShortName();
+        String name = shortName + " " + sampleUnitType;
+        String description = shortName + " " + sampleUnitType + " Case";
+        ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
+
+        createCaseTypeDefault(survey, sampleUnitType, actionPlan);
+        log.debug("Successfully created default action plan, ActionPlanId: %s, SurveyId: %s , CaseType: %s",
+                actionPlan.getId(), survey.getId(), sampleUnitType);
+    }
+
+    /**
+     * Create case type default for action plan, survey and sample unit type if not already exists
+     * @param survey
+     * @param sampleUnitType
+     * @param actionPlan
+     */
+    private void createCaseTypeDefault(SurveyDTO survey, String sampleUnitType, ActionPlanDTO actionPlan) {
+        log.debug("Creating case type default, ActionPlanId: %s SurveyId: %s CaseType: %s",
+                actionPlan.getId(), survey.getId(), sampleUnitType);
+        CaseTypeDefault caseTypeDefault = new CaseTypeDefault();
+        caseTypeDefault.setSurveyId(UUID.fromString(survey.getId()));
+        caseTypeDefault.setSampleUnitTypeFK(sampleUnitType);
+        caseTypeDefault.setActionPlanId(actionPlan.getId());
+
+        this.caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
+        log.debug("Successfully created case type default, ActionPlanId: %s SurveyId: %s CaseType: %s",
+                actionPlan.getId(), survey.getId(), sampleUnitType);
     }
 
     /**
@@ -276,9 +321,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collectionExercise Collection Exercise
      * @param caseType Sample Unit Type
      */
-    private void createActionPlan(String shortName, CollectionExercise collectionExercise, String caseType) {
-        log.debug("Attempting to create action plan and case type overrides for collection exercise %s case type, %s",
-                   collectionExercise.getId(), caseType);
+    private void createOverrideActionPlan(String shortName, CollectionExercise collectionExercise, String caseType) {
+        log.debug("Creating override action plan, CollectionExerciseId: %s , CaseType: %s",
+                collectionExercise.getId(), caseType);
         String exerciseRef = collectionExercise.getExerciseRef();
         String name = shortName + " " + caseType + " " + exerciseRef;
         String description = shortName + " " + caseType + " Case " + exerciseRef;
@@ -286,8 +331,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
 
         createCaseTypeOverride(collectionExercise, caseType, actionPlan);
-        log.debug("Successfully created action plan and case type override collection exercise, %s case type, %s",
-                   collectionExercise.getId(), caseType);
+        log.debug("Successfully created override action plan, ActionPlanId: %s, CollectionExerciseId: %s , CaseType: %s",
+                actionPlan.getId(), collectionExercise.getId(), caseType);
     }
 
     /**

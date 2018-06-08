@@ -20,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -59,6 +60,9 @@ public class CollectionExerciseServiceImplTest {
   private static final UUID ACTIONPLANID2 = UUID.fromString("60df56d9-f491-4ac8-b256-a10154290a8c");
   private static final UUID ACTIONPLANID3 = UUID.fromString("70df56d9-f491-4ac8-b256-a10154290a8b");
   private static final UUID ACTIONPLANID4 = UUID.fromString("80df56d9-f491-4ac8-b256-a10154290a8b");
+
+  @Mock
+  private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
   @Mock
   private CaseTypeOverrideRepository caseTypeOverrideRepo;
@@ -219,6 +223,7 @@ public class CollectionExerciseServiceImplTest {
     // Given
     CollectionExercise collectionExercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
+
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
@@ -226,6 +231,7 @@ public class CollectionExerciseServiceImplTest {
     ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
     actionPlanDTO.setId(UUID.randomUUID());
     when(actionService.createActionPlan(any(), any())).thenReturn(actionPlanDTO);
+    when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(any(), any())).thenReturn(null);
 
     // When
     this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
