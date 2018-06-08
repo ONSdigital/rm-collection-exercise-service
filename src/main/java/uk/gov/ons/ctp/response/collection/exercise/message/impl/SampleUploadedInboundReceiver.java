@@ -1,17 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
@@ -35,18 +30,9 @@ public class SampleUploadedInboundReceiver {
     private SampleService sampleService;
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @Autowired
-    private SimpleMessageSender sender;
-
-    @Autowired
     @Qualifier("sampleLink")
     private StateTransitionManager<SampleLinkState, SampleLinkEvent>
             sampleLinkState;
-
-    private static String OUTBOUND_EXCHANGE = "collection-outbound-exchange";
-    private static String OUTBOUND_ROUTING_KEY = "SampleLink.Activated.binding";
 
     /**
      * Method to set the state of a SampleLink to ACTIVATED
@@ -62,16 +48,10 @@ public class SampleUploadedInboundReceiver {
 
             this.sampleService.saveSampleLink(sampleLink);
 
-            String message = mapper.writeValueAsString(sampleLink);
-            this.sender.sendMessage(OUTBOUND_EXCHANGE, OUTBOUND_ROUTING_KEY, message);
-            log.info("Send message {} to {} ({})", message, OUTBOUND_EXCHANGE, OUTBOUND_ROUTING_KEY);
-
             this.collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
                     sampleLink.getCollectionExerciseId());
         } catch (CTPException e) {
             log.error("Failed to activate sample link {} - {}", sampleLink, e);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to marshal outgoing activation message {} - {}", sampleLink, e);
         }
     }
 
