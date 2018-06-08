@@ -42,7 +42,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     @Override
     public ActionPlanDTO createActionPlan(String name, String description) {
         log.debug("Attempting to post action plan to action service");
-        UriComponents uriComponents = restUtility.createUriComponents(appConfig.getActionSvc().getActionsPath(),
+        UriComponents uriComponents = restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(),
                 null);
 
         ActionPlanDTO actionPlanDTO = new ActionPlanDTO();

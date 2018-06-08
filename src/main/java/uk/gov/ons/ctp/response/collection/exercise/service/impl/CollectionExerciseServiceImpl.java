@@ -275,7 +275,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param caseType Sample Unit Type
      */
     private void createActionPlan(String shortName, CollectionExercise collectionExercise, String caseType) {
-        log.debug("Attempting to create each action plan and case type overrides for collection exercise %s case type, %s",
+        log.debug("Attempting to create action plan and case type overrides for collection exercise %s case type, %s",
                    collectionExercise.getId(), caseType);
         String exerciseRef = collectionExercise.getExerciseRef();
         String name = shortName + " " + caseType + " " + exerciseRef;

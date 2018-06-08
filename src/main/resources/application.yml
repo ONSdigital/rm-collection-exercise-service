@@ -115,7 +115,7 @@ survey-svc:
     read-timeout-milli-seconds: 5000
 
 action-svc:
-  actions-path: /actions
+  action-plans-path: /actionplans
   connection-config:
     scheme: http
     host: localhost

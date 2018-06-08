@@ -62,7 +62,7 @@ public class ActionSvcClientImplTest {
     public void testCreateActionPlan() {
         // Given
         ActionSvc actionSvcConfig = new ActionSvc();
-        actionSvcConfig.setActionsPath(ACTION_PATH);
+        actionSvcConfig.setActionPlansPath(ACTION_PATH);
         Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
@@ -103,7 +103,7 @@ public class ActionSvcClientImplTest {
     public void testCreateActionPlanRestClientException() {
         // Given
         ActionSvc actionSvcConfig = new ActionSvc();
-        actionSvcConfig.setActionsPath(ACTION_PATH);
+        actionSvcConfig.setActionPlansPath(ACTION_PATH);
         Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
