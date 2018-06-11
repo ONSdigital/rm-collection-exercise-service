@@ -349,6 +349,7 @@ public class CollectionExerciseEndpoint {
 
     /**
      * POST request to create a collection exercise
+     * Also creates required action plans and casetypeoverrides
      *
      * @param collex A dto containing the data about the collection exercise
      * @return 201 if all is ok, 400 for bad request, 409 for conflict
@@ -358,11 +359,13 @@ public class CollectionExerciseEndpoint {
     public ResponseEntity<?> createCollectionExercise(
             final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody CollectionExerciseDTO collex)
             throws CTPException {
-        log.info("Creating collection exercise");
+        log.info("Creating collection exercise, ExerciseRef: %s, SurveyRef: %s",
+                collex.getExerciseRef(), collex.getSurveyRef());
         String surveyId = collex.getSurveyId();
         String surveyRef = collex.getSurveyRef();
         SurveyDTO survey;
 
+        // Retrieve survey from survey service if it exists
         if (!StringUtils.isBlank(surveyId)) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
         } else if (!StringUtils.isBlank(surveyRef)) {
@@ -376,13 +379,13 @@ public class CollectionExerciseEndpoint {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
         }
 
+        // Check if collection exercise already exists
         CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
                 collex.getExerciseRef(), survey);
         if (existing != null) {
             throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                    String.format("Collection exercise already exists, SurveyId: %s exerciseRef: %s",
-                            survey.getId(),
-                            collex.getExerciseRef()));
+                    String.format("Collection exercise already exists, ExerciseRef: %s, SurveyRef: %s",
+                            collex.getExerciseRef(), surveyRef));
         }
 
         CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex, survey);
