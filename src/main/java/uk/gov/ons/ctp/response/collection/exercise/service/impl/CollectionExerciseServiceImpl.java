@@ -424,7 +424,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("Collection exercise {} not found", id));
+                    String.format("Collection exercise %s not found", id));
         } else {
             String proposedPeriod = patchData.getExerciseRef() == null
                     ? collex.getExerciseRef()
@@ -443,7 +443,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
                 if (survey == null) {
                     throw new CTPException(CTPException.Fault.BAD_REQUEST,
-                            String.format("Survey {} does not exist", surveyId));
+                            String.format("Survey %s does not exist", surveyId));
                 } else {
                     collex.setSurveyId(surveyId);
                 }
@@ -487,7 +487,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             if (otherExisting != null && !otherExisting.getId().equals(existing.getId())) {
                 throw new CTPException(
                         CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                        String.format("A collection exercise with period {} and id {} already exists.",
+                        String.format("A collection exercise with period %s and id %s already exists.",
                                 candidatePeriod,
                                 candidateSurvey));
             }
@@ -501,7 +501,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         if (existing == null) {
             throw new CTPException(
                     CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("Collection exercise with id {} does not exist", id));
+                    String.format("Collection exercise with id %s does not exist", id));
         } else {
             UUID surveyUuid = UUID.fromString(collexDto.getSurveyId());
             String period = collexDto.getExerciseRef();
@@ -514,7 +514,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             if (survey == null) {
                 throw new CTPException(
                         CTPException.Fault.BAD_REQUEST,
-                        String.format("Survey {} does not exist", surveyUuid));
+                        String.format("Survey %s does not exist", surveyUuid));
             } else {
                 setCollectionExerciseFromDto(collexDto, existing);
                 existing.setUpdated(new Timestamp(new Date().getTime()));
@@ -544,7 +544,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("Collection exercise {} does not exists", id));
+                    String.format("Collection exercise %s does not exists", id));
         } else {
             collex.setDeleted(deleted);
 
@@ -587,7 +587,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("Cannot find collection exercise {}", collectionExerciseId));
+                    String.format("Cannot find collection exercise %s", collectionExerciseId));
         }
 
         transitionCollectionExercise(collex, event);
