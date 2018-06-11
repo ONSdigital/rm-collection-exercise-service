@@ -93,9 +93,10 @@ public interface CollectionExerciseService {
   /**
    * Create a collection exercise
    * @param collex the data to create the collection exercise from
+   * @param survey representation of survey for collection exercise
    * @return a new CollectionExercise object
    */
-  CollectionExercise createCollectionExercise(CollectionExerciseDTO collex);
+  CollectionExercise createCollectionExercise(CollectionExerciseDTO collex, SurveyDTO survey);
 
   /**
    * Gets collection exercise with given exerciseRef and survey (should be no more than 1)

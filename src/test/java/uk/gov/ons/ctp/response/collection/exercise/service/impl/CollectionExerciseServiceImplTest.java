@@ -234,7 +234,7 @@ public class CollectionExerciseServiceImplTest {
     when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(any(), any())).thenReturn(null);
 
     // When
-    this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
+    this.collectionExerciseServiceImpl.createCollectionExercise(toCreate, survey);
 
     // Then
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
@@ -250,7 +250,7 @@ public class CollectionExerciseServiceImplTest {
 
   /**
    * Tests that create collection exercise endpoint creates the action plans.
-   * @throws Exception
+   * @throws Exception general exception
    */
   @Test
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
@@ -266,7 +266,7 @@ public class CollectionExerciseServiceImplTest {
     when(actionService.createActionPlan(any(), any())).thenReturn(actionPlanDTO);
 
     // When
-    this.collectionExerciseServiceImpl.createCollectionExercise(toCreate);
+    this.collectionExerciseServiceImpl.createCollectionExercise(toCreate, survey);
 
     // Then
     verify(actionService).createActionPlan("BRES B 202103", "BRES B Case 202103");

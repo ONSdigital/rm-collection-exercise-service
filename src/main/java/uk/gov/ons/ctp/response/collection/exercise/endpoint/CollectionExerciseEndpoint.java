@@ -363,6 +363,7 @@ public class CollectionExerciseEndpoint {
         String surveyRef = collex.getSurveyRef();
         SurveyDTO survey;
 
+        // Retrieve survey for given collection exercise
         if (!StringUtils.isBlank(surveyId)) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
         } else if (!StringUtils.isBlank(surveyRef)) {
@@ -372,31 +373,32 @@ public class CollectionExerciseEndpoint {
         } else {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
         }
-
         if (survey == null) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
         }
+
+        // Check if collection exercise already exists
         CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
                 collex.getExerciseRef(), survey);
-
         if (existing != null) {
             throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                    String.format("Collection exercise with survey %s and exerciseRef %s already exists",
+                    String.format("Collection exercise already exists, SurveyId: %s exerciseRef: %s",
                             survey.getId(),
                             collex.getExerciseRef()));
         }
-        CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
+
+        // Create new collection exercise, including required action plans and casetypedefaults/overrides
+        CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex, survey);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newCollex.getId()).toUri();
-
-        log.info("Successfully created collection exercise, %s", newCollex.getId());
+        log.info("Successfully created collection exercise, CollectionExerciseId: %s", newCollex.getId());
         return ResponseEntity.created(location).build();
     }
 
     /**
-     * DELETE request to delete a collection exercise
+     * DELETE request which deletes a collection exercise
      *
      * @param id Collection exercise Id to delete
      * @return the collection exercise that was to be deleted

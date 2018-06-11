@@ -1,17 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -50,11 +45,6 @@ public class ActionSvcClientImplTest {
     @Mock
     private RestUtility restUtility;
 
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     /**
      * Test that the action service is called with the correct details when creating action plan.
      */
@@ -63,7 +53,7 @@ public class ActionSvcClientImplTest {
         // Given
         ActionSvc actionSvcConfig = new ActionSvc();
         actionSvcConfig.setActionPlansPath(ACTION_PATH);
-        Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
+        when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(HTTP)
@@ -78,22 +68,21 @@ public class ActionSvcClientImplTest {
         actionPlanDTO.setName(ACTION_PLAN_NAME);
         actionPlanDTO.setDescription(ACTION_PLAN_DESCRIPTION);
         actionPlanDTO.setCreatedBy("SYSTEM");
+
         HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
         when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
-
-        ResponseEntity<ActionPlanDTO> responseEntity = new ResponseEntity<>(actionPlanDTO, HttpStatus.CREATED);
-        when(restTemplate.exchange(
-                eq(uriComponents.toUri()), eq(HttpMethod.POST), eq(httpEntity), eq(ActionPlanDTO.class)))
-                .thenReturn(responseEntity);
+        when(restTemplate.postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class)))
+                .thenReturn(actionPlanDTO);
 
         // When
-        ActionPlanDTO createdActionPlanDTO = actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
+        ActionPlanDTO createdActionPlanDTO = actionSvcClient.createActionPlan(
+                ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
 
         // Then
+        verify(restTemplate).postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class));
         assertEquals(createdActionPlanDTO.getName(), ACTION_PLAN_NAME);
         assertEquals(createdActionPlanDTO.getDescription(), ACTION_PLAN_DESCRIPTION);
         assertEquals(createdActionPlanDTO.getCreatedBy(), "SYSTEM");
-        verify(restTemplate).exchange(eq(uriComponents.toUri()), eq(HttpMethod.POST), eq(httpEntity), eq(ActionPlanDTO.class));
     }
 
     /**
@@ -104,7 +93,7 @@ public class ActionSvcClientImplTest {
         // Given
         ActionSvc actionSvcConfig = new ActionSvc();
         actionSvcConfig.setActionPlansPath(ACTION_PATH);
-        Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
+        when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(HTTP)
@@ -121,7 +110,8 @@ public class ActionSvcClientImplTest {
         actionPlanDTO.setCreatedBy("SYSTEM");
         HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
         when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
-        when(restTemplate.exchange(any(), any(), any(), eq(ActionPlanDTO.class))).thenThrow(RestClientException.class);
+        when(restTemplate.postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class)))
+                .thenThrow(RestClientException.class);
 
         // When
         actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
