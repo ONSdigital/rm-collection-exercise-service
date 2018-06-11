@@ -59,7 +59,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
 
         ActionPlanDTO createdActionPlan = restTemplate.postForObject(uriComponents.toUri(),
                 httpEntity, ActionPlanDTO.class);
-        log.debug("Successfully posted to action service to create action plan, ActionPlanIn: %s",
+        log.debug("Successfully posted to action service to create action plan, ActionPlanIn: {}",
                 createdActionPlan.getId());
         return createdActionPlan;
     }

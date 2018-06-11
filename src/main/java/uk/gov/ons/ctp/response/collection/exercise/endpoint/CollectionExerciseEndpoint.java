@@ -117,7 +117,7 @@ public class CollectionExerciseEndpoint {
 
         if (survey == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_SURVEYNOTFOUND, id));
+                    String.format("{} {}", RETURN_SURVEYNOTFOUND, id));
         } else {
             log.debug("Entering collection exercise fetch with survey Id {}", id);
             List<CollectionExercise> collectionExerciseList = collectionExerciseService
@@ -150,7 +150,7 @@ public class CollectionExerciseEndpoint {
         CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(id);
         if (collectionExercise == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, id));
+                    String.format("{} {}", RETURN_COLLECTIONEXERCISENOTFOUND, id));
         }
 
         CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseDTO(collectionExercise);
@@ -257,7 +257,7 @@ public class CollectionExerciseEndpoint {
 
             return patchCollectionExercise(id, collexDto);
         } catch (DateTimeParseException e) {
-            throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", scheduledStart, e.getLocalizedMessage()));
+            throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date {} ({})", scheduledStart, e.getLocalizedMessage()));
         }
     }
 
@@ -349,6 +349,7 @@ public class CollectionExerciseEndpoint {
 
     /**
      * POST request to create a collection exercise
+     * Also creates required action plans and casetypeoverrides
      *
      * @param collex A dto containing the data about the collection exercise
      * @return 201 if all is ok, 400 for bad request, 409 for conflict
@@ -358,12 +359,13 @@ public class CollectionExerciseEndpoint {
     public ResponseEntity<?> createCollectionExercise(
             final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody CollectionExerciseDTO collex)
             throws CTPException {
-        log.info("Creating collection exercise");
+        log.info("Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
+                collex.getExerciseRef(), collex.getSurveyRef());
         String surveyId = collex.getSurveyId();
         String surveyRef = collex.getSurveyRef();
         SurveyDTO survey;
 
-        // Retrieve survey for given collection exercise
+        // Retrieve survey from survey service if it exists
         if (!StringUtils.isBlank(surveyId)) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
         } else if (!StringUtils.isBlank(surveyRef)) {
@@ -382,9 +384,8 @@ public class CollectionExerciseEndpoint {
                 collex.getExerciseRef(), survey);
         if (existing != null) {
             throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                    String.format("Collection exercise already exists, SurveyId: %s exerciseRef: %s",
-                            survey.getId(),
-                            collex.getExerciseRef()));
+                    String.format("Collection exercise already exists, ExerciseRef: {}, SurveyRef: {}",
+                            collex.getExerciseRef(), surveyRef));
         }
 
         // Create new collection exercise, including required action plans and casetypedefaults/overrides
@@ -393,7 +394,7 @@ public class CollectionExerciseEndpoint {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newCollex.getId()).toUri();
-        log.info("Successfully created collection exercise, CollectionExerciseId: %s", newCollex.getId());
+        log.info("Successfully created collection exercise, CollectionExerciseId: {}", newCollex.getId());
         return ResponseEntity.created(location).build();
     }
 
@@ -441,7 +442,7 @@ public class CollectionExerciseEndpoint {
         CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(collectionExerciseId);
         if (collectionExercise == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
+                    String.format("{} {}", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
         }
 
         List<SampleLink> linkSampleSummaryToCollectionExercise = collectionExerciseService
@@ -479,7 +480,7 @@ public class CollectionExerciseEndpoint {
         CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(collectionExerciseId);
         if (collectionExercise == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
+                    String.format("{} {}", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
         }
 
         collectionExerciseService.removeSampleSummaryLink(sampleSummaryId, collectionExerciseId);
@@ -505,7 +506,7 @@ public class CollectionExerciseEndpoint {
         CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(collectionExerciseId);
         if (collectionExercise == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
+                    String.format("{} {}", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
         }
 
         List<SampleLink> result = collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
@@ -607,7 +608,7 @@ public class CollectionExerciseEndpoint {
             eventService.updateEvent(id, tag, dateParser.parse(date));
             return ResponseEntity.noContent().build();
         } catch (ParseException e) {
-            throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date %s (%s)", date,
+            throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Unparseable date {} ({})", date,
                     e.getLocalizedMessage()));
         }
     }
@@ -667,7 +668,7 @@ public class CollectionExerciseEndpoint {
 
         if (collex == null) {
             throw new CTPException(CTPException.Fault.RESOURCE_NOT_FOUND,
-                    String.format("Cannot find collection exercise for survey %s and period %s", surveyRef, exerciseRef));
+                    String.format("Cannot find collection exercise for survey {} and period {}", surveyRef, exerciseRef));
         } else {
             return ResponseEntity.ok(getCollectionExerciseDTO(collex));
         }
