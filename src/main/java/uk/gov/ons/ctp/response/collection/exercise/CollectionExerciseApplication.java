@@ -1,8 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
 import net.sourceforge.cobertura.CoverageIgnore;
-
-import org.apache.tomcat.jdbc.pool.DataSource;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
