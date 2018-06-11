@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -94,6 +93,7 @@ public interface CollectionExerciseService {
   /**
    * Create a collection exercise
    * @param collex the data to create the collection exercise from
+   * @param survey representation of survey for collection exercise
    * @return a new CollectionExercise object
    */
   CollectionExercise createCollectionExercise(CollectionExerciseDTO collex, SurveyDTO survey);

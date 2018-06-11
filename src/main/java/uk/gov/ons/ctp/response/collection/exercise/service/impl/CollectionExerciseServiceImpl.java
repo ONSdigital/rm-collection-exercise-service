@@ -241,6 +241,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     /**
      * Create collection exercise and create action plans for collection exercise
      * @param collex the data to create the collection exercise from
+     * @param survey representation of the survey for the given collection exercise
      * @return created collection exercise
      */
     @Transactional
@@ -306,13 +307,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     /**
      * Create case type override for action plan and collection exercise
-     * @param collectionExercise
-     * @param sampleUnitType
-     * @param actionPlan
+     * @param collectionExercise representation of collection exercise
+     * @param sampleUnitType Sample unit type i.e. (B, H, HI)
+     * @param actionPlan the newly created action plan
      * @throws DataAccessException if caseTypeOverride fails to save to database
      */
-    private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan)
-            throws DataAccessException {
+    private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType,
+                                        ActionPlanDTO actionPlan) throws DataAccessException {
         log.debug("Creating case type override for Action Plan:%s Collection Exercise:%s Case Type: %s",
                    actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
         CaseTypeOverride caseTypeOverride = new CaseTypeOverride();

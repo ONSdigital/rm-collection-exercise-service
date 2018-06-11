@@ -75,7 +75,8 @@ public class ActionSvcClientImplTest {
                 .thenReturn(actionPlanDTO);
 
         // When
-        ActionPlanDTO createdActionPlanDTO = actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
+        ActionPlanDTO createdActionPlanDTO = actionSvcClient.createActionPlan(
+                ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
 
         // Then
         verify(restTemplate).postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class));
@@ -92,7 +93,7 @@ public class ActionSvcClientImplTest {
         // Given
         ActionSvc actionSvcConfig = new ActionSvc();
         actionSvcConfig.setActionPlansPath(ACTION_PATH);
-        Mockito.when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
+        when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(HTTP)

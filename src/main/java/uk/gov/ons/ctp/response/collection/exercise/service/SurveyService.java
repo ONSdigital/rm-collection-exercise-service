@@ -16,6 +16,7 @@ public interface SurveyService {
    *
    * @param id the survey Id for which to request survey.
    * @return the survey object
+   * @throws RestClientException when failing to connect to survey service
    */
   SurveyDTO findSurvey(UUID id) throws RestClientException;
 
@@ -23,6 +24,7 @@ public interface SurveyService {
    * Request a survey by reference
    * @param surveyRef surveyRef to request the survey
    * @return the survey object
+   * @throws RestClientException when failing to connect to survey service
    */
   SurveyDTO findSurveyByRef(String surveyRef) throws RestClientException;
 

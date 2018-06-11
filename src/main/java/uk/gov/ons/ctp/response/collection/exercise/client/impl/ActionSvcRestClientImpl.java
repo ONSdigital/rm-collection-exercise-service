@@ -36,23 +36,17 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
      * @param appConfig application config object
      */
     @Autowired
-    public ActionSvcRestClientImpl(RestTemplate restTemplate,
-                                   @Qualifier("actionRestUtility") RestUtility restUtility, AppConfig appConfig) {
+    public ActionSvcRestClientImpl(final RestTemplate restTemplate,
+                                   final @Qualifier("actionRestUtility") RestUtility restUtility, AppConfig appConfig) {
         this.restTemplate = restTemplate;
         this.appConfig = appConfig;
         this.restUtility = restUtility;
     }
 
-    /**
-     * Implementation for request to action service to create action plan
-     * @param name name of action plan
-     * @param description description of action plan
-     * @return ActionPlanDTO representing action plan
-     */
     @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
             backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
     @Override
-    public ActionPlanDTO createActionPlan(String name, String description) throws RestClientException {
+    public ActionPlanDTO createActionPlan(final String name, String description) throws RestClientException {
         log.debug("Posting to action service to create action plan");
         UriComponents uriComponents = restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(),
                 null);
