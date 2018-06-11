@@ -359,7 +359,7 @@ public class CollectionExerciseEndpoint {
     public ResponseEntity<?> createCollectionExercise(
             final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody CollectionExerciseDTO collex)
             throws CTPException {
-        log.info("Creating collection exercise, ExerciseRef: %s, SurveyRef: %s",
+        log.info("Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
                 collex.getExerciseRef(), collex.getSurveyRef());
         String surveyId = collex.getSurveyId();
         String surveyRef = collex.getSurveyRef();
@@ -393,7 +393,7 @@ public class CollectionExerciseEndpoint {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newCollex.getId()).toUri();
-        log.info("Successfully created collection exercise, CollectionExerciseId: %s", newCollex.getId());
+        log.info("Successfully created collection exercise, CollectionExerciseId: {}", newCollex.getId());
         return ResponseEntity.created(location).build();
     }
 

@@ -248,13 +248,13 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     @Transactional
     @Override
     public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex, SurveyDTO survey) {
-        log.debug("Creating collection exercise, ExerciseRef: %s, SurveyRef: %s",
+        log.debug("Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
                 collex.getExerciseRef(), survey.getSurveyRef());
         CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
         // Save collection exercise before creating action plans because we need the exercisepk
         collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
         createActionPlans(collectionExercise, survey);
-        log.debug("Successfully created collection exercise, CollectionExerciseId: %s", collectionExercise.getId());
+        log.debug("Successfully created collection exercise, CollectionExerciseId: {}", collectionExercise.getId());
         return collectionExercise;
     }
 
@@ -281,10 +281,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param survey SurveyDTO representing survey of collection exercise
      */
     private void createActionPlans(CollectionExercise collectionExercise, SurveyDTO survey) {
-        log.debug("Creating action plans, CollectionExerciseId: %s", collectionExercise.getId());
+        log.debug("Creating action plans, CollectionExerciseId: {}", collectionExercise.getId());
         createOverrideActionPlan(collectionExercise, survey,  "B");
         createOverrideActionPlan(collectionExercise, survey,  "BI");
-        log.debug("Successfully created action plans, CollectionExerciseId: %s", collectionExercise.getId());
+        log.debug("Successfully created action plans, CollectionExerciseId: {}", collectionExercise.getId());
     }
 
     /**
@@ -295,14 +295,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
     private void createOverrideActionPlan(CollectionExercise collectionExercise, SurveyDTO survey,
                                           String sampleUnitType) {
-        log.debug("Creating override action plan, CollectionExerciseId: %s, SampleUnitType: %s",
+        log.debug("Creating override action plan, CollectionExerciseId: {}, SampleUnitType: {}",
                    collectionExercise.getId(), sampleUnitType);
 
         // If a casetypeoverride already exists for this exercise/sampleUnitType do nothing
         CaseTypeOverride existingCaseTypeOverride = caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
                 collectionExercise.getExercisePK(), sampleUnitType);
         if (existingCaseTypeOverride != null) {
-            log.debug("Override action plan already exists, CollectionExerciseId: %s, SampleUnitType: %s",
+            log.debug("Override action plan already exists, CollectionExerciseId: {}, SampleUnitType: {}",
                     collectionExercise.getId(), sampleUnitType);
             return;
         }
@@ -317,7 +317,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         // Create casetypeoverride linking collection exercise and sample unit type to the action plan
         createCaseTypeOverride(collectionExercise, sampleUnitType, actionPlan);
         log.debug("Successfully created override action plan, " +
-                  "ActionPlanId: %s, CollectionExerciseId: %s, SampleUnitType: %s",
+                  "ActionPlanId: {}, CollectionExerciseId: {}, SampleUnitType: {}",
                    actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
     }
 
@@ -330,7 +330,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
     private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType,
                                         ActionPlanDTO actionPlan) throws DataAccessException {
-        log.debug("Creating case type override, ActionPlanId: %s, CollectionExerciseId: %s SampleUnitType: %s",
+        log.debug("Creating case type override, ActionPlanId: {}, CollectionExerciseId: {}, SampleUnitType: {}",
                    actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
         CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
         caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
@@ -338,7 +338,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         caseTypeOverride.setActionPlanId(actionPlan.getId());
         this.caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
         log.debug("Successfully created case type override, " +
-                  "ActionPlan: %s CollectionExerciseId :%s, SampleUnitType: %s",
+                  "ActionPlan: {}, CollectionExerciseId : {}, SampleUnitType: {}",
                    actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
     }
 
