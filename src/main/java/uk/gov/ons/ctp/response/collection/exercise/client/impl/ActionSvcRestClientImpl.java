@@ -32,8 +32,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     /**
      * Implementation for request to action service to create action plan
      * @param restTemplate Spring frameworks rest template
-     * @param appConfig description of action plan
-     * @param restUtility fro creating URI's and HTTPEntities
+     * @param restUtility for creating URI's and HTTPEntities
+     * @param appConfig application config object
      */
     @Autowired
     public ActionSvcRestClientImpl(RestTemplate restTemplate,
@@ -47,7 +47,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
      * Implementation for request to action service to create action plan
      * @param name name of action plan
      * @param description description of action plan
-     * @return action plan
+     * @return ActionPlanDTO representing action plan
      */
     @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
             backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))

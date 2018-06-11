@@ -46,31 +46,46 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CollectionExerciseServiceImpl implements CollectionExerciseService {
 
-    @Autowired
-    private CollectionExerciseRepository collectRepo;
-
-    @Autowired
-    private CaseTypeOverrideRepository caseTypeOverrideRepo;
-
-    @Autowired
     private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
-    @Autowired
+    private CaseTypeOverrideRepository caseTypeOverrideRepo;
+
+    private CollectionExerciseRepository collectRepo;
+
     private ActionSvcClient actionSvcClient;
 
-    @Autowired
-    private SurveyService surveyService;
+    private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
-    @Autowired
     private SampleLinkRepository sampleLinkRepository;
 
-    @Autowired
-    @Qualifier("collectionExercise")
+    private SurveyService surveyService;
+
     private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState,
             CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
 
+
     @Autowired
-    private CollectionInstrumentSvcClient collectionInstrument;
+    public CollectionExerciseServiceImpl(
+            CaseTypeDefaultRepository caseTypeDefaultRepo,
+            CaseTypeOverrideRepository caseTypeOverrideRepo,
+            CollectionExerciseRepository collectRepo,
+            SampleLinkRepository sampleLinkRepository,
+            ActionSvcClient actionSvcClient,
+            CollectionInstrumentSvcClient collectionInstrumentSvcClient,
+            SurveyService surveyService,
+            @Qualifier("collectionExercise") StateTransitionManager
+                    <CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent>
+                    collectionExerciseTransitionState) {
+        this.caseTypeOverrideRepo = caseTypeOverrideRepo;
+        this.caseTypeDefaultRepo = caseTypeDefaultRepo;
+        this.collectRepo = collectRepo;
+        this.sampleLinkRepository = sampleLinkRepository;
+        this.actionSvcClient = actionSvcClient;
+        this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
+        this.surveyService = surveyService;
+        this.collectionExerciseTransitionState = collectionExerciseTransitionState;
+    }
+
 
     @Override
     public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
@@ -545,7 +560,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE",
                 collectionExercise.getId().toString());
         String searchStringJson = new JSONObject(searchStringMap).toString();
-        Integer numberOfCollectionInstruments = collectionInstrument.countCollectionInstruments(searchStringJson);
+        Integer numberOfCollectionInstruments = collectionInstrumentSvcClient.countCollectionInstruments(
+                searchStringJson);
         boolean sampleLinksValid = validateSampleLinks(collexId);
         boolean shouldTransition = sampleLinksValid
                 && numberOfCollectionInstruments != null
