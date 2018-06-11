@@ -372,7 +372,6 @@ public class CollectionExerciseEndpoint {
         } else {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
         }
-
         if (survey == null) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
         }
@@ -381,7 +380,7 @@ public class CollectionExerciseEndpoint {
                 collex.getExerciseRef(), survey);
         if (existing != null) {
             throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                    String.format("Collection exercise with survey %s and exerciseRef %s already exists",
+                    String.format("Collection exercise already exists, SurveyId: %s exerciseRef: %s",
                             survey.getId(),
                             collex.getExerciseRef()));
         }
