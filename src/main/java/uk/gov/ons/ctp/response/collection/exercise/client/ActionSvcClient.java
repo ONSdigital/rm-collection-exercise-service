@@ -13,6 +13,7 @@ public interface ActionSvcClient {
         Request action plan is created.
         @param name name of action plan
         @param description description of action plan
+        @return ActionPlanDTO representation of the created action plan
      */
-    ActionPlanDTO  createActionPlan(String name, String description) throws RestClientException;
+    ActionPlanDTO createActionPlan(String name, String description) throws RestClientException;
 }

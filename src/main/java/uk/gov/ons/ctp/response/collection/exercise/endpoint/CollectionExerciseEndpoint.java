@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
@@ -372,31 +373,30 @@ public class CollectionExerciseEndpoint {
         } else {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
         }
-
         if (survey == null) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
         }
+
         CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
                 collex.getExerciseRef(), survey);
-
         if (existing != null) {
             throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
                     String.format("Collection exercise with survey %s and exerciseRef %s already exists",
                             survey.getId(),
                             collex.getExerciseRef()));
         }
+
         CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newCollex.getId()).toUri();
-
-        log.info("Successfully created collection exercise, %s", newCollex.getId());
+        log.info("Successfully created collection exercise, CollectionExerciseId: %s", newCollex.getId());
         return ResponseEntity.created(location).build();
     }
 
     /**
-     * DELETE request to delete a collection exercise
+     * DELETE request which deletes a collection exercise
      *
      * @param id Collection exercise Id to delete
      * @return the collection exercise that was to be deleted

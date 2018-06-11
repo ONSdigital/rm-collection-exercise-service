@@ -5,7 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
@@ -228,12 +230,18 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @return created collection exercise
      */
     @Override
-    public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) {
+    public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) throws CTPException {
         log.debug("Attempting to create collection exercise with action plans");
-        CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
-        // Save collection exercise before creating action plans because we need exercisepk
-        collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-        createActionPlans(collectionExercise);
+        CollectionExercise collectionExercise;
+        try {
+            collectionExercise = newCollectionExerciseFromDTO(collex);
+            // Save collection exercise before creating action plans because we need an exercisepk
+            collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
+            createActionPlans(collectionExercise);
+        } catch (DataAccessException|RestClientException e) {
+            log.error("Failed to create collection exercise");
+            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, e.getMessage());
+        }
 
         log.debug("Successfully created collection exercise and action plans.");
         return collectionExercise;
@@ -262,9 +270,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      */
     private void createActionPlans(CollectionExercise collectionExercise) {
         log.debug("Attempting to create action plans for Collection exercise %s", collectionExercise.getId());
+
         SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
         String shortName = survey.getShortName();
-
         createActionPlan(shortName, collectionExercise, "B");
         createActionPlan(shortName, collectionExercise, "BI");
         log.debug("Successfully created action plans for Collection Exercise %s", collectionExercise.getId());
@@ -280,11 +288,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         log.debug("Attempting to create action plan and case type overrides for collection exercise %s case type, %s",
                    collectionExercise.getId(), caseType);
         String exerciseRef = collectionExercise.getExerciseRef();
-        String name = shortName + " " + caseType + " " + exerciseRef;
-        String description = shortName + " " + caseType + " Case " + exerciseRef;
-
+        String name = String.format("%s %s %s", shortName, caseType, exerciseRef);
+        String description = String.format("%s %s Case %s", shortName, caseType, exerciseRef);
         ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
-
         createCaseTypeOverride(collectionExercise, caseType, actionPlan);
         log.debug("Successfully created action plan and case type override collection exercise, %s case type, %s",
                    collectionExercise.getId(), caseType);
@@ -295,8 +301,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collectionExercise
      * @param sampleUnitType
      * @param actionPlan
+     * @throws DataAccessException if caseTypeOverride fails to save to database
      */
-    private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan) {
+    private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan)
+            throws DataAccessException {
         log.debug("Creating case type override for Action Plan:%s Collection Exercise:%s Case Type: %s",
                    actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
         CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
