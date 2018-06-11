@@ -69,25 +69,32 @@ public class CollectionExerciseEndpoint {
     private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
     private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
 
-
-    @Autowired
     private CollectionExerciseService collectionExerciseService;
 
-    @Autowired
     private SurveyService surveyService;
 
-    @Autowired
     private SampleService sampleService;
 
-    @Autowired
     private EventService eventService;
 
-    @Qualifier("collectionExerciseBeanMapper")
-    @Autowired
     private MapperFacade mapperFacade;
 
-    @Autowired
     private Scheduler scheduler;
+
+    @Autowired
+    public CollectionExerciseEndpoint(CollectionExerciseService collectionExerciseService,
+                                      SurveyService surveyService,
+                                      SampleService sampleService,
+                                      EventService eventService,
+                                      @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade,
+                                      Scheduler scheduler) {
+        this.collectionExerciseService = collectionExerciseService;
+        this.surveyService = surveyService;
+        this.sampleService = sampleService;
+        this.eventService = eventService;
+        this.mapperFacade = mapperFacade;
+        this.scheduler = scheduler;
+    }
 
     /**
      * Method to return a useful message from a ConstraintViolation
