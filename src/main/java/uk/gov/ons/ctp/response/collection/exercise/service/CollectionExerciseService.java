@@ -179,7 +179,6 @@ public interface CollectionExerciseService {
   void transitionCollectionExercise(UUID collectionExerciseId, CollectionExerciseDTO.CollectionExerciseEvent event)
           throws CTPException;
 
-
   /**
    * Transition scheduled collection exercises with collection instruments and samples to
    * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
@@ -191,4 +190,12 @@ public interface CollectionExerciseService {
    * {@link CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
    */
   void transitionScheduleCollectionExerciseToReadyToReview(CollectionExercise collectionExercise) throws CTPException;
+
+  /**
+   * Delete SampleSummary link
+   * @param sampleSummaryId a sample summary uuid
+   * @param collectionExerciseId a collection exercise uuid
+   * @throws CTPException thrown if transition fails
+   */
+  void removeSampleSummaryLink(UUID sampleSummaryId, UUID collectionExerciseId) throws CTPException;
 }

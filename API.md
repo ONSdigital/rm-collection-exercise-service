@@ -416,6 +416,12 @@ The endpoint will also delete any entries currently in the samplelink table for 
 
 An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
 
+## Unlink Sample Summary To Collection Exercise
+* `DELETE /collectionexercises/unlink/{collection_exercise_id}/sample/{sample_summary_id}` will unlink the Sample Summary specified from the collection exercise with the given id.
+* Returns 204 noContent if successfully unlinked
+
+An `HTTP 404 Not Found` status code is returned if the collection exercise with the specified ID could not be found.
+
 ## Get Sample Summaries Linked To Collection Exercise
 * `GET /collectionexercises/link/{collection_exercise_id}` will return a list of Sample Summary IDs linked to a collection exercise.
 
@@ -436,7 +442,20 @@ This part of the page  documents the Collection Exercise event service API endpo
 
 ## Service Information
 
-## Update Collection Event Exercise
+## Create Collection Exercise Event
+* `POST /collectionexercises/{collection_exercise_id}/events` will create a new collection exercise event timestamp with the given id.
+* Returns 201 OK if the resource is updated
+
+### Example Request Body
+
+```
+    {
+        "tag": "exercise_end_2",
+        "timestamp": "2018-04-01T00:00:00.000Z"
+    }
+```
+
+## Update Collection Exercise Event
 * `PUT /collectionexercises/{collection_exercise_id}/events/{event-tag}` will update the collection exercise event timestamp with the given id.
 * Returns 200 OK if the resource is updated
 

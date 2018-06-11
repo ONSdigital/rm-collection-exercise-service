@@ -206,4 +206,14 @@ public class SampleServiceImpl implements SampleService {
                 .map(SampleServiceImpl::validateSampleUnit)
                 .toArray(SampleUnitValidationErrorDTO[]::new);
     }
+
+    @Override
+    public List<SampleLink> getSampleLinksForSummary(final UUID sampleSummaryId) {
+        return this.sampleLinkRepository.findBySampleSummaryId(sampleSummaryId);
+    }
+
+    @Override
+    public SampleLink saveSampleLink(final SampleLink sampleLink) {
+        return this.sampleLinkRepository.saveAndFlush(sampleLink);
+    }
 }
