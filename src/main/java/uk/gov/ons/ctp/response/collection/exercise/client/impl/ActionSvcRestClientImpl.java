@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -47,6 +49,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
      * @param description description of action plan
      * @return action plan
      */
+    @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
+            backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
     @Override
     public ActionPlanDTO createActionPlan(String name, String description) throws RestClientException {
         log.debug("Posting to action service to create action plan");
