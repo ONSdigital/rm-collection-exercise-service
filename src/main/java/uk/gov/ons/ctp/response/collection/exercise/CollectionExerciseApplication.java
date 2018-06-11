@@ -56,9 +56,6 @@ public class CollectionExerciseApplication {
 
   @Autowired
   private StateTransitionManagerFactory collectionExerciseStateTransitionManagerFactory;
-  
-  @Autowired
-  private DataSource dataSource;
 
   /**
    * Bean used to map exceptions for endpoints
