@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
@@ -229,20 +228,15 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collex the data to create the collection exercise from
      * @return created collection exercise
      */
+    @Transactional
     @Override
-    public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) throws CTPException {
+    public CollectionExercise createCollectionExercise(CollectionExerciseDTO collex, SurveyDTO survey) {
         log.debug("Attempting to create collection exercise with action plans");
-        CollectionExercise collectionExercise;
-        try {
-            collectionExercise = newCollectionExerciseFromDTO(collex);
-            // Save collection exercise before creating action plans because we need an exercisepk
-            collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-            createActionPlans(collectionExercise);
-        } catch (DataAccessException|RestClientException e) {
-            log.error("Failed to create collection exercise");
-            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, e.getMessage());
-        }
 
+        CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
+        // Save collection exercise before creating action plans because we need an exercisepk
+        collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
+        createActionPlans(collectionExercise, survey);
         log.debug("Successfully created collection exercise and action plans.");
         return collectionExercise;
     }
@@ -267,11 +261,10 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     /**
      * Set up data for creation of action plans
      * @param collectionExercise Collection Exercise
+     * @param survey SurveyDTO representing survey of collection exercise
      */
-    private void createActionPlans(CollectionExercise collectionExercise) {
+    private void createActionPlans(CollectionExercise collectionExercise, SurveyDTO survey) {
         log.debug("Attempting to create action plans for Collection exercise %s", collectionExercise.getId());
-
-        SurveyDTO survey = surveyService.findSurvey(collectionExercise.getSurveyId());
         String shortName = survey.getShortName();
         createActionPlan(shortName, collectionExercise, "B");
         createActionPlan(shortName, collectionExercise, "BI");

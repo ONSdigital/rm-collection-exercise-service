@@ -120,7 +120,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(UUID surveyId) {
+  public SurveyDTO findSurvey(UUID surveyId) throws RestClientException {
     UriComponents uriComponents = restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
 
@@ -138,7 +138,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(String surveyRef) {
+  public SurveyDTO findSurveyByRef(String surveyRef) throws RestClientException {
     UriComponents uriComponents = restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);
 

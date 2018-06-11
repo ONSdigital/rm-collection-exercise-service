@@ -96,7 +96,7 @@ public interface CollectionExerciseService {
    * @param collex the data to create the collection exercise from
    * @return a new CollectionExercise object
    */
-  CollectionExercise createCollectionExercise(CollectionExerciseDTO collex) throws CTPException;
+  CollectionExercise createCollectionExercise(CollectionExerciseDTO collex, SurveyDTO survey);
 
   /**
    * Gets collection exercise with given exerciseRef and survey (should be no more than 1)
