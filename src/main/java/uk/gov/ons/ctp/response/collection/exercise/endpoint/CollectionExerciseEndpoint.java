@@ -369,8 +369,17 @@ public class CollectionExerciseEndpoint {
 
         if (StringUtils.isBlank(surveyId) == false) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+
+            if (survey == null){
+                throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Survey with id %s not found",
+                        surveyId));
+            }
         } else if (StringUtils.isBlank(surveyRef) == false) {
             survey = this.surveyService.findSurveyByRef(surveyRef);
+            if (survey == null){
+                throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Survey with ref %s not found",
+                        surveyRef));
+            }
             // Downstream expects the surveyId to be present so add it now
             collex.setSurveyId(survey.getId());
         } else {
