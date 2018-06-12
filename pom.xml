@@ -23,7 +23,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectionexercisesvc-api</artifactId>
-      <version>10.49.11</version>
+      <version>10.49.12</version>
     </dependency>
 
     <dependency>
@@ -65,7 +65,7 @@
     <dependency>
       <groupId>uk.gov.ons.ctp.common</groupId>
       <artifactId>framework</artifactId>
-      <version>10.49.10</version>
+      <version>10.49.12</version>
     </dependency>
 
     <dependency>
@@ -183,6 +183,13 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context-support</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>com.mashape.unirest</groupId>
+      <artifactId>unirest-java</artifactId>
+      <version>1.4.9</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <scm>
@@ -218,6 +225,9 @@
         <configuration>
           <executable>true</executable>
           <mainClass>uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication</mainClass>
+          <profiles>
+            <profile>test</profile>
+          </profiles>
         </configuration>
         <executions>
           <execution>
@@ -257,6 +267,77 @@
           </formats>
           <check />
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.23.0</version>
+        <executions>
+          <execution>
+            <id>pre-stop</id>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <images>
+                <image>
+                  <external>
+                    <type>compose</type>
+                    <basedir>${project.basedir}</basedir>
+                  </external>
+                </image>
+              </images>
+            </configuration>
+          </execution>
+          <execution>
+            <id>start</id>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <showLogs>false</showLogs>
+              <images>
+                <image>
+                  <external>
+                    <type>compose</type>
+                    <basedir>${project.basedir}</basedir>
+                  </external>
+                </image>
+              </images>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop</id>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <configuration>
+              <images>
+                <image>
+                  <external>
+                    <type>compose</type>
+                    <basedir>${project.basedir}</basedir>
+                  </external>
+                </image>
+              </images>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.18.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <phase>integration-test</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <resources>
