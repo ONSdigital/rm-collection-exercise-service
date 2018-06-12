@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,8 +8,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
+import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -22,6 +27,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +44,15 @@ public class SampleUploadedInboundReceiverTest {
 
     @Mock
     private CollectionExerciseService collectionExerciseService;
+
+    @Mock
+    private SimpleMessageSender sender;
+
+    @Mock
+    private ObjectMapper mapper;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @Mock
     private StateTransitionManager<LinkSampleSummaryDTO.SampleLinkState,
@@ -67,13 +82,18 @@ public class SampleUploadedInboundReceiverTest {
 
         ArgumentCaptor<SampleLink> sampleLinkCaptor = ArgumentCaptor.forClass(SampleLink.class);
         verify(this.sampleService, times(1)).saveSampleLink(sampleLinkCaptor.capture());
+        verify(this.rabbitTemplate, times(1))
+                .convertAndSend(
+                        eq(SampleUploadedInboundReceiver.OUTBOUND_EXCHANGE),
+                        eq(SampleUploadedInboundReceiver.OUTBOUND_ROUTING_KEY),
+                        anyString());
+        verify(this.collectionExerciseService, times(1))
+                .transitionScheduleCollectionExerciseToReadyToReview(eq(sampleLink.getCollectionExerciseId()));
+
         SampleLink capturedLink = sampleLinkCaptor.getValue();
 
         assertEquals(sampleLink.getSampleSummaryId(), capturedLink.getSampleSummaryId());
         assertEquals(sampleLink.getCollectionExerciseId(), capturedLink.getCollectionExerciseId());
         assertEquals(LinkSampleSummaryDTO.SampleLinkState.ACTIVE, capturedLink.getState());
-
-        verify(this.collectionExerciseService, times(1))
-                .transitionScheduleCollectionExerciseToReadyToReview(eq(sampleLink.getCollectionExerciseId()));
     }
 }

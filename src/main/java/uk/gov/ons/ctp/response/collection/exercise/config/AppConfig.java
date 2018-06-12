@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.Data;
+import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
 
 /**
  * The apps main holder for centralised configuration read from application.yml
@@ -25,5 +26,6 @@ public class AppConfig {
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
   private SwaggerSettings swaggerSettings;
+  private Rabbitmq rabbitmq;
 
 }
