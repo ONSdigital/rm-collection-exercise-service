@@ -41,7 +41,7 @@ services:
     - security_user_password=secret
  action:
    container_name: action-it
-   image: sdcplatform/actionsvc:latest
+   image: sdcplatform/actionsvc
    ports:
     - "38151:8151"
    external_links:
@@ -57,7 +57,6 @@ services:
     - liquibase_password=postgres
     - security_user_name=admin
     - security_user_password=secret
-    - data-grid_address=redis-it:6379
-    - redis_host=redis-it
-    - rabbitmq_host=rabbit-it
+    - data_grid_address=redis-it:6379
+    - rabbitmq_host=rabbitmq-it
     - rabbitmq_port=5672
