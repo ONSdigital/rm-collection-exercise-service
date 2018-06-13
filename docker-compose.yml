@@ -39,4 +39,19 @@ services:
     - DATABASE_URL=postgres://postgres:postgres@postgres-it:5432/postgres?sslmode=disable
     - security_user_name=admin
     - security_user_password=secret
-
+ action:
+   container_name: action-it
+   image: sdcplatform/actionsvc
+   ports:
+    - "38151:8151"
+   external_links:
+    - postgres-it
+   environment:
+    - spring_datasource_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
+    - spring_datasource_username=postgres
+    - spring_datasource_password=postgres
+    - liquibase_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
+    - liquibase_user=postgres
+    - liquibase_password=postgres
+    - security_user_name=admin
+    - security_user_password=secret
