@@ -24,7 +24,7 @@ public class DataSourceConfiguration {
    * @return Cloud
    */
   @Bean
-  public final Cloud cloud() {
+  public Cloud cloud() {
     return new CloudFactory().getCloud();
   }
 
