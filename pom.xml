@@ -237,9 +237,6 @@
         <configuration>
           <executable>true</executable>
           <mainClass>uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication</mainClass>
-          <profiles>
-            <profile>test</profile>
-          </profiles>
         </configuration>
         <executions>
           <execution>
