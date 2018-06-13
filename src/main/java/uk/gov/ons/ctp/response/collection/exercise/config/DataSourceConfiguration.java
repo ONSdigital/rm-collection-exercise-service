@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import net.sourceforge.cobertura.CoverageIgnore;
 
 /**
- * DataSource bean
+ * DataSource bean. Required to override the CloudFoundry defaults - no practical use in code
  *
  */
 @CoverageIgnore
@@ -19,15 +19,23 @@ import net.sourceforge.cobertura.CoverageIgnore;
 @Profile("cloud")
 public class DataSourceConfiguration {
 
-    @Bean
-    public Cloud cloud() {
-        return new CloudFactory().getCloud();
-    }
-    
-    @Bean
-    @ConfigurationProperties(prefix="spring.datasource.tomcat")
-    public DataSource dataSource() {
-        return cloud().getSingletonServiceConnector(DataSource.class, null);
-    }
+  /**
+   * Creates the cloud object.
+   * @return Cloud
+   */
+  @Bean
+  public final Cloud cloud() {
+    return new CloudFactory().getCloud();
+  }
+
+  /**
+   * Creates the DataSource object.
+   * @return DataSource
+   */
+  @Bean
+  @ConfigurationProperties(prefix = "spring.datasource.tomcat")
+  public DataSource dataSource() {
+    return cloud().getSingletonServiceConnector(DataSource.class, null);
+  }
 
 }
