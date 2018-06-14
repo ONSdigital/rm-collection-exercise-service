@@ -277,7 +277,7 @@ public class CollectionExerciseServiceImplTest {
 
   /**
    * Tests that creating a collection exercise for which action plans exists does not try to create action plans
-   * @throws Exception
+   * @throws Exception general exception
    */
   @Test
   public void testCreateCollectionExerciseExistingDefaultActionPlans() throws Exception {
@@ -304,7 +304,7 @@ public class CollectionExerciseServiceImplTest {
 
   /**
    * Tests that creating a collection exercise for which action plans exists does not try to create action plans
-   * @throws Exception
+   * @throws Exception general exception
    */
   @Test
   public void testCreateCollectionExerciseExistingOverrideActionPlans() throws Exception {
