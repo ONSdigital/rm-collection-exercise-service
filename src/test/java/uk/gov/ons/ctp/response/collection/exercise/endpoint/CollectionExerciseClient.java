@@ -125,6 +125,24 @@ public class CollectionExerciseClient {
     }
 
     /**
+     * Gets a collection exercise given the whole URI (e.g. as returned in a Location header)
+     * @param uriStr the full URI of the collection exercise resource
+     * @return a representation of the collection exercise
+     * @throws CTPException thrown if there was an error retrieving the collection exercise
+     */
+    public CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
+        try {
+            return Unirest.get(uriStr)
+                    .basicAuth(this.username, this.password)
+                    .header("accept", "application/json")
+                    .asObject(CollectionExerciseDTO.class)
+                    .getBody();
+        } catch (UnirestException e) {
+            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+        }
+    }
+
+    /**
      * Calls the API to link a list of sample summaries to a collection exercise
      * @param collexId the uuid of the collection exercise to link
      * @param sampleSummaryIds a list of the uuids of the sample summaries to link
@@ -165,24 +183,6 @@ public class CollectionExerciseClient {
      */
     public int linkSampleSummary(final UUID collexId, final UUID sampleSummaryId) throws CTPException {
         return linkSampleSummaries(collexId, Arrays.asList(sampleSummaryId));
-    }
-
-    /**
-     * Gets a collection exercise given the whole URI (e.g. as returned in a Location header)
-     * @param uriStr the full URI of the collection exercise resource
-     * @return a representation of the collection exercise
-     * @throws CTPException thrown if there was an error retrieving the collection exercise
-     */
-    public CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
-        try {
-            return Unirest.get(uriStr)
-                    .basicAuth(this.username, this.password)
-                    .header("accept", "application/json")
-                    .asObject(CollectionExerciseDTO.class)
-                    .getBody();
-        } catch (UnirestException e) {
-            throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
-        }
     }
 
     /**
