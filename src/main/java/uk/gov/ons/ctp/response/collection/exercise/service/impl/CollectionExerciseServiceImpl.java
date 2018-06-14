@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
@@ -269,7 +270,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
         collectionExercise.setCreated(new Timestamp(new Date().getTime()));
         collectionExercise.setId(UUID.randomUUID());
-
         log.debug("Successfully created collection exercise from DTO, CollectionExerciseId: {}",
                 collectionExercise.getId());
         return collectionExercise;
@@ -377,11 +377,12 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
      * @param collectionExercise representation of collection exercise
      * @param sampleUnitType Sample unit type i.e. (B, H, HI)
      * @param actionPlan the newly created action plan
+     * @throws DataAccessException if caseTypeOverride fails to save to database
      */
     private void createCaseTypeOverride(CollectionExercise collectionExercise, String sampleUnitType,
-                                        ActionPlanDTO actionPlan) {
-        log.debug("Creating case type override, CollectionExerciseId: {}, SampleUnitType: {}, ActionPlanId: {}",
-                collectionExercise.getId(), sampleUnitType, actionPlan.getId());
+                                        ActionPlanDTO actionPlan) throws DataAccessException {
+        log.debug("Creating case type override, ActionPlanId: {}, CollectionExerciseId: {}, SampleUnitType: {}",
+                   actionPlan.getId(), collectionExercise.getId(), sampleUnitType);
         CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
         caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
         caseTypeOverride.setSampleUnitTypeFK(sampleUnitType);

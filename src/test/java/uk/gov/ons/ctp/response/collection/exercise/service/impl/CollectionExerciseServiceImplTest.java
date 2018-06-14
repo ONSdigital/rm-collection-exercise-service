@@ -269,8 +269,35 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.createCollectionExercise(toCreate, survey);
 
     // Then
-    verify(actionService).createActionPlan("BRES B 202103", "BRES B Case 202103");
-    verify(actionService).createActionPlan("BRES BI 202103", "BRES BI Case 202103");
+    verify(actionService, times(1)).createActionPlan("BRES B 202103", "BRES B Case 202103");
+    verify(actionService, times(1)).createActionPlan("BRES BI 202103", "BRES BI Case 202103");
+  }
+
+  /**
+   * Tests that creating a collection exercise for which action plans exists does not try to create action plans
+   * @throws Exception
+   */
+  @Test
+  public void testCreateCollectionExerciseExistingActionPlans() throws Exception {
+    // Given
+    CollectionExerciseDTO toCreate = FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise collectionExercise = FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
+    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
+    actionPlanDTO.setId(UUID.randomUUID());
+    when(actionService.createActionPlan(any(), any())).thenReturn(actionPlanDTO);
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(any(), any())).thenReturn(caseTypeOverride);
+
+    // When
+    this.collectionExerciseServiceImpl.createCollectionExercise(toCreate, survey);
+
+    // Then
+    verify(actionService, times(0)).createActionPlan("BRES B 202103", "BRES B Case 202103");
+    verify(actionService, times(0)).createActionPlan("BRES BI 202103", "BRES BI Case 202103");
   }
 
   @Test

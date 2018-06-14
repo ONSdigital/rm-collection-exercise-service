@@ -127,7 +127,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
     try {
-      log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
+      log.debug("about to get to the Survey SVC with surveyId {} from {}", surveyId, uriComponents.toUri());
       ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
               String.class);
 
@@ -145,7 +145,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
     try {
-      log.debug("about to get to the Survey SVC with surveyRef {}", surveyRef);
+      log.debug("about to get to the Survey SVC with surveyRef {} from {}", surveyRef, uriComponents.toUri());
       ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
               String.class);
 
