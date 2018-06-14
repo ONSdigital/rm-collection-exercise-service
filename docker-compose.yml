@@ -1,0 +1,62 @@
+version: '2'
+services:
+ postgres:
+  container_name: postgres-it
+  image: sdcplatform/ras-rm-docker-postgres
+  ports:
+   - "15432:5432"
+ redis:
+  container_name: redis-it
+  image: redis:3.2.9
+  ports:
+   - "17379:6379"
+ rabbitmq:
+  container_name: rabbitmq-it
+  image: rabbitmq:3.6.10-management
+  ports:
+    - "14369:4369"
+    - "35672:25672"
+    - "15671:5671"
+    - "15672:5672"
+    - "25671:15671"
+    - "26672:15672"
+ sftp:
+    container_name: sftp-it
+    image: atmoz/sftp
+    volumes:
+        - ~/Documents/sftp:/home/centos/Documents/sftp
+    ports:
+        - "222:22"
+    command: centos:JLibV2&XD,:1001
+ survey:
+   container_name: survey-it
+   image: sdcplatform/surveysvc
+   ports:
+    - "18080:8080"
+   external_links:
+    - postgres-it
+   environment:
+    - DATABASE_URL=postgres://postgres:postgres@postgres-it:5432/postgres?sslmode=disable
+    - security_user_name=admin
+    - security_user_password=secret
+ action:
+   container_name: action-it
+   image: sdcplatform/actionsvc
+   ports:
+    - "38151:8151"
+   external_links:
+    - postgres-it
+    - redis-it
+    - rabbitmq-it
+   environment:
+    - spring_datasource_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
+    - spring_datasource_username=postgres
+    - spring_datasource_password=postgres
+    - liquibase_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
+    - liquibase_user=postgres
+    - liquibase_password=postgres
+    - security_user_name=admin
+    - security_user_password=secret
+    - data_grid_address=redis-it:6379
+    - rabbitmq_host=rabbitmq-it
+    - rabbitmq_port=5672

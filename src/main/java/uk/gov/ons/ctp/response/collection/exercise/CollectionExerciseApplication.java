@@ -126,14 +126,23 @@ public class CollectionExerciseApplication {
   }*/
 
   /**
+   * The RestUtility bean for the Action service
+   * @return the RestUtility bean for the Action service
+   */
+  @Bean
+  @Qualifier("actionRestUtility")
+  public RestUtility actionRestUtility() {
+    return new RestUtility(appConfig.getActionSvc().getConnectionConfig());
+  }
+
+  /**
    * The RestUtility bean for the CollectionInstrument service
    * @return the RestUtility bean for the CollectionInstrument service
    */
   @Bean
   @Qualifier("collectionInstrumentRestUtility")
   public RestUtility collectionInstrumentRestUtility() {
-    RestUtility restUtility = new RestUtility(appConfig.getCollectionInstrumentSvc().getConnectionConfig());
-    return restUtility;
+    return new RestUtility(appConfig.getCollectionInstrumentSvc().getConnectionConfig());
   }
 
   /**
@@ -143,8 +152,7 @@ public class CollectionExerciseApplication {
   @Bean
   @Qualifier("partyRestUtility")
   public RestUtility partyRestUtility() {
-    RestUtility restUtility = new RestUtility(appConfig.getPartySvc().getConnectionConfig());
-    return restUtility;
+    return new RestUtility(appConfig.getPartySvc().getConnectionConfig());
   }
 
   /**
@@ -154,8 +162,7 @@ public class CollectionExerciseApplication {
   @Bean
   @Qualifier("sampleRestUtility")
   public RestUtility sampleRestUtility() {
-    RestUtility restUtility = new RestUtility(appConfig.getSampleSvc().getConnectionConfig());
-    return restUtility;
+    return new RestUtility(appConfig.getSampleSvc().getConnectionConfig());
   }
 
   /**
@@ -165,8 +172,7 @@ public class CollectionExerciseApplication {
   @Bean
   @Qualifier("surveyRestUtility")
   public RestUtility surveyRestUtility() {
-    RestUtility restUtility = new RestUtility(appConfig.getSurveySvc().getConnectionConfig());
-    return restUtility;
+    return new RestUtility(appConfig.getSurveySvc().getConnectionConfig());
   }
 
   /**

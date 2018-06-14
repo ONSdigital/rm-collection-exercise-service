@@ -60,6 +60,10 @@ spring:
       min-idle: 3
     continue-on-error: true
     schema: classpath:/schema-cloud.sql
+    user: ${cloud.services.postgresql.connection.username}
+    password: ${cloud.services.postgresql.connection.password}
+    default-schema: collectionexercise
+    url: ${cloud.services.postgresql.connection.jdbcurl}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

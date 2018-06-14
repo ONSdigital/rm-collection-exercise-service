@@ -1,12 +1,18 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
+import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
@@ -30,9 +36,19 @@ public class SampleUploadedInboundReceiver {
     private SampleService sampleService;
 
     @Autowired
+    private ObjectMapper mapper;
+
+    @Qualifier("genericRabbitTemplate")
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
     @Qualifier("sampleLink")
     private StateTransitionManager<SampleLinkState, SampleLinkEvent>
             sampleLinkState;
+
+    static String OUTBOUND_EXCHANGE = "collection-outbound-exchange";
+    static String OUTBOUND_ROUTING_KEY = "SampleLink.Activated.binding";
 
     /**
      * Method to set the state of a SampleLink to ACTIVATED
@@ -47,6 +63,10 @@ public class SampleUploadedInboundReceiver {
             sampleLink.setState(newState);
 
             this.sampleService.saveSampleLink(sampleLink);
+
+            //String message = mapper.writeValueAsString(sampleLink);
+            this.rabbitTemplate.convertAndSend(OUTBOUND_EXCHANGE, OUTBOUND_ROUTING_KEY, sampleLink);
+            log.info("Send message {} to {} ({})", sampleLink, OUTBOUND_EXCHANGE, OUTBOUND_ROUTING_KEY);
 
             this.collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
                     sampleLink.getCollectionExerciseId());

@@ -120,14 +120,14 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(UUID surveyId) {
+  public SurveyDTO findSurvey(UUID surveyId) throws RestClientException {
     UriComponents uriComponents = restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
     try {
-      log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
+      log.debug("about to get to the Survey SVC with surveyId {} from {}", surveyId, uriComponents.toUri());
       ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
               String.class);
 
@@ -138,14 +138,14 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(String surveyRef) {
+  public SurveyDTO findSurveyByRef(String surveyRef) throws RestClientException {
     UriComponents uriComponents = restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
     try {
-      log.debug("about to get to the Survey SVC with surveyRef {}", surveyRef);
+      log.debug("about to get to the Survey SVC with surveyRef {} from {}", surveyRef, uriComponents.toUri());
       ResponseEntity<String> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity,
               String.class);
 
