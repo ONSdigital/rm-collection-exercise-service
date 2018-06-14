@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import net.sourceforge.cobertura.CoverageIgnore;
 
 /**
- * DataSource bean. Required to override the CloudFoundry defaults - no practical use in code
+ * DataSource bean, Required to override the CloudFoundry defaults - no practical use in code
  *
  */
 @CoverageIgnore
@@ -24,7 +24,7 @@ public class DataSourceConfiguration {
    * @return Cloud
    */
   @Bean
-  public final Cloud cloud() {
+  public Cloud cloud() {
     return new CloudFactory().getCloud();
   }
 
