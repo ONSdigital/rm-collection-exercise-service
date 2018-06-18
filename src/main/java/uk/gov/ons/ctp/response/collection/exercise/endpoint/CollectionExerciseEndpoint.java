@@ -685,6 +685,19 @@ public class CollectionExerciseEndpoint {
     }
 
     /**
+     * Get's the list of all scheduled events from quartz (i.e. it's not the list of events as stored in the database,
+     * it's the actual jobs scheduled in quartz)
+     * @return the list of events derived from quartz jobs
+     * @throws SchedulerException thrown if issues getting data from quartz
+     */
+    @RequestMapping(value = "/events/scheduled", method = RequestMethod.GET)
+    public ResponseEntity<List<EventDTO>> getAllScheduledEvents() throws SchedulerException {
+        List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);
+
+        return ResponseEntity.ok(scheduledEvents);
+    }
+
+    /**
      * Endpoint to get a collection exercise by exercise ref and survey ref
      *
      * @param exerciseRef the exercise ref
