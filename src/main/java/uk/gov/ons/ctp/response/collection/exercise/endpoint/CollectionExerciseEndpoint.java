@@ -399,7 +399,6 @@ public class CollectionExerciseEndpoint {
                             collex.getExerciseRef(), surveyRef));
         }
 
-        // Create new collection exercise, including required action plans and casetypedefaults/overrides
         CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex, survey);
 
         URI location = ServletUriComponentsBuilder
