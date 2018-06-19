@@ -138,6 +138,7 @@ public class SampleServiceImpl implements SampleService {
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false, timeout = TRANSACTION_TIMEOUT)
     @Override
     public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
+        log.debug("Processing sample unit: {}", sampleUnit);
         ExerciseSampleUnit exerciseSampleUnit = null;
 
         CollectionExercise collectionExercise = collectRepo.findOneById(
@@ -159,10 +160,12 @@ public class SampleServiceImpl implements SampleService {
                 exerciseSampleUnit = new ExerciseSampleUnit();
                 exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
                 exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+                exerciseSampleUnit.setSampleUnitId(UUID.fromString(sampleUnit.getId()));
                 exerciseSampleUnit.setSampleUnitType(SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
 
                 sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
+                // null pointer exception thrown here
                 if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK()) == collectionExercise
                         .getSampleSize()) {
                     collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),

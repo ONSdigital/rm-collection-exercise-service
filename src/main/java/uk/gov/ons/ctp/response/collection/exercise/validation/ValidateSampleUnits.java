@@ -400,6 +400,7 @@ public class ValidateSampleUnits {
    */
   private CollectionExerciseEvent getCollectionExerciseTransitionState(CollectionExercise exercise)
           throws CTPException {
+    log.info("getCollectionExerciseTransitionState is called!");
     CollectionExerciseEvent event = null;
     long init = sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
         SampleUnitGroupDTO.SampleUnitGroupState.INIT, exercise);
@@ -411,9 +412,11 @@ public class ValidateSampleUnits {
     if (validated == exercise.getSampleSize().longValue()) {
       // All sample units validated, set exercise state to VALIDATED
       event = CollectionExerciseEvent.VALIDATE;
+      log.info("State of collection exercise id: {} is now VALIDATE", exercise.getId());
     } else if (init < 1 && failed > 0) {
       // None left to validate but some failed, set exercise to
       // FAILEDVALIDATION
+      log.info("State of collection exercise id: {} is now INVALIDATED (FAILEDVALIDATION)", exercise.getId());
       event = CollectionExerciseEvent.INVALIDATE;
     }
 

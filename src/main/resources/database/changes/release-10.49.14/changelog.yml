@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.49.14
+      author: Damien Lloyd/Matthew Innes
+      changes:
+        - sqlFile:
+            comment: Add sample unit type for social surveys
+            path: add_new_sample_unit_type.sql
+            relativeToChangelogFile: true
+            splitStatements: false

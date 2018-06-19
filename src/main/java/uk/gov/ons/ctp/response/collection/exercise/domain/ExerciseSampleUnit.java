@@ -43,6 +43,9 @@ public class ExerciseSampleUnit {
   @JoinColumn(name = "sampleunitgroupfk", referencedColumnName = "sampleunitgrouppk")
   private ExerciseSampleUnitGroup sampleUnitGroup;
 
+  @Column(name = "id")
+  private UUID sampleUnitId;
+
   @Column (name = "collectioninstrumentid")
   private UUID collectionInstrumentId;
 

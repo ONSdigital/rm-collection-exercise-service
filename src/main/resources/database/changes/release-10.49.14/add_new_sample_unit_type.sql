@@ -1,0 +1,1 @@
+INSERT INTO collectionexercise.sampleunittype VALUES ('H');

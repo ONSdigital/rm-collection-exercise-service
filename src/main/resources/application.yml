@@ -11,8 +11,10 @@ info:
 logging:
   level:
     uk.gov.ons.ctp: DEBUG
+    org.hibernate.type: TRACE
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
+
 
 liquibase:
   user: postgres
@@ -71,11 +73,12 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         ddl-auto: update
         default_schema: collectionexercise
+
 
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
@@ -122,7 +125,7 @@ action-svc:
     port: 8151
     username: admin
     password: secret
-    
+
 collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   request-collection-instruments-count: /collection-instrument-api/1.0.2/collectioninstrument/count
@@ -167,6 +170,8 @@ schedules:
   distribution-schedule-delay-milli-seconds: 60000
   # number retrieved for each collection exercise each run, distributes this number for each exercise
   distribution-schedule-retrieval-max: 1000
+
+
 
 rabbitmq:
   username: guest

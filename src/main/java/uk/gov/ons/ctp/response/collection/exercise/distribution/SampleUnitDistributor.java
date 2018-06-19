@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -152,6 +153,7 @@ public class SampleUnitDistributor {
       } else {
         SampleUnitChild child = new SampleUnitChild();
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+        child.setId(sampleUnit.getSampleUnitId().toString());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         child.setPartyId(sampleUnit.getPartyId().toString());
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());

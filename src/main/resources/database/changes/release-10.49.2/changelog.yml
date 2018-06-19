@@ -107,3 +107,12 @@ databaseChangeLog:
             comment: Adds state to samplelink
             path: add-state-to-samplelink.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 10.49.2-13
+      author: Matt Innes
+      changes:
+        - sqlFile:
+            comment: Add the sample unit id to the sampleunit table
+            path: add-id-to-sampleunit.sql
+            relativeToChangelogFile: true
