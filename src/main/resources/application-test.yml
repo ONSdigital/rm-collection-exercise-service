@@ -27,4 +27,3 @@ schedules:
 collection-instrument-svc:
     connection-config:
         port: 18002
-

@@ -52,6 +52,7 @@ import static org.junit.Assert.assertNotNull;
  */
 @Slf4j
 @ContextConfiguration
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class CollectionExerciseEndpointIT {
