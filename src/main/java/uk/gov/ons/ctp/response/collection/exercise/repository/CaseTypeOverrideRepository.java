@@ -20,5 +20,6 @@ public interface CaseTypeOverrideRepository extends JpaRepository<CaseTypeOverri
    */
   List<CaseTypeOverride> findByExerciseFK(Integer collectionExercisePK);
 
+  CaseTypeOverride findTopByExerciseFKAndSampleUnitTypeFK(Integer collectionExercisePK, String sampleUnitType);
 
 }

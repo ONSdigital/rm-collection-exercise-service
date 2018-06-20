@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.49.13-1
+      author: Andrew Millar/Gemma Irving
+      changes:
+        - sqlFile:
+            comment: Add sequence for casetypeoverridepk
+            path: add-sequence-for-casetypeoverridepk.sql
+            relativeToChangelogFile: true
+            splitStatements: false

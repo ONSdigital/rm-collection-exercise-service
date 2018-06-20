@@ -18,6 +18,7 @@ import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
 @Data
 public class AppConfig {
 
+  private ActionSvc actionSvc;
   private SampleSvc sampleSvc;
   private SurveySvc surveySvc;
   private CollectionInstrumentSvc collectionInstrumentSvc;

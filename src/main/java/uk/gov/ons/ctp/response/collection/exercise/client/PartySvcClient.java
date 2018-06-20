@@ -7,7 +7,7 @@ import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /**
- * Service responsible for making client calls to the Survey service
+ * Service responsible for making client calls to the Party service
  *
  */
 public interface PartySvcClient {

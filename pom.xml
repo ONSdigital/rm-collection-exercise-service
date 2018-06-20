@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>collectionexercisesvc</artifactId>
-  <version>10.49.13-SNAPSHOT</version>
+  <version>10.49.14-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>CTP : CollectionExerciseService</name>
@@ -24,6 +24,18 @@
       <groupId>uk.gov.ons.ctp.product</groupId>
       <artifactId>collectionexercisesvc-api</artifactId>
       <version>10.49.12</version>
+    </dependency>
+
+    <dependency>
+      <groupId>uk.gov.ons.ctp.product</groupId>
+      <artifactId>actionsvc-api</artifactId>
+      <version>10.49.10</version>
+    </dependency>
+
+    <dependency>
+      <groupId>uk.gov.ons.ctp.product</groupId>
+      <artifactId>actionsvc-api</artifactId>
+      <version>10.49.10</version>
     </dependency>
 
     <dependency>
@@ -339,6 +351,25 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>sleep-for-a-while</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <sleep seconds="10" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <resources>
       <resource>
@@ -347,5 +378,6 @@
       </resource>
     </resources>
   </build>
+
 
 </project>

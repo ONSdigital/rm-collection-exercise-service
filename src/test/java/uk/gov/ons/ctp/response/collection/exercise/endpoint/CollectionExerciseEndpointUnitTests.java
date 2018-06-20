@@ -387,7 +387,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testCreateCollectionExercise() throws Exception {
     CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
     when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
-    when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
+    when(collectionExerciseService.createCollectionExercise(any(), any())).thenReturn(created);
 
     String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
     ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
@@ -401,7 +401,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testCreateCollectionExerciseBySurveyRef() throws Exception {
     CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
     when(surveyService.findSurveyByRef(SURVEY_REF_1)).thenReturn(surveyDtoResults.get(0));
-    when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
+    when(collectionExerciseService.createCollectionExercise(any(), any())).thenReturn(created);
 
     String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post-survey-ref.json");
     ResultActions actions = mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
@@ -415,7 +415,7 @@ public class CollectionExerciseEndpointUnitTests {
   public void testCreateCollectionExerciseAlreadyExists() throws Exception {
     CollectionExercise created = FixtureHelper.loadClassFixtures(CollectionExercise[].class, "post").get(0);
     when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
-    when(collectionExerciseService.createCollectionExercise(any())).thenReturn(created);
+    when(collectionExerciseService.createCollectionExercise(any(), any())).thenReturn(created);
     when(this.collectionExerciseService.findCollectionExercise("202103", surveyDtoResults.get(0))).thenReturn(created);
 
     String json = getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");

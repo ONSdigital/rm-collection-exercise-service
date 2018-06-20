@@ -70,25 +70,32 @@ public class CollectionExerciseEndpoint {
     private static final String RETURN_SURVEYNOTFOUND = "Survey not found for survey Id";
     private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
 
-
-    @Autowired
     private CollectionExerciseService collectionExerciseService;
 
-    @Autowired
     private SurveyService surveyService;
 
-    @Autowired
     private SampleService sampleService;
 
-    @Autowired
     private EventService eventService;
 
-    @Qualifier("collectionExerciseBeanMapper")
-    @Autowired
     private MapperFacade mapperFacade;
 
-    @Autowired
     private Scheduler scheduler;
+
+    @Autowired
+    public CollectionExerciseEndpoint(CollectionExerciseService collectionExerciseService,
+                                      SurveyService surveyService,
+                                      SampleService sampleService,
+                                      EventService eventService,
+                                      @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade,
+                                      Scheduler scheduler) {
+        this.collectionExerciseService = collectionExerciseService;
+        this.surveyService = surveyService;
+        this.sampleService = sampleService;
+        this.eventService = eventService;
+        this.mapperFacade = mapperFacade;
+        this.scheduler = scheduler;
+    }
 
     /**
      * Method to return a useful message from a ConstraintViolation
@@ -353,6 +360,7 @@ public class CollectionExerciseEndpoint {
 
     /**
      * POST request to create a collection exercise
+     * Also creates required action plans and casetypeoverrides
      *
      * @param collex A dto containing the data about the collection exercise
      * @return 201 if all is ok, 400 for bad request, 409 for conflict
@@ -362,55 +370,46 @@ public class CollectionExerciseEndpoint {
     public ResponseEntity<?> createCollectionExercise(
             final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody CollectionExerciseDTO collex)
             throws CTPException {
-        log.info("Creating collection exercise");
+        log.info("Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
+                collex.getExerciseRef(), collex.getSurveyRef());
         String surveyId = collex.getSurveyId();
         String surveyRef = collex.getSurveyRef();
-        SurveyDTO survey = null;
+        SurveyDTO survey;
 
-        if (StringUtils.isBlank(surveyId) == false) {
+        // Retrieve survey from survey service if it exists
+        if (!StringUtils.isBlank(surveyId)) {
             survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
-
-            if (survey == null){
-                throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Survey with id %s not found",
-                        surveyId));
-            }
-        } else if (StringUtils.isBlank(surveyRef) == false) {
+        } else if (!StringUtils.isBlank(surveyRef)) {
             survey = this.surveyService.findSurveyByRef(surveyRef);
-            if (survey == null){
-                throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Survey with ref %s not found",
-                        surveyRef));
-            }
             // Downstream expects the surveyId to be present so add it now
             collex.setSurveyId(survey.getId());
         } else {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
         }
-
         if (survey == null) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
-        } else {
-            CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
-                    collex.getExerciseRef(), survey);
-
-            if (existing != null) {
-                throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
-                        String.format("Collection exercise with survey %s and exerciseRef %s already exists",
-                                survey.getId().toString(),
-                                collex.getExerciseRef()));
-            } else {
-                CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex);
-
-                URI location = ServletUriComponentsBuilder
-                        .fromCurrentRequest().path("/{id}")
-                        .buildAndExpand(newCollex.getId()).toUri();
-
-                return ResponseEntity.created(location).build();
-            }
         }
+
+        // Check if collection exercise already exists
+        CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
+                collex.getExerciseRef(), survey);
+        if (existing != null) {
+            throw new CTPException(CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+                    String.format("Collection exercise already exists, ExerciseRef: %s, SurveyRef: %s",
+                            collex.getExerciseRef(), surveyRef));
+        }
+
+        CollectionExercise newCollex = this.collectionExerciseService.createCollectionExercise(collex, survey);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(newCollex.getId()).toUri();
+        log.info("Successfully created collection exercise, CollectionExerciseId: {}", newCollex.getId());
+        return ResponseEntity.created(location).build();
     }
 
     /**
-     * DELETE request to delete a collection exercise
+     * DELETE request which deletes a collection exercise
      *
      * @param id Collection exercise Id to delete
      * @return the collection exercise that was to be deleted
@@ -682,6 +681,19 @@ public class CollectionExerciseEndpoint {
         eventService.deleteEvent(id, tag);
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get's the list of all scheduled events from quartz (i.e. it's not the list of events as stored in the database,
+     * it's the actual jobs scheduled in quartz)
+     * @return the list of events derived from quartz jobs
+     * @throws SchedulerException thrown if issues getting data from quartz
+     */
+    @RequestMapping(value = "/events/scheduled", method = RequestMethod.GET)
+    public ResponseEntity<List<EventDTO>> getAllScheduledEvents() throws SchedulerException {
+        List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);
+
+        return ResponseEntity.ok(scheduledEvents);
     }
 
     /**
