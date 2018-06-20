@@ -2,31 +2,27 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageBase;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageListener;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
-import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.action.message.instruction.ActionInstruction;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
@@ -38,14 +34,16 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -53,11 +51,9 @@ import static org.junit.Assert.assertNotNull;
  * A class to contain integration tests for the collection exercise service
  */
 @Slf4j
-@RunWith(SpringRunner.class)
 @ContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@AutoConfigureWireMock(port = 18002)
 public class CollectionExerciseEndpointIT {
 
   // TODO pull these from config
@@ -78,6 +74,15 @@ public class CollectionExerciseEndpointIT {
 
   @Autowired
   private AppConfig appConfig;
+
+  @ClassRule
+  public static final SpringClassRule SPRING_CLASS_RULE= new SpringClassRule();
+
+  @Rule
+  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+  @Rule
+  public WireMockRule wireMockRule = new WireMockRule(options().port(18002));
 
   private CollectionExerciseClient client;
 
@@ -228,10 +233,10 @@ public class CollectionExerciseEndpointIT {
     sender.sendMessage("sample-outbound-exchange", "Sample.SampleDelivery.binding",
                        xml);
 
-    String message = queue.poll(10, TimeUnit.SECONDS);
+    // This is set to 2 minutes as you need time to debug before the mock is torn down
+    // (but don't want to wait too long for test failing because no message)
+    String message = queue.poll(2, TimeUnit.MINUTES);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
-
-    deleteCollectionExercise(collex);
   }
 
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
@@ -263,13 +268,8 @@ public class CollectionExerciseEndpointIT {
     collexRepository.saveAndFlush(c);
   }
 
-  private void deleteCollectionExercise(CollectionExerciseDTO collex) {
-    collexRepository.delete(collexRepository.findOneById(collex.getId()));
-  }
-
   private void createCollectionInstrumentStub() {
-    WireMock.configureFor("localhost", 18002);
-    stubFor(get(urlEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
+    this.wireMockRule.stubFor(get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
                                                                                                         .withHeader("Content-Type", "application/json")
                                                                                                         .withBody("{}")));
   }
