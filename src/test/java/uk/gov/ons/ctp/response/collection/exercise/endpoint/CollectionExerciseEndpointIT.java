@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.tools.ant.util.FileUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -28,13 +30,18 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
+import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -77,7 +84,7 @@ public class CollectionExerciseEndpointIT {
   private AppConfig appConfig;
 
   @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE= new SpringClassRule();
+  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
   @Rule
   public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -91,12 +98,13 @@ public class CollectionExerciseEndpointIT {
    * Method to set up integration test
    */
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     //wireMockServer = new WireMockServer(wireMockConfig().port(18002));
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
 
-   // wireMockServer.start();
+    // wireMockServer.start();
     createCollectionInstrumentStub();
+    createPartyServiceStub();
   }
 
 //  @After
@@ -210,7 +218,7 @@ public class CollectionExerciseEndpointIT {
     UUID id = UUID.randomUUID();
     SimpleMessageSender sender = getMessageSender();
 
-    CollectionExerciseDTO collex = createCollectionExercise(TEST_SURVEY_ID, "899992", "Test description");
+    CollectionExerciseDTO collex = createCollectionExercise(TEST_SURVEY_ID, getRandomRef(), "Test description");
 
     sampleUnit.setId(id.toString());
     sampleUnit.setSampleUnitRef("LMS0001");
@@ -236,7 +244,7 @@ public class CollectionExerciseEndpointIT {
 
     // This is set to 2 minutes as you need time to debug before the mock is torn down
     // (but don't want to wait too long for test failing because no message)
-    String message = queue.poll(2, TimeUnit.MINUTES);
+    String message = queue.poll(62, TimeUnit.MINUTES);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
   }
 
@@ -263,15 +271,34 @@ public class CollectionExerciseEndpointIT {
     collexRepository.saveAndFlush(c);
   }
 
+  private String getRandomRef() {
+    Random r = new Random();
+    return String.valueOf(r.nextInt(1_000_000));
+  }
+
   private void setState(CollectionExerciseDTO collex, CollectionExerciseDTO.CollectionExerciseState state) throws Exception {
     CollectionExercise c = collexRepository.findOneById(collex.getId());
     c.setState(state);
     collexRepository.saveAndFlush(c);
   }
 
-  private void createCollectionInstrumentStub() {
+  private void createCollectionInstrumentStub() throws IOException {
+    InputStream is = ValidateSampleUnits.class.getResourceAsStream("ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
+    String json = writer.toString();
     this.wireMockRule.stubFor(get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
-                                                                                                        .withHeader("Content-Type", "application/json")
-                                                                                                        .withBody("{}")));
+                                                                                                                              .withHeader("Content-Type", "application/json")
+                                                                                                                              .withBody(json)));
+  }
+
+  private void createPartyServiceStub() throws IOException {
+    InputStream is = ValidateSampleUnits.class.getResourceAsStream("ValidateSampleUnitsTest.PartyDTO.json");
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
+    String json = writer.toString();
+    this.wireMockRule.stubFor(get(urlPathEqualTo("/party-api/v1/parties/type/H/ref/LMS0001")).willReturn(aResponse()
+                                                                                                                 .withHeader("Content-Type", "application/json")
+                                                                                                                 .withBody(json)));
   }
 }

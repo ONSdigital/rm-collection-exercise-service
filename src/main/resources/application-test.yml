@@ -27,3 +27,8 @@ schedules:
 collection-instrument-svc:
     connection-config:
         port: 18002
+
+party-svc:
+    connection-config:
+        port: 18002
+
