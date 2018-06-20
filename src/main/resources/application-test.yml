@@ -18,4 +18,4 @@ redisson-config:
 
 rabbitmq:
   host: localhost
-  port: 15672
+  port: 35672

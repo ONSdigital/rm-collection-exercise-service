@@ -14,12 +14,12 @@ services:
   container_name: rabbitmq-it
   image: rabbitmq:3.6.10-management
   ports:
-    - "14369:4369"
-    - "35672:25672"
-    - "15671:5671"
-    - "15672:5672"
-    - "25671:15671"
-    - "26672:15672"
+    - "34369:4369"
+    - "55672:25672"
+    - "35671:5671"
+    - "35672:5672"
+    - "46671:15671"
+    - "46672:15672"
  sftp:
     container_name: sftp-it
     image: atmoz/sftp
