@@ -2,14 +2,20 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -38,6 +44,8 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -49,6 +57,7 @@ import static org.junit.Assert.assertNotNull;
 @ContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@AutoConfigureWireMock(port = 18002)
 public class CollectionExerciseEndpointIT {
 
   // TODO pull these from config
@@ -77,8 +86,17 @@ public class CollectionExerciseEndpointIT {
    */
   @Before
   public void setUp() {
+    //wireMockServer = new WireMockServer(wireMockConfig().port(18002));
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
+
+   // wireMockServer.start();
+    createCollectionInstrumentStub();
   }
+
+//  @After
+//  public void teardown() {
+//    wireMockServer.stop();
+//  }
 
   /**
    * Method to test construction of a collection exercise via the API
@@ -190,7 +208,8 @@ public class CollectionExerciseEndpointIT {
 
     sampleUnit.setId(id.toString());
     sampleUnit.setSampleUnitRef("LMS0001");
-    sampleUnit.setCollectionExerciseId(collex.getId().toString());
+    sampleUnit.setCollectionExerciseId(collex.getId()
+                                             .toString());
     sampleUnit.setFormType("");
     sampleUnit.setSampleUnitType("H");
     //sampleUnit.setSampleAttributes(new SampleUnit.SampleAttributes(new ArrayList<>()));
@@ -211,6 +230,8 @@ public class CollectionExerciseEndpointIT {
 
     String message = queue.poll(10, TimeUnit.SECONDS);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
+
+    deleteCollectionExercise(collex);
   }
 
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
@@ -240,5 +261,16 @@ public class CollectionExerciseEndpointIT {
     CollectionExercise c = collexRepository.findOneById(collex.getId());
     c.setState(state);
     collexRepository.saveAndFlush(c);
+  }
+
+  private void deleteCollectionExercise(CollectionExerciseDTO collex) {
+    collexRepository.delete(collexRepository.findOneById(collex.getId()));
+  }
+
+  private void createCollectionInstrumentStub() {
+    WireMock.configureFor("localhost", 18002);
+    stubFor(get(urlEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
+                                                                                                        .withHeader("Content-Type", "application/json")
+                                                                                                        .withBody("{}")));
   }
 }

@@ -24,3 +24,7 @@ schedules:
   validation-schedule-delay-milli-seconds: 5000
   distribution-schedule-delay-milli-seconds: 5000
 
+collection-instrument-svc:
+    connection-config:
+        port: 18002
+
