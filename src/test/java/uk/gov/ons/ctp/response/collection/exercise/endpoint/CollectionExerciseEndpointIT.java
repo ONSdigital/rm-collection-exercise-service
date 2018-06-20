@@ -36,8 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * A class to contain integration tests for the collection exercise service
@@ -184,7 +186,7 @@ public class CollectionExerciseEndpointIT {
     UUID id = UUID.randomUUID();
     SimpleMessageSender sender = getMessageSender();
 
-    CollectionExerciseDTO collex = createCollectionExercise(TEST_SURVEY_ID, "899991", "Test description");
+    CollectionExerciseDTO collex = createCollectionExercise(TEST_SURVEY_ID, "899992", "Test description");
 
     sampleUnit.setId(id.toString());
     sampleUnit.setSampleUnitRef("LMS0001");
@@ -207,8 +209,8 @@ public class CollectionExerciseEndpointIT {
     sender.sendMessage("sample-outbound-exchange", "Sample.SampleDelivery.binding",
                        xml);
 
-    queue.take();
-
+    String message = queue.poll(10, TimeUnit.SECONDS);
+    assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
   }
 
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
