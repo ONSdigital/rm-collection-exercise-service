@@ -61,7 +61,6 @@ import static org.junit.Assert.assertNotNull;
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
 public class CollectionExerciseEndpointIT {
 
   // TODO pull these from config
@@ -244,7 +243,8 @@ public class CollectionExerciseEndpointIT {
 
     // This is set to 2 minutes as you need time to debug before the mock is torn down
     // (but don't want to wait too long for test failing because no message)
-    String message = queue.poll(62, TimeUnit.MINUTES);
+    String message = queue.take();
+    log.debug("message = " + message);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
   }
 

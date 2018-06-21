@@ -1,18 +1,21 @@
 databaseChangeLog:
 
   - changeSet:
-      id: 10.49.14
-      author: Damien Lloyd/Matthew Innes
-      changes:
-        - sqlFile:
-            comment: Add sample unit type for social surveys
-            path: add_new_sample_unit_type.sql
-
       id: 10.49.14-1
       author: Andrew Millar/Gemma Irving
       changes:
         - sqlFile:
             comment: Add sequence for casetypedefaultpk
             path: add-sequence-for-casetypedefaultpk.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+
+  - changeSet:
+      id: 10.49.14-2
+      author: Damien Lloyd/Matthew Innes
+      changes:
+        - sqlFile:
+            comment: Add sample unit type for social surveys
+            path: add_new_sample_unit_type.sql
             relativeToChangelogFile: true
             splitStatements: false

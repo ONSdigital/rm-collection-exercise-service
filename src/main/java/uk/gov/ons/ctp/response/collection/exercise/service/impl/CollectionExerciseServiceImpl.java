@@ -283,10 +283,25 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     private void createActionPlans(CollectionExercise collectionExercise, SurveyDTO survey) {
         log.debug("Creating action plans for exercise, CollectionExerciseId: {}, SurveyId: {}",
                 collectionExercise.getId(), survey.getId());
-        createDefaultActionPlan(survey, "B");
-        createDefaultActionPlan(survey, "BI");
-        createOverrideActionPlan(collectionExercise, survey, "B");
-        createOverrideActionPlan(collectionExercise, survey, "BI");
+
+        switch (survey.getSurveyType()) {
+          case Business:
+            createDefaultActionPlan(survey, "B");
+            createDefaultActionPlan(survey, "BI");
+            createOverrideActionPlan(collectionExercise, survey, "B");
+            createOverrideActionPlan(collectionExercise, survey, "BI");
+            break;
+
+          case Social:
+            createDefaultActionPlan(survey, "H");
+            createOverrideActionPlan(collectionExercise, survey, "H");
+            break;
+
+          case Census:
+          default:
+            throw new RuntimeException("Census surveys not supported... yet!");
+        }
+
         log.debug("Successfully created action plans for exercise, CollectionExerciseId: {}, SurveyID: {}",
                 collectionExercise.getId(), survey.getId());
     }
