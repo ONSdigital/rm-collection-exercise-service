@@ -111,6 +111,9 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       String responseBody = responseEntity.getBody();
       try {
         result = objectMapper.readValue(responseBody, SurveyDTO.class);
+
+        // TODO: Remove this!
+        result.setSurveyType(SurveyDTO.SurveyType.Social);
       } catch (IOException e) {
         String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
         log.error(msg);

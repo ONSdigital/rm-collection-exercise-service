@@ -103,7 +103,7 @@ public class CollectionExerciseEndpointIT {
 
     // wireMockServer.start();
     createCollectionInstrumentStub();
-    createPartyServiceStub();
+    //createPartyServiceStub();
   }
 
 //  @After

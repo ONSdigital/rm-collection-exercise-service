@@ -145,7 +145,8 @@ public class SampleUnitDistributor {
         parent.setCollectionExerciseId(exercise.getId().toString());
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        parent.setPartyId(sampleUnit.getPartyId().toString());
+        if (sampleUnit.getPartyId() != null)
+          parent.setPartyId(sampleUnit.getPartyId().toString());
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         actionPlanId = collectionExerciseRepo
             .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
@@ -155,7 +156,8 @@ public class SampleUnitDistributor {
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setId(sampleUnit.getSampleUnitId().toString());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        child.setPartyId(sampleUnit.getPartyId().toString());
+        if (child.getPartyId() != null)
+          child.setPartyId(sampleUnit.getPartyId().toString());
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(
             collectionExerciseRepo

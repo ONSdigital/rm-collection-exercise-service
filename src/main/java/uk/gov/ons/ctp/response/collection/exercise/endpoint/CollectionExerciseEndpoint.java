@@ -389,7 +389,6 @@ public class CollectionExerciseEndpoint {
         if (survey == null) {
             throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
         }
-        survey.setSurveyType(SurveyDTO.SurveyType.Social);
         // Check if collection exercise already exists
         CollectionExercise existing = this.collectionExerciseService.findCollectionExercise(
                 collex.getExerciseRef(), survey);
