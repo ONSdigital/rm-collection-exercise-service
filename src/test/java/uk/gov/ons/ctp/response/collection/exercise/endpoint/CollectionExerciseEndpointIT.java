@@ -98,18 +98,9 @@ public class CollectionExerciseEndpointIT {
    */
   @Before
   public void setUp() throws IOException {
-    //wireMockServer = new WireMockServer(wireMockConfig().port(18002));
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
 
-    // wireMockServer.start();
-    createCollectionInstrumentStub();
-    //createPartyServiceStub();
   }
-
-//  @After
-//  public void teardown() {
-//    wireMockServer.stop();
-//  }
 
   /**
    * Method to test construction of a collection exercise via the API
@@ -170,7 +161,9 @@ public class CollectionExerciseEndpointIT {
    */
   @Test
   public void shouldActivateSampleLink() throws Exception {
-    String exerciseRef = "899991";
+    createCollectionInstrumentCountStub();
+
+    String exerciseRef = getRandomRef();
     String userDescription = "Test Description";
     Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
 
@@ -212,6 +205,7 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHere() throws Exception {
+    createCollectionInstrumentStub();
 
     SampleUnit sampleUnit = new SampleUnit();
     UUID id = UUID.randomUUID();
@@ -283,13 +277,18 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void createCollectionInstrumentStub() throws IOException {
-    InputStream is = ValidateSampleUnits.class.getResourceAsStream("ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
-    String json = writer.toString();
-    this.wireMockRule.stubFor(get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
-                                                                                                                              .withHeader("Content-Type", "application/json")
-                                                                                                                              .withBody(json)));
+        InputStream is = ValidateSampleUnits.class.getResourceAsStream("ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
+        String json = writer.toString();
+        this.wireMockRule.stubFor(get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(json)));
+  }
+
+  private void createCollectionInstrumentCountStub() throws IOException {
+    this.wireMockRule.stubFor(get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument/count")).willReturn(aResponse()
+                                                                                                                              .withBody("1")));
   }
 
   private void createPartyServiceStub() throws IOException {

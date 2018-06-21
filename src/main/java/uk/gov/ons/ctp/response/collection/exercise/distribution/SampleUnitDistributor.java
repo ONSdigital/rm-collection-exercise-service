@@ -156,7 +156,7 @@ public class SampleUnitDistributor {
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setId(sampleUnit.getSampleUnitId().toString());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        if (child.getPartyId() != null)
+        if (sampleUnit.getPartyId() != null)
           child.setPartyId(sampleUnit.getPartyId().toString());
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(

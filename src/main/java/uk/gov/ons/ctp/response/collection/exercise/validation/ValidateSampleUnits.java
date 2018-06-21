@@ -460,7 +460,7 @@ public class ValidateSampleUnits {
   private ExerciseSampleUnitGroup transitionSampleUnitGroupState(ExerciseSampleUnitGroup sampleUnitGroup,
                                                                  List<ExerciseSampleUnit> sampleUnits) {
 
-    boolean stateValidated = sampleUnits.stream().allMatch(ValidateSampleUnits::isSampleUnitValid);
+    boolean stateValidated = sampleUnits.size() > 0 && sampleUnits.stream().allMatch(ValidateSampleUnits::isSampleUnitValid);
     try {
       if (stateValidated) {
         sampleUnitGroup.setStateFK(
