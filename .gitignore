@@ -58,3 +58,6 @@ target
 *.redo
 *.backup
 /.apt_generated/
+
+plantuml.jar
+diagrams/*.svg
