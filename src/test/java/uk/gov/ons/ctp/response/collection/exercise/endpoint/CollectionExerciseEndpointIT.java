@@ -6,18 +6,15 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.tools.ant.util.FileUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
@@ -25,6 +22,7 @@ import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageBase;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageListener;
 import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
@@ -36,6 +34,7 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -48,8 +47,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -111,7 +110,8 @@ public class CollectionExerciseEndpointIT {
    * @throws CTPException thrown by error creating collection exercise
    */
   @Test
-  public void shouldCreateCollectionExercise() throws CTPException {
+  public void shouldCreateCollectionExercise() throws Exception {
+    createSurveyServiceBusinessStub();
     String exerciseRef = "899990";
     String userDescription = "Test Description";
     Pair<Integer, String> result = this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef,
@@ -161,6 +161,7 @@ public class CollectionExerciseEndpointIT {
    */
   @Test
   public void shouldActivateSampleLink() throws Exception {
+    createSurveyServiceBusinessStub();
     createCollectionInstrumentCountStub();
 
     String exerciseRef = getRandomRef();
@@ -206,6 +207,7 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void ensureSampleUnitIdIsPropagatedHere() throws Exception {
     createCollectionInstrumentStub();
+    createSurveyServiceSocialStub();
 
     SampleUnit sampleUnit = new SampleUnit();
     UUID id = UUID.randomUUID();
@@ -235,11 +237,20 @@ public class CollectionExerciseEndpointIT {
     sender.sendMessage("sample-outbound-exchange", "Sample.SampleDelivery.binding",
                        xml);
 
-    // This is set to 2 minutes as you need time to debug before the mock is torn down
-    // (but don't want to wait too long for test failing because no message)
-    String message = queue.take();
+    // The service stubs will exit once the call below times out preventing further debugging of this test in other
+    // threads (i.e. you have 2 minutes to debug before the service calls will start to fail)
+//    String message = queue.poll(2, TimeUnit.MINUTES);
+    // If you need more than 2 minutes to debug this test, then either change the timeout above or comment that line
+    // and uncomment the one below (which gives infinite time).
+     String message = queue.take();
     log.debug("message = " + message);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
+
+    JAXBContext jaxbContext = JAXBContext.newInstance(SampleUnitParent.class);
+    SampleUnitParent sampleUnitParent = (SampleUnitParent) jaxbContext.createUnmarshaller()
+            .unmarshal(new ByteArrayInputStream(message.getBytes()));
+
+    assertEquals(id, UUID.fromString(sampleUnitParent.getId()));
   }
 
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
@@ -276,11 +287,15 @@ public class CollectionExerciseEndpointIT {
     collexRepository.saveAndFlush(c);
   }
 
+  private String loadResourceAsString(Class clazz, String resourceName) throws IOException {
+    InputStream is = clazz.getResourceAsStream(resourceName);
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
+    return writer.toString();
+  }
+
   private void createCollectionInstrumentStub() throws IOException {
-        InputStream is = ValidateSampleUnits.class.getResourceAsStream("ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
-        StringWriter writer = new StringWriter();
-        IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
-        String json = writer.toString();
+        String json = loadResourceAsString(ValidateSampleUnits.class, "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
         this.wireMockRule.stubFor(get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument")).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(json)));
@@ -292,12 +307,38 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void createPartyServiceStub() throws IOException {
-    InputStream is = ValidateSampleUnits.class.getResourceAsStream("ValidateSampleUnitsTest.PartyDTO.json");
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(is, writer, StandardCharsets.UTF_8.name());
-    String json = writer.toString();
+    String json = loadResourceAsString(ValidateSampleUnits.class, "ValidateSampleUnitsTest.PartyDTO.json");
     this.wireMockRule.stubFor(get(urlPathEqualTo("/party-api/v1/parties/type/H/ref/LMS0001")).willReturn(aResponse()
                                                                                                                  .withHeader("Content-Type", "application/json")
                                                                                                                  .withBody(json)));
+  }
+
+  private void createSurveyServiceClassifierStubs() throws IOException {
+    String json = loadResourceAsString(CollectionExerciseEndpointIT.class,"CollectionExerciseEndpointIT.SurveyClassifierDTO.json");
+    this.wireMockRule.stubFor(get(urlPathMatching("/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/classifiertypeselectors")).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(json)));
+    json = loadResourceAsString(CollectionExerciseEndpointIT.class,"CollectionExerciseEndpointIT.SurveyClassifierTypeDTO.json");
+    this.wireMockRule.stubFor(get(urlPathMatching("/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/classifiertypeselectors/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(json)));
+  }
+
+  private void createSurveyServiceSocialStub() throws IOException {
+    createSurveyServiceClassifierStubs();
+
+    String json = loadResourceAsString(CollectionExerciseEndpointIT.class,"CollectionExerciseEndpointIT.SurveyDTO.social.json");
+    this.wireMockRule.stubFor(get(urlPathMatching("/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(json)));
+  }
+
+  private void createSurveyServiceBusinessStub() throws IOException {
+    createSurveyServiceClassifierStubs();
+
+    String json = loadResourceAsString(CollectionExerciseEndpointIT.class, "CollectionExerciseEndpointIT.SurveyDTO.business.json");
+    this.wireMockRule.stubFor(get(urlPathMatching("/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(json)));
   }
 }

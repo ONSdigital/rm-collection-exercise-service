@@ -7,7 +7,7 @@ spring:
 
 survey-svc:
   connection-config:
-    port: 18080
+    port: 18002
 
 action-svc:
   connection-config:

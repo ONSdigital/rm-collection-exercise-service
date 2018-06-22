@@ -145,6 +145,7 @@ public class SampleUnitDistributor {
         parent.setCollectionExerciseId(exercise.getId().toString());
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
+        parent.setId(sampleUnit.getSampleUnitId().toString());
         if (sampleUnit.getPartyId() != null)
           parent.setPartyId(sampleUnit.getPartyId().toString());
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
