@@ -1,10 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -146,8 +143,7 @@ public class SampleUnitDistributor {
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         parent.setId(sampleUnit.getSampleUnitId().toString());
-        if (sampleUnit.getPartyId() != null)
-          parent.setPartyId(sampleUnit.getPartyId().toString());
+        parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         actionPlanId = collectionExerciseRepo
             .getActiveActionPlanId(exercise.getExercisePK(), sampleUnit.getSampleUnitType().name(),
@@ -157,8 +153,7 @@ public class SampleUnitDistributor {
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setId(sampleUnit.getSampleUnitId().toString());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        if (sampleUnit.getPartyId() != null)
-          child.setPartyId(sampleUnit.getPartyId().toString());
+        child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(
             collectionExerciseRepo
