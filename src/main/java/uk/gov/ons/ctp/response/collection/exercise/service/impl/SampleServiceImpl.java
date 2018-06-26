@@ -165,7 +165,6 @@ public class SampleServiceImpl implements SampleService {
 
                 sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-                // null pointer exception thrown here
                 if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK()) == collectionExercise
                         .getSampleSize()) {
                     collectionExercise.setState(collectionExerciseTransitionState.transition(collectionExercise.getState(),
