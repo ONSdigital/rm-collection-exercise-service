@@ -27,16 +27,16 @@ import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
+import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.impl.EventValidator;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 
 /**
- * The main entry point into the Collection Exercise Service SpringBoot
- * Application. Also used for bean configuration.
+ * The main entry point into the Collection Exercise Service SpringBoot Application. Also used for
+ * bean configuration.
  */
 @CoverageIgnore
 @SpringBootApplication
@@ -51,11 +51,9 @@ public class CollectionExerciseApplication {
   private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
   private static final String DISTRIBUTION_LIST = "collectionexercisesvc.sample.distribution";
 
-  @Autowired
-  private AppConfig appConfig;
+  @Autowired private AppConfig appConfig;
 
-  @Autowired
-  private StateTransitionManagerFactory collectionExerciseStateTransitionManagerFactory;
+  @Autowired private StateTransitionManagerFactory collectionExerciseStateTransitionManagerFactory;
 
   /**
    * Bean used to map exceptions for endpoints
@@ -78,55 +76,8 @@ public class CollectionExerciseApplication {
   }
 
   /**
-   * Bean used to access Sample service through REST calls
-   *
-   * @return the service client
-   */
-/*  @Bean
-  @Qualifier("sampleSvc")
-  public RestClient sampleSvcClientRestTemplate() {
-    RestClient restHelper = new RestClient(appConfig.getSampleSvc().getConnectionConfig());
-    return restHelper;
-  }*/
-
-  /**
-   * Bean used to access Survey service through REST calls
-   *
-   * @return the service client
-   */
-/*  @Bean
-  @Qualifier("surveySvc")
-  public RestClient surveySvcClientRestTemplate() {
-    RestClient restHelper = new RestClient(appConfig.getSurveySvc().getConnectionConfig());
-    return restHelper;
-  }*/
-
-  /**
-   * Bean used to access CollectionInstrument service through REST calls
-   *
-   * @return the service client
-   */
-/*  @Bean
-  @Qualifier("collectionInstrumentSvc")
-  public RestClient collectionInstrumentSvcClientRestTemplate() {
-    RestClient restHelper = new RestClient(appConfig.getCollectionInstrumentSvc().getConnectionConfig());
-    return restHelper;
-  }*/
-
-  /**
-   * Bean used to access Party service through REST calls
-   *
-   * @return the service client
-   */
-/*  @Bean
-  @Qualifier("partySvc")
-  public RestClient partySvcClientRestTemplate() {
-    RestClient restHelper = new RestClient(appConfig.getPartySvc().getConnectionConfig());
-    return restHelper;
-  }*/
-
-  /**
    * The RestUtility bean for the Action service
+   *
    * @return the RestUtility bean for the Action service
    */
   @Bean
@@ -137,6 +88,7 @@ public class CollectionExerciseApplication {
 
   /**
    * The RestUtility bean for the CollectionInstrument service
+   *
    * @return the RestUtility bean for the CollectionInstrument service
    */
   @Bean
@@ -147,6 +99,7 @@ public class CollectionExerciseApplication {
 
   /**
    * The RestUtility bean for the Party service
+   *
    * @return the RestUtility bean for the Party service
    */
   @Bean
@@ -157,6 +110,7 @@ public class CollectionExerciseApplication {
 
   /**
    * The RestUtility bean for the Sample service
+   *
    * @return the RestUtility bean for the Sample service
    */
   @Bean
@@ -167,6 +121,7 @@ public class CollectionExerciseApplication {
 
   /**
    * The RestUtility bean for the Survey service
+   *
    * @return the RestUtility bean for the Survey service
    */
   @Bean
@@ -183,9 +138,9 @@ public class CollectionExerciseApplication {
   @Bean
   @Qualifier("collectionExercise")
   public StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-    collectionExerciseStateTransitionManager() {
-    return collectionExerciseStateTransitionManagerFactory
-        .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
+      collectionExerciseStateTransitionManager() {
+    return collectionExerciseStateTransitionManagerFactory.getStateTransitionManager(
+        CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
   }
 
   /**
@@ -195,9 +150,10 @@ public class CollectionExerciseApplication {
    */
   @Bean
   @Qualifier("sampleUnitGroup")
-  public StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupStateTransitionManager() {
-    return collectionExerciseStateTransitionManagerFactory
-            .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
+  public StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent>
+      sampleUnitGroupStateTransitionManager() {
+    return collectionExerciseStateTransitionManagerFactory.getStateTransitionManager(
+        CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
   }
 
   /**
@@ -208,37 +164,43 @@ public class CollectionExerciseApplication {
   @Bean
   @Qualifier("sampleLink")
   public StateTransitionManager<SampleLinkState, SampleLinkEvent>
-  sampleLinkStateTransitionManager() {
-    return collectionExerciseStateTransitionManagerFactory
-        .getStateTransitionManager(CollectionExerciseStateTransitionManagerFactory.SAMPLELINK_ENTITY);
+      sampleLinkStateTransitionManager() {
+    return collectionExerciseStateTransitionManagerFactory.getStateTransitionManager(
+        CollectionExerciseStateTransitionManagerFactory.SAMPLELINK_ENTITY);
   }
 
   /**
    * The DistributedListManager for sampleUnitGroup validation.
+   *
    * @param redissonClient the redissonClient.
    * @return the DistributedListManager.
    */
   @Bean
   @Qualifier("validation")
-  public DistributedListManager<Integer> sampleValidationListManager(RedissonClient redissonClient) {
+  public DistributedListManager<Integer> sampleValidationListManager(
+      RedissonClient redissonClient) {
     return new DistributedListManagerRedissonImpl<Integer>(
-        VALIDATION_LIST, redissonClient,
+        VALIDATION_LIST,
+        redissonClient,
         appConfig.getRedissonConfig().getListTimeToWaitSeconds(),
-            appConfig.getRedissonConfig().getListTimeToLiveSeconds());
+        appConfig.getRedissonConfig().getListTimeToLiveSeconds());
   }
 
   /**
    * The DistributedListManager for sampleUnitGroup distribution.
+   *
    * @param redissonClient the redissonClient.
    * @return the DistributedListManager.
    */
   @Bean
   @Qualifier("distribution")
-  public DistributedListManager<Integer> sampleDistributionListManager(RedissonClient redissonClient) {
+  public DistributedListManager<Integer> sampleDistributionListManager(
+      RedissonClient redissonClient) {
     return new DistributedListManagerRedissonImpl<Integer>(
-        DISTRIBUTION_LIST, redissonClient,
+        DISTRIBUTION_LIST,
+        redissonClient,
         appConfig.getRedissonConfig().getListTimeToWaitSeconds(),
-            appConfig.getRedissonConfig().getListTimeToLiveSeconds());
+        appConfig.getRedissonConfig().getListTimeToLiveSeconds());
   }
 
   /**
@@ -249,8 +211,7 @@ public class CollectionExerciseApplication {
   @Bean
   public RedissonClient redissonClient() {
     Config config = new Config();
-    config.useSingleServer()
-        .setAddress(appConfig.getRedissonConfig().getAddress());
+    config.useSingleServer().setAddress(appConfig.getRedissonConfig().getAddress());
     return Redisson.create(config);
   }
 
