@@ -1,15 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
-import net.sourceforge.cobertura.CoverageIgnore;
-import org.springframework.stereotype.Component;
-
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
+import net.sourceforge.cobertura.CoverageIgnore;
+import org.springframework.stereotype.Component;
 
 /**
- * The MapperFactory to obtain the MapperFacade to map Entity objects to/from
- * presentation objects.
+ * The MapperFactory to obtain the MapperFacade to map Entity objects to/from presentation objects.
  */
 @CoverageIgnore
 @Component

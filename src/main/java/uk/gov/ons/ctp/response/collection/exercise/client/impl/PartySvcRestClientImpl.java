@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,45 +22,42 @@ import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
-import java.io.IOException;
-
-/**
- * HTTP RestClient implementation for calls to the Party service
- *
- */
+/** HTTP RestClient implementation for calls to the Party service */
 @Component
 @Slf4j
 public class PartySvcRestClientImpl implements PartySvcClient {
 
-  @Autowired
-  private AppConfig appConfig;
+  @Autowired private AppConfig appConfig;
 
-  @Autowired
-  private RestTemplate restTemplate;
+  @Autowired private RestTemplate restTemplate;
 
   @Qualifier("partyRestUtility")
   @Autowired
   private RestUtility restUtility;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef)
       throws RestClientException {
 
-    UriComponents uriComponents = restUtility.createUriComponents(
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
             appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitType, sampleUnitRef);
 
     HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug("about to get the Party with Sample Unit Type: {} and Sample Unit Ref: {}",
-            sampleUnitType, sampleUnitRef);
+    log.debug(
+        "about to get the Party with Sample Unit Type: {} and Sample Unit Ref: {}",
+        sampleUnitType,
+        sampleUnitRef);
 
-    ResponseEntity<String> responseEntity = restTemplate.exchange(
-            uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
+    ResponseEntity<String> responseEntity =
+        restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
     if (responseEntity != null) {
       System.out.println(responseEntity.getStatusCodeValue());
@@ -80,17 +78,33 @@ public class PartySvcRestClientImpl implements PartySvcClient {
   }
 
   @Override
-  public SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) throws RestClientException {
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getPartySvc().getSampleLinkPath(), null, sampleSummaryId);
+  public SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId)
+      throws RestClientException {
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getPartySvc().getSampleLinkPath(), null, sampleSummaryId);
     SampleLinkCreationRequestDTO sampleLinkCreationRequestDTO = new SampleLinkCreationRequestDTO();
     sampleLinkCreationRequestDTO.setCollectionExerciseId(collectionExerciseId);
-    HttpEntity<SampleLinkCreationRequestDTO> httpEntity = restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
-    ResponseEntity<SampleLinkDTO> responseEntity = restTemplate.exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
+    HttpEntity<SampleLinkCreationRequestDTO> httpEntity =
+        restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
+    ResponseEntity<SampleLinkDTO> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
 
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      log.info("Created link Sample Summary Id: " + sampleSummaryId + " Collection exercise: " + collectionExerciseId);
+      log.info(
+          "Created link Sample Summary Id: "
+              + sampleSummaryId
+              + " Collection exercise: "
+              + collectionExerciseId);
     } else {
-      log.error("Couldn't link Sample Summary Id: " + sampleSummaryId + " Collection exercise: " + collectionExerciseId + " Status code: " + responseEntity.getStatusCode());
+      log.error(
+          "Couldn't link Sample Summary Id: "
+              + sampleSummaryId
+              + " Collection exercise: "
+              + collectionExerciseId
+              + " Status code: "
+              + responseEntity.getStatusCode());
     }
     return responseEntity.getBody();
   }

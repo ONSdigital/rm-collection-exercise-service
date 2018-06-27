@@ -23,5 +23,8 @@ See [API.md](https://github.com/ONSdigital/rm-collection-exercise-service/blob/m
 # Swagger Specification
 To view the swagger Specification for the Collection Exercise service, run the service and navigate to http://localhost:8145/swagger-ui.html.
 
+# Code Styler
+To use the code styler please goto this url (https://github.com/google/google-java-format) and follow the Intellij instructions or Eclipse depending on what you use
+
 ## Copyright
 Copyright (C) 2017 Crown Copyright (Office for National Statistics)

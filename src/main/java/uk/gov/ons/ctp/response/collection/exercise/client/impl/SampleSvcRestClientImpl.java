@@ -1,6 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,69 +29,65 @@ import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreati
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-/**
- * HTTP RestClient implementation for calls to the Sample service
- *
- */
+/** HTTP RestClient implementation for calls to the Sample service */
 @Component
 @Slf4j
 public class SampleSvcRestClientImpl implements SampleSvcClient {
 
-  @Autowired
-  private AppConfig appConfig;
+  @Autowired private AppConfig appConfig;
 
-  @Autowired
-  private RestTemplate restTemplate;
+  @Autowired private RestTemplate restTemplate;
 
-  @Autowired
-  private SampleLinkRepository sampleLinkRepository;
+  @Autowired private SampleLinkRepository sampleLinkRepository;
 
   @Qualifier("sampleRestUtility")
   @Autowired
   private RestUtility restUtility;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private SurveyService surveyService;
+  @Autowired private SurveyService surveyService;
 
-  @Retryable(value = {RestClientException.class}, maxAttemptsExpression = "#{${retries.maxAttempts}}",
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException {
 
-    UriComponents uriComponents = restUtility.createUriComponents(appConfig.getSampleSvc().getRequestSampleUnitsPath(),
-        null, exercise);
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getRequestSampleUnitsPath(), null, exercise);
 
-    List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(exercise.getId());
-    List<UUID> sampleSummaryUUIDList =  new ArrayList<>();
+    List<SampleLink> sampleLinks =
+        sampleLinkRepository.findByCollectionExerciseId(exercise.getId());
+    List<UUID> sampleSummaryUUIDList = new ArrayList<>();
     for (SampleLink samplelink : sampleLinks) {
       sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
     }
 
     SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyId());
 
-    if (surveyDto == null){
-      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid survey %s for collection exercise %s",
+    if (surveyDto == null) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST,
+          String.format(
+              "Invalid survey %s for collection exercise %s",
               exercise.getSurveyId(), exercise.getId()));
     } else {
-      CollectionExerciseJobCreationRequestDTO requestDTO = new CollectionExerciseJobCreationRequestDTO();
+      CollectionExerciseJobCreationRequestDTO requestDTO =
+          new CollectionExerciseJobCreationRequestDTO();
       requestDTO.setCollectionExerciseId(exercise.getId());
       requestDTO.setSurveyRef(surveyDto.getSurveyRef());
       requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
       requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
 
-      HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity = restUtility.createHttpEntity(requestDTO);
+      HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity =
+          restUtility.createHttpEntity(requestDTO);
 
       log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
-      ResponseEntity<String> responseEntity = restTemplate.exchange(
-              uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
+      ResponseEntity<String> responseEntity =
+          restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
 
       SampleUnitsRequestDTO result = null;
       if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -102,5 +102,4 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
       return result;
     }
   }
-
 }

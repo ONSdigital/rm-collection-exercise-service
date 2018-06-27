@@ -6,14 +6,14 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 @Data
 public class EventMessageDTO {
-    private EventDTO event;
+  private EventDTO event;
 
-    private CollectionExerciseEventPublisher.MessageType messageType;
+  private CollectionExerciseEventPublisher.MessageType messageType;
 
-    public EventMessageDTO() { }
+  public EventMessageDTO() {}
 
-    public EventMessageDTO(CollectionExerciseEventPublisher.MessageType messageType, EventDTO event) {
-        this.event = event;
-        this.messageType = messageType;
-    }
+  public EventMessageDTO(CollectionExerciseEventPublisher.MessageType messageType, EventDTO event) {
+    this.event = event;
+    this.messageType = messageType;
+  }
 }

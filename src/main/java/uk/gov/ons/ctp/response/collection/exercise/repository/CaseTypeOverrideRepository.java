@@ -1,15 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 
-import java.util.List;
-import java.util.UUID;
-
-/**
- * Spring JPA Repository for CaseTypeOverride
- *
- */
+/** Spring JPA Repository for CaseTypeOverride */
 public interface CaseTypeOverrideRepository extends JpaRepository<CaseTypeOverride, UUID> {
 
   /**
@@ -20,6 +16,6 @@ public interface CaseTypeOverrideRepository extends JpaRepository<CaseTypeOverri
    */
   List<CaseTypeOverride> findByExerciseFK(Integer collectionExercisePK);
 
-  CaseTypeOverride findTopByExerciseFKAndSampleUnitTypeFK(Integer collectionExercisePK, String sampleUnitType);
-
+  CaseTypeOverride findTopByExerciseFKAndSampleUnitTypeFK(
+      Integer collectionExercisePK, String sampleUnitType);
 }
