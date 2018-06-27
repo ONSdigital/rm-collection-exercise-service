@@ -3,9 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.config;
 import lombok.Data;
 import net.sourceforge.cobertura.CoverageIgnore;
 
-/**
- * Config POJO for Swagger UI Generation
- */
+/** Config POJO for Swagger UI Generation */
 @CoverageIgnore
 @Data
 public class SwaggerSettings {
@@ -15,5 +13,4 @@ public class SwaggerSettings {
   private String title;
   private String description;
   private String version;
-
 }

@@ -4,8 +4,8 @@ import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /**
- * Interface for the receipt of sample unit messages from the Spring Integration
- * inbound message queue
+ * Interface for the receipt of sample unit messages from the Spring Integration inbound message
+ * queue
  */
 public interface SampleUnitReceiver {
 
@@ -16,5 +16,4 @@ public interface SampleUnitReceiver {
    * @throws CTPException when collection exercise state transition error
    */
   void acceptSampleUnit(SampleUnit sampleUnit) throws CTPException;
-
 }

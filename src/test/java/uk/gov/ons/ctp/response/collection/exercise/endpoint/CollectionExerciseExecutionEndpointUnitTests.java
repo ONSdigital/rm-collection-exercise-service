@@ -1,5 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.ons.ctp.common.MvcHelper.*;
+import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
+
+import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,29 +25,16 @@ import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.ons.ctp.common.MvcHelper.*;
-import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
-
-/**
- * Collection Exercise Endpoint Unit tests
- */
+/** Collection Exercise Endpoint Unit tests */
 @Slf4j
 public class CollectionExerciseExecutionEndpointUnitTests {
-  private static final UUID COLLECTIONEXERCISE_ID1 = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+  private static final UUID COLLECTIONEXERCISE_ID1 =
+      UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
   private static final int SAMPLEUNITSTOTAL = 500;
 
-  @InjectMocks
-  private CollectionExerciseExecutionEndpoint collectionExerciseExecutionEndpoint;
+  @InjectMocks private CollectionExerciseExecutionEndpoint collectionExerciseExecutionEndpoint;
 
-  @Mock
-  private SampleService sampleService;
+  @Mock private SampleService sampleService;
 
   private MockMvc mockCollectionExerciseExecutionMvc;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
@@ -52,13 +48,14 @@ public class CollectionExerciseExecutionEndpointUnitTests {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    this.mockCollectionExerciseExecutionMvc = MockMvcBuilders
-        .standaloneSetup(collectionExerciseExecutionEndpoint)
-        .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
-        .setMessageConverters(new MappingJackson2HttpMessageConverter(new CustomObjectMapper()))
-        .build();
+    this.mockCollectionExerciseExecutionMvc =
+        MockMvcBuilders.standaloneSetup(collectionExerciseExecutionEndpoint)
+            .setHandlerExceptionResolvers(mockAdviceFor(RestExceptionHandler.class))
+            .setMessageConverters(new MappingJackson2HttpMessageConverter(new CustomObjectMapper()))
+            .build();
 
-    this.sampleUnitsRequestDTOResults = FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
+    this.sampleUnitsRequestDTOResults =
+        FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
   }
 
   /**
@@ -68,17 +65,19 @@ public class CollectionExerciseExecutionEndpointUnitTests {
    */
   @Test
   public void requestSampleUnits() throws Exception {
-    when(sampleService.requestSampleUnits(COLLECTIONEXERCISE_ID1)).thenReturn(sampleUnitsRequestDTOResults.get(0));
+    when(sampleService.requestSampleUnits(COLLECTIONEXERCISE_ID1))
+        .thenReturn(sampleUnitsRequestDTOResults.get(0));
 
-    ResultActions actions = mockCollectionExerciseExecutionMvc
-        .perform(postJson(String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1), "{}"));
+    ResultActions actions =
+        mockCollectionExerciseExecutionMvc.perform(
+            postJson(
+                String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1), "{}"));
 
-    actions.andExpect(status().isOk())
+    actions
+        .andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
         .andExpect(handler().methodName("requestSampleUnits"))
         .andExpect(jsonPath("$.*", hasSize(1)))
         .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
-
   }
-
 }

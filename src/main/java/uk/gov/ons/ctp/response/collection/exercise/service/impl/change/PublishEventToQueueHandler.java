@@ -9,19 +9,18 @@ import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEve
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
-/**
- * EventChangeHandler to publish a message to a rabbit queue when the event changes
- */
+/** EventChangeHandler to publish a message to a rabbit queue when the event changes */
 @Component
 @Slf4j
 public final class PublishEventToQueueHandler implements EventChangeHandler {
-    @Autowired
-    private CollectionExerciseEventPublisher eventPublisher;
+  @Autowired private CollectionExerciseEventPublisher eventPublisher;
 
-    @Override
-    public void handleEventLifecycle(final CollectionExerciseEventPublisher.MessageType change, final Event event)
-            throws CTPException {
-        log.debug("Publishing {} message for {}", change, event);
-        eventPublisher.publishCollectionExerciseEvent(change, EventService.createEventDTOFromEvent(event));
-    }
+  @Override
+  public void handleEventLifecycle(
+      final CollectionExerciseEventPublisher.MessageType change, final Event event)
+      throws CTPException {
+    log.debug("Publishing {} message for {}", change, event);
+    eventPublisher.publishCollectionExerciseEvent(
+        change, EventService.createEventDTOFromEvent(event));
+  }
 }

@@ -1,14 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import java.util.UUID;
 import org.springframework.web.client.RestClientException;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
-import java.util.UUID;
-
-/**
- * Service responsible for dealing with samples
- *
- */
+/** Service responsible for dealing with samples */
 public interface SurveyService {
 
   /**
@@ -22,10 +18,10 @@ public interface SurveyService {
 
   /**
    * Request a survey by reference
+   *
    * @param surveyRef surveyRef to request the survey
    * @return the survey object
    * @throws RestClientException when failing to connect to survey service
    */
   SurveyDTO findSurveyByRef(String surveyRef) throws RestClientException;
-
 }

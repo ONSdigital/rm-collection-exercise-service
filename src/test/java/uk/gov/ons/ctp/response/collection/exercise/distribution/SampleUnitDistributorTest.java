@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
-
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
@@ -50,9 +48,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 
-/**
- * Tests for the SampleUnitDistributor
- */
+/** Tests for the SampleUnitDistributor */
 @RunWith(MockitoJUnitRunner.class)
 public class SampleUnitDistributorTest {
 
@@ -71,37 +67,33 @@ public class SampleUnitDistributorTest {
   private static final String ACTION_PLAN_ID_CHILD = "0009e978-0932-463b-a2a1-b45cb3ffcb2a";
   private static final String TEST_EXCEPTION = "Test Exception thrown";
 
-  @InjectMocks
-  private SampleUnitDistributor sampleUnitDistributor;
+  @InjectMocks private SampleUnitDistributor sampleUnitDistributor;
+
+  @Mock private PlatformTransactionManager platformTransactionManager;
+
+  @Mock private SampleUnitGroupRepository sampleUnitGroupRepo;
+
+  @Mock private CollectionExerciseRepository collectionExerciseRepo;
+
+  @Mock private SampleUnitRepository sampleUnitRepo;
 
   @Mock
-  private PlatformTransactionManager platformTransactionManager;
+  private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent>
+      sampleUnitGroupState;
 
   @Mock
-  private SampleUnitGroupRepository sampleUnitGroupRepo;
+  private StateTransitionManager<
+          CollectionExerciseDTO.CollectionExerciseState,
+          CollectionExerciseDTO.CollectionExerciseEvent>
+      collectionExerciseTransitionState;
 
-  @Mock
-  private CollectionExerciseRepository collectionExerciseRepo;
-
-  @Mock
-  private SampleUnitRepository sampleUnitRepo;
-
-  @Mock
-  private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent> sampleUnitGroupState;
-
-  @Mock
-  private StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState,
-      CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
-
-  @Mock
-  private SampleUnitPublisher publisher;
+  @Mock private SampleUnitPublisher publisher;
 
   @Mock
   @Qualifier("distribution")
   private static DistributedListManager<Integer> sampleDistributionListManager;
 
-  @Spy
-  private AppConfig appConfig = new AppConfig();
+  @Spy private AppConfig appConfig = new AppConfig();
 
   private List<ExerciseSampleUnitGroup> sampleUnitGroups;
   private CollectionExercise collectionExercise;
@@ -126,94 +118,98 @@ public class SampleUnitDistributorTest {
 
     sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
     collectionExercise = sampleUnitGroups.get(0).getCollectionExercise();
-    sampleUnitParentOnly = FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class, "ParentOnly");
-    sampleUnitRespondents = FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class, "WithRespondentUnits");
+    sampleUnitParentOnly =
+        FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class, "ParentOnly");
+    sampleUnitRespondents =
+        FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class, "WithRespondentUnits");
 
     MockitoAnnotations.initMocks(this);
 
     // Mock data layer domain objects SampleUnitGroup, SampleUnit and repository
     // queries.
-    when(
-        sampleUnitGroupRepo.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
-            SampleUnitGroupState.VALIDATED,
-            collectionExercise,
-            new ArrayList<Integer>(Arrays.asList(IMPOSSIBLE_ID)),
-            new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
-                .thenReturn(sampleUnitGroups);
+    when(sampleUnitGroupRepo
+            .findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
+                SampleUnitGroupState.VALIDATED,
+                collectionExercise,
+                new ArrayList<Integer>(Arrays.asList(IMPOSSIBLE_ID)),
+                new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
+        .thenReturn(sampleUnitGroups);
 
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitParentOnly);
 
-    when(collectionExerciseRepo.getActiveActionPlanId(collectionExercise.getExercisePK(), "B",
-        collectionExercise.getSurveyId()))
-            .thenReturn(ACTION_PLAN_ID_PARENT);
+    when(collectionExerciseRepo.getActiveActionPlanId(
+            collectionExercise.getExercisePK(), "B", collectionExercise.getSurveyId()))
+        .thenReturn(ACTION_PLAN_ID_PARENT);
 
-    when(collectionExerciseRepo.getActiveActionPlanId(collectionExercise.getExercisePK(), "BI",
-        collectionExercise.getSurveyId()))
-            .thenReturn(ACTION_PLAN_ID_CHILD);
-    when(
-        sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    when(collectionExerciseRepo.getActiveActionPlanId(
+            collectionExercise.getExercisePK(), "BI", collectionExercise.getSurveyId()))
+        .thenReturn(ACTION_PLAN_ID_CHILD);
+    when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
-                .thenReturn(2L);
+        .thenReturn(2L);
 
     // Mock transition Managers
-    when(collectionExerciseTransitionState.transition(CollectionExerciseState.VALIDATED,
-        CollectionExerciseEvent.PUBLISH)).thenReturn(CollectionExerciseState.READY_FOR_LIVE);
+    when(collectionExerciseTransitionState.transition(
+            CollectionExerciseState.VALIDATED, CollectionExerciseEvent.PUBLISH))
+        .thenReturn(CollectionExerciseState.READY_FOR_LIVE);
 
-    when(sampleUnitGroupState.transition(SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
+    when(sampleUnitGroupState.transition(
+            SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
         .thenReturn(SampleUnitGroupState.PUBLISHED);
   }
 
   /**
-   * Test happy path of Party with no pre-enrolled respondent units.
-   * SampleUnitParent with no SampleUnitChildren.
-   *
+   * Test happy path of Party with no pre-enrolled respondent units. SampleUnitParent with no
+   * SampleUnitChildren.
    */
   @Test
   public void sampleUnitParentPublishedWhenParentOnly() {
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
-    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave = ArgumentCaptor
-        .forClass(SampleUnitParent.class);
+    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave =
+        ArgumentCaptor.forClass(SampleUnitParent.class);
     verify(publisher, times(2)).sendSampleUnit(sampleUnitParentSave.capture());
     List<SampleUnitParent> savedSampleUnitParents = sampleUnitParentSave.getAllValues();
     assertTrue(savedSampleUnitParents.size() == 2);
-    savedSampleUnitParents.forEach((message) -> {
-      assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitRef());
-      assertEquals(SAMPLE_UNIT_TYPE_PARENT, message.getSampleUnitType());
-      assertEquals(PARTY_ID_PARENT, message.getPartyId());
-      assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
-      assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
-      assertEquals(ACTION_PLAN_ID_PARENT, message.getActionPlanId());
-      assertNull(message.getSampleUnitChildren());
-    });
+    savedSampleUnitParents.forEach(
+        (message) -> {
+          assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitRef());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, message.getSampleUnitType());
+          assertEquals(PARTY_ID_PARENT, message.getPartyId());
+          assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
+          assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
+          assertEquals(ACTION_PLAN_ID_PARENT, message.getActionPlanId());
+          assertNull(message.getSampleUnitChildren());
+        });
 
-    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
-        .forClass(ExerciseSampleUnitGroup.class);
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave =
+        ArgumentCaptor.forClass(ExerciseSampleUnitGroup.class);
     verify(sampleUnitGroupRepo, times(2)).saveAndFlush(sampleUnitGroupSave.capture());
     List<ExerciseSampleUnitGroup> savedSampleUnitGroups = sampleUnitGroupSave.getAllValues();
     assertTrue(savedSampleUnitGroups.size() == 2);
-    savedSampleUnitGroups.forEach((group) -> {
-      assertEquals(COLLECTION_EXERCISE_ID, group.getCollectionExercise().getId().toString());
-      assertEquals(SampleUnitGroupState.PUBLISHED, group.getStateFK());
-      assertEquals(SAMPLE_UNIT_TYPE_PARENT, group.getFormType());
-    });
+    savedSampleUnitGroups.forEach(
+        (group) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, group.getCollectionExercise().getId().toString());
+          assertEquals(SampleUnitGroupState.PUBLISHED, group.getStateFK());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, group.getFormType());
+        });
 
-    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor
-        .forClass(CollectionExercise.class);
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave =
+        ArgumentCaptor.forClass(CollectionExercise.class);
     verify(collectionExerciseRepo, times(1)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> savedCollectionExercise = collectionExerciseSave.getAllValues();
     assertTrue(savedCollectionExercise.size() == 1);
-    savedCollectionExercise.forEach((exercise) -> {
-      assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
-      assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
-    });
+    savedCollectionExercise.forEach(
+        (exercise) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
+          assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
+        });
   }
 
   /**
-   * Test happy path of Party with pre-enrolled respondent units.
-   * SampleUnitParent with SampleUnitChildren.
-   *
+   * Test happy path of Party with pre-enrolled respondent units. SampleUnitParent with
+   * SampleUnitChildren.
    */
   @Test
   public void sampleUnitParentPublishedWhenChildIsNotNull() {
@@ -223,65 +219,77 @@ public class SampleUnitDistributorTest {
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
-    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave = ArgumentCaptor
-        .forClass(SampleUnitParent.class);
+    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave =
+        ArgumentCaptor.forClass(SampleUnitParent.class);
     verify(publisher, times(2)).sendSampleUnit(sampleUnitParentSave.capture());
     List<SampleUnitParent> savedSampleUnitParents = sampleUnitParentSave.getAllValues();
     assertTrue(savedSampleUnitParents.size() == 2);
-    savedSampleUnitParents.forEach((message) -> {
-      assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitRef());
-      assertEquals(SAMPLE_UNIT_TYPE_PARENT, message.getSampleUnitType());
-      assertEquals(PARTY_ID_PARENT, message.getPartyId());
-      assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
-      assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
-      assertNull(message.getActionPlanId());
-      assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitRef());
-      assertEquals(SAMPLE_UNIT_TYPE_CHILD,
-          message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitType());
-      assertEquals(PARTY_ID_CHILD, message.getSampleUnitChildren().getSampleUnitchildren().get(0).getPartyId());
-      assertEquals(COLLECTION_INSTRUMENT_ID,
-          message.getSampleUnitChildren().getSampleUnitchildren().get(0).getCollectionInstrumentId());
-      assertEquals(ACTION_PLAN_ID_CHILD,
-          message.getSampleUnitChildren().getSampleUnitchildren().get(0).getActionPlanId());
-    });
+    savedSampleUnitParents.forEach(
+        (message) -> {
+          assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitRef());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, message.getSampleUnitType());
+          assertEquals(PARTY_ID_PARENT, message.getPartyId());
+          assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
+          assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
+          assertNull(message.getActionPlanId());
+          assertEquals(
+              SAMPLE_UNIT_REF,
+              message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitRef());
+          assertEquals(
+              SAMPLE_UNIT_TYPE_CHILD,
+              message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitType());
+          assertEquals(
+              PARTY_ID_CHILD,
+              message.getSampleUnitChildren().getSampleUnitchildren().get(0).getPartyId());
+          assertEquals(
+              COLLECTION_INSTRUMENT_ID,
+              message
+                  .getSampleUnitChildren()
+                  .getSampleUnitchildren()
+                  .get(0)
+                  .getCollectionInstrumentId());
+          assertEquals(
+              ACTION_PLAN_ID_CHILD,
+              message.getSampleUnitChildren().getSampleUnitchildren().get(0).getActionPlanId());
+        });
 
-    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave = ArgumentCaptor
-        .forClass(ExerciseSampleUnitGroup.class);
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave =
+        ArgumentCaptor.forClass(ExerciseSampleUnitGroup.class);
     verify(sampleUnitGroupRepo, times(2)).saveAndFlush(sampleUnitGroupSave.capture());
     List<ExerciseSampleUnitGroup> savedSampleUnitGroups = sampleUnitGroupSave.getAllValues();
     assertTrue(savedSampleUnitGroups.size() == 2);
-    savedSampleUnitGroups.forEach((group) -> {
-      assertEquals(COLLECTION_EXERCISE_ID, group.getCollectionExercise().getId().toString());
-      assertEquals(SampleUnitGroupState.PUBLISHED, group.getStateFK());
-      assertEquals(SAMPLE_UNIT_TYPE_PARENT, group.getFormType());
-    });
+    savedSampleUnitGroups.forEach(
+        (group) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, group.getCollectionExercise().getId().toString());
+          assertEquals(SampleUnitGroupState.PUBLISHED, group.getStateFK());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, group.getFormType());
+        });
 
-    ArgumentCaptor<CollectionExercise> collectionExerciseSave = ArgumentCaptor
-        .forClass(CollectionExercise.class);
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave =
+        ArgumentCaptor.forClass(CollectionExercise.class);
     verify(collectionExerciseRepo, times(1)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> savedCollectionExercise = collectionExerciseSave.getAllValues();
     assertTrue(savedCollectionExercise.size() == 1);
-    savedCollectionExercise.forEach((exercise) -> {
-      assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
-      assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
-    });
+    savedCollectionExercise.forEach(
+        (exercise) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
+          assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
+        });
   }
 
-  /**
-   * Test of no sampleUnitGroups in state VALIDATED - none to distribute.
-   */
+  /** Test of no sampleUnitGroups in state VALIDATED - none to distribute. */
   @Test
   public void noSampleUnitGroupsExistTest() {
 
     // Override happy path scenario to return an empty list querying for
     // sampleUnitGroups.
-    when(
-        sampleUnitGroupRepo.findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
-            SampleUnitGroupState.VALIDATED,
-            collectionExercise,
-            new ArrayList<Integer>(Arrays.asList(IMPOSSIBLE_ID)),
-            new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
-                .thenReturn(new ArrayList<ExerciseSampleUnitGroup>());
+    when(sampleUnitGroupRepo
+            .findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
+                SampleUnitGroupState.VALIDATED,
+                collectionExercise,
+                new ArrayList<Integer>(Arrays.asList(IMPOSSIBLE_ID)),
+                new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
+        .thenReturn(new ArrayList<ExerciseSampleUnitGroup>());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -290,23 +298,20 @@ public class SampleUnitDistributorTest {
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
 
-  /**
-   * Test no SampleUnitChild or ActionPlanId in SampleUnitGroup.
-   */
+  /** Test no SampleUnitChild or ActionPlanId in SampleUnitGroup. */
   @Test
   public void noSampleUnitChildOrActionPlanId() {
 
     // Override happy path scenario so no ActionPlanId is returned.
-    when(collectionExerciseRepo.getActiveActionPlanId(collectionExercise.getExercisePK(), "B",
-        collectionExercise.getSurveyId()))
-            .thenReturn(null);
+    when(collectionExerciseRepo.getActiveActionPlanId(
+            collectionExercise.getExercisePK(), "B", collectionExercise.getSurveyId()))
+        .thenReturn(null);
 
     // Count of SampleUnitGroups would not match as didn't publish the
     // SampleUnitGroups in the exercise as no child or ActionPlanId.
-    when(
-        sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
-                .thenReturn(0L);
+        .thenReturn(0L);
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -315,9 +320,7 @@ public class SampleUnitDistributorTest {
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
 
-  /**
-   * Test no SampleUnitParent in SampleUnitGroup
-   */
+  /** Test no SampleUnitParent in SampleUnitGroup */
   @Test
   public void noParentInSampleUnitGroup() {
 
@@ -326,10 +329,9 @@ public class SampleUnitDistributorTest {
 
     // Count of SampleUnitGroups would not match as didn't publish the
     // SampleUnitGroups in the exercise as had no Parent.
-    when(
-        sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
-                .thenReturn(0L);
+        .thenReturn(0L);
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -338,9 +340,7 @@ public class SampleUnitDistributorTest {
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
 
-  /**
-   * Test of LockingException thrown by DistributedListManager.
-   */
+  /** Test of LockingException thrown by DistributedListManager. */
   @Test
   public void distributedListManagerLockingException() {
     // Override happy path scenario to return a LockingException from
@@ -359,15 +359,14 @@ public class SampleUnitDistributorTest {
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
 
-  /**
-   * Test of Exception thrown by sampleUnitGroup state transition.
-   */
+  /** Test of Exception thrown by sampleUnitGroup state transition. */
   @Test
   public void sampleUnitGroupStateTransitionException() {
     // Override happy path scenario to return a CTPException from
     // SampleUnitGroup transition manager.
     try {
-      when(sampleUnitGroupState.transition(SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
+      when(sampleUnitGroupState.transition(
+              SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
           .thenThrow(new CTPException(CTPException.Fault.BAD_REQUEST, TEST_EXCEPTION));
     } catch (CTPException ex) {
       // Do nothing with it, actually want to catch it in SampleUnitDistributor
@@ -375,10 +374,9 @@ public class SampleUnitDistributorTest {
 
     // Count of SampleUnitGroups would not match as didn't publish the
     // SampleUnitGroup due to state transition failure
-    when(
-        sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
+    when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
-                .thenReturn(0L);
+        .thenReturn(0L);
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -387,16 +385,15 @@ public class SampleUnitDistributorTest {
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
 
-  /**
-   * Test of Exception thrown by collectionExercise state transition.
-   */
+  /** Test of Exception thrown by collectionExercise state transition. */
   @Test
   public void collectionExerciseStateTransitionException() {
     // Override happy path scenario to return a CTPException from
     // collectionExercise transition manager.
     try {
-      when(collectionExerciseTransitionState.transition(CollectionExerciseState.VALIDATED,
-          CollectionExerciseEvent.PUBLISH)).thenThrow(new CTPException(CTPException.Fault.BAD_REQUEST, TEST_EXCEPTION));
+      when(collectionExerciseTransitionState.transition(
+              CollectionExerciseState.VALIDATED, CollectionExerciseEvent.PUBLISH))
+          .thenThrow(new CTPException(CTPException.Fault.BAD_REQUEST, TEST_EXCEPTION));
     } catch (CTPException ex) {
       // Do nothing with it, actually want to catch it in SampleUnitDistributor
     }
@@ -407,5 +404,4 @@ public class SampleUnitDistributorTest {
     verify(sampleUnitGroupRepo, times(2)).saveAndFlush(any(ExerciseSampleUnitGroup.class));
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
-
 }

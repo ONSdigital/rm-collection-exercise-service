@@ -2,14 +2,10 @@ package uk.gov.ons.ctp.response.collection.exercise.repository;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 
-/**
- * JPA Data Repository.
- */
+/** JPA Data Repository. */
 public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer> {
 
   /**
@@ -25,7 +21,8 @@ public interface SampleLinkRepository extends JpaRepository<SampleLink, Integer>
    * @param sampleSummaryId the UUID of the sample to delete link for
    * @param collectionExerciseId the UUID of the collection exercise to delete link for
    */
-  void deleteBySampleSummaryIdAndCollectionExerciseId(UUID sampleSummaryId, UUID collectionExerciseId);
+  void deleteBySampleSummaryIdAndCollectionExerciseId(
+      UUID sampleSummaryId, UUID collectionExerciseId);
 
   /**
    * find sample summaries linked to collection exercise
