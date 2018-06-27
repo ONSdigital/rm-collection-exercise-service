@@ -52,6 +52,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * A class to contain integration tests for the collection exercise service
@@ -205,9 +206,36 @@ public class CollectionExerciseEndpointIT {
   }
 
   @Test
-  public void ensureSampleUnitIdIsPropagatedHere() throws Exception {
-    createCollectionInstrumentStub();
+  public void ensureSampleUnitIdIsPropagatedHereSocial() throws Exception {
+    log.info("************ Starting ensureSampleUnitIdIsPropagatedHereSocial *************");
     createSurveyServiceSocialStub();
+    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("H");
+
+    assertNull("Party id must be null", sampleUnit.getPartyId());
+  }
+
+  @Test
+  public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
+    log.info("************ Starting ensureSampleUnitIdIsPropagatedHereBusiness *************");
+    createSurveyServiceBusinessStub();
+    createPartyServiceNoAssociationsStub();
+    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
+
+    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+  }
+
+  @Test
+  public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
+    log.info("************ Starting ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments *************");
+    createSurveyServiceBusinessStub();
+    createPartyServicesWithAssociationsStub();
+    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
+
+    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+  }
+
+  private SampleUnitParent ensureSampleUnitIdIsPropagatedHere(String type) throws Exception {
+    createCollectionInstrumentStub();
 
     SampleUnit sampleUnit = new SampleUnit();
     UUID id = UUID.randomUUID();
@@ -220,7 +248,7 @@ public class CollectionExerciseEndpointIT {
     sampleUnit.setCollectionExerciseId(collex.getId()
                                              .toString());
     sampleUnit.setFormType("");
-    sampleUnit.setSampleUnitType("H");
+    sampleUnit.setSampleUnitType(type);
     //sampleUnit.setSampleAttributes(new SampleUnit.SampleAttributes(new ArrayList<>()));
 
     setSampleSize(collex, 1);
@@ -251,6 +279,8 @@ public class CollectionExerciseEndpointIT {
             .unmarshal(new ByteArrayInputStream(message.getBytes()));
 
     assertEquals(id, UUID.fromString(sampleUnitParent.getId()));
+
+    return sampleUnitParent;
   }
 
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
@@ -306,9 +336,16 @@ public class CollectionExerciseEndpointIT {
                                                                                                                               .withBody("1")));
   }
 
-  private void createPartyServiceStub() throws IOException {
-    String json = loadResourceAsString(ValidateSampleUnits.class, "ValidateSampleUnitsTest.PartyDTO.json");
-    this.wireMockRule.stubFor(get(urlPathEqualTo("/party-api/v1/parties/type/H/ref/LMS0001")).willReturn(aResponse()
+  private void createPartyServiceNoAssociationsStub() throws IOException {
+    String json = loadResourceAsString(CollectionExerciseEndpointIT.class, "CollectionExerciseEndpointIT.PartyDTO.no-associations.json");
+    this.wireMockRule.stubFor(get(urlPathMatching("/party-api/v1/parties/type/B/ref/(.*)")).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(json)));
+  }
+
+  private void createPartyServicesWithAssociationsStub() throws IOException {
+    String json = loadResourceAsString(CollectionExerciseEndpointIT.class, "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
+    this.wireMockRule.stubFor(get(urlPathMatching("/party-api/v1/parties/type/B/ref/(.*)")).willReturn(aResponse()
                                                                                                                  .withHeader("Content-Type", "application/json")
                                                                                                                  .withBody(json)));
   }

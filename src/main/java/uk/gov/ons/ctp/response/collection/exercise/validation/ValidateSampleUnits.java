@@ -315,6 +315,7 @@ public class ValidateSampleUnits {
                                                  ExerciseSampleUnit sampleUnit,
                                                  Association association) {
     ExerciseSampleUnit respondent = new ExerciseSampleUnit();
+    respondent.setSampleUnitId(UUID.randomUUID());
     respondent.setSampleUnitGroup(sampleUnitGroup);
     respondent.setPartyId(UUID.fromString(association.getPartyId()));
     respondent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
