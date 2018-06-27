@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -57,6 +58,7 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Tests for the ValidatesSampleTest */
 @RunWith(MockitoJUnitRunner.class)
@@ -185,6 +187,10 @@ public class ValidateSampleUnitsTest {
     when(collectionInstrumentSvcClient.requestCollectionInstruments(
             new JSONObject(CI_2_SVC_SEARCH).toString()))
         .thenReturn(collectionInstruments);
+
+    List<SurveyDTO> surveys = FixtureHelper.loadClassFixtures(SurveyDTO[].class);
+    when(surveySvcClient.findSurvey(any(UUID.class))).thenReturn(surveys.get(0));
+    when(surveySvcClient.findSurveyByRef(any(String.class))).thenReturn(surveys.get(0));
 
     // Mock transition Managers
     when(collectionExerciseTransitionState.transition(

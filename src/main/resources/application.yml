@@ -122,7 +122,7 @@ action-svc:
     port: 8151
     username: admin
     password: secret
-    
+
 collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   request-collection-instruments-count: /collection-instrument-api/1.0.2/collectioninstrument/count

@@ -34,7 +34,7 @@
 	<!-- Option to be used in Debug/Test: throw-exception-on-rejection="true" -->
 	<int-xml:validating-filter id="sampleUnitValidator"
 		input-channel="sampleUnitXml" output-channel="sampleUnitXmlValid"
-		schema-location="classpath:samplesvc/xsd/outbound/sample-unit.xsd" discard-channel="sampleUnitInvalidXml" />
+		schema-location="classpath:samplesvc/xsd/outbound/sample-unit.xsd" discard-channel="sampleUnitInvalidXml" throw-exception-on-rejection="true"/>
 
 	<!-- Validated xml is transformed into the jaxb generated object model -->
 	<int:channel id="sampleUnitTransformed"

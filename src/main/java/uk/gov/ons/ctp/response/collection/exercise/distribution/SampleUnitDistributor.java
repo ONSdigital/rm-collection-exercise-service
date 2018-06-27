@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -138,7 +139,8 @@ public class SampleUnitDistributor {
         parent.setCollectionExerciseId(exercise.getId().toString());
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        parent.setPartyId(sampleUnit.getPartyId().toString());
+        parent.setId(sampleUnit.getSampleUnitId().toString());
+        parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         actionPlanId =
             collectionExerciseRepo.getActiveActionPlanId(
@@ -148,8 +150,9 @@ public class SampleUnitDistributor {
       } else {
         SampleUnitChild child = new SampleUnitChild();
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+        child.setId(sampleUnit.getSampleUnitId().toString());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        child.setPartyId(sampleUnit.getPartyId().toString());
+        child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(
             collectionExerciseRepo.getActiveActionPlanId(

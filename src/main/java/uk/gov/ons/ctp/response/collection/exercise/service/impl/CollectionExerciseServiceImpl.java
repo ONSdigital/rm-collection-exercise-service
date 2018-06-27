@@ -97,6 +97,16 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
+  public List<SampleLink> findLinkedSampleSummaries(UUID id) {
+    return sampleLinkRepository.findByCollectionExerciseId(id);
+  }
+
+  @Override
+  public List<CollectionExercise> findAllCollectionExercise() {
+    return collectRepo.findAll();
+  }
+
+  @Override
   public CollectionExercise findCollectionExercise(UUID id) {
 
     return collectRepo.findOneById(id);
@@ -138,16 +148,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       default:
         return existing.get(0);
     }
-  }
-
-  @Override
-  public List<SampleLink> findLinkedSampleSummaries(UUID id) {
-    return sampleLinkRepository.findByCollectionExerciseId(id);
-  }
-
-  @Override
-  public List<CollectionExercise> findAllCollectionExercise() {
-    return collectRepo.findAll();
   }
 
   @Override
@@ -327,10 +327,25 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         "Creating action plans for exercise, CollectionExerciseId: {}, SurveyId: {}",
         collectionExercise.getId(),
         survey.getId());
-    createDefaultActionPlan(survey, "B");
-    createDefaultActionPlan(survey, "BI");
-    createOverrideActionPlan(collectionExercise, survey, "B");
-    createOverrideActionPlan(collectionExercise, survey, "BI");
+
+    switch (survey.getSurveyType()) {
+      case Business:
+        createDefaultActionPlan(survey, "B");
+        createDefaultActionPlan(survey, "BI");
+        createOverrideActionPlan(collectionExercise, survey, "B");
+        createOverrideActionPlan(collectionExercise, survey, "BI");
+        break;
+
+      case Social:
+        createDefaultActionPlan(survey, "H");
+        createOverrideActionPlan(collectionExercise, survey, "H");
+        break;
+
+      case Census:
+      default:
+        throw new RuntimeException("Census surveys not supported... yet!");
+    }
+
     log.debug(
         "Successfully created action plans for exercise, CollectionExerciseId: {}, SurveyID: {}",
         collectionExercise.getId(),
@@ -368,8 +383,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description);
     createCaseTypeDefault(survey, sampleUnitType, actionPlan);
     log.debug(
-        "Successfully created default action plan, ActionPlanId: {}, SurveyId: {},"
-            + " SampleUnitType: {}",
+        "Successfully created default action plan,"
+            + "ActionPlanId: {}, SurveyId: {}, SampleUnitType: {}",
         actionPlan.getId(),
         survey.getId(),
         sampleUnitType);
@@ -396,8 +411,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     this.caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
     log.debug(
-        "Successfully created case type default, ActionPlanId: {}, SurveyId: {},"
-            + " SampleUnitType: {}",
+        "Successfully created case type default,"
+            + "ActionPlanId: {}, SurveyId: {}, SampleUnitType: {}",
         actionPlan.getId(),
         survey.getId(),
         sampleUnitType);
@@ -458,8 +473,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan)
       throws DataAccessException {
     log.debug(
-        "Creating case type override, ActionPlanId: {}, CollectionExerciseId: {},"
-            + " SampleUnitType: {}",
+        "Creating case type override,"
+            + "ActionPlanId: {}, CollectionExerciseId: {}, SampleUnitType: {}",
         actionPlan.getId(),
         collectionExercise.getId(),
         sampleUnitType);
@@ -660,16 +675,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public void transitionScheduleCollectionExerciseToReadyToReview(final UUID collectionExerciseId)
-      throws CTPException {
-    CollectionExercise collex = findCollectionExercise(collectionExerciseId);
-
-    if (collex != null) {
-      transitionScheduleCollectionExerciseToReadyToReview(collex);
-    }
-  }
-
-  @Override
   public void transitionScheduleCollectionExerciseToReadyToReview(
       final CollectionExercise collectionExercise) throws CTPException {
     UUID collexId = collectionExercise.getId();
@@ -685,8 +690,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
             && numberOfCollectionInstruments != null
             && numberOfCollectionInstruments > 0;
     log.info(
-        "ready_for_review transition check: sampleLinksValid: {},"
-            + " numberOfCollectionInstruments: {},"
+        "ready_for_review transition check:"
+            + "sampleLinksValid: {}, numberOfCollectionInstruments: {},"
             + " shouldTransition: {}",
         sampleLinksValid,
         numberOfCollectionInstruments,
@@ -697,6 +702,16 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     } else {
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
+    }
+  }
+
+  @Override
+  public void transitionScheduleCollectionExerciseToReadyToReview(final UUID collectionExerciseId)
+      throws CTPException {
+    CollectionExercise collex = findCollectionExercise(collectionExerciseId);
+
+    if (collex != null) {
+      transitionScheduleCollectionExerciseToReadyToReview(collex);
     }
   }
 

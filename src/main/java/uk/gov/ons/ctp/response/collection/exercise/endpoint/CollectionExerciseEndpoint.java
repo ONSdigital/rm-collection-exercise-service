@@ -142,6 +142,33 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
+   * Endpoint to get a collection exercise by exercise ref and survey ref
+   *
+   * @param exerciseRef the exercise ref
+   * @param surveyRef the survey ref
+   * @return 200 with collection exercise body if found, otherwise 404
+   * @throws CTPException
+   */
+  @RequestMapping(value = "/{exerciseRef}/survey/{surveyRef}", method = RequestMethod.GET)
+  public ResponseEntity<CollectionExerciseDTO> getCollectionExercisesForSurvey(
+      @PathVariable("exerciseRef") final String exerciseRef,
+      @PathVariable("surveyRef") final String surveyRef)
+      throws CTPException {
+    CollectionExercise collex =
+        this.collectionExerciseService.findCollectionExercise(surveyRef, exerciseRef);
+
+    if (collex == null) {
+      throw new CTPException(
+          CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "Cannot find collection exercise for survey %s and period %s",
+              surveyRef, exerciseRef));
+    } else {
+      return ResponseEntity.ok(getCollectionExerciseDTO(collex));
+    }
+  }
+
+  /**
    * GET to find collection exercise from the collection exercise service for the given collection
    * exercise Id.
    *
@@ -399,7 +426,6 @@ public class CollectionExerciseEndpoint {
     if (survey == null) {
       throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
     }
-
     // Check if collection exercise already exists
     CollectionExercise existing =
         this.collectionExerciseService.findCollectionExercise(collex.getExerciseRef(), survey);
@@ -733,32 +759,5 @@ public class CollectionExerciseEndpoint {
     List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);
 
     return ResponseEntity.ok(scheduledEvents);
-  }
-
-  /**
-   * Endpoint to get a collection exercise by exercise ref and survey ref
-   *
-   * @param exerciseRef the exercise ref
-   * @param surveyRef the survey ref
-   * @return 200 with collection exercise body if found, otherwise 404
-   * @throws CTPException
-   */
-  @RequestMapping(value = "/{exerciseRef}/survey/{surveyRef}", method = RequestMethod.GET)
-  public ResponseEntity<CollectionExerciseDTO> getCollectionExercisesForSurveyAndExerciseRef(
-      @PathVariable("exerciseRef") final String exerciseRef,
-      @PathVariable("surveyRef") final String surveyRef)
-      throws CTPException {
-    CollectionExercise collex =
-        this.collectionExerciseService.findCollectionExercise(surveyRef, exerciseRef);
-
-    if (collex == null) {
-      throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format(
-              "Cannot find collection exercise for survey %s and period %s",
-              surveyRef, exerciseRef));
-    } else {
-      return ResponseEntity.ok(getCollectionExerciseDTO(collex));
-    }
   }
 }

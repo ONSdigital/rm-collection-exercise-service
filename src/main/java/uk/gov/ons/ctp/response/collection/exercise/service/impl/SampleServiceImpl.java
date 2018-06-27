@@ -134,6 +134,7 @@ public class SampleServiceImpl implements SampleService {
       timeout = TRANSACTION_TIMEOUT)
   @Override
   public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
+    log.debug("Processing sample unit: {}", sampleUnit);
     ExerciseSampleUnit exerciseSampleUnit = null;
 
     CollectionExercise collectionExercise =
@@ -157,6 +158,7 @@ public class SampleServiceImpl implements SampleService {
         exerciseSampleUnit = new ExerciseSampleUnit();
         exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
         exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+        exerciseSampleUnit.setSampleUnitId(UUID.fromString(sampleUnit.getId()));
         exerciseSampleUnit.setSampleUnitType(
             SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
 
@@ -173,8 +175,8 @@ public class SampleServiceImpl implements SampleService {
 
       } else {
         log.warn(
-            "SampleUnitRef {} with  setSampleUnitTypeFK {}"
-                + " already exists for CollectionExercise {}",
+            "SampleUnitRef {} with"
+                + " setSampleUnitTypeFK {} already exists for CollectionExercise {}",
             sampleUnit.getSampleUnitRef(),
             sampleUnit.getSampleUnitType(),
             sampleUnit.getCollectionExerciseId());

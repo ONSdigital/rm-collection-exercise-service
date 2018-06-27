@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -41,8 +40,10 @@ import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionIn
 import uk.gov.ons.ctp.response.party.representation.Association;
 import uk.gov.ons.ctp.response.party.representation.Enrolment;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Class responsible for business logic to validate SampleUnits. */
 @Component
@@ -164,15 +165,24 @@ public class ValidateSampleUnits {
         }
         try {
           String surveyId = exercise.getSurveyId().toString();
+          SurveyDTO survey = surveySvcClient.findSurvey(UUID.fromString(surveyId));
           UUID collectionInstrumentId =
               requestCollectionInstrumentId(classifierTypes, sampleUnitParent, surveyId);
-          sampleUnitsWithRespondents =
-              createEnrolledRespondentSampleUnits(
-                  sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
+
+          if (survey.getSurveyType() == SurveyDTO.SurveyType.Business) {
+            sampleUnitsWithRespondents =
+                createEnrolledRespondentSampleUnits(
+                    sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
+
+          } else if (survey.getSurveyType() == SurveyDTO.SurveyType.Social) {
+            sampleUnitsWithRespondents.add(sampleUnitParent);
+          }
+
           sampleUnitsWithRespondents.forEach(
               updatedSampleUnit -> {
                 updatedSampleUnit.setCollectionInstrumentId(collectionInstrumentId);
               });
+
         } catch (RestClientException ex) {
           log.error(
               "Error in validation for SampleUnitGroup PK: {} due to: {}",
@@ -313,6 +323,7 @@ public class ValidateSampleUnits {
       ExerciseSampleUnit sampleUnit,
       Association association) {
     ExerciseSampleUnit respondent = new ExerciseSampleUnit();
+    respondent.setSampleUnitId(UUID.randomUUID());
     respondent.setSampleUnitGroup(sampleUnitGroup);
     respondent.setPartyId(UUID.fromString(association.getPartyId()));
     respondent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
@@ -430,6 +441,7 @@ public class ValidateSampleUnits {
    */
   private CollectionExerciseEvent getCollectionExerciseTransitionState(CollectionExercise exercise)
       throws CTPException {
+    log.info("getCollectionExerciseTransitionState is called!");
     CollectionExerciseEvent event = null;
     long init =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
@@ -444,9 +456,13 @@ public class ValidateSampleUnits {
     if (validated == exercise.getSampleSize().longValue()) {
       // All sample units validated, set exercise state to VALIDATED
       event = CollectionExerciseEvent.VALIDATE;
+      log.info("State of collection exercise id: {} is now VALIDATE", exercise.getId());
     } else if (init < 1 && failed > 0) {
       // None left to validate but some failed, set exercise to
       // FAILEDVALIDATION
+      log.info(
+          "State of collection exercise id: {} is now INVALIDATED (FAILEDVALIDATION)",
+          exercise.getId());
       event = CollectionExerciseEvent.INVALIDATE;
     }
 
@@ -463,14 +479,9 @@ public class ValidateSampleUnits {
   private ExerciseSampleUnitGroup transitionSampleUnitGroupState(
       ExerciseSampleUnitGroup sampleUnitGroup, List<ExerciseSampleUnit> sampleUnits) {
 
-    Predicate<ExerciseSampleUnit> stateTest =
-        su -> su.getPartyId() instanceof UUID && su.getCollectionInstrumentId() instanceof UUID;
-    boolean stateValidated = false;
-    if (sampleUnits.isEmpty()) {
-      stateValidated = false;
-    } else {
-      stateValidated = sampleUnits.stream().allMatch(stateTest);
-    }
+    boolean stateValidated =
+        sampleUnits.size() > 0
+            && sampleUnits.stream().allMatch(ValidateSampleUnits::isSampleUnitValid);
     try {
       if (stateValidated) {
         sampleUnitGroup.setStateFK(
@@ -486,5 +497,16 @@ public class ValidateSampleUnits {
       log.error("Stack trace: " + ex);
     }
     return sampleUnitGroup;
+  }
+
+  private static boolean isSampleUnitValid(ExerciseSampleUnit sampleUnit) {
+    if (sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.H) {
+      return sampleUnit.getCollectionInstrumentId() != null && sampleUnit.getPartyId() == null;
+    } else if (sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.B
+        || sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.BI) {
+      return sampleUnit.getCollectionInstrumentId() != null && sampleUnit.getPartyId() != null;
+    } else {
+      return false;
+    }
   }
 }

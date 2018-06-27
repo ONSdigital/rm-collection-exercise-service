@@ -7,7 +7,7 @@ spring:
 
 survey-svc:
   connection-config:
-    port: 18080
+    port: 18002
 
 action-svc:
   connection-config:
@@ -19,3 +19,16 @@ redisson-config:
 rabbitmq:
   host: localhost
   port: 35672
+
+schedules:
+  validation-schedule-delay-milli-seconds: 5000
+  distribution-schedule-delay-milli-seconds: 5000
+
+collection-instrument-svc:
+    connection-config:
+        port: 18002
+
+party-svc:
+    connection-config:
+        port: 18002
+
