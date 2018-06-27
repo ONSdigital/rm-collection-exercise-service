@@ -2,7 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import java.util.List;
 import java.util.UUID;
-
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
@@ -11,15 +10,11 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitVali
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
-/**
- * Service responsible for dealing with samples
- *
- */
+/** Service responsible for dealing with samples */
 public interface SampleService {
 
   /**
-   * Request the delivery of sample units from the Sample Service via a message
-   * queue.
+   * Request the delivery of sample units from the Sample Service via a message queue.
    *
    * @param id the Collection Exercise Id for which to request sample units.
    * @return the total number of sample units in the collection exercise.
@@ -36,10 +31,7 @@ public interface SampleService {
    */
   ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException;
 
-  /**
-   * Validate SampleUnits
-   *
-   */
+  /** Validate SampleUnits */
   void validateSampleUnits();
 
   /**
@@ -49,9 +41,9 @@ public interface SampleService {
    */
   void distributeSampleUnits(CollectionExercise exercise);
 
-
   /**
    * Get the sample unit validation errors for a given collection exercise
+   *
    * @param collectionExerciseId a collection exercise
    * @return an array of validation errors
    */
@@ -59,6 +51,7 @@ public interface SampleService {
 
   /**
    * Gets a list of sample links for a given sample summary
+   *
    * @param sampleSummaryId the id of the sample summary to find sample links for
    * @return a list of sample links
    */
@@ -66,6 +59,7 @@ public interface SampleService {
 
   /**
    * Method to save a sample link
+   *
    * @param sampleLink the sample link to save
    * @return the updated sample link
    */

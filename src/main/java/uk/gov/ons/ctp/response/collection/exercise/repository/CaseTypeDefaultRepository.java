@@ -1,15 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 
-import java.util.List;
-import java.util.UUID;
-
-/**
- * Spring JPA Repository for CaseTypeDefault
- *
- */
+/** Spring JPA Repository for CaseTypeDefault */
 public interface CaseTypeDefaultRepository extends JpaRepository<CaseTypeDefault, UUID> {
 
   /**
@@ -28,5 +24,4 @@ public interface CaseTypeDefaultRepository extends JpaRepository<CaseTypeDefault
    * @return list of associated casetypedefaults.
    */
   CaseTypeDefault findTopBySurveyIdAndSampleUnitTypeFK(UUID surveyUuid, String sampleUnitType);
-
 }

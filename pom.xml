@@ -16,7 +16,7 @@
   <parent>
     <groupId>uk.gov.ons.ctp.product</groupId>
     <artifactId>rm-common-config</artifactId>
-    <version>10.49.8</version>
+    <version>10.49.12</version>
   </parent>
 
   <dependencies>
@@ -374,6 +374,10 @@
                 </configuration>
             </execution>
         </executions>
+      </plugin>
+      <plugin>
+          <groupId>com.coveo</groupId>
+          <artifactId>fmt-maven-plugin</artifactId>
       </plugin>
     </plugins>
     <resources>
