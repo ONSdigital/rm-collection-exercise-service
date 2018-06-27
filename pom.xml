@@ -349,22 +349,30 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
+        <groupId>se.thinkcode.wait</groupId>
+        <artifactId>http</artifactId>
+        <version>1.0.0</version>
         <executions>
-          <execution>
-            <id>sleep-for-a-while</id>
-            <phase>pre-integration-test</phase>
-            <configuration>
-              <target>
-                <sleep seconds="10" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
+            <execution>
+                <id>wait-for-action</id>
+                <goals>
+                    <goal>wait</goal>
+                </goals>
+                <configuration>
+                    <url>http://localhost:38151/info</url>
+                    <timeout>60000</timeout>
+                </configuration>
+            </execution>
+            <execution>
+                <id>wait-for-survey</id>
+                <goals>
+                    <goal>wait</goal>
+                </goals>
+                <configuration>
+                    <url>http://localhost:18080/info</url>
+                    <timeout>60000</timeout>
+                </configuration>
+            </execution>
         </executions>
       </plugin>
       <plugin>
