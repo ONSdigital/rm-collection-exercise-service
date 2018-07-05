@@ -257,6 +257,35 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   /**
+   * Test to get collection exercise with get events throws CTP Exception.
+   *
+   * @throws CTPException exception thrown
+   */
+  @Test
+  public void
+      findCollectionExerciseGetEventsThrowsCTPExceptionSuccessfullyRetrievesCollectionExercise()
+          throws Exception {
+    when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
+        .thenReturn(collectionExerciseResults.get(0));
+    when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
+        .thenReturn(caseTypeDefaultResults);
+    when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
+        .thenReturn(surveyDtoResults.get(0));
+    when(eventService.getEvents(COLLECTIONEXERCISE_ID1)).thenThrow(CTPException.class);
+
+    MockHttpServletRequestBuilder json =
+        getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
+
+    log.info("json: {}", json);
+
+    ResultActions actions = mockCollectionExerciseMvc.perform(json);
+
+    log.info("actions: {}", actions);
+
+    actions.andExpect(status().isOk());
+  }
+
+  /**
    * Test to get all collection exercises.
    *
    * @throws Exception exception thrown

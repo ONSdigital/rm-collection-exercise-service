@@ -654,7 +654,7 @@ public class CollectionExerciseEndpoint {
 
       collectionExerciseDTO.setEvents(eventList);
     } catch (CTPException e) {
-      log.debug(
+      log.error(
           "Error retrieving events for collection exercise Id {}",
           collectionExercise.getId().toString());
     }
