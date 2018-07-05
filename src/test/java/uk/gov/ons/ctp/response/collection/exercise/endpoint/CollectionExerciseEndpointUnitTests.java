@@ -282,7 +282,17 @@ public class CollectionExerciseEndpointUnitTests {
 
     log.info("actions: {}", actions);
 
-    actions.andExpect(status().isOk());
+    actions
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercise"))
+        .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
+        .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
+        .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
+        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
+        .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
+        .andExpect(jsonPath("$.caseTypes[*].*", hasSize(2)))
+        .andExpect(
+            jsonPath("$.caseTypes[*].actionPlanId", containsInAnyOrder(ACTIONPLANID.toString())));
   }
 
   /**
