@@ -117,6 +117,8 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id) throws CTPException {
 
+    log.info("Retrieving collection exercises by survey id {}", id);
+
     SurveyDTO survey = surveyService.findSurvey(id);
 
     List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
@@ -616,6 +618,7 @@ public class CollectionExerciseEndpoint {
    */
   private CollectionExerciseDTO getCollectionExerciseDTO(
       final CollectionExercise collectionExercise) {
+    log.debug("Populating data for requested collection exercise {}", collectionExercise.getId());
     Collection<CaseType> caseTypeList =
         collectionExerciseService.getCaseTypesList(collectionExercise);
     List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
@@ -639,6 +642,21 @@ public class CollectionExerciseEndpoint {
           this.sampleService.getValidationErrors(collectionExercise.getId());
 
       collectionExerciseDTO.setValidationErrors(errors);
+    }
+
+    try {
+      List<EventDTO> eventList =
+          this.eventService
+              .getEvents(collectionExercise.getId())
+              .stream()
+              .map(EventService::createEventDTOFromEvent)
+              .collect(Collectors.toList());
+
+      collectionExerciseDTO.setEvents(eventList);
+    } catch (CTPException e) {
+      log.debug(
+          "Error retrieving events for collection exercise Id {}",
+          collectionExercise.getId().toString());
     }
 
     return collectionExerciseDTO;
