@@ -271,7 +271,8 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
         .thenReturn(surveyDtoResults.get(0));
-    when(eventService.getEvents(COLLECTIONEXERCISE_ID1)).thenThrow(CTPException.class);
+    when(eventService.getEvents(COLLECTIONEXERCISE_ID1))
+        .thenThrow(new CTPException(CTPException.Fault.SYSTEM_ERROR));
 
     MockHttpServletRequestBuilder json =
         getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
