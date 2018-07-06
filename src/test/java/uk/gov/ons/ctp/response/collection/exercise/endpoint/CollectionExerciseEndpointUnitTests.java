@@ -277,11 +277,9 @@ public class CollectionExerciseEndpointUnitTests {
     MockHttpServletRequestBuilder json =
         getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
 
-    log.info("json: {}", json);
 
     ResultActions actions = mockCollectionExerciseMvc.perform(json);
 
-    log.info("actions: {}", actions);
 
     actions
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
