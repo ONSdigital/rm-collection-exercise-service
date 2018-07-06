@@ -259,7 +259,7 @@ public class CollectionExerciseEndpointUnitTests {
   /**
    * Test to get collection exercise with get events throws CTP Exception.
    *
-   * @throws CTPException exception thrown
+   * @throws Exception exception thrown
    */
   @Test
   public void
@@ -277,9 +277,7 @@ public class CollectionExerciseEndpointUnitTests {
     MockHttpServletRequestBuilder json =
         getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
 
-
     ResultActions actions = mockCollectionExerciseMvc.perform(json);
-
 
     actions
         .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))

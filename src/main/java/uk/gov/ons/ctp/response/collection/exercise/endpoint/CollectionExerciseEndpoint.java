@@ -158,7 +158,8 @@ public class CollectionExerciseEndpoint {
       @PathVariable("surveyRef") final String surveyRef)
       throws CTPException {
 
-    log.info("Retrieving collection exercise with surveyRef={} and period={}", surveyRef, exerciseRef);
+    log.info(
+        "Retrieving collection exercise with surveyRef={} and period={}", surveyRef, exerciseRef);
 
     CollectionExercise collex =
         this.collectionExerciseService.findCollectionExercise(surveyRef, exerciseRef);
@@ -168,9 +169,13 @@ public class CollectionExerciseEndpoint {
           CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format(
               "Cannot find collection exercise for surveyRef={} and period={}",
-              surveyRef, exerciseRef));
+              surveyRef,
+              exerciseRef));
     } else {
-      log.info("Successfully retrieved collection exercise using surveyRef={} and period={}", surveyRef, exerciseRef);
+      log.info(
+          "Successfully retrieved collection exercise using surveyRef={} and period={}",
+          surveyRef,
+          exerciseRef);
       return ResponseEntity.ok(getCollectionExerciseDTO(collex));
     }
   }
