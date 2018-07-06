@@ -257,6 +257,42 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   /**
+   * Test to get collection exercise with get events throws CTP Exception.
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void
+      findCollectionExerciseGetEventsThrowsCTPExceptionSuccessfullyRetrievesCollectionExercise()
+          throws Exception {
+    when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
+        .thenReturn(collectionExerciseResults.get(0));
+    when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
+        .thenReturn(caseTypeDefaultResults);
+    when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
+        .thenReturn(surveyDtoResults.get(0));
+    when(eventService.getEvents(COLLECTIONEXERCISE_ID1))
+        .thenThrow(new CTPException(CTPException.Fault.SYSTEM_ERROR));
+
+    MockHttpServletRequestBuilder json =
+        getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
+
+    ResultActions actions = mockCollectionExerciseMvc.perform(json);
+
+    actions
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercise"))
+        .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
+        .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
+        .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
+        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
+        .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
+        .andExpect(jsonPath("$.caseTypes[*].*", hasSize(2)))
+        .andExpect(
+            jsonPath("$.caseTypes[*].actionPlanId", containsInAnyOrder(ACTIONPLANID.toString())));
+  }
+
+  /**
    * Test to get all collection exercises.
    *
    * @throws Exception exception thrown
