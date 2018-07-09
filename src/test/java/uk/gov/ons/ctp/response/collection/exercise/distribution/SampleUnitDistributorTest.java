@@ -5,14 +5,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,10 +33,12 @@ import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.ScheduleSettings;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -46,6 +47,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 
 /** Tests for the SampleUnitDistributor */
@@ -75,6 +77,8 @@ public class SampleUnitDistributorTest {
 
   @Mock private CollectionExerciseRepository collectionExerciseRepo;
 
+  @Mock private EventRepository eventRepository;
+
   @Mock private SampleUnitRepository sampleUnitRepo;
 
   @Mock
@@ -97,6 +101,7 @@ public class SampleUnitDistributorTest {
 
   private List<ExerciseSampleUnitGroup> sampleUnitGroups;
   private CollectionExercise collectionExercise;
+  private List<Event> events;
   private List<ExerciseSampleUnit> sampleUnitParentOnly;
   private List<ExerciseSampleUnit> sampleUnitRespondents;
 
@@ -118,6 +123,7 @@ public class SampleUnitDistributorTest {
 
     sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
     collectionExercise = sampleUnitGroups.get(0).getCollectionExercise();
+    events = FixtureHelper.loadClassFixtures(Event[].class);
     sampleUnitParentOnly =
         FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class, "ParentOnly");
     sampleUnitRespondents =
@@ -164,6 +170,13 @@ public class SampleUnitDistributorTest {
    */
   @Test
   public void sampleUnitParentPublishedWhenParentOnly() {
+
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -216,6 +229,13 @@ public class SampleUnitDistributorTest {
 
     // Override to return respondent units
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitRespondents);
+
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -312,6 +332,12 @@ public class SampleUnitDistributorTest {
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
         .thenReturn(0L);
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -332,6 +358,12 @@ public class SampleUnitDistributorTest {
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
         .thenReturn(0L);
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -351,6 +383,12 @@ public class SampleUnitDistributorTest {
     } catch (LockingException ex) {
       // Do nothing with it, actually want to catch it in SampleUnitDistributor
     }
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -377,6 +415,12 @@ public class SampleUnitDistributorTest {
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
         .thenReturn(0L);
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
@@ -387,7 +431,7 @@ public class SampleUnitDistributorTest {
 
   /** Test of Exception thrown by collectionExercise state transition. */
   @Test
-  public void collectionExerciseStateTransitionException() {
+  public void collectionExerciseStateTransitionException() throws Exception {
     // Override happy path scenario to return a CTPException from
     // collectionExercise transition manager.
     try {
@@ -397,6 +441,12 @@ public class SampleUnitDistributorTest {
     } catch (CTPException ex) {
       // Do nothing with it, actually want to catch it in SampleUnitDistributor
     }
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 

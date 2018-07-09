@@ -30,7 +30,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
@@ -115,15 +114,6 @@ public class SampleServiceImpl implements SampleService {
         }
 
         collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
-        if ((eventRepository.findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name())
-                .getTimestamp().getTime()) < System.currentTimeMillis())
-        {
-          collectionExercise.setState(
-                  collectionExerciseTransitionState.transition(
-                          collectionExercise.getState(), CollectionExerciseEvent
-                  )
-          );
-        }
         collectionExercise.setState(
             collectionExerciseTransitionState.transition(
                 collectionExercise.getState(), CollectionExerciseEvent.EXECUTE));

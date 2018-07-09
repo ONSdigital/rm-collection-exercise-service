@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -37,6 +38,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
@@ -52,6 +54,8 @@ public class SampleUnitDistributor {
   private static final int TRANSACTION_TIMEOUT = 60;
 
   @Autowired private AppConfig appConfig;
+
+  @Autowired private EventRepository eventRepository;
 
   @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
 
@@ -289,11 +293,34 @@ public class SampleUnitDistributor {
 
     try {
       if (published == exercise.getSampleSize().longValue()) {
-        // All sample units published, set exercise state to PUBLISHED
-        exercise.setState(
-            collectionExerciseTransitionState.transition(
-                exercise.getState(), CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
-        exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
+
+        if ((eventRepository
+                .findOneByCollectionExerciseAndTag(exercise, EventService.Tag.go_live.name())
+                .getTimestamp()
+                .getTime())
+            < System.currentTimeMillis()) {
+          log.debug(
+              "Attempting to transition collection exercise to Live, collectionExerciseId={}",
+              exercise.getId());
+          // All sample units published and go live date in past, set exercise state to LIVE
+          exercise.setState(
+              collectionExerciseTransitionState.transition(
+                  exercise.getState(), CollectionExerciseEvent.GO_LIVE));
+        } else {
+          // All sample units published, set exercise state to READY_FOR_LIVE
+          log.debug(
+              "Attempting to transition collection exercise to Ready for Live, "
+                  + "collectionExerciseId={}",
+              exercise.getId());
+          exercise.setState(
+              collectionExerciseTransitionState.transition(
+                  exercise.getState(), CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
+          exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
+        }
+        log.debug(
+            "Successfully set collection exercise state collectionExerciseId={}, state={}",
+            exercise.getId(),
+            exercise.getState());
         collectionExerciseRepo.saveAndFlush(exercise);
       }
     } catch (CTPException ex) {
