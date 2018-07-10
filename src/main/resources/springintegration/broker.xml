@@ -51,6 +51,8 @@
 		</rabbit:queue-arguments>
 	</rabbit:queue>
 
+	<rabbit:queue name="Collex.Transition" />
+
 	<rabbit:queue name="Case.CaseDeliveryDLQ" durable="true" />
 
 	<rabbit:queue name="Case.InvalidCaseInstructions" durable="true" />
@@ -94,6 +96,12 @@
 	<rabbit:direct-exchange name="case-invalid-exchange">
 		<rabbit:bindings>
 			<rabbit:binding queue="Case.InvalidCaseInstructions" key="Case.CaseDelivery.binding" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="collex-transition-exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="Collex.Transition" key="Collex.Transition.binding"/>
 		</rabbit:bindings>
 	</rabbit:direct-exchange>
 	<!-- End of Exchanges -->

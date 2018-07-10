@@ -14,6 +14,6 @@
     <import resource="collex-event-messager-inbound.xml"/>
     <import resource="collection-instrument-inbound.xml"/>
     <import resource="sample-uploaded-inbound.xml"/>
-    <import resource="generic-collection-outbound-flow.xml"/>
+    <import resource="collex-transition-outbound-flow.xml"/>
 
 </beans>

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -90,16 +89,9 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
-    Integer result = null;
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody();
-      if (StringUtils.isNumeric(responseBody)) {
-        result = Integer.parseInt(responseBody);
-      } else {
-        log.warn("Body {} is not numeric", responseBody);
-        return null;
-      }
-    }
+    String responseBody = responseEntity.getBody();
+    int result = Integer.parseInt(responseBody);
+    log.debug("Got collection instrument count count={}", result);
     return result;
   }
 }

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,12 +27,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
@@ -45,8 +46,10 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
+import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** UnitTests for CollectionExerciseServiceImpl */
@@ -71,6 +74,10 @@ public class CollectionExerciseServiceImplTest {
   @Mock private ActionSvcClient actionService;
 
   @Mock private CollectionInstrumentSvcClient collectionInstrument;
+
+  @Mock private SampleSvcClient sampleSvcClient;
+
+  @Mock private RabbitTemplate rabbitTemplate;
 
   @Spy
   private StateTransitionManager<?, ?> stateManager =
@@ -105,7 +112,7 @@ public class CollectionExerciseServiceImplTest {
         this.collectionExerciseServiceImpl.createCaseTypeList(
             caseTypeDefaultList, caseTypeOverrideList);
 
-    Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID1));
+    assertEquals(caseTypeList.iterator().next().getActionPlanId(), ACTIONPLANID1);
   }
 
   @Test
@@ -119,7 +126,7 @@ public class CollectionExerciseServiceImplTest {
         this.collectionExerciseServiceImpl.createCaseTypeList(
             caseTypeDefaultList, caseTypeOverrideList);
 
-    Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID3));
+    assertEquals(caseTypeList.iterator().next().getActionPlanId(), ACTIONPLANID3);
   }
 
   @Test
@@ -135,7 +142,7 @@ public class CollectionExerciseServiceImplTest {
         this.collectionExerciseServiceImpl.createCaseTypeList(
             caseTypeDefaultList, caseTypeOverrideList);
 
-    Assert.assertTrue(caseTypeList.iterator().next().getActionPlanId().equals(ACTIONPLANID3));
+    assertEquals(caseTypeList.iterator().next().getActionPlanId(), ACTIONPLANID3);
   }
 
   @Test
@@ -154,8 +161,8 @@ public class CollectionExerciseServiceImplTest {
         this.collectionExerciseServiceImpl.createCaseTypeList(
             caseTypeDefaultList, caseTypeOverrideList);
     Iterator<CaseType> i = caseTypeList.iterator();
-    Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID1));
-    Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID3));
+    assertEquals(i.next().getActionPlanId(), ACTIONPLANID1);
+    assertEquals(i.next().getActionPlanId(), ACTIONPLANID3);
   }
 
   @Test
@@ -176,8 +183,8 @@ public class CollectionExerciseServiceImplTest {
             caseTypeDefaultList, caseTypeOverrideList);
 
     Iterator<CaseType> i = caseTypeList.iterator();
-    Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID3));
-    Assert.assertTrue(i.next().getActionPlanId().equals(ACTIONPLANID4));
+    assertEquals(i.next().getActionPlanId(), ACTIONPLANID3);
+    assertEquals(i.next().getActionPlanId(), ACTIONPLANID4);
   }
 
   /**
@@ -210,11 +217,7 @@ public class CollectionExerciseServiceImplTest {
         .build();
   }
 
-  /**
-   * Tests collection exercise is created with the correct details.
-   *
-   * @throws Exception
-   */
+  /** Tests collection exercise is created with the correct details. */
   @Test
   public void testCreateCollectionExercise() throws Exception {
     // Given
@@ -247,11 +250,7 @@ public class CollectionExerciseServiceImplTest {
     verify(this.caseTypeOverrideRepo, times(2)).saveAndFlush(any());
   }
 
-  /**
-   * Tests that create collection exercise endpoint creates the action plans.
-   *
-   * @throws Exception general exception
-   */
+  /** Tests that create collection exercise endpoint creates the action plans. */
   @Test
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
     // Given
@@ -280,8 +279,6 @@ public class CollectionExerciseServiceImplTest {
   /**
    * Tests that creating a collection exercise for which action plans exists does not try to create
    * action plans
-   *
-   * @throws Exception general exception
    */
   @Test
   public void testCreateCollectionExerciseExistingDefaultActionPlans() throws Exception {
@@ -312,8 +309,6 @@ public class CollectionExerciseServiceImplTest {
   /**
    * Tests that creating a collection exercise for which action plans exists does not try to create
    * action plans
-   *
-   * @throws Exception general exception
    */
   @Test
   public void testCreateCollectionExerciseExistingOverrideActionPlans() throws Exception {
@@ -367,6 +362,29 @@ public class CollectionExerciseServiceImplTest {
   }
 
   @Test
+  public void testUpdateCollectionExerciseSendsCollectionTransitionEvent() throws Exception {
+    // Given
+    CollectionExercise existing =
+        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    UUID surveyId = UUID.fromString(survey.getId());
+    existing.setSurveyId(surveyId);
+    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
+    when(surveyService.findSurvey(surveyId)).thenReturn(survey);
+    CollectionExerciseDTO toUpdate =
+        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+
+    // When
+    this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
+
+    // Then
+    CollectionTransitionEvent collectionTransitionEvent =
+        new CollectionTransitionEvent(
+            existing.getId(), CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    verify(rabbitTemplate).convertAndSend(collectionTransitionEvent);
+  }
+
+  @Test
   public void testUpdateCollectionExerciseInvalidSurvey() throws Exception {
     CollectionExerciseDTO toUpdate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
@@ -399,7 +417,7 @@ public class CollectionExerciseServiceImplTest {
     // Set up the mock to return a different one with the same exercise ref and survey id
     when(collexRepo.findByExerciseRefAndSurveyId(
             toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
-        .thenReturn(Arrays.asList(otherExisting));
+        .thenReturn(Collections.singletonList(otherExisting));
 
     try {
       this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
@@ -550,7 +568,7 @@ public class CollectionExerciseServiceImplTest {
     // Set up the mock to return a different one with the same exercise ref and survey id
     when(collexRepo.findByExerciseRefAndSurveyId(
             toUpdate.getExerciseRef(), UUID.fromString(toUpdate.getSurveyId())))
-        .thenReturn(Arrays.asList(otherExisting));
+        .thenReturn(Collections.singletonList(otherExisting));
 
     try {
       this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), toUpdate);
@@ -568,9 +586,16 @@ public class CollectionExerciseServiceImplTest {
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     SampleLink testSampleLink = new SampleLink();
+    testSampleLink.setSampleSummaryId(UUID.randomUUID());
     testSampleLink.setState(SampleLinkState.ACTIVE);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId()))
         .willReturn(Collections.singletonList(testSampleLink));
+
+    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+    sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
+    given(sampleSvcClient.getSampleSummary(testSampleLink.getSampleSummaryId()))
+        .willReturn(sampleSummary);
+
     String searchStringJson =
         new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString()))
             .toString();
@@ -612,7 +637,7 @@ public class CollectionExerciseServiceImplTest {
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId()))
-        .willReturn(Collections.singletonList(new SampleLink()));
+        .willReturn(Collections.emptyList());
     String searchStringJson =
         new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString()))
             .toString();
@@ -633,7 +658,7 @@ public class CollectionExerciseServiceImplTest {
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId()))
-        .willReturn(Collections.singletonList(new SampleLink()));
+        .willReturn(Collections.emptyList());
     String searchStringJson =
         new JSONObject(Collections.singletonMap("COLLECTION_EXERCISE", exercise.getId().toString()))
             .toString();
