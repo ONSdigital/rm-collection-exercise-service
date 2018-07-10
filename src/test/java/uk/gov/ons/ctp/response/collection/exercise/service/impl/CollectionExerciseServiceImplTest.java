@@ -45,7 +45,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
@@ -587,7 +586,6 @@ public class CollectionExerciseServiceImplTest {
     exercise.setState(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
     SampleLink testSampleLink = new SampleLink();
     testSampleLink.setSampleSummaryId(UUID.randomUUID());
-    testSampleLink.setState(SampleLinkState.ACTIVE);
     given(sampleLinkRepository.findByCollectionExerciseId(exercise.getId()))
         .willReturn(Collections.singletonList(testSampleLink));
 
@@ -683,7 +681,6 @@ public class CollectionExerciseServiceImplTest {
 
     assertEquals(sampleSummaryUuid, sampleLink.getSampleSummaryId());
     assertEquals(collexUuid, sampleLink.getCollectionExerciseId());
-    assertEquals(SampleLinkState.INIT, sampleLink.getState());
 
     verify(sampleLinkRepository, times(1)).saveAndFlush(any());
   }

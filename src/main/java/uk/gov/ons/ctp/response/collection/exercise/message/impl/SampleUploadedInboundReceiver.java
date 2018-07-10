@@ -4,14 +4,10 @@ import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
@@ -24,10 +20,6 @@ public class SampleUploadedInboundReceiver {
   @Autowired private CollectionExerciseService collectionExerciseService;
 
   @Autowired private SampleService sampleService;
-
-  @Autowired
-  @Qualifier("sampleLink")
-  private StateTransitionManager<SampleLinkState, SampleLinkEvent> sampleLinkState;
 
   /**
    * Attempt to transition collection exercise now sample has been uploaded

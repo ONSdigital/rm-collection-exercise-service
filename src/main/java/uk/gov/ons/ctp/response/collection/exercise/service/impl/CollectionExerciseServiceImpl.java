@@ -34,7 +34,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
@@ -750,7 +749,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     SampleLink sampleLink = new SampleLink();
     sampleLink.setSampleSummaryId(sampleSummaryId);
     sampleLink.setCollectionExerciseId(collectionExerciseId);
-    sampleLink.setState(SampleLinkState.INIT);
     return sampleLinkRepository.saveAndFlush(sampleLink);
   }
 }
