@@ -43,8 +43,6 @@ public class SampleServiceImpl implements SampleService {
 
   private static final int TRANSACTION_TIMEOUT = 60;
 
-  @Autowired private EventRepository eventRepository;
-
   @Autowired private PartySvcClient partySvcClient;
 
   @Autowired private SampleLinkRepository sampleLinkRepository;
