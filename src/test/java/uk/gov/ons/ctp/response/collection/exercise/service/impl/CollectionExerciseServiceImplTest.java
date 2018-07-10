@@ -79,10 +79,16 @@ public class CollectionExerciseServiceImplTest {
   @Mock private RabbitTemplate rabbitTemplate;
 
   @Spy
-  private StateTransitionManager<?, ?> stateManager =
-      new CollectionExerciseStateTransitionManagerFactory()
-          .getStateTransitionManager(
-              CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
+  private StateTransitionManager<
+          CollectionExerciseDTO.CollectionExerciseState,
+          CollectionExerciseDTO.CollectionExerciseEvent>
+      stateManager =
+          (StateTransitionManager<
+                  CollectionExerciseDTO.CollectionExerciseState,
+                  CollectionExerciseDTO.CollectionExerciseEvent>)
+              new CollectionExerciseStateTransitionManagerFactory()
+                  .getStateTransitionManager(
+                      CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
 
   @InjectMocks @Spy private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
 
@@ -683,6 +689,35 @@ public class CollectionExerciseServiceImplTest {
     assertEquals(collexUuid, sampleLink.getCollectionExerciseId());
 
     verify(sampleLinkRepository, times(1)).saveAndFlush(any());
+  }
+
+  @Test
+  public void testCreateLinkShouldAttemptToTransitionToReadyToReview() throws CTPException {
+    // Given
+    UUID sampleSummaryUuid = UUID.randomUUID();
+    UUID collexUuid = UUID.randomUUID();
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(collexUuid);
+    collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
+    given(collexRepo.findOneById(collexUuid)).willReturn(collectionExercise);
+    given(collectionInstrument.countCollectionInstruments(any())).willReturn(1);
+    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+    SampleLink sampleLink = new SampleLink();
+    sampleLink.setSampleSummaryId(sampleSummaryUuid);
+    given(sampleLinkRepository.findByCollectionExerciseId(collexUuid))
+        .willReturn(Collections.singletonList(sampleLink));
+    sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
+    given(sampleSvcClient.getSampleSummary(sampleSummaryUuid)).willReturn(sampleSummary);
+
+    // When
+    this.collectionExerciseServiceImpl.linkSampleSummaryToCollectionExercise(
+        collexUuid, Collections.singletonList(sampleSummaryUuid));
+
+    // Then
+    verify(stateManager)
+        .transition(
+            CollectionExerciseDTO.CollectionExerciseState.CREATED,
+            CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
   }
 
   public void testRemoveSampleSummaryLink() throws Exception {

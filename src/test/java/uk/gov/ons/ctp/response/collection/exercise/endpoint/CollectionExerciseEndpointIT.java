@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -139,24 +140,56 @@ public class CollectionExerciseEndpointIT {
         config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
   }
 
-  /**
-   * Method to test the flow receving a message that a sample upload has finished. - Create a
-   * collection exercise - Get the collection exercise - Link the collection exercise to a sample
-   * summary with a random sample summary id - Send a message to Sample.SampleUploadFinished.binding
-   * key on sample-outbound-exchange - Get the sample links for the collection exercise - Assert the
-   * sample link is active (and the sample summary ids match)
-   *
-   * @throws CTPException throw if errors occur in any of the interactions
-   */
   @Test
-  public void shouldTransitionCollectionExerciseToReadyToReview() throws Exception {
-    log.info("************ Starting shouldActivateSampleLink *************");
+  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink()
+      throws Exception {
+    log.info(
+        "************ Starting shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink *************");
     // Given
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     SampleSummaryDTO sampleSummary = stubSampleSummary();
     UUID collectionExerciseId = createScheduledCollectionExercise();
+
+    // When
+    BlockingQueue<String> queue =
+        getMessageListener()
+            .listen(
+                SimpleMessageBase.ExchangeType.Direct,
+                "collex-transition-exchange",
+                "Collex.Transition.binding");
     this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+
+    // Then
+    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
+
+    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
+        collectionTransitionEvent.getState());
+
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
+  }
+
+  @Test
+  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
+      throws Exception {
+    log.info(
+        "************ Starting shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink *************");
+    // Given;
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+    BlockingQueue<String> queue =
+        getMessageListener()
+            .listen(
+                SimpleMessageBase.ExchangeType.Direct,
+                "collex-transition-exchange",
+                "Collex.Transition.binding");
 
     // This will cause an exception to be thrown as there is no collection instrument service but
     // this is harmless to our purpose
@@ -168,16 +201,7 @@ public class CollectionExerciseEndpointIT {
             this.mapper.writeValueAsString(sampleSummary));
 
     // Then
-    String collexTransition =
-        getMessageListener()
-            .listen(
-                SimpleMessageBase.ExchangeType.Direct,
-                "collex-transition-exchange",
-                "Collex.Transition.binding")
-            .take();
-
-    CollectionTransitionEvent collectionTransitionEvent =
-        (CollectionTransitionEvent) new XStream().fromXML(collexTransition);
+    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
 
     assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
     assertEquals(
@@ -341,6 +365,31 @@ public class CollectionExerciseEndpointIT {
     return sampleSummary;
   }
 
+  private SampleSummaryDTO stubSampleSummaryInitThenActive() throws IOException {
+    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+    sampleSummary.setState(SampleSummaryDTO.SampleState.INIT);
+    sampleSummary.setId(UUID.randomUUID());
+    this.wireMockRule.stubFor(
+        get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
+            .inScenario("INIT then ACTIVE")
+            .whenScenarioStateIs(Scenario.STARTED)
+            .willSetStateTo("ACTIVE")
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(sampleSummary))));
+    sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
+    this.wireMockRule.stubFor(
+        get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
+            .inScenario("INIT then ACTIVE")
+            .whenScenarioStateIs("ACTIVE")
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(sampleSummary))));
+    return sampleSummary;
+  }
+
   private void stubCollectionInstrumentCount() throws IOException {
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument/count"))
@@ -430,5 +479,17 @@ public class CollectionExerciseEndpointIT {
               this.client.createCollectionExerciseEvent(event);
             });
     return collectionExerciseId;
+  }
+
+  private CollectionTransitionEvent pollForReadyToReview(BlockingQueue<String> queue)
+      throws InterruptedException {
+    String collexTransition = queue.take();
+    CollectionTransitionEvent collectionTransitionEvent =
+        (CollectionTransitionEvent) new XStream().fromXML(collexTransition);
+    return collectionTransitionEvent
+            .getState()
+            .equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW)
+        ? collectionTransitionEvent
+        : pollForReadyToReview(queue);
   }
 }

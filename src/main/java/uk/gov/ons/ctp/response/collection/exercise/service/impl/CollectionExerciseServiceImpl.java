@@ -206,16 +206,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Transactional
   @Override
   public List<SampleLink> linkSampleSummaryToCollectionExercise(
-      UUID collectionExerciseId, List<UUID> sampleSummaryIds) {
+      UUID collectionExerciseId, List<UUID> sampleSummaryIds) throws CTPException {
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
     List<SampleLink> linkedSummaries = new ArrayList<>();
     for (UUID summaryId : sampleSummaryIds) {
       linkedSummaries.add(createLink(summaryId, collectionExerciseId));
     }
 
-    // This used to transition the collection exercise to ready for review, but now that only
-    // happens if
-    // the sample link is ACTIVE
+    transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
 
     return linkedSummaries;
   }
@@ -711,6 +709,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
     } else {
+      // TODO This isn't correct. If we cannot transition it doens't mean a sample has been deleted
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
     }

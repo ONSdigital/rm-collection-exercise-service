@@ -80,6 +80,8 @@ public class CollectionExerciseStateTransitionManagerFactory
         CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
     transitionForReview.put(
         CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
+    transitionForReview.put(
+        CollectionExerciseEvent.CI_SAMPLE_ADDED, CollectionExerciseState.READY_FOR_REVIEW);
     transitions.put(CollectionExerciseState.READY_FOR_REVIEW, transitionForReview);
 
     // PENDING/EXECUTION_STARTED
