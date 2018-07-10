@@ -159,6 +159,10 @@ public class SampleUnitDistributorTest {
             CollectionExerciseState.VALIDATED, CollectionExerciseEvent.PUBLISH))
         .thenReturn(CollectionExerciseState.READY_FOR_LIVE);
 
+    when(collectionExerciseTransitionState.transition(
+            CollectionExerciseState.VALIDATED, CollectionExerciseEvent.GO_LIVE))
+            .thenReturn(CollectionExerciseState.LIVE);
+
     when(sampleUnitGroupState.transition(
             SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
         .thenReturn(SampleUnitGroupState.PUBLISHED);
@@ -453,5 +457,25 @@ public class SampleUnitDistributorTest {
     verify(publisher, times(2)).sendSampleUnit(any(SampleUnitParent.class));
     verify(sampleUnitGroupRepo, times(2)).saveAndFlush(any(ExerciseSampleUnitGroup.class));
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
+  }
+
+  /** Test if go_live date has past at time of validation. */
+  @Test
+  public void changeCollectionExerciseStateToLiveWhenGoLiveDatePast() throws Exception {
+
+
+
+    events
+            .get(0)
+            .setTimestamp(new Timestamp(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+            .when(eventRepository)
+            .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
+
+    sampleUnitDistributor.distributeSampleUnits(collectionExercise);
+
+    verify(publisher, times(2)).sendSampleUnit(any(SampleUnitParent.class));
+    verify(sampleUnitGroupRepo, times(2)).saveAndFlush(any(ExerciseSampleUnitGroup.class));
+    verify(collectionExerciseRepo, times(1)).saveAndFlush(any());
   }
 }
