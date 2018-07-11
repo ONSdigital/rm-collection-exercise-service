@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -41,10 +42,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
@@ -77,6 +85,18 @@ public class CollectionExerciseEndpointIT {
 
   @Autowired private AppConfig appConfig;
 
+  @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepository;
+
+  @Autowired private CollectionExerciseRepository collectionExerciseRepository;
+
+  @Autowired private SampleUnitRepository sampleUnitRepository;
+
+  @Autowired private SampleUnitGroupRepository sampleUnitGroupRepository;
+
+  @Autowired private SampleLinkRepository sampleLinkRepository;
+
+  @Autowired private EventRepository eventRepository;
+
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -88,7 +108,40 @@ public class CollectionExerciseEndpointIT {
   /** Method to set up integration test */
   @Before
   public void setUp() throws IOException {
+    wireMockRule.resetAll();
+
+    sampleUnitRepository.deleteAllInBatch();
+    sampleLinkRepository.deleteAllInBatch();
+    eventRepository.deleteAllInBatch();
+    caseTypeOverrideRepository.deleteAllInBatch();
+    sampleUnitGroupRepository.deleteAllInBatch();
+    collectionExerciseRepository.deleteAllInBatch();
+
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
+  }
+
+  private void stubCreateActionPlan() throws IOException {
+    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
+    actionPlanDTO.setId(UUID.randomUUID());
+
+    wireMockRule.stubFor(
+        post(urlPathMatching("/actionplans"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(actionPlanDTO))));
+  }
+
+  private void stubCreateActionRule() throws IOException {
+    ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
+    actionRuleDTO.setId(UUID.randomUUID());
+
+    wireMockRule.stubFor(
+        post(urlPathMatching("/actionrules"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(actionRuleDTO))));
   }
 
   /**
@@ -100,7 +153,8 @@ public class CollectionExerciseEndpointIT {
    */
   @Test
   public void shouldCreateCollectionExercise() throws Exception {
-    log.info("************ Starting shouldCreateCollectionExercise *************");
+    stubCreateActionPlan();
+
     stubSurveyServiceBusiness();
     String exerciseRef = "899990";
     String userDescription = "Test Description";
@@ -143,9 +197,9 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink()
       throws Exception {
-    log.info(
-        "************ Starting shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink *************");
     // Given
+    stubCreateActionPlan();
+    stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     SampleSummaryDTO sampleSummary = stubSampleSummary();
@@ -176,9 +230,9 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
       throws Exception {
-    log.info(
-        "************ Starting shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink *************");
     // Given;
+    stubCreateActionPlan();
+    stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
@@ -215,7 +269,7 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereSocial() throws Exception {
-    log.info("************ Starting ensureSampleUnitIdIsPropagatedHereSocial *************");
+    stubCreateActionPlan();
     createSurveyServiceSocialStub();
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("H");
 
@@ -224,7 +278,7 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
-    log.info("************ Starting ensureSampleUnitIdIsPropagatedHereBusiness *************");
+    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     createPartyServiceNoAssociationsStub();
     stubCollectionInstrumentCount();
@@ -235,8 +289,7 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
-    log.info(
-        "************ Starting ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments *************");
+    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     createPartyServicesWithAssociationsStub();
     stubCollectionInstrumentCount();
