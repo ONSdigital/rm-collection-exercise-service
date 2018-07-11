@@ -22,7 +22,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
