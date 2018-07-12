@@ -90,7 +90,7 @@ public interface CollectionExerciseService {
    * @return linkedSummaries the list of CollectionExercises and the linked SampleSummaries
    */
   List<SampleLink> linkSampleSummaryToCollectionExercise(
-      UUID collectionExerciseId, List<UUID> sampleSummaryIds);
+      UUID collectionExerciseId, List<UUID> sampleSummaryIds) throws CTPException;
 
   /**
    * Create a collection exercise

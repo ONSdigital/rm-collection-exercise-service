@@ -8,8 +8,6 @@ import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
@@ -21,8 +19,6 @@ public class CollectionExerciseStateTransitionManagerFactory
   public static final String COLLLECTIONEXERCISE_ENTITY = "CollectionExercise";
 
   public static final String SAMPLEUNITGROUP_ENTITY = "SampleUnitGroup";
-
-  public static final String SAMPLELINK_ENTITY = "SampleLink";
 
   private Map<String, StateTransitionManager<?, ?>> managers;
 
@@ -40,10 +36,6 @@ public class CollectionExerciseStateTransitionManagerFactory
     StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent>
         sampleUnitGroupStateTransitionManager = createSampleUnitGroupStateTransitionManager();
     managers.put(SAMPLEUNITGROUP_ENTITY, sampleUnitGroupStateTransitionManager);
-
-    StateTransitionManager<SampleLinkState, SampleLinkEvent> sampleLinkStateTransitionManager =
-        createSampleLinkStateTransitionManager();
-    managers.put(SAMPLELINK_ENTITY, sampleLinkStateTransitionManager);
   }
 
   /**
@@ -88,6 +80,8 @@ public class CollectionExerciseStateTransitionManagerFactory
         CollectionExerciseEvent.EVENTS_DELETED, CollectionExerciseState.CREATED);
     transitionForReview.put(
         CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
+    transitionForReview.put(
+        CollectionExerciseEvent.CI_SAMPLE_ADDED, CollectionExerciseState.READY_FOR_REVIEW);
     transitions.put(CollectionExerciseState.READY_FOR_REVIEW, transitionForReview);
 
     // PENDING/EXECUTION_STARTED
@@ -154,29 +148,6 @@ public class CollectionExerciseStateTransitionManagerFactory
     transitions.put(SampleUnitGroupState.VALIDATED, transitionForValidated);
 
     StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitTransitionManager =
-        new BasicStateTransitionManager<>(transitions);
-
-    return sampleUnitTransitionManager;
-  }
-
-  /**
-   * Create and initialise the factory with the concrete StateTransitionManager for the SampleLink
-   * entity
-   *
-   * @return StateTransitionManager
-   */
-  private StateTransitionManager<SampleLinkState, SampleLinkEvent>
-      createSampleLinkStateTransitionManager() {
-
-    Map<SampleLinkState, Map<SampleLinkEvent, SampleLinkState>> transitions = new HashMap<>();
-
-    // INIT
-    Map<SampleLinkEvent, SampleLinkState> transitionForInit = new HashMap<>();
-    transitionForInit.put(SampleLinkEvent.ACTIVATE, SampleLinkState.ACTIVE);
-
-    transitions.put(SampleLinkState.INIT, transitionForInit);
-
-    StateTransitionManager<SampleLinkState, SampleLinkEvent> sampleUnitTransitionManager =
         new BasicStateTransitionManager<>(transitions);
 
     return sampleUnitTransitionManager;

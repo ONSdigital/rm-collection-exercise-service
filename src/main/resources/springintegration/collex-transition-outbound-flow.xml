@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+  http://www.springframework.org/schema/rabbit
+  http://www.springframework.org/schema/rabbit/spring-rabbit-1.6.xsd">
+
+
+    <bean id="collexTransitionCreationMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller"/>
+
+    <bean id="collexTransitionMarshallingMessageConverter"
+          class="org.springframework.amqp.support.converter.MarshallingMessageConverter">
+        <constructor-arg ref="collexTransitionCreationMarshaller"/>
+        <property name="contentType" value="text/xml"/>
+    </bean>
+
+    <rabbit:template id="collexTransitionTemplate" connection-factory="connectionFactory"
+                     exchange="collex-transition-exchange" routing-key="Collex.Transition.binding"
+                     message-converter="collexTransitionMarshallingMessageConverter" channel-transacted="true"
+                     mandatory="true"/>
+
+</beans>
