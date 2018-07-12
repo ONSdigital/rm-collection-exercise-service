@@ -41,10 +41,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageBase;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageListener;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -56,6 +52,10 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
+import uk.gov.ons.tools.rabbit.Rabbitmq;
+import uk.gov.ons.tools.rabbit.SimpleMessageBase;
+import uk.gov.ons.tools.rabbit.SimpleMessageListener;
+import uk.gov.ons.tools.rabbit.SimpleMessageSender;
 
 /** A class to contain integration tests for the collection exercise service */
 @Slf4j
