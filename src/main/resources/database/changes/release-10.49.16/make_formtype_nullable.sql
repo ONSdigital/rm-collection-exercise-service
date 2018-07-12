@@ -1,0 +1,1 @@
+ALTER TABLE collectionexercise.sampleunitgroup ALTER COLUMN formtype DROP NOT NULL;

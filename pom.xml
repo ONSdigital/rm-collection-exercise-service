@@ -41,7 +41,7 @@
         <dependency>
             <groupId>uk.gov.ons.ctp.product</groupId>
             <artifactId>samplesvc-api</artifactId>
-            <version>10.49.15</version>
+            <version>10.49.17-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -175,7 +175,7 @@
         <dependency>
             <groupId>uk.gov.ons.ctp.common</groupId>
             <artifactId>test-framework</artifactId>
-            <version>10.49.7</version>
+            <version>10.49.10</version>
             <scope>test</scope>
         </dependency>
 
