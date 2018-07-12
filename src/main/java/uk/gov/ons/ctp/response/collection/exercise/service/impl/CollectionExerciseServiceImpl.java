@@ -92,11 +92,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public List<CollectionExercise> findCollectionExercisesForParty(final UUID id) {
-    return this.collectRepo.findByPartyId(id);
-  }
-
-  @Override
   public List<SampleLink> findLinkedSampleSummaries(UUID id) {
     return sampleLinkRepository.findByCollectionExerciseId(id);
   }

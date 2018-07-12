@@ -22,14 +22,6 @@ public interface CollectionExerciseService {
   List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey);
 
   /**
-   * Find a list of collection exercises associated to a party from the Collection Exercise Service
-   *
-   * @param id the party id for which to find collection exercises
-   * @return the associated collection exercises.
-   */
-  List<CollectionExercise> findCollectionExercisesForParty(UUID id);
-
-  /**
    * Find a collection exercise associated to a collection exercise Id from the Collection Exercise
    * Service
    *
