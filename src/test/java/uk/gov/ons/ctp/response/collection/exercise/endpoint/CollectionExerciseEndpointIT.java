@@ -10,14 +10,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
+import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -25,6 +27,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -38,19 +41,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.message.rabbit.Rabbitmq;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageBase;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageListener;
-import uk.gov.ons.ctp.common.message.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
+import uk.gov.ons.tools.rabbit.Rabbitmq;
+import uk.gov.ons.tools.rabbit.SimpleMessageBase;
+import uk.gov.ons.tools.rabbit.SimpleMessageListener;
+import uk.gov.ons.tools.rabbit.SimpleMessageSender;
 
 /** A class to contain integration tests for the collection exercise service */
 @Slf4j
@@ -59,7 +64,6 @@ import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CollectionExerciseEndpointIT {
 
-  // TODO pull these from config
   private static final UUID TEST_SURVEY_ID =
       UUID.fromString("c23bb1c1-5202-43bb-8357-7a07c844308f");
   private static final String TEST_USERNAME = "admin";
@@ -70,8 +74,6 @@ public class CollectionExerciseEndpointIT {
   @Autowired private CollectionExerciseRepository collexRepository;
 
   @Autowired private ObjectMapper mapper;
-
-  private ObjectMapper xmlMapper = new XmlMapper();
 
   @Autowired private AppConfig appConfig;
 
@@ -99,7 +101,7 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void shouldCreateCollectionExercise() throws Exception {
     log.info("************ Starting shouldCreateCollectionExercise *************");
-    createSurveyServiceBusinessStub();
+    stubSurveyServiceBusiness();
     String exerciseRef = "899990";
     String userDescription = "Test Description";
     Pair<Integer, String> result =
@@ -138,66 +140,77 @@ public class CollectionExerciseEndpointIT {
         config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
   }
 
-  /**
-   * Method to test the flow receving a message that a sample upload has finished. - Create a
-   * collection exercise - Get the collection exercise - Link the collection exercise to a sample
-   * summary with a random sample summary id - Send a message to Sample.SampleUploadFinished.binding
-   * key on sample-outbound-exchange - Get the sample links for the collection exercise - Assert the
-   * sample link is active (and the sample summary ids match)
-   *
-   * @throws CTPException throw if errors occur in any of the interactions
-   */
   @Test
-  public void shouldActivateSampleLink() throws Exception {
-    log.info("************ Starting shouldActivateSampleLink *************");
-    createSurveyServiceBusinessStub();
-    createCollectionInstrumentCountStub();
+  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink()
+      throws Exception {
+    log.info(
+        "************ Starting shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink *************");
+    // Given
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    SampleSummaryDTO sampleSummary = stubSampleSummary();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
 
-    String exerciseRef = getRandomRef();
-    String userDescription = "Test Description";
-    Pair<Integer, String> result =
-        this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
-
-    assertEquals(201, (int) result.getLeft());
-    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(result.getRight());
-
-    log.info("Collection exercise to link: {}", newCollex);
-
-    UUID sampleSummaryId = UUID.randomUUID();
-
-    final int status = this.client.linkSampleSummary(newCollex.getId(), sampleSummaryId);
-    assertEquals(200, status);
-
-    SimpleMessageSender sender = getMessageSender();
-
-    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
-    sampleSummary.setId(sampleSummaryId);
-
-    SimpleMessageListener listener = getMessageListener();
+    // When
     BlockingQueue<String> queue =
-        listener.listen(
-            SimpleMessageBase.ExchangeType.Direct,
-            "collection-outbound-exchange",
-            "SampleLink.Activated.binding");
+        getMessageListener()
+            .listen(
+                SimpleMessageBase.ExchangeType.Direct,
+                "collex-transition-exchange",
+                "Collex.Transition.binding");
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+
+    // Then
+    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
+
+    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
+        collectionTransitionEvent.getState());
+
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
+  }
+
+  @Test
+  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
+      throws Exception {
+    log.info(
+        "************ Starting shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink *************");
+    // Given;
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+    BlockingQueue<String> queue =
+        getMessageListener()
+            .listen(
+                SimpleMessageBase.ExchangeType.Direct,
+                "collex-transition-exchange",
+                "Collex.Transition.binding");
 
     // This will cause an exception to be thrown as there is no collection instrument service but
-    // this is
-    // harmless to our purpose
-    sender.sendMessage(
-        "sample-outbound-exchange",
-        "Sample.SampleUploadFinished.binding",
-        this.mapper.writeValueAsString(sampleSummary));
+    // this is harmless to our purpose
+    // When
+    getMessageSender()
+        .sendMessage(
+            "sample-outbound-exchange",
+            "Sample.SampleUploadFinished.binding",
+            this.mapper.writeValueAsString(sampleSummary));
 
-    queue.take();
+    // Then
+    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
 
-    List<SampleLinkDTO> links = this.client.getSampleLinks(newCollex.getId());
+    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
+        collectionTransitionEvent.getState());
 
-    assertEquals(1, links.size());
-
-    SampleLinkDTO link = links.get(0);
-
-    assertEquals(sampleSummaryId, UUID.fromString(link.getSampleSummaryId()));
-    assertEquals("ACTIVE", link.getState());
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
   }
 
   @Test
@@ -212,9 +225,9 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
     log.info("************ Starting ensureSampleUnitIdIsPropagatedHereBusiness *************");
-    createSurveyServiceBusinessStub();
+    stubSurveyServiceBusiness();
     createPartyServiceNoAssociationsStub();
-    createCollectionInstrumentCountStub();
+    stubCollectionInstrumentCount();
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
@@ -224,9 +237,9 @@ public class CollectionExerciseEndpointIT {
   public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
     log.info(
         "************ Starting ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments *************");
-    createSurveyServiceBusinessStub();
+    stubSurveyServiceBusiness();
     createPartyServicesWithAssociationsStub();
-    createCollectionInstrumentCountStub();
+    stubCollectionInstrumentCount();
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
@@ -239,8 +252,7 @@ public class CollectionExerciseEndpointIT {
     UUID id = UUID.randomUUID();
     SimpleMessageSender sender = getMessageSender();
 
-    CollectionExerciseDTO collex =
-        createCollectionExercise(TEST_SURVEY_ID, getRandomRef(), "Test description");
+    CollectionExerciseDTO collex = createCollectionExercise(getRandomRef());
 
     sampleUnit.setId(id.toString());
     sampleUnit.setSampleUnitRef("LMS0001");
@@ -295,15 +307,14 @@ public class CollectionExerciseEndpointIT {
     return stringWriter.toString();
   }
 
-  private CollectionExerciseDTO createCollectionExercise(
-      UUID surveyID, String exerciseRef, String userDescription) throws CTPException {
+  private CollectionExerciseDTO createCollectionExercise(String exerciseRef) throws CTPException {
     Pair<Integer, String> result =
-        this.client.createCollectionExercise(surveyID, exerciseRef, userDescription);
+        this.client.createCollectionExercise(
+            CollectionExerciseEndpointIT.TEST_SURVEY_ID, exerciseRef, "Test description");
 
     assertEquals(201, (int) result.getLeft());
-    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(result.getRight());
 
-    return newCollex;
+    return this.client.getCollectionExercise(result.getRight());
   }
 
   private void setSampleSize(CollectionExerciseDTO collex, int sampleSize) throws Exception {
@@ -341,7 +352,45 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createCollectionInstrumentCountStub() throws IOException {
+  private SampleSummaryDTO stubSampleSummary() throws IOException {
+    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+    sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
+    sampleSummary.setId(UUID.randomUUID());
+    this.wireMockRule.stubFor(
+        get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(sampleSummary))));
+    return sampleSummary;
+  }
+
+  private SampleSummaryDTO stubSampleSummaryInitThenActive() throws IOException {
+    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+    sampleSummary.setState(SampleSummaryDTO.SampleState.INIT);
+    sampleSummary.setId(UUID.randomUUID());
+    this.wireMockRule.stubFor(
+        get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
+            .inScenario("INIT then ACTIVE")
+            .whenScenarioStateIs(Scenario.STARTED)
+            .willSetStateTo("ACTIVE")
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(sampleSummary))));
+    sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
+    this.wireMockRule.stubFor(
+        get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
+            .inScenario("INIT then ACTIVE")
+            .whenScenarioStateIs("ACTIVE")
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(sampleSummary))));
+    return sampleSummary;
+  }
+
+  private void stubCollectionInstrumentCount() throws IOException {
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument/count"))
             .willReturn(aResponse().withBody("1")));
@@ -399,7 +448,7 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createSurveyServiceBusinessStub() throws IOException {
+  private void stubSurveyServiceBusiness() throws IOException {
     createSurveyServiceClassifierStubs();
 
     String json =
@@ -410,5 +459,37 @@ public class CollectionExerciseEndpointIT {
         get(urlPathMatching(
                 "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+  }
+
+  private UUID createScheduledCollectionExercise() throws CTPException {
+    String exerciseRef = getRandomRef();
+    String userDescription = "Test Description";
+    Pair<Integer, String> result =
+        this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
+    String collexId = StringUtils.substringAfterLast(result.getRight(), "/");
+    UUID collectionExerciseId = UUID.fromString(collexId);
+    Arrays.stream(EventService.Tag.values())
+        .filter(EventService.Tag::isMandatory)
+        .forEach(
+            t -> {
+              EventDTO event = new EventDTO();
+              event.setCollectionExerciseId(collectionExerciseId);
+              event.setTag(t.name());
+              event.setTimestamp(new Date());
+              this.client.createCollectionExerciseEvent(event);
+            });
+    return collectionExerciseId;
+  }
+
+  private CollectionTransitionEvent pollForReadyToReview(BlockingQueue<String> queue)
+      throws InterruptedException {
+    String collexTransition = queue.take();
+    CollectionTransitionEvent collectionTransitionEvent =
+        (CollectionTransitionEvent) new XStream().fromXML(collexTransition);
+    return collectionTransitionEvent
+            .getState()
+            .equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW)
+        ? collectionTransitionEvent
+        : pollForReadyToReview(queue);
   }
 }

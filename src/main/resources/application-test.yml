@@ -9,6 +9,10 @@ survey-svc:
   connection-config:
     port: 18002
 
+sample-svc:
+  connection-config:
+    port: 18002
+
 action-svc:
   connection-config:
     port: 38151
