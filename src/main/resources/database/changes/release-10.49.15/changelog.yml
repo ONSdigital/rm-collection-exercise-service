@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.49.15-1
+      author: Ben Jefferies
+      changes:
+        - sqlFile:
+            comment: Remove sample link state
+            path: remove-sample-link-state.sql
+            relativeToChangelogFile: true
+            splitStatements: false

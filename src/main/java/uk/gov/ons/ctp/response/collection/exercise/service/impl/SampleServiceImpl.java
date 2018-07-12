@@ -31,6 +31,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
+import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
@@ -225,5 +226,10 @@ public class SampleServiceImpl implements SampleService {
   @Override
   public SampleLink saveSampleLink(final SampleLink sampleLink) {
     return this.sampleLinkRepository.saveAndFlush(sampleLink);
+  }
+
+  @Override
+  public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
+    return sampleSvcClient.getSampleSummary(sampleSummaryId);
   }
 }

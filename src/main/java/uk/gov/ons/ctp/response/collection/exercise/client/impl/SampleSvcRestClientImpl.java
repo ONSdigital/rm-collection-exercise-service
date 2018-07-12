@@ -26,6 +26,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -101,5 +102,24 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
       }
       return result;
     }
+  }
+
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  @Override
+  public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
+    log.debug("Getting sample summary sampleSummaryId={}", sampleSummaryId);
+    UriComponents uri =
+        restUtility.createUriComponents(
+            "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
+    ResponseEntity<SampleSummaryDTO> response =
+        restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, SampleSummaryDTO.class);
+
+    SampleSummaryDTO sampleSummary = response.getBody();
+    log.debug("Got sampleSummary={}", sampleSummary);
+    return sampleSummary;
   }
 }

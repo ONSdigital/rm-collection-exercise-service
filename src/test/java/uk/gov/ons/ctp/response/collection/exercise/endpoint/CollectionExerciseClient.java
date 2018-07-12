@@ -8,6 +8,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -17,10 +18,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 
 /** A class to wrap the collection exercise REST API in Java using Unirest */
-public class CollectionExerciseClient {
+class CollectionExerciseClient {
 
   private ObjectMapper jacksonMapper;
   private int port;
@@ -35,7 +37,7 @@ public class CollectionExerciseClient {
    * @param aPassword collection exercise API password
    * @param aMapper an object mapper
    */
-  public CollectionExerciseClient(
+  CollectionExerciseClient(
       final int aPort, final String aUsername, final String aPassword, final ObjectMapper aMapper) {
     this.port = aPort;
     this.jacksonMapper = aMapper;
@@ -77,7 +79,7 @@ public class CollectionExerciseClient {
    *     has been created
    * @throws CTPException thrown if an error occurred creating the collection exercise
    */
-  public Pair<Integer, String> createCollectionExercise(
+  Pair<Integer, String> createCollectionExercise(
       final UUID surveyId, final String exerciseRef, final String userDescription)
       throws CTPException {
     CollectionExerciseDTO inputDto = new CollectionExerciseDTO();
@@ -112,7 +114,7 @@ public class CollectionExerciseClient {
    * @return the full details of the collection exercise
    * @throws CTPException thrown if an error occurred retrieving the collection exercise details
    */
-  public CollectionExerciseDTO getCollectionExercise(final UUID collexId) throws CTPException {
+  CollectionExerciseDTO getCollectionExercise(final UUID collexId) throws CTPException {
     try {
       return Unirest.get("http://localhost:" + this.port + "/collectionexercises/{id}")
           .routeParam("id", collexId.toString())
@@ -133,7 +135,7 @@ public class CollectionExerciseClient {
    * @return a representation of the collection exercise
    * @throws CTPException thrown if there was an error retrieving the collection exercise
    */
-  public CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
+  CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
     try {
       return Unirest.get(uriStr)
           .basicAuth(this.username, this.password)
@@ -155,12 +157,12 @@ public class CollectionExerciseClient {
    * @throws CTPException thrown if there was an error linking the sample summaries to the
    *     collection exercise
    */
-  public int linkSampleSummaries(final UUID collexId, final List<UUID> sampleSummaryIds)
+  private int linkSampleSummaries(final UUID collexId, final List<UUID> sampleSummaryIds)
       throws CTPException {
     try {
       JSONObject jsonPayload = new JSONObject();
       JSONArray jsonSampleSummaryIds = new JSONArray();
-      sampleSummaryIds.stream().forEach(ssi -> jsonSampleSummaryIds.put(ssi.toString()));
+      sampleSummaryIds.forEach(ssi -> jsonSampleSummaryIds.put(ssi.toString()));
       jsonPayload.put("sampleSummaryIds", jsonSampleSummaryIds);
 
       HttpResponse<JsonNode> linkResponse =
@@ -185,14 +187,12 @@ public class CollectionExerciseClient {
    *
    * @param collexId the uuid of the collection exercise to link
    * @param sampleSummaryId the uuid of the sample summary to link
-   * @return the http status code of the operation
    * @throws CTPException thrown if there was an error linking the sample summary to the collection
    *     exercise
    * @see CollectionExerciseClient#linkSampleSummaries
    */
-  public int linkSampleSummary(final UUID collexId, final UUID sampleSummaryId)
-      throws CTPException {
-    return linkSampleSummaries(collexId, Arrays.asList(sampleSummaryId));
+  void linkSampleSummary(final UUID collexId, final UUID sampleSummaryId) throws CTPException {
+    linkSampleSummaries(collexId, Collections.singletonList(sampleSummaryId));
   }
 
   /**
@@ -202,7 +202,7 @@ public class CollectionExerciseClient {
    * @return a list of samole links
    * @throws CTPException thrown if an error occurs retrieving the sample links
    */
-  public List<SampleLinkDTO> getSampleLinks(final UUID collexId) throws CTPException {
+  List<SampleLinkDTO> getSampleLinks(final UUID collexId) throws CTPException {
     try {
       SampleLinkDTO[] linkArray =
           Unirest.get("http://localhost:" + this.port + "/collectionexercises/link/{id}")
@@ -216,6 +216,32 @@ public class CollectionExerciseClient {
     } catch (UnirestException e) {
       throw new CTPException(
           CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+    }
+  }
+
+  void createCollectionExerciseEvent(EventDTO event) {
+    HttpResponse<String> response = null;
+    try {
+      response =
+          Unirest.post("http://localhost:" + this.port + "/collectionexercises/{id}/events")
+              .routeParam("id", event.getCollectionExerciseId().toString())
+              .basicAuth(this.username, this.password)
+              .header("accept", "application/json")
+              .header("Content-Type", "application/json")
+              .body(event)
+              .asString();
+    } catch (UnirestException e) {
+      throw new RuntimeException(
+          String.format(
+              "Could not create collection exercise events colletionExerciseId=%s tag=%s",
+              event.getCollectionExerciseId(), event.getTag()),
+          e);
+    }
+    if (response.getStatus() != 201 && response.getStatus() != 409) {
+      throw new RuntimeException(
+          String.format(
+              "Could not create collection exercise events colletionExerciseId=%s tag=%s status=%s",
+              event.getCollectionExerciseId(), event.getTag(), response.getStatus()));
     }
   }
 }
