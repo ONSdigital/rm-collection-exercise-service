@@ -704,7 +704,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
     } else {
-      // TODO This isn't correct. If we cannot transition it doens't mean a sample has been deleted
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED);
     }
