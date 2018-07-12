@@ -20,7 +20,7 @@ import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChild;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitBase;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -130,27 +130,27 @@ public class SampleUnitDistributor {
   private void distributeSampleUnits(
       CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-    List<SampleUnitChild> children = new ArrayList<SampleUnitChild>();
-    String actionPlanId = null;
+    List<SampleUnitBase> children = new ArrayList<>();
     SampleUnitParent parent = null;
     for (ExerciseSampleUnit sampleUnit : sampleUnits) {
       if (sampleUnit.getSampleUnitType().isParent()) {
         parent = new SampleUnitParent();
-        parent.setCollectionExerciseId(exercise.getId().toString());
+        parent.setId(sampleUnit.getSampleUnitId().toString());
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        parent.setId(sampleUnit.getSampleUnitId().toString());
         parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-        actionPlanId =
+        parent.setActionPlanId(
             collectionExerciseRepo.getActiveActionPlanId(
                 exercise.getExercisePK(),
                 sampleUnit.getSampleUnitType().name(),
-                exercise.getSurveyId());
+                exercise.getSurveyId()));
+
+        parent.setCollectionExerciseId(exercise.getId().toString());
       } else {
-        SampleUnitChild child = new SampleUnitChild();
-        child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+        SampleUnitBase child = new SampleUnitBase();
         child.setId(sampleUnit.getSampleUnitId().toString());
+        child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
@@ -166,16 +166,13 @@ public class SampleUnitDistributor {
     if ((parent != null)) {
       if (!children.isEmpty()) {
         parent.setSampleUnitChildren(new SampleUnitChildren(children));
-        publishSampleUnit(sampleUnitGroup, parent);
-      } else if ((actionPlanId != null)) {
-        parent.setActionPlanId(actionPlanId);
-        publishSampleUnit(sampleUnitGroup, parent);
       } else {
         log.error(
             "No Child or ActionPlan for SampleUnitRef {}, SampleUnitType {}",
             parent.getSampleUnitRef(),
             parent.getSampleUnitType());
       }
+      publishSampleUnit(sampleUnitGroup, parent);
     } else {
       log.error(
           "No Parent for SampleUnit in SampleUnitGroupPK {} ",
