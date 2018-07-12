@@ -20,14 +20,6 @@ services:
     - "35672:5672"
     - "46671:15671"
     - "46672:15672"
- sftp:
-    container_name: sftp-it
-    image: atmoz/sftp
-    volumes:
-        - ~/Documents/sftp:/home/centos/Documents/sftp
-    ports:
-        - "222:22"
-    command: centos:JLibV2&XD,:1001
  survey:
    container_name: survey-it
    image: sdcplatform/surveysvc
