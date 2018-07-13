@@ -259,7 +259,9 @@ public class CollectionExerciseEndpointIT {
     sampleUnit.setCollectionExerciseId(collex.getId().toString());
     sampleUnit.setSampleUnitType(type);
 
-    if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) sampleUnit.setFormType("");
+    if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) {
+      sampleUnit.setFormType("");
+    }
 
     // sampleUnit.setSampleAttributes(new SampleUnit.SampleAttributes(new ArrayList<>()));
 
