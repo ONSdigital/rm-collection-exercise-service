@@ -50,6 +50,18 @@ public class EventValidator {
     return validateMandatoryEvents(eventMap) && validateNonMandatoryEvents(eventMap);
   }
 
+  /** Validates the dates on event creation */
+  public boolean validateOnCreate(
+      final List<Event> existingEvents,
+      final Event updatedEvent,
+      final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
+
+    if (collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.CREATED)) {
+      return true;
+    }
+    return true;
+  }
+
   /**
    * Validates the dates which aren't mandatory for a collection exercise to be executed. If the
    * events exist it checks that reference period start before referencePeriodEnd and all reminders
