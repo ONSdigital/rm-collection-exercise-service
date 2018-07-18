@@ -6,10 +6,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -165,7 +165,7 @@ public class SampleUnitDistributorTest {
 
     when(collectionExerciseTransitionState.transition(
             CollectionExerciseState.VALIDATED, CollectionExerciseEvent.GO_LIVE))
-            .thenReturn(CollectionExerciseState.LIVE);
+        .thenReturn(CollectionExerciseState.LIVE);
 
     when(sampleUnitGroupState.transition(
             SampleUnitGroupState.VALIDATED, SampleUnitGroupEvent.PUBLISH))
@@ -466,20 +466,19 @@ public class SampleUnitDistributorTest {
   /** Test if go_live date has past at time of validation. */
   @Test
   public void changeCollectionExerciseStateToLiveWhenGoLiveDatePast() throws Exception {
-
-
-
+    // Set collection exercise go live date to be in past
     events
-            .get(0)
-            .setTimestamp(new Timestamp(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
     doReturn(events.get(0))
-            .when(eventRepository)
-            .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
     verify(publisher, times(2)).sendSampleUnit(any(SampleUnitParent.class));
     verify(sampleUnitGroupRepo, times(2)).saveAndFlush(any(ExerciseSampleUnitGroup.class));
     verify(collectionExerciseRepo, times(1)).saveAndFlush(any());
+    assertEquals(collectionExercise.getState(), CollectionExerciseState.LIVE);
   }
 }
