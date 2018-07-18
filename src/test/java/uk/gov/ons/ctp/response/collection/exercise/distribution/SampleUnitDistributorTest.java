@@ -476,9 +476,15 @@ public class SampleUnitDistributorTest {
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
-    verify(publisher, times(2)).sendSampleUnit(any(SampleUnitParent.class));
-    verify(sampleUnitGroupRepo, times(2)).saveAndFlush(any(ExerciseSampleUnitGroup.class));
-    verify(collectionExerciseRepo, times(1)).saveAndFlush(any());
-    assertEquals(collectionExercise.getState(), CollectionExerciseState.LIVE);
+    ArgumentCaptor<CollectionExercise> collectionExerciseSave =
+            ArgumentCaptor.forClass(CollectionExercise.class);
+    verify(collectionExerciseRepo, times(1)).saveAndFlush(collectionExerciseSave.capture());
+    List<CollectionExercise> savedCollectionExercise = collectionExerciseSave.getAllValues();
+    assertTrue(savedCollectionExercise.size() == 1);
+    savedCollectionExercise.forEach(
+            (exercise) -> {
+              assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
+              assertEquals(CollectionExerciseState.LIVE, exercise.getState());
+            });
   }
 }
