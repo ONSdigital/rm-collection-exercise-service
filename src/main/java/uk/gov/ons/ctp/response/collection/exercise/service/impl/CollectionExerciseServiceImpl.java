@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
@@ -23,6 +23,7 @@ import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
@@ -33,9 +34,10 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO.SampleLinkState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** The implementation of the SampleService */
@@ -55,7 +57,11 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
   private SampleLinkRepository sampleLinkRepository;
 
+  private SampleSvcClient sampleSvcClient;
+
   private SurveyService surveyService;
+
+  private RabbitTemplate rabbitTemplate;
 
   private StateTransitionManager<
           CollectionExerciseDTO.CollectionExerciseState,
@@ -70,7 +76,9 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       SampleLinkRepository sampleLinkRepository,
       ActionSvcClient actionSvcClient,
       CollectionInstrumentSvcClient collectionInstrumentSvcClient,
+      SampleSvcClient sampleSvcClient,
       SurveyService surveyService,
+      @Qualifier("collexTransitionTemplate") RabbitTemplate rabbitTemplate,
       @Qualifier("collectionExercise")
           StateTransitionManager<
                   CollectionExerciseDTO.CollectionExerciseState,
@@ -83,17 +91,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     this.actionSvcClient = actionSvcClient;
     this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
     this.surveyService = surveyService;
+    this.sampleSvcClient = sampleSvcClient;
+    this.rabbitTemplate = rabbitTemplate;
     this.collectionExerciseTransitionState = collectionExerciseTransitionState;
   }
 
   @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
     return this.collectRepo.findBySurveyId(UUID.fromString(survey.getId()));
-  }
-
-  @Override
-  public List<CollectionExercise> findCollectionExercisesForParty(final UUID id) {
-    return this.collectRepo.findByPartyId(id);
   }
 
   @Override
@@ -196,16 +201,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Transactional
   @Override
   public List<SampleLink> linkSampleSummaryToCollectionExercise(
-      UUID collectionExerciseId, List<UUID> sampleSummaryIds) {
+      UUID collectionExerciseId, List<UUID> sampleSummaryIds) throws CTPException {
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
     List<SampleLink> linkedSummaries = new ArrayList<>();
     for (UUID summaryId : sampleSummaryIds) {
       linkedSummaries.add(createLink(summaryId, collectionExerciseId));
     }
 
-    // This used to transition the collection exercise to ready for review, but now that only
-    // happens if
-    // the sample link is ACTIVE
+    transitionScheduleCollectionExerciseToReadyToReview(collectionExerciseId);
 
     return linkedSummaries;
   }
@@ -605,6 +608,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
     collex.setUpdated(new Timestamp(new Date().getTime()));
+    rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
     return this.collectRepo.saveAndFlush(collex);
   }
 
@@ -684,16 +688,16 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     String searchStringJson = new JSONObject(searchStringMap).toString();
     Integer numberOfCollectionInstruments =
         collectionInstrumentSvcClient.countCollectionInstruments(searchStringJson);
-    boolean sampleLinksValid = validateSampleLinks(collexId);
+    boolean allSamplesActive = allSamplesActive(collexId);
     boolean shouldTransition =
-        sampleLinksValid
+        allSamplesActive
             && numberOfCollectionInstruments != null
             && numberOfCollectionInstruments > 0;
     log.info(
         "ready_for_review transition check:"
-            + "sampleLinksValid: {}, numberOfCollectionInstruments: {},"
+            + "allSamplesActive: {}, numberOfCollectionInstruments: {},"
             + " shouldTransition: {}",
-        sampleLinksValid,
+        allSamplesActive,
         numberOfCollectionInstruments,
         shouldTransition);
     if (shouldTransition) {
@@ -715,22 +719,16 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  /**
-   * Method to validate the sample links for a collection exercise by ensuring that all associated
-   * SampleLinks are in the ACTIVE state
-   *
-   * @param collexId the collection exercise to validate
-   * @return true if the associated sample links are valid, false otherwise
-   */
-  private boolean validateSampleLinks(final UUID collexId) {
+  private boolean allSamplesActive(final UUID collexId) throws CTPException {
     List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collexId);
-    List<SampleLink> nonActiveSampleLinks =
-        sampleLinks
-            .stream()
-            .filter(sl -> SampleLinkState.ACTIVE != sl.getState())
-            .collect(Collectors.toList());
+    if (sampleLinks.isEmpty()) {
+      return false;
+    }
 
-    return sampleLinks.size() > 0 && nonActiveSampleLinks.size() == 0;
+    return sampleLinks
+        .stream()
+        .map(sampleLink -> sampleSvcClient.getSampleSummary(sampleLink.getSampleSummaryId()))
+        .allMatch(ss -> ss.getState().equals(SampleSummaryDTO.SampleState.ACTIVE));
   }
 
   /**
@@ -744,7 +742,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     SampleLink sampleLink = new SampleLink();
     sampleLink.setSampleSummaryId(sampleSummaryId);
     sampleLink.setCollectionExerciseId(collectionExerciseId);
-    sampleLink.setState(SampleLinkState.INIT);
     return sampleLinkRepository.saveAndFlush(sampleLink);
   }
 }

@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 10.49.16-1
+      author: Damien Lloyd
+      changes:
+        - sqlFile:
+            comment: Delta for allowing formtype to be null
+            path: make_formtype_nullable.sql
+            relativeToChangelogFile: true
+            splitStatements: true
