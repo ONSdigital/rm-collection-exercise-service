@@ -294,11 +294,17 @@ public class SampleUnitDistributor {
     try {
       if (published == exercise.getSampleSize().longValue()) {
 
+        Boolean isGoLiveInPast = Boolean.FALSE;
         if ((eventRepository
                 .findOneByCollectionExerciseAndTag(exercise, EventService.Tag.go_live.name())
                 .getTimestamp()
                 .getTime())
             < System.currentTimeMillis()) {
+
+          isGoLiveInPast = Boolean.TRUE;
+        }
+
+        if (isGoLiveInPast) {
           log.debug(
               "Attempting to transition collection exercise to Live, collectionExerciseId={}",
               exercise.getId());
