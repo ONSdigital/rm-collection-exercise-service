@@ -300,7 +300,7 @@ public class SampleUnitDistributorTest {
 
   /** Test no SampleUnitChild or ActionPlanId in SampleUnitGroup. */
   @Test
-  public void noSampleUnitChildOrActionPlanId() {
+  public void noSampleUnitChildOrActionPlanIdStillCreateBCase() {
 
     // Override happy path scenario so no ActionPlanId is returned.
     when(collectionExerciseRepo.getActiveActionPlanId(
@@ -315,8 +315,31 @@ public class SampleUnitDistributorTest {
 
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
-    verify(publisher, never()).sendSampleUnit(any());
-    verify(sampleUnitGroupRepo, never()).saveAndFlush(any());
+    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave =
+        ArgumentCaptor.forClass(SampleUnitParent.class);
+    verify(publisher, times(2)).sendSampleUnit(sampleUnitParentSave.capture());
+    List<SampleUnitParent> savedSampleUnitParents = sampleUnitParentSave.getAllValues();
+    assertTrue(savedSampleUnitParents.size() == 2);
+    savedSampleUnitParents.forEach(
+        (message) -> {
+          assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitRef());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, message.getSampleUnitType());
+          assertEquals(PARTY_ID_PARENT, message.getPartyId());
+          assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
+          assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
+          assertEquals(null, message.getActionPlanId());
+        });
+    ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave =
+        ArgumentCaptor.forClass(ExerciseSampleUnitGroup.class);
+    verify(sampleUnitGroupRepo, times(2)).saveAndFlush(sampleUnitGroupSave.capture());
+    List<ExerciseSampleUnitGroup> savedSampleUnitGroups = sampleUnitGroupSave.getAllValues();
+    assertTrue(savedSampleUnitGroups.size() == 2);
+    savedSampleUnitGroups.forEach(
+        (group) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, group.getCollectionExercise().getId().toString());
+          assertEquals(SampleUnitGroupState.PUBLISHED, group.getStateFK());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, group.getFormType());
+        });
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }
 
