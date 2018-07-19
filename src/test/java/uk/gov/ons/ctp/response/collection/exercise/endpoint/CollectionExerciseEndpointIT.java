@@ -257,8 +257,12 @@ public class CollectionExerciseEndpointIT {
     sampleUnit.setId(id.toString());
     sampleUnit.setSampleUnitRef("LMS0001");
     sampleUnit.setCollectionExerciseId(collex.getId().toString());
-    sampleUnit.setFormType("");
     sampleUnit.setSampleUnitType(type);
+
+    if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) {
+      sampleUnit.setFormType("");
+    }
+
     // sampleUnit.setSampleAttributes(new SampleUnit.SampleAttributes(new ArrayList<>()));
 
     setSampleSize(collex, 1);
