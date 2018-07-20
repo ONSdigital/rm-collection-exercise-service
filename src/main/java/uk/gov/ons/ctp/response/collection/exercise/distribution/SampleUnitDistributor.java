@@ -20,7 +20,7 @@ import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitBase;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -134,7 +134,7 @@ public class SampleUnitDistributor {
   private void distributeSampleUnits(
       CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-    List<SampleUnitBase> children = new ArrayList<>();
+    List<SampleUnit> children = new ArrayList<>();
     SampleUnitParent parent = null;
     for (ExerciseSampleUnit sampleUnit : sampleUnits) {
       if (sampleUnit.getSampleUnitType().isParent()) {
@@ -152,7 +152,7 @@ public class SampleUnitDistributor {
 
         parent.setCollectionExerciseId(exercise.getId().toString());
       } else {
-        SampleUnitBase child = new SampleUnitBase();
+        SampleUnit child = new SampleUnit();
         child.setId(sampleUnit.getSampleUnitId().toString());
         child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
@@ -170,12 +170,8 @@ public class SampleUnitDistributor {
     if ((parent != null)) {
       if (!children.isEmpty()) {
         parent.setSampleUnitChildren(new SampleUnitChildren(children));
-      } else {
-        log.error(
-            "No Child or ActionPlan for SampleUnitRef {}, SampleUnitType {}",
-            parent.getSampleUnitRef(),
-            parent.getSampleUnitType());
       }
+
       publishSampleUnit(sampleUnitGroup, parent);
     } else {
       log.error(
