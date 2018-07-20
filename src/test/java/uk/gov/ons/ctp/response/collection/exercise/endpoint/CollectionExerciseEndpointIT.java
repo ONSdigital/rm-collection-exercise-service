@@ -35,6 +35,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -52,6 +53,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
@@ -89,13 +91,10 @@ public class CollectionExerciseEndpointIT {
 
   private CollectionExerciseClient client;
 
-  private SurveySvcClient surveyClient;
-
   /** Method to set up integration test */
   @Before
   public void setUp() throws IOException {
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
-    surveyClient = new SurveySvcRestClientImpl();
   }
 
   /**
@@ -311,14 +310,6 @@ public class CollectionExerciseEndpointIT {
     return sampleUnitParent;
   }
 
-  @Test(expected = CTPException.class)
-  public void surveyClientThrowsException() throws Exception {
-    String surveyRef = "ABC123";
-    stubFindSurveyByRef(surveyRef);
-
-    surveyClient.findSurveyByRef(surveyRef);
-  }
-
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
     JAXBContext jaxbContext = JAXBContext.newInstance(SampleUnit.class);
     StringWriter stringWriter = new StringWriter();
@@ -369,13 +360,6 @@ public class CollectionExerciseEndpointIT {
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
-  }
-
-  private void stubFindSurveyByRef(String surveyRef) {
-    this.wireMockRule.stubFor(
-        get(urlPathEqualTo("/surveys/ref/" + surveyRef))
-            .willReturn(
-                aResponse().withHeader("Content-Type", "application/json").withStatus(400)));
   }
 
   private SampleSummaryDTO stubSampleSummary() throws IOException {
