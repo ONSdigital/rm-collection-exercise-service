@@ -1,11 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -53,13 +56,69 @@ public class EventValidator {
   /** Validates the dates on event creation */
   public boolean validateOnCreate(
       final List<Event> existingEvents,
-      final Event updatedEvent,
+      final Event newEvent,
       final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
-
+    Map<String, Event> events =
+        existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
     if (collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.CREATED)) {
+      return validateMandatoryEventsOnCreate(events, newEvent);
+    }
+    return false;
+  }
+
+  private boolean validateMandatoryEventsOnCreate(
+      final Map<String, Event> eventMap, Event newEvent) {
+    final Optional<Event> mpsEvent =
+        Optional.ofNullable(eventMap.get(EventService.Tag.mps.toString()));
+    final Optional<Event> goLiveEvent =
+        Optional.ofNullable(eventMap.get(EventService.Tag.go_live.toString()));
+    final Optional<Event> returnByEvent =
+        Optional.ofNullable(eventMap.get(EventService.Tag.return_by.toString()));
+    final Optional<Event> exerciseEndEvent =
+        Optional.ofNullable(eventMap.get(EventService.Tag.exercise_end.toString()));
+
+    List<Event> events = new ArrayList<>();
+    if (mpsEvent.isPresent()) {
+      events.add(mpsEvent.get());
+    } else if (newEvent.getTag().equals(EventService.Tag.mps.toString())) {
+      events.add(newEvent);
+    }
+
+    if (goLiveEvent.isPresent()) {
+      events.add(goLiveEvent.get());
+    } else if (newEvent.getTag().equals(EventService.Tag.go_live.toString())) {
+      events.add(newEvent);
+    }
+
+    if (returnByEvent.isPresent()) {
+      events.add(returnByEvent.get());
+    } else if (newEvent.getTag().equals(EventService.Tag.return_by.toString())) {
+      events.add(newEvent);
+    }
+
+    if (exerciseEndEvent.isPresent()) {
+      events.add(exerciseEndEvent.get());
+    } else if (newEvent.getTag().equals(EventService.Tag.exercise_end.toString())) {
+      events.add(newEvent);
+    }
+
+    if (events.size() == 1) {
       return true;
     }
-    return true;
+
+    Timestamp previous = null;
+    boolean result = true;
+    for (Event e : events) {
+      if (previous == null) {
+        previous = e.getTimestamp();
+      } else {
+        if (previous.after(e.getTimestamp())) {
+          result = false;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**

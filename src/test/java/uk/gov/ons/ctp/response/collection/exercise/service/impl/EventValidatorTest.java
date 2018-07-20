@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -28,6 +29,18 @@ public class EventValidatorTest {
     this.validator = new EventValidator();
     this.mandatoryEvents = createMandatoryEvents();
     this.allEvents = createAllEvents();
+  }
+
+  @Test
+  public void testValidMpsEventCreation() {
+    long now = System.currentTimeMillis();
+    LocalDateTime timePoint = LocalDateTime.now();
+    Event mpsEvent = new Event();
+    mpsEvent.setTag((EventService.Tag.mps.toString()));
+    mpsEvent.setTimestamp(new Timestamp(now + 15000000));
+    assertTrue(
+        this.validator.validateOnCreate(
+            this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
   }
 
   @Test
