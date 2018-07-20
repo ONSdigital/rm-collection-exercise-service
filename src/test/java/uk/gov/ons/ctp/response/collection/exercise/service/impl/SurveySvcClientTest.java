@@ -1,11 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -47,7 +49,12 @@ public class SurveySvcClientTest {
 
   @Mock private RestTemplate restTemplate;
 
-  @Test
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+  }
+
+  @Test(expected = CTPException.class)
   public void ensure4xxThrownSurveyFindByRef() throws Exception {
     String surveyRef = "ABC123";
 
@@ -65,14 +72,16 @@ public class SurveySvcClientTest {
 
     when(appConfig.getSurveySvc()).thenReturn(surveySvcConfig);
 
-    when(restUtility.createUriComponents(Mockito.eq(appConfig.getSurveySvc().getSurveyRefPath()), eq(null), eq(surveyRef)))
+    when(restUtility.createUriComponents(
+            Mockito.eq(appConfig.getSurveySvc().getSurveyRefPath()), eq(null), eq(surveyRef)))
         .thenReturn(uriComponents);
 
-    //    when(restTemplate.exchange(Matchers.anyObject(), Matchers.any(HttpMethod.class),
-    // Matchers.<HttpEntity>any(), Matchers.<Class<String>> any()))
-    //        .thenThrow(RestClientException.class);
-
-    when(restTemplate.getForObject(Matchers.anyObject(), Matchers.<Class<SurveyDTO>>any())).thenThrow(RestClientException.class);
+    when(restTemplate.exchange(
+            Matchers.anyObject(),
+            Matchers.any(HttpMethod.class),
+            Matchers.<HttpEntity>any(),
+            Matchers.<Class<String>>any()))
+        .thenThrow(RestClientException.class);
 
     surveySvcClient.findSurveyByRef(surveyRef);
 
