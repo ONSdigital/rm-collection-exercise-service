@@ -35,7 +35,7 @@ public class EventServiceImplTest {
 
   @InjectMocks private EventServiceImpl eventService;
 
-  /** Given collection excercise does not exist When event is created Then exception is thrown */
+  /* Given collection excercise does not exist When event is created Then exception is thrown */
   @Test
   public void givenCollectionExcerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown() {
     EventDTO eventDto = new EventDTO();
@@ -52,7 +52,7 @@ public class EventServiceImplTest {
     }
   }
 
-  /** Given event already exists When event is created Then exception is thrown */
+  /* Given event already exists When event is created Then exception is thrown */
   @Test
   public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() throws Exception {
     String tag = EventService.Tag.mps.name();

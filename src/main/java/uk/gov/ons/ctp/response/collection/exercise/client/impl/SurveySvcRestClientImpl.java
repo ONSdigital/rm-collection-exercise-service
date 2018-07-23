@@ -3,7 +3,6 @@ package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -125,7 +124,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(UUID surveyId) throws CTPException {
+  public SurveyDTO findSurvey(final UUID surveyId) throws CTPException {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
@@ -153,7 +152,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(String surveyRef) throws CTPException {
+  public SurveyDTO findSurveyByRef(final String surveyRef) throws CTPException {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);

@@ -26,6 +26,7 @@ public interface CollectionExerciseService {
    * Service
    *
    * @param id the collection exercise Id for which to find collection exercise
+   * @throws CTPException if collection exercise not found
    * @return the associated collection exercise.
    */
   CollectionExercise findCollectionExercise(UUID id) throws CTPException;
@@ -36,24 +37,29 @@ public interface CollectionExerciseService {
    *
    * @param surveyRef the survey ref
    * @param exerciseRef the collection exercise ref
+   * @throws CTPException if collection exercise not found
    * @return the specified collection exercise or null if not found
    */
-  CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef) throws CTPException;
+  CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef)
+      throws CTPException;
 
   /**
    * Gets collection exercise with given exerciseRef and survey (should be no more than 1)
    *
    * @param exerciseRef the exerciseRef (period) of the collection exercise
    * @param survey the survey the collection exercise is associated with
+   * @throws CTPException if collection exercise not found
    * @return the collection exercise if it exists, null otherwise
    */
-  CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) throws CTPException;
+  CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey)
+      throws CTPException;
 
   /**
    * Gets collection exercise with given exerciseRef and survey uuid (should be no more than 1)
    *
    * @param exerciseRef the exerciseRef (period) of the collection exercise
    * @param surveyId the uuid of the survey the collection exercise is associated with
+   * @throws CTPException if collection exercise not found
    * @return the collection exercise if it exists, null otherwise
    */
   CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) throws CTPException;
