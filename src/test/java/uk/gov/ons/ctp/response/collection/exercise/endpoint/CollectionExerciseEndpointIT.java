@@ -29,10 +29,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,8 +45,6 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
-import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.client.impl.SurveySvcRestClientImpl;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
@@ -87,13 +88,10 @@ public class CollectionExerciseEndpointIT {
 
   private CollectionExerciseClient client;
 
-  private SurveySvcClient surveyClient;
-
   /** Method to set up integration test */
   @Before
   public void setUp() throws IOException {
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
-    surveyClient = new SurveySvcRestClientImpl();
   }
 
   /**
@@ -309,14 +307,6 @@ public class CollectionExerciseEndpointIT {
     return sampleUnitParent;
   }
 
-  @Test(expected = CTPException.class)
-  public void surveyClientThrowsException() throws Exception {
-    String surveyRef = "ABC123";
-    stubFindSurveyByRef(surveyRef);
-
-    surveyClient.findSurveyByRef(surveyRef);
-  }
-
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
     JAXBContext jaxbContext = JAXBContext.newInstance(SampleUnit.class);
     StringWriter stringWriter = new StringWriter();
@@ -367,13 +357,6 @@ public class CollectionExerciseEndpointIT {
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
-  }
-
-  private void stubFindSurveyByRef(String surveyRef) {
-    this.wireMockRule.stubFor(
-        get(urlPathEqualTo("/surveys/ref/" + surveyRef))
-            .willReturn(
-                aResponse().withHeader("Content-Type", "application/json").withStatus(400)));
   }
 
   private SampleSummaryDTO stubSampleSummary() throws IOException {

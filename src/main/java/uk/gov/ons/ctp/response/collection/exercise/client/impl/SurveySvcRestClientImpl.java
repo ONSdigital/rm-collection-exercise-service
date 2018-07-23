@@ -124,7 +124,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(UUID surveyId) throws CTPException {
+  public SurveyDTO findSurvey(final UUID surveyId) throws CTPException {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
@@ -152,7 +152,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(String surveyRef) throws CTPException {
+  public SurveyDTO findSurveyByRef(final String surveyRef) throws CTPException {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);

@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.gov.ons.ctp.common.UnirestInitialiser;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -44,29 +45,7 @@ class CollectionExerciseClient {
     this.username = aUsername;
     this.password = aPassword;
 
-    initialiseUnirestObjectMapper();
-  }
-
-  /** Initialises object mapper as used by unirest (needs a Jackson ObjectMapper to construct) */
-  private void initialiseUnirestObjectMapper() {
-    Unirest.setObjectMapper(
-        new com.mashape.unirest.http.ObjectMapper() {
-          public <T> T readValue(final String value, final Class<T> valueType) {
-            try {
-              return jacksonMapper.readValue(value, valueType);
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          public String writeValue(final Object value) {
-            try {
-              return jacksonMapper.writeValueAsString(value);
-            } catch (JsonProcessingException e) {
-              throw new RuntimeException(e);
-            }
-          }
-        });
+    UnirestInitialiser.initialise(jacksonMapper);
   }
 
   /**
