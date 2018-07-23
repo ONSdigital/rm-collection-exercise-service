@@ -110,7 +110,7 @@ public class SampleUnitDistributor {
         collectionExerciseTransitionState(exercise);
       }
 
-    } catch (LockingException ex) {
+    } catch (LockingException | CTPException ex) {
       log.error("Distribution failed due to {}", ex.getMessage());
       log.error("Stack trace: " + ex);
     } finally {
@@ -132,7 +132,7 @@ public class SampleUnitDistributor {
    * @param sampleUnitGroup for which to distribute sample units.
    */
   private void distributeSampleUnits(
-      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
+      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
     List<SampleUnit> children = new ArrayList<>();
     SampleUnitParent parent = null;
@@ -172,6 +172,14 @@ public class SampleUnitDistributor {
         parent.setSampleUnitChildren(new SampleUnitChildren(children));
       }
 
+      if (parent.getActionPlanId() == null) {
+        String message =
+            String.format(
+                "Action Plan Id is required for collectionExerciseId=%s and sampleUnitId=%s",
+                exercise.getId(), parent.getId());
+        log.error(message);
+        throw new CTPException(CTPException.Fault.VALIDATION_FAILED, message);
+      }
       publishSampleUnit(sampleUnitGroup, parent);
     } else {
       log.error(
