@@ -118,7 +118,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef) throws CTPException {
+  public CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef)
+      throws CTPException {
     CollectionExercise collex = null;
     SurveyDTO survey = this.surveyService.findSurveyByRef(surveyRef);
 

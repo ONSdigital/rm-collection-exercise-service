@@ -3,7 +3,6 @@ package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
