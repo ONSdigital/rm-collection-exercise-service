@@ -259,7 +259,7 @@ public class SampleUnitDistributorTest {
           assertEquals(PARTY_ID_PARENT, message.getPartyId());
           assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
           assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
-          assertNull(message.getActionPlanId());
+          assertEquals(ACTION_PLAN_ID_PARENT, message.getActionPlanId());
           assertEquals(
               SAMPLE_UNIT_REF,
               message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitRef());
@@ -328,7 +328,7 @@ public class SampleUnitDistributorTest {
 
   /** Test no SampleUnitChild or ActionPlanId in SampleUnitGroup. */
   @Test
-  public void noSampleUnitChildOrActionPlanId() {
+  public void noActionPlanIdThrowsCTPException() {
 
     // Override happy path scenario so no ActionPlanId is returned.
     when(collectionExerciseRepo.getActiveActionPlanId(
@@ -477,14 +477,14 @@ public class SampleUnitDistributorTest {
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
     ArgumentCaptor<CollectionExercise> collectionExerciseSave =
-            ArgumentCaptor.forClass(CollectionExercise.class);
+        ArgumentCaptor.forClass(CollectionExercise.class);
     verify(collectionExerciseRepo, times(1)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> savedCollectionExercise = collectionExerciseSave.getAllValues();
     assertTrue(savedCollectionExercise.size() == 1);
     savedCollectionExercise.forEach(
-            (exercise) -> {
-              assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
-              assertEquals(CollectionExerciseState.LIVE, exercise.getState());
-            });
+        (exercise) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
+          assertEquals(CollectionExerciseState.LIVE, exercise.getState());
+        });
   }
 }
