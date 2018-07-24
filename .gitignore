@@ -61,3 +61,6 @@ target
 
 plantuml.jar
 diagrams/*.svg
+
+# Mac
+*.DS_Store
