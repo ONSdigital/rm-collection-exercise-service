@@ -165,7 +165,7 @@ public class SampleServiceImpl implements SampleService {
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.totalByExercisePK(collectionExercise.getExercisePK())
+        if (sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
             == collectionExercise.getSampleSize()) {
           collectionExercise.setState(
               collectionExerciseTransitionState.transition(
