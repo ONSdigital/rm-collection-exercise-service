@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,7 @@ public class SampleServiceImplTest {
   @Test
   public void testAcceptSampleUnit_CountNotEqual() throws CTPException {
     CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_ID);
     collex.setSampleSize(50);
     collex.setState(CollectionExerciseState.EXECUTION_STARTED);
 
@@ -60,6 +62,7 @@ public class SampleServiceImplTest {
   @Test
   public void testAcceptSampleUnit_CountEqual() throws CTPException {
     CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_ID);
     collex.setSampleSize(99);
     collex.setState(CollectionExerciseState.EXECUTION_STARTED);
 
@@ -82,13 +85,11 @@ public class SampleServiceImplTest {
             .withFormType("X")
             .withSampleUnitRef("REF123")
             .withSampleUnitType("B")
-            .withCollectionExerciseId(COLLEX_ID.toString())
+            .withCollectionExerciseId(collex.getId().toString())
             .build();
 
-    ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
-
     when(collectRepo.findOneById(any())).thenReturn(collex);
-    when(sampleUnitGroupRepo.saveAndFlush(any())).thenReturn(sampleUnitGroup);
+    when(sampleUnitGroupRepo.saveAndFlush(any())).then(returnsFirstArg());
     when(sampleUnitRepo.tupleExists(any(), any(), any())).thenReturn(false);
     when(sampleUnitRepo.countBySampleUnitGroupCollectionExercise(any())).thenReturn(99);
 
@@ -105,7 +106,7 @@ public class SampleServiceImplTest {
     ArgumentCaptor<ExerciseSampleUnit> sampleUnitArgumentCaptor =
         ArgumentCaptor.forClass(ExerciseSampleUnit.class);
     verify(sampleUnitRepo).saveAndFlush(sampleUnitArgumentCaptor.capture());
-    assertEquals(sampleUnitGroup, sampleUnitArgumentCaptor.getValue().getSampleUnitGroup());
+    assertEquals(sampleUnitGroupArgumentCaptor.getValue(), sampleUnitArgumentCaptor.getValue().getSampleUnitGroup());
     assertEquals("REF123", sampleUnitArgumentCaptor.getValue().getSampleUnitRef());
     assertEquals(SampleUnitType.B, sampleUnitArgumentCaptor.getValue().getSampleUnitType());
     assertEquals(SAMPLE_ID, sampleUnitArgumentCaptor.getValue().getSampleUnitId());
