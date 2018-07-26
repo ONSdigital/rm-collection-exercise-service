@@ -29,7 +29,7 @@ public interface CollectionExerciseService {
    * @throws CTPException if collection exercise not found
    * @return the associated collection exercise.
    */
-  CollectionExercise findCollectionExercise(UUID id) throws CTPException;
+  CollectionExercise findCollectionExercise(UUID id);
 
   /**
    * Find a collection exercise from a survey ref (e.g. 221) and a collection exercise ref (e.g.
@@ -51,8 +51,7 @@ public interface CollectionExerciseService {
    * @throws CTPException if collection exercise not found
    * @return the collection exercise if it exists, null otherwise
    */
-  CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey)
-      throws CTPException;
+  CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey);
 
   /**
    * Gets collection exercise with given exerciseRef and survey uuid (should be no more than 1)
@@ -62,7 +61,7 @@ public interface CollectionExerciseService {
    * @throws CTPException if collection exercise not found
    * @return the collection exercise if it exists, null otherwise
    */
-  CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) throws CTPException;
+  CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId);
 
   /**
    * Find all Collection Exercises
