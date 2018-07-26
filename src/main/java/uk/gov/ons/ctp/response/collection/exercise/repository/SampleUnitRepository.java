@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 
@@ -39,18 +40,10 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
   /**
    * Count the number of SampleUnits for the CollectionExercise.
    *
-   * @param id of CollectionExercise for which to count SampleUnits.
-   * @return int of SampleUnit total for given exercisePK.
+   * @param collectionExercise is CollectionExercise for which to count SampleUnits.
+   * @return int of SampleUnit total for given collectionExercise.
    */
-  @Query(
-      value =
-          "select count(*) from "
-              + "collectionexercise.sampleunit su, "
-              + "collectionexercise.sampleunitgroup sg "
-              + "where sg.exercisefk = :p_exercisefk and "
-              + "su.sampleunitgroupfk = sg.sampleunitgrouppk;",
-      nativeQuery = true)
-  int totalByExercisePK(@Param("p_exercisefk") Integer id);
+  int countBySampleUnitGroupCollectionExercise(CollectionExercise collectionExercise);
 
   /**
    * Query repository for SampleUnits belonging to a SampleUnitGroup.
