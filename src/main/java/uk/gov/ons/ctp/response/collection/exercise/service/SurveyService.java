@@ -1,6 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import java.util.UUID;
+
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -14,7 +16,7 @@ public interface SurveyService {
    * @return the survey object
    * @throws CTPException if survey service reports error
    */
-  SurveyDTO findSurvey(UUID id) throws CTPException;
+  SurveyDTO findSurvey(UUID id) throws RestClientException;
 
   /**
    * Request a survey by reference
@@ -23,5 +25,5 @@ public interface SurveyService {
    * @return the survey object
    * @throws CTPException if survey service reports error
    */
-  SurveyDTO findSurveyByRef(String surveyRef) throws CTPException;
+  SurveyDTO findSurveyByRef(String surveyRef) throws RestClientException;
 }

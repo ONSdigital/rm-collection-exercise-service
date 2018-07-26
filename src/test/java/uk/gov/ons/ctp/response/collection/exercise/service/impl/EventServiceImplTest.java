@@ -54,7 +54,7 @@ public class EventServiceImplTest {
 
   /* Given event already exists When event is created Then exception is thrown */
   @Test
-  public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() throws Exception {
+  public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() {
     String tag = EventService.Tag.mps.name();
     EventDTO eventDto = new EventDTO();
     CollectionExercise collex = new CollectionExercise();

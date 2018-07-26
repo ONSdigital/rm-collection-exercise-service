@@ -189,8 +189,6 @@ public class ValidateSampleUnits {
               sampleUnitGroup.getSampleUnitGroupPK(),
               ex.getMessage());
           log.error("Stack trace: " + ex);
-        } catch (CTPException e) {
-          e.printStackTrace();
         }
       }
 

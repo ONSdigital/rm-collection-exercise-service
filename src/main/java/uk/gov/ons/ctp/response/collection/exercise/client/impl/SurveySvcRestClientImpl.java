@@ -11,14 +11,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
-import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -124,13 +125,14 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(final UUID surveyId) throws CTPException {
+  public SurveyDTO findSurvey(final UUID surveyId) throws RestClientException {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
     ResponseEntity<String> responseEntity = null;
+    SurveyDTO survey = null;
 
     try {
       log.debug(
@@ -139,40 +141,38 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
           uriComponents.toUri());
       responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
-      return getSurveyDtoFromResponseEntity(responseEntity);
-    } catch (RestClientException e) {
-      if (responseEntity != null && responseEntity.getStatusCode().is4xxClientError()) {
-        throw new CTPException(
-            CTPException.Fault.BAD_REQUEST,
-            String.format("There was a 4xx error: %s", e.toString()));
+      survey = getSurveyDtoFromResponseEntity(responseEntity);
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
       }
-      throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, String.format("System error: %s", e.toString()));
+      log.error("Client error: ", e);
     }
+    return survey;
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(final String surveyRef) throws CTPException {
+  public SurveyDTO findSurveyByRef(final String surveyRef) throws RestClientException {
     UriComponents uriComponents =
         restUtility.createUriComponents(
-            appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);
+            appConfig.getSurveySvc().getSurveyRefPath(),
+            null, surveyRef);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
     ResponseEntity<String> responseEntity = null;
+    SurveyDTO survey = null;
 
     try {
       responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
-      return getSurveyDtoFromResponseEntity(responseEntity);
-    } catch (RestClientException e) {
-      if (responseEntity != null && responseEntity.getStatusCode().is4xxClientError()) {
-        throw new CTPException(
-            CTPException.Fault.BAD_REQUEST,
-            String.format("There was a 4xx error: %s", e.toString()));
+      survey =  getSurveyDtoFromResponseEntity(responseEntity);
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
       }
-      throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, String.format("System error: %s", e.toString()));
+      log.error("Client error: ", e);
     }
+    return survey;
   }
 }
