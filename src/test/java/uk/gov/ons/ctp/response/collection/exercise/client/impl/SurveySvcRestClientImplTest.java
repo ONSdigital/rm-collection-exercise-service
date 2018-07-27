@@ -1,4 +1,4 @@
-package uk.gov.ons.ctp.response.collection.exercise.service.impl;
+package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -21,12 +21,11 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
-import uk.gov.ons.ctp.response.collection.exercise.client.impl.SurveySvcRestClientImpl;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.SurveySvc;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SurveySvcClientTest {
+public class SurveySvcRestClientImplTest {
 
   private static final String SURVEY_PATH = "/surveys";
   private static final String SURVEY_REF_PATH = SURVEY_PATH + "/ref";

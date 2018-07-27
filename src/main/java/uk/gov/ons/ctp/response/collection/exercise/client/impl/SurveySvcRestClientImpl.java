@@ -125,7 +125,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(final UUID surveyId) throws RestClientException {
+  public SurveyDTO findSurvey(final UUID surveyId) {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
@@ -147,12 +147,13 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
         return null;
       }
       log.error("Client error: ", e);
+      throw new RestClientException("There has been a client error: ", e);
     }
     return survey;
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(final String surveyRef) throws RestClientException {
+  public SurveyDTO findSurveyByRef(final String surveyRef) {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyRefPath(),
@@ -172,6 +173,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
         return null;
       }
       log.error("Client error: ", e);
+      throw new RestClientException("There has been a client error: ", e);
     }
     return survey;
   }
