@@ -147,7 +147,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
         return null;
       }
       log.error("Client error: ", e);
-      throw new RestClientException("There has been a client error: ", e);
+      throw e;
     }
     return survey;
   }
@@ -173,7 +173,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
         return null;
       }
       log.error("Client error: ", e);
-      throw new RestClientException("There has been a client error: ", e);
+      throw e;
     }
     return survey;
   }
