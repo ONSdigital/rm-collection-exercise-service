@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>collectionexercisesvc</artifactId>
-    <version>10.49.15-SNAPSHOT</version>
+    <version>10.49.16-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>CTP : CollectionExerciseService</name>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>uk.gov.ons.ctp.product</groupId>
             <artifactId>casesvc-api</artifactId>
-            <version>10.49.17</version>
+            <version>10.49.25</version>
         </dependency>
 
         <dependency>

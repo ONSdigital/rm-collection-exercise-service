@@ -103,6 +103,7 @@ public class CollectionExerciseStateTransitionManagerFactory
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForValidated = new HashMap<>();
     transitionForValidated.put(
         CollectionExerciseEvent.PUBLISH, CollectionExerciseState.READY_FOR_LIVE);
+    transitionForValidated.put(CollectionExerciseEvent.GO_LIVE, CollectionExerciseState.LIVE);
     transitions.put(CollectionExerciseState.VALIDATED, transitionForValidated);
 
     // FAILEDVALIDATION

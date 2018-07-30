@@ -1,0 +1,20 @@
+[{
+  "id": "2a4f23b8-0659-4968-914a-604453e2e3ce",
+  "eventPK": 3921,
+  "tag": "go_live",
+  "timestamp": "2018-03-19T00:00:00.000Z",
+  "collectionExercise": {
+    "exercisePK": 1,
+    "id": "14fb3e68-4dca-46db-bf49-04b84e07e77c",
+    "name": "BRES_2016",
+    "scheduledExecutionDateTime": 1494846000002,
+    "state": "VALIDATED",
+    "surveyId":  "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef87",
+    "sampleSize": 2
+  },
+  "created": "2018-07-09T09:59:59.954Z",
+  "updated": null,
+  "deleted": false,
+  "messageSent": "2018-07-09T09:59:59.964Z"
+}
+]

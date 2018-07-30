@@ -20,7 +20,7 @@ import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChild;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -37,6 +38,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
@@ -52,6 +54,8 @@ public class SampleUnitDistributor {
   private static final int TRANSACTION_TIMEOUT = 60;
 
   @Autowired private AppConfig appConfig;
+
+  @Autowired private EventRepository eventRepository;
 
   @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
 
@@ -106,7 +110,7 @@ public class SampleUnitDistributor {
         collectionExerciseTransitionState(exercise);
       }
 
-    } catch (LockingException ex) {
+    } catch (LockingException | CTPException ex) {
       log.error("Distribution failed due to {}", ex.getMessage());
       log.error("Stack trace: " + ex);
     } finally {
@@ -128,29 +132,29 @@ public class SampleUnitDistributor {
    * @param sampleUnitGroup for which to distribute sample units.
    */
   private void distributeSampleUnits(
-      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
+      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-    List<SampleUnitChild> children = new ArrayList<SampleUnitChild>();
-    String actionPlanId = null;
+    List<SampleUnit> children = new ArrayList<>();
     SampleUnitParent parent = null;
     for (ExerciseSampleUnit sampleUnit : sampleUnits) {
       if (sampleUnit.getSampleUnitType().isParent()) {
         parent = new SampleUnitParent();
-        parent.setCollectionExerciseId(exercise.getId().toString());
+        parent.setId(sampleUnit.getSampleUnitId().toString());
         parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        parent.setId(sampleUnit.getSampleUnitId().toString());
         parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-        actionPlanId =
+        parent.setActionPlanId(
             collectionExerciseRepo.getActiveActionPlanId(
                 exercise.getExercisePK(),
                 sampleUnit.getSampleUnitType().name(),
-                exercise.getSurveyId());
+                exercise.getSurveyId()));
+
+        parent.setCollectionExerciseId(exercise.getId().toString());
       } else {
-        SampleUnitChild child = new SampleUnitChild();
-        child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+        SampleUnit child = new SampleUnit();
         child.setId(sampleUnit.getSampleUnitId().toString());
+        child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
@@ -166,16 +170,17 @@ public class SampleUnitDistributor {
     if ((parent != null)) {
       if (!children.isEmpty()) {
         parent.setSampleUnitChildren(new SampleUnitChildren(children));
-        publishSampleUnit(sampleUnitGroup, parent);
-      } else if ((actionPlanId != null)) {
-        parent.setActionPlanId(actionPlanId);
-        publishSampleUnit(sampleUnitGroup, parent);
-      } else {
-        log.error(
-            "No Child or ActionPlan for SampleUnitRef {}, SampleUnitType {}",
-            parent.getSampleUnitRef(),
-            parent.getSampleUnitType());
       }
+
+      if (parent.getActionPlanId() == null) {
+        String message =
+            String.format(
+                "Action Plan Id is required for collectionExerciseId=%s and sampleUnitId=%s",
+                exercise.getId(), parent.getId());
+        log.error(message);
+        throw new CTPException(CTPException.Fault.VALIDATION_FAILED, message);
+      }
+      publishSampleUnit(sampleUnitGroup, parent);
     } else {
       log.error(
           "No Parent for SampleUnit in SampleUnitGroupPK {} ",
@@ -289,11 +294,40 @@ public class SampleUnitDistributor {
 
     try {
       if (published == exercise.getSampleSize().longValue()) {
-        // All sample units published, set exercise state to PUBLISHED
-        exercise.setState(
-            collectionExerciseTransitionState.transition(
-                exercise.getState(), CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
-        exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
+
+        Boolean isGoLiveInPast = Boolean.FALSE;
+        if ((eventRepository
+                .findOneByCollectionExerciseAndTag(exercise, EventService.Tag.go_live.name())
+                .getTimestamp()
+                .getTime())
+            < System.currentTimeMillis()) {
+
+          isGoLiveInPast = Boolean.TRUE;
+        }
+
+        if (isGoLiveInPast) {
+          log.debug(
+              "Attempting to transition collection exercise to Live, collectionExerciseId={}",
+              exercise.getId());
+          // All sample units published and go live date in past, set exercise state to LIVE
+          exercise.setState(
+              collectionExerciseTransitionState.transition(
+                  exercise.getState(), CollectionExerciseEvent.GO_LIVE));
+        } else {
+          // All sample units published, set exercise state to READY_FOR_LIVE
+          log.debug(
+              "Attempting to transition collection exercise to Ready for Live, "
+                  + "collectionExerciseId={}",
+              exercise.getId());
+          exercise.setState(
+              collectionExerciseTransitionState.transition(
+                  exercise.getState(), CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
+          exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
+        }
+        log.debug(
+            "Successfully set collection exercise state collectionExerciseId={}, state={}",
+            exercise.getId(),
+            exercise.getState());
         collectionExerciseRepo.saveAndFlush(exercise);
       }
     } catch (CTPException ex) {
