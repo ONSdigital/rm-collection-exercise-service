@@ -12,6 +12,7 @@ public interface ActionSvcClient {
    *
    * @param name name of action plan
    * @param description description of action plan
+   * @param selectors Map of selectors for actionplans as key value pairs
    * @return ActionPlanDTO representation of the created action plan
    * @throws RestClientException for failed connection to action service
    */

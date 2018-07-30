@@ -50,7 +50,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public ActionPlanDTO createActionPlan(
-      final String name, String description, HashMap<String, String> selectors)
+      final String name, final String description, HashMap<String, String> selectors)
       throws RestClientException {
     log.debug("Posting to action service to create action plan");
     UriComponents uriComponents =

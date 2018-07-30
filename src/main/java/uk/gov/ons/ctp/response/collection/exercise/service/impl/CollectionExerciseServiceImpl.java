@@ -452,8 +452,8 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     HashMap<String, String> selectors = new HashMap<>();
     selectors.put("exerciseRef", exerciseRef);
     selectors.put("surveyRef", survey.getSurveyRef());
-    if (!sampleUnitType.equals("H") && !sampleUnitType.equals("HI")) {
-      String activeEnrolment = Boolean.toString(sampleUnitType.equals("BI"));
+    if (!"H".equals(sampleUnitType) && !"HI".equals(sampleUnitType)) {
+      String activeEnrolment = Boolean.toString("BI".equals(sampleUnitType));
       selectors.put("activeEnrolment", activeEnrolment);
     }
     String shortName = survey.getShortName();
