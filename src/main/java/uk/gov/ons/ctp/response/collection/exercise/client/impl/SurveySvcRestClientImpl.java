@@ -156,8 +156,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   public SurveyDTO findSurveyByRef(final String surveyRef) {
     UriComponents uriComponents =
         restUtility.createUriComponents(
-            appConfig.getSurveySvc().getSurveyRefPath(),
-            null, surveyRef);
+            appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
     ResponseEntity<String> responseEntity = null;
@@ -167,7 +166,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
-      survey =  getSurveyDtoFromResponseEntity(responseEntity);
+      survey = getSurveyDtoFromResponseEntity(responseEntity);
     } catch (HttpClientErrorException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
