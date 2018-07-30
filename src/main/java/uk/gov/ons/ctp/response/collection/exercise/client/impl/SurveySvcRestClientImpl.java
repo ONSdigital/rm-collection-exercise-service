@@ -146,7 +146,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
-      log.error("Client error: ", e);
+      log.error("Client error with status code = {}", e.getStatusCode(), e);
       throw e;
     }
     return survey;
@@ -171,7 +171,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
-      log.error("Client error: ", e);
+      log.error("Client error with status code = {}", e.getStatusCode(), e);
       throw e;
     }
     return survey;
