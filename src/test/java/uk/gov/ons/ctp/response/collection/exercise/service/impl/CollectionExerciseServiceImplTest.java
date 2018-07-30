@@ -276,18 +276,11 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.createCollectionExercise(toCreate, survey);
 
     // Then check that all actionplans are created in the correct state
+    verify(actionService, times(1)).createActionPlan("BRES B", "BRES B Case", null);
+    verify(actionService, times(1)).createActionPlan("BRES BI", "BRES BI Case", null);
+
     String exerciseRef = collectionExercise.getExerciseRef();
     String surveyRef = survey.getSurveyRef();
-    HashMap<String, String> defaultBSelectors = new HashMap<>();
-    defaultBSelectors.put("surveyRef", surveyRef);
-    defaultBSelectors.put("activeEnrolment", "false");
-    verify(actionService, times(1)).createActionPlan("BRES B", "BRES B Case", defaultBSelectors);
-
-    HashMap<String, String> defaultBISelectors = new HashMap<>();
-    defaultBISelectors.put("surveyRef", surveyRef);
-    defaultBISelectors.put("activeEnrolment", "true");
-    verify(actionService, times(1)).createActionPlan("BRES BI", "BRES BI Case", defaultBISelectors);
-
     HashMap<String, String> overrideBSelectors = new HashMap<>();
     overrideBSelectors.put("surveyRef", surveyRef);
     overrideBSelectors.put("exerciseRef", exerciseRef);
@@ -330,16 +323,8 @@ public class CollectionExerciseServiceImplTest {
     this.collectionExerciseServiceImpl.createCollectionExercise(toCreate, survey);
 
     // Then
-    String surveyRef = survey.getSurveyRef();
-    HashMap<String, String> defaultBSelectors = new HashMap<>();
-    defaultBSelectors.put("surveyRef", surveyRef);
-    defaultBSelectors.put("activeEnrolment", "false");
-    verify(actionService, times(0)).createActionPlan("BRES B", "BRES B Case", defaultBSelectors);
-
-    HashMap<String, String> defaultBISelectors = new HashMap<>();
-    defaultBISelectors.put("surveyRef", surveyRef);
-    defaultBISelectors.put("activeEnrolment", "true");
-    verify(actionService, times(0)).createActionPlan("BRES BI", "BRES BI Case", defaultBISelectors);
+    verify(actionService, times(0)).createActionPlan("BRES B", "BRES B Case", null);
+    verify(actionService, times(0)).createActionPlan("BRES BI", "BRES BI Case", null);
   }
 
   /**

@@ -383,13 +383,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     String shortName = survey.getShortName();
     String name = String.format("%s %s", shortName, sampleUnitType);
     String description = String.format("%s %s Case", shortName, sampleUnitType);
-    HashMap<String, String> selectors = new HashMap<>();
-    selectors.put("surveyRef", survey.getSurveyRef());
-    if (!sampleUnitType.equals("H") && !sampleUnitType.equals("HI")) {
-      String activeEnrolment = Boolean.toString(sampleUnitType.equals("BI"));
-      selectors.put("activeEnrolment", activeEnrolment);
-    }
-    ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description, selectors);
+    ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description, null);
     createCaseTypeDefault(survey, sampleUnitType, actionPlan);
     log.debug(
         "Successfully created default action plan,"
