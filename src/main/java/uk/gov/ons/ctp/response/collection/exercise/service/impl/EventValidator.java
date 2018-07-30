@@ -66,11 +66,7 @@ public class EventValidator {
     return false;
   }
 
-  /**
-   * Validates the mandatory dates on event creation.
-   * Event dates can be added in any order.
-   *
-   * */
+  /** Validates the mandatory dates on event creation. Event dates can be added in any order. */
   private boolean validateMandatoryEventsOnCreate(
       final Map<String, Event> eventMap, Event newEvent) {
     final Optional<Event> mpsEvent =
@@ -91,13 +87,13 @@ public class EventValidator {
 
     if (newEvent.getTag().equals(EventService.Tag.go_live.toString())) {
       events.add(newEvent);
-    } else if (goLiveEvent.isPresent()){
+    } else if (goLiveEvent.isPresent()) {
       events.add(goLiveEvent.get());
     }
 
-    if (newEvent.getTag().equals(EventService.Tag.return_by.toString()))  {
+    if (newEvent.getTag().equals(EventService.Tag.return_by.toString())) {
       events.add(newEvent);
-    } else if (returnByEvent.isPresent()){
+    } else if (returnByEvent.isPresent()) {
       events.add(returnByEvent.get());
     }
 
