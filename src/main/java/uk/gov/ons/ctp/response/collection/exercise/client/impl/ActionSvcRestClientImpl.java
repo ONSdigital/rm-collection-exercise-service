@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
+import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,7 +49,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
-  public ActionPlanDTO createActionPlan(final String name, String description)
+  public ActionPlanDTO createActionPlan(
+      final String name, String description, HashMap<String, String> selectors)
       throws RestClientException {
     log.debug("Posting to action service to create action plan");
     UriComponents uriComponents =
@@ -58,6 +60,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     actionPlanDTO.setName(name);
     actionPlanDTO.setDescription(description);
     actionPlanDTO.setCreatedBy("SYSTEM");
+    actionPlanDTO.setSelectors(selectors);
     HttpEntity<ActionPlanDTO> httpEntity = restUtility.createHttpEntity(actionPlanDTO);
 
     ActionPlanDTO createdActionPlan =
