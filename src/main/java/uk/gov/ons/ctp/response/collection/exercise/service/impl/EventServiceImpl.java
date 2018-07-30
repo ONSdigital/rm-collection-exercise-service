@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
 @Service
 @Slf4j

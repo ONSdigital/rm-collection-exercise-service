@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
-public class EventValidator {
+public class BusinessEventValidator implements EventValidator {
 
   /**
    * q Validates the events timestamps are in the correct order and the updated event can be

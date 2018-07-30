@@ -13,6 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventValidatorTest {
@@ -25,7 +26,7 @@ public class EventValidatorTest {
 
   @Before
   public void setUp() {
-    this.validator = new EventValidator();
+    this.validator = new BusinessEventValidator();
     this.mandatoryEvents = createMandatoryEvents();
     this.allEvents = createAllEvents();
   }
