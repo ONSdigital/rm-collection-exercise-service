@@ -1,12 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +80,7 @@ class CollectionExerciseClient {
       return new ImmutablePair<>(statusCode, location);
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to create collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to create collection exercise: %s", e);
     }
   }
 
@@ -103,7 +101,7 @@ class CollectionExerciseClient {
           .getBody();
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
     }
   }
 
@@ -123,7 +121,7 @@ class CollectionExerciseClient {
           .getBody();
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
     }
   }
 
@@ -155,9 +153,9 @@ class CollectionExerciseClient {
 
       return linkResponse.getStatus();
     } catch (JSONException e) {
-      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload", e);
+      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload: %s", e);
     } catch (UnirestException e) {
-      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload", e);
+      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload: %s", e);
     }
   }
 
@@ -194,7 +192,7 @@ class CollectionExerciseClient {
       return Arrays.asList(linkArray);
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
     }
   }
 
