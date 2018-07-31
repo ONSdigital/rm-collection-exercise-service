@@ -143,7 +143,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   }
 
   @Override
-  public CollectionExercise findCollectionExercise(String exerciseRef, UUID surveyId) {
+  public CollectionExercise findCollectionExercise(final String exerciseRef, final UUID surveyId) {
     List<CollectionExercise> existing =
         this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
 

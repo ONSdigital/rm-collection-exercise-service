@@ -26,6 +26,7 @@ public interface CollectionExerciseService {
    * Service
    *
    * @param id the collection exercise Id for which to find collection exercise
+   * @throws CTPException if collection exercise not found
    * @return the associated collection exercise.
    */
   CollectionExercise findCollectionExercise(UUID id);
