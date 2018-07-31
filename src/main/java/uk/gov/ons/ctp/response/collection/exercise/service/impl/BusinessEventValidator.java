@@ -69,41 +69,24 @@ public class BusinessEventValidator implements EventValidator {
   /** Validates the mandatory dates on event creation. Event dates can be added in any order. */
   private boolean validateMandatoryEventsOnCreate(
       final Map<String, Event> eventMap, Event newEvent) {
-    final Optional<Event> mpsEvent =
-        Optional.ofNullable(eventMap.get(EventService.Tag.mps.toString()));
-    final Optional<Event> goLiveEvent =
-        Optional.ofNullable(eventMap.get(EventService.Tag.go_live.toString()));
-    final Optional<Event> returnByEvent =
-        Optional.ofNullable(eventMap.get(EventService.Tag.return_by.toString()));
-    final Optional<Event> exerciseEndEvent =
-        Optional.ofNullable(eventMap.get(EventService.Tag.exercise_end.toString()));
 
     List<Event> events = new ArrayList<>();
-    if (newEvent.getTag().equals(EventService.Tag.mps.toString())) {
-      events.add(newEvent);
-    } else {
-      mpsEvent.ifPresent(events::add);
-    }
-
-    if (newEvent.getTag().equals(EventService.Tag.go_live.toString())) {
-      events.add(newEvent);
-    } else {
-      goLiveEvent.ifPresent(events::add);
-    }
-
-    if (newEvent.getTag().equals(EventService.Tag.return_by.toString())) {
-      events.add(newEvent);
-    } else {
-      returnByEvent.ifPresent(events::add);
-    }
-
-    if (newEvent.getTag().equals(EventService.Tag.exercise_end.toString())) {
-      events.add(newEvent);
-    } else {
-      exerciseEndEvent.ifPresent(events::add);
-    }
+    addEvent(eventMap, newEvent, events, EventService.Tag.mps.toString());
+    addEvent(eventMap, newEvent, events, EventService.Tag.go_live.toString());
+    addEvent(eventMap, newEvent, events, EventService.Tag.return_by.toString());
+    addEvent(eventMap, newEvent, events, EventService.Tag.exercise_end.toString());
 
     return datesInValidOrder(events);
+  }
+
+  private void addEvent(
+      Map<String, Event> eventMap, Event newEvent, List<Event> events, String eventTag) {
+    final Optional<Event> existingEvent = Optional.ofNullable(eventMap.get(eventTag));
+    if (newEvent.getTag().equals(eventTag)) {
+      events.add(newEvent);
+    } else {
+      existingEvent.ifPresent(events::add);
+    }
   }
 
   private boolean datesInValidOrder(List<Event> events) {
