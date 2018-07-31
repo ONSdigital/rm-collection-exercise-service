@@ -78,6 +78,7 @@ public class BusinessEventValidator implements EventValidator {
 
     return datesInValidOrder(events);
   }
+  
   /** Build list for event validation. Prioritises new event over existing event. */
   private void addEvent(
       Map<String, Event> eventMap, Event newEvent, List<Event> events, String eventTag) {
