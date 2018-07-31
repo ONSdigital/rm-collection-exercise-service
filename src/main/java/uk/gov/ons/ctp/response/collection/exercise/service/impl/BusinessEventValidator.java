@@ -78,7 +78,7 @@ public class BusinessEventValidator implements EventValidator {
 
     return datesInValidOrder(events);
   }
-
+  /** Build list for event validation. Prioritises new event over existing event. */
   private void addEvent(
       Map<String, Event> eventMap, Event newEvent, List<Event> events, String eventTag) {
     final Optional<Event> existingEvent = Optional.ofNullable(eventMap.get(eventTag));
@@ -89,6 +89,7 @@ public class BusinessEventValidator implements EventValidator {
     }
   }
 
+  /** Validates list of events in chronological order. */
   private boolean datesInValidOrder(List<Event> events) {
     Timestamp previous = null;
     boolean result = true;
