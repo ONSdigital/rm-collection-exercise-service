@@ -29,10 +29,8 @@ public class BusinessEventValidator implements EventValidator {
       final Event updatedEvent,
       final CollectionExerciseState collectionExerciseState) {
 
-    // Can only update reminders of the non mandatory events when READY_FOR_LIVE
-    if ((collectionExerciseState.equals(CollectionExerciseState.READY_FOR_LIVE)
-            || collectionExerciseState.equals(CollectionExerciseState.LIVE))
-        && (isMandatory(updatedEvent) || !isReminder(updatedEvent))) {
+    if (isReadyForLiveOrLive(collectionExerciseState)
+        && cannotBeModifiedAfterReadyForLive(updatedEvent)) {
       return false;
     }
 
@@ -51,6 +49,15 @@ public class BusinessEventValidator implements EventValidator {
     Map<String, Event> eventMap = generateEventsMap(existingEvents, updatedEvent);
 
     return validateMandatoryEvents(eventMap) && validateNonMandatoryEvents(eventMap);
+  }
+
+  private boolean cannotBeModifiedAfterReadyForLive(Event updatedEvent) {
+    return isMandatory(updatedEvent) || !isReminder(updatedEvent);
+  }
+
+  private boolean isReadyForLiveOrLive(CollectionExerciseState collectionExerciseState) {
+    return collectionExerciseState.equals(CollectionExerciseState.READY_FOR_LIVE)
+        || collectionExerciseState.equals(CollectionExerciseState.LIVE);
   }
 
   /** Validates the dates on event creation */

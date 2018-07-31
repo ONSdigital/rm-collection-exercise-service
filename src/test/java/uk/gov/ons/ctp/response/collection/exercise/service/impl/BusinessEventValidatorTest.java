@@ -16,7 +16,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventValidatorTest {
+public class BusinessEventValidatorTest {
 
   private EventValidator validator;
 
@@ -127,6 +127,34 @@ public class EventValidatorTest {
   }
 
   @Test
+  public void testInvalidMpsEventUpdateReadyForLiveState() {
+    long now = System.currentTimeMillis();
+
+    Event mpsEvent = new Event();
+    mpsEvent.setTag(EventService.Tag.mps.toString());
+    mpsEvent.setTimestamp(new Timestamp(now + 1500000));
+
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents,
+            mpsEvent,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+  }
+
+  @Test
+  public void testInvalidMpsEventUpdateLiveState() {
+    long now = System.currentTimeMillis();
+
+    Event mpsEvent = new Event();
+    mpsEvent.setTag(EventService.Tag.mps.toString());
+    mpsEvent.setTimestamp(new Timestamp(now + 1500000));
+
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
+  }
+
+  @Test
   public void testValidGoLiveEventUpdate() {
     long now = System.currentTimeMillis();
 
@@ -139,6 +167,34 @@ public class EventValidatorTest {
             this.mandatoryEvents,
             goLiveEvent,
             CollectionExerciseDTO.CollectionExerciseState.CREATED));
+  }
+
+  @Test
+  public void testInvalidGoLiveEventUpdateReadyForLiveState() {
+    long now = System.currentTimeMillis();
+
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag(EventService.Tag.go_live.toString());
+    goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
+
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents,
+            goLiveEvent,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+  }
+
+  @Test
+  public void testInvalidGoLiveEventUpdateLiveState() {
+    long now = System.currentTimeMillis();
+
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag(EventService.Tag.go_live.toString());
+    goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
+
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents, goLiveEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
   }
 
   @Test
