@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
@@ -27,12 +27,11 @@ public class BusinessEventValidator implements EventValidator {
   public boolean validate(
       final List<Event> existingEvents,
       final Event updatedEvent,
-      final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
+      final CollectionExerciseState collectionExerciseState) {
 
     // Can only update reminders of the non mandatory events when READY_FOR_LIVE
-    if ((collectionExerciseState.equals(
-                CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE)
-            || collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.LIVE))
+    if ((collectionExerciseState.equals(CollectionExerciseState.READY_FOR_LIVE)
+            || collectionExerciseState.equals(CollectionExerciseState.LIVE))
         && (isMandatory(updatedEvent) || !isReminder(updatedEvent))) {
       return false;
     }
@@ -58,10 +57,10 @@ public class BusinessEventValidator implements EventValidator {
   public boolean validateOnCreate(
       final List<Event> existingEvents,
       final Event newEvent,
-      final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
+      final CollectionExerciseState collectionExerciseState) {
     Map<String, Event> events =
         existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
-    if (collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.CREATED)) {
+    if (collectionExerciseState.equals(CollectionExerciseState.CREATED)) {
       return validateMandatoryEventsOnCreate(events, newEvent);
     }
     return false;
@@ -82,26 +81,26 @@ public class BusinessEventValidator implements EventValidator {
     List<Event> events = new ArrayList<>();
     if (newEvent.getTag().equals(EventService.Tag.mps.toString())) {
       events.add(newEvent);
-    } else if (mpsEvent.isPresent()) {
-      events.add(mpsEvent.get());
+    } else {
+      mpsEvent.ifPresent(events::add);
     }
 
     if (newEvent.getTag().equals(EventService.Tag.go_live.toString())) {
       events.add(newEvent);
-    } else if (goLiveEvent.isPresent()) {
-      events.add(goLiveEvent.get());
+    } else {
+      goLiveEvent.ifPresent(events::add);
     }
 
     if (newEvent.getTag().equals(EventService.Tag.return_by.toString())) {
       events.add(newEvent);
-    } else if (returnByEvent.isPresent()) {
-      events.add(returnByEvent.get());
+    } else {
+      returnByEvent.ifPresent(events::add);
     }
 
     if (newEvent.getTag().equals(EventService.Tag.exercise_end.toString())) {
       events.add(newEvent);
-    } else if (exerciseEndEvent.isPresent()) {
-      events.add(exerciseEndEvent.get());
+    } else {
+      exerciseEndEvent.ifPresent(events::add);
     }
 
     return datesInValidOrder(events);
