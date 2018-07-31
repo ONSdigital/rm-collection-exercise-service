@@ -106,7 +106,9 @@ public class SampleServiceImplTest {
     ArgumentCaptor<ExerciseSampleUnit> sampleUnitArgumentCaptor =
         ArgumentCaptor.forClass(ExerciseSampleUnit.class);
     verify(sampleUnitRepo).saveAndFlush(sampleUnitArgumentCaptor.capture());
-    assertEquals(sampleUnitGroupArgumentCaptor.getValue(), sampleUnitArgumentCaptor.getValue().getSampleUnitGroup());
+    assertEquals(
+        sampleUnitGroupArgumentCaptor.getValue(),
+        sampleUnitArgumentCaptor.getValue().getSampleUnitGroup());
     assertEquals("REF123", sampleUnitArgumentCaptor.getValue().getSampleUnitRef());
     assertEquals(SampleUnitType.B, sampleUnitArgumentCaptor.getValue().getSampleUnitType());
     assertEquals(SAMPLE_ID, sampleUnitArgumentCaptor.getValue().getSampleUnitId());

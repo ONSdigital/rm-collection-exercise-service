@@ -235,7 +235,7 @@
         <dependency>
             <groupId>uk.gov.ons.ctp.common</groupId>
             <artifactId>test-framework</artifactId>
-            <version>10.49.10</version>
+            <version>10.49.12</version>
             <scope>test</scope>
         </dependency>
 

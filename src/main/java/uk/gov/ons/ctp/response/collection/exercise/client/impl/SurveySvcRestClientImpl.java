@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -123,46 +125,55 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
   }
 
   @Override
-  public SurveyDTO findSurvey(UUID surveyId) throws RestClientException {
+  public SurveyDTO findSurvey(final UUID surveyId) {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
+    ResponseEntity<String> responseEntity = null;
+    SurveyDTO survey = null;
 
     try {
       log.debug(
           "about to get to the Survey SVC with surveyId {} from {}",
           surveyId,
           uriComponents.toUri());
-      ResponseEntity<String> responseEntity =
+      responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
-
-      return getSurveyDtoFromResponseEntity(responseEntity);
-    } catch (RestClientException e) {
-      return null;
+      survey = getSurveyDtoFromResponseEntity(responseEntity);
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
+      }
+      log.error("Client error with status code = {}", e.getStatusCode(), e);
+      throw e;
     }
+    return survey;
   }
 
   @Override
-  public SurveyDTO findSurveyByRef(String surveyRef) throws RestClientException {
+  public SurveyDTO findSurveyByRef(final String surveyRef) {
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getSurveyRefPath(), null, surveyRef);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
+    ResponseEntity<String> responseEntity = null;
+    SurveyDTO survey = null;
 
     try {
-      log.debug(
-          "about to get to the Survey SVC with surveyRef {} from {}",
-          surveyRef,
-          uriComponents.toUri());
-      ResponseEntity<String> responseEntity =
+      responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
-      return getSurveyDtoFromResponseEntity(responseEntity);
-    } catch (RestClientException e) {
-      return null;
+      survey = getSurveyDtoFromResponseEntity(responseEntity);
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
+      }
+      log.error("Client error with status code = {}", e.getStatusCode(), e);
+      throw e;
     }
+    return survey;
   }
 }
