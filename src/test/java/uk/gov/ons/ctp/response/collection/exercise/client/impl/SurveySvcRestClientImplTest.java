@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 
 import java.net.URI;
 import java.util.UUID;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,8 +78,8 @@ public class SurveySvcRestClientImplTest {
 
     given(
             restTemplate.exchange(
-                    any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
-            .willThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Bad request"));
+                any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .willThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Bad request"));
 
     SurveyDTO survey = surveySvcClient.findSurvey(surveyId);
 

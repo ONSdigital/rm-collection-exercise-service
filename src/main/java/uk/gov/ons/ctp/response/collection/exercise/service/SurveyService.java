@@ -1,8 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import java.util.UUID;
-import org.springframework.web.client.RestClientException;
-import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Service responsible for dealing with samples */
