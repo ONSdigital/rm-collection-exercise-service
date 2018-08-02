@@ -52,9 +52,9 @@ public class EventServiceImpl implements EventService {
   @Autowired private List<ActionRuleCreator> actionRuleCreators;
 
   @Override
-  public Event createEvent(EventDTO eventDto) throws CTPException {
-    UUID collexId = eventDto.getCollectionExerciseId();
-    CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexId);
+  public Event createEvent(final EventDTO eventDto) throws CTPException {
+    final UUID collexId = eventDto.getCollectionExerciseId();
+    final CollectionExercise collex = collectionExerciseService.findCollectionExercise(collexId);
 
     if (collex == null) {
       throw new CTPException(
@@ -63,8 +63,8 @@ public class EventServiceImpl implements EventService {
               "Collection exercise %s does not exist", eventDto.getCollectionExerciseId()));
     }
 
-    Event existing =
-        this.eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
+    final Event existing =
+            eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
 
     if (existing != null) {
       throw new CTPException(

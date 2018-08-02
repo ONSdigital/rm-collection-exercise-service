@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +25,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
@@ -34,6 +35,9 @@ import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
@@ -55,6 +59,8 @@ public class EventServiceImplTest {
 
   @InjectMocks private EventServiceImpl eventService;
 
+  @Mock private EventValidator eventValidator;
+
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());
     Event event = new Event();
@@ -64,7 +70,7 @@ public class EventServiceImplTest {
     return event;
   }
 
-  /* Given collection excercise does not exist When event is created Then exception is thrown */
+  /** Given collection excercise does not exist When event is created Then exception is thrown */
   @Test
   public void givenCollectionExcerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown() {
     EventDTO eventDto = new EventDTO();
@@ -77,17 +83,17 @@ public class EventServiceImplTest {
       fail("Created event with non-existent collection exercise");
     } catch (CTPException e) {
       // Expected 404
-      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+      assertEquals(Fault.RESOURCE_NOT_FOUND, e.getFault());
     }
   }
 
   /* Given event already exists When event is created Then exception is thrown */
   @Test
-  public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() throws CTPException {
-    String tag = Tag.mps.name();
-    EventDTO eventDto = new EventDTO();
-    CollectionExercise collex = new CollectionExercise();
-    UUID collexUuid = UUID.randomUUID();
+  public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() {
+    final String tag = Tag.mps.name();
+    final EventDTO eventDto = new EventDTO();
+    final CollectionExercise collex = new CollectionExercise();
+    final UUID collexUuid = UUID.randomUUID();
     eventDto.setCollectionExerciseId(collexUuid);
     eventDto.setTag(tag);
     collex.setId(collexUuid);
@@ -99,9 +105,57 @@ public class EventServiceImplTest {
       eventService.createEvent(eventDto);
 
       fail("Created event with non-existent collection exercise");
-    } catch (CTPException e) {
-      // Expected 409
-      assertEquals(CTPException.Fault.RESOURCE_VERSION_CONFLICT, e.getFault());
+    } catch (final CTPException e) {
+      assertEquals(Fault.RESOURCE_VERSION_CONFLICT, e.getFault());
+    }
+  }
+
+  /** Given collection exercise doesn't exist Then exception is thrown */
+  @Test
+  public void givenCollectionExerciseDoesNotExistWhenCreatingAnExceptionThrowError() {
+    final String tag = Tag.mps.name();
+    final EventDTO eventDto = new EventDTO();
+    final UUID collexUuid = UUID.randomUUID();
+    eventDto.setCollectionExerciseId(collexUuid);
+    eventDto.setTag(tag);
+
+    when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(null);
+
+    try {
+      eventService.createEvent(eventDto);
+
+      fail("Created event with non-existent collection exercise");
+    } catch (final CTPException e) {
+      assertEquals(Fault.RESOURCE_NOT_FOUND, e.getFault());
+    }
+  }
+
+  /** Given collection exercise doesn't exist Then exception is thrown */
+  @Test
+  public void givenCollectionExerciseEventsAreInInvalidStateThrowException() {
+    final String tag = Tag.mps.name();
+    final EventDTO eventDto = new EventDTO();
+    final CollectionExercise collex = new CollectionExercise();
+    final UUID collexUuid = UUID.randomUUID();
+    eventDto.setCollectionExerciseId(collexUuid);
+    eventDto.setTag(tag);
+    eventDto.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
+    collex.setId(collexUuid);
+
+    when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name())).thenReturn(null);
+    final List<Event> existingEvents = new ArrayList<>();
+    final Event event = new Event();
+    existingEvents.add(event);
+    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
+    when(eventValidator.validateOnCreate(existingEvents, event, collex.getState())).thenReturn(false);
+
+    try {
+      eventService.createEvent(eventDto);
+
+      fail("No exception thrown on bad event");
+    } catch (final CTPException e) {
+      assertEquals(Fault.BAD_REQUEST, e.getFault());
     }
   }
 
