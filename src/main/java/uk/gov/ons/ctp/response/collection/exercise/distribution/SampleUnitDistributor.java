@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -24,10 +25,14 @@ import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
@@ -62,6 +67,10 @@ public class SampleUnitDistributor {
   @Autowired private SampleUnitRepository sampleUnitRepo;
 
   @Autowired private CollectionExerciseRepository collectionExerciseRepo;
+
+  @Autowired private CaseTypeDefaultRepository caseTypeDefaultRepo;
+
+  @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepo;
 
   @Autowired private SampleUnitPublisher publisher;
 
@@ -145,7 +154,7 @@ public class SampleUnitDistributor {
         parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         parent.setActionPlanId(
-            collectionExerciseRepo.getActiveActionPlanId(
+            getActiveActionPlanId(
                 exercise.getExercisePK(),
                 sampleUnit.getSampleUnitType().name(),
                 exercise.getSurveyId()));
@@ -159,7 +168,7 @@ public class SampleUnitDistributor {
         child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(
-            collectionExerciseRepo.getActiveActionPlanId(
+            getActiveActionPlanId(
                 exercise.getExercisePK(),
                 sampleUnit.getSampleUnitType().name(),
                 exercise.getSurveyId()));
@@ -335,5 +344,26 @@ public class SampleUnitDistributor {
       log.error("Stack trace: " + ex);
     }
     return exercise;
+  }
+
+  private String getActiveActionPlanId(
+      Integer exercisefk, String sampleunittypefk, UUID surveyuuid) {
+    String actionPlanId = null;
+
+    CaseTypeOverride caseTypeOverride =
+        caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(exercisefk, sampleunittypefk);
+
+    if (caseTypeOverride != null && caseTypeOverride.getActionPlanId() != null) {
+      actionPlanId = caseTypeOverride.getActionPlanId().toString();
+    } else {
+      CaseTypeDefault caseTypeDefault =
+          caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(surveyuuid, sampleunittypefk);
+
+      if (caseTypeDefault != null) {
+        actionPlanId = caseTypeDefault.getActionPlanId().toString();
+      }
+    }
+
+    return actionPlanId;
   }
 }

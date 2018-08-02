@@ -78,6 +78,35 @@ public class SampleServiceImplTest {
     assertNotNull(collexArgumentCaptor.getValue().getActualExecutionDateTime());
   }
 
+  @Test
+  public void testAcceptSampleUnit_AlreadyExists() throws CTPException {
+    CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_ID);
+    collex.setSampleSize(99);
+    collex.setState(CollectionExerciseState.EXECUTION_STARTED);
+
+    SampleUnit sampleUnit =
+        SampleUnit.builder()
+            .withId(SAMPLE_ID.toString())
+            .withFormType("X")
+            .withSampleUnitRef("REF123")
+            .withSampleUnitType("B")
+            .withCollectionExerciseId(COLLEX_ID.toString())
+            .build();
+
+    when(collectRepo.findOneById(any())).thenReturn(collex);
+    when(sampleUnitRepo.existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
+            any(), any(), any()))
+        .thenReturn(true);
+
+    underTest.acceptSampleUnit(sampleUnit);
+
+    verify(collectionExerciseTransitionState, never()).transition(any(), any());
+    verify(sampleUnitGroupRepo, never()).saveAndFlush(any());
+    verify(sampleUnitRepo, never()).saveAndFlush(any());
+    verify(collectRepo, never()).saveAndFlush(any());
+  }
+
   private void acceptSampleUnitWithCollex(CollectionExercise collex) throws CTPException {
     SampleUnit sampleUnit =
         SampleUnit.builder()
@@ -90,7 +119,9 @@ public class SampleServiceImplTest {
 
     when(collectRepo.findOneById(any())).thenReturn(collex);
     when(sampleUnitGroupRepo.saveAndFlush(any())).then(returnsFirstArg());
-    when(sampleUnitRepo.tupleExists(any(), any(), any())).thenReturn(false);
+    when(sampleUnitRepo.existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
+            any(), any(), any()))
+        .thenReturn(false);
     when(sampleUnitRepo.countBySampleUnitGroupCollectionExercise(any())).thenReturn(99);
 
     underTest.acceptSampleUnit(sampleUnit);
