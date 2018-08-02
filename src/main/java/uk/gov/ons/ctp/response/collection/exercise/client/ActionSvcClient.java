@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import java.util.HashMap;
 import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 
@@ -11,8 +12,10 @@ public interface ActionSvcClient {
    *
    * @param name name of action plan
    * @param description description of action plan
+   * @param selectors Map of selectors for actionplans as key value pairs
    * @return ActionPlanDTO representation of the created action plan
    * @throws RestClientException for failed connection to action service
    */
-  ActionPlanDTO createActionPlan(String name, String description) throws RestClientException;
+  ActionPlanDTO createActionPlan(String name, String description, HashMap<String, String> selectors)
+      throws RestClientException;
 }
