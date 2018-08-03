@@ -477,14 +477,14 @@ public class SampleUnitDistributorTest {
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
     ArgumentCaptor<CollectionExercise> collectionExerciseSave =
-            ArgumentCaptor.forClass(CollectionExercise.class);
+        ArgumentCaptor.forClass(CollectionExercise.class);
     verify(collectionExerciseRepo, times(1)).saveAndFlush(collectionExerciseSave.capture());
     List<CollectionExercise> savedCollectionExercise = collectionExerciseSave.getAllValues();
     assertTrue(savedCollectionExercise.size() == 1);
     savedCollectionExercise.forEach(
-            (exercise) -> {
-              assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
-              assertEquals(CollectionExerciseState.LIVE, exercise.getState());
-            });
+        (exercise) -> {
+          assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
+          assertEquals(CollectionExerciseState.LIVE, exercise.getState());
+        });
   }
 }
