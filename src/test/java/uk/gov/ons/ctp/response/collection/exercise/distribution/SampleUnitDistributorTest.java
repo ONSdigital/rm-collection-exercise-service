@@ -259,7 +259,7 @@ public class SampleUnitDistributorTest {
           assertEquals(PARTY_ID_PARENT, message.getPartyId());
           assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
           assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
-          assertNull(message.getActionPlanId());
+          assertEquals(ACTION_PLAN_ID_PARENT, message.getActionPlanId());
           assertEquals(
               SAMPLE_UNIT_REF,
               message.getSampleUnitChildren().getSampleUnitchildren().get(0).getSampleUnitRef());
@@ -328,7 +328,7 @@ public class SampleUnitDistributorTest {
 
   /** Test no SampleUnitChild or ActionPlanId in SampleUnitGroup. */
   @Test
-  public void noSampleUnitChildOrActionPlanId() {
+  public void noActionPlanIdThrowsCTPException() {
 
     // Override happy path scenario so no ActionPlanId is returned.
     when(collectionExerciseRepo.getActiveActionPlanId(

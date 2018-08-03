@@ -1,12 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.gov.ons.ctp.common.UnirestInitialiser;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -44,29 +43,7 @@ class CollectionExerciseClient {
     this.username = aUsername;
     this.password = aPassword;
 
-    initialiseUnirestObjectMapper();
-  }
-
-  /** Initialises object mapper as used by unirest (needs a Jackson ObjectMapper to construct) */
-  private void initialiseUnirestObjectMapper() {
-    Unirest.setObjectMapper(
-        new com.mashape.unirest.http.ObjectMapper() {
-          public <T> T readValue(final String value, final Class<T> valueType) {
-            try {
-              return jacksonMapper.readValue(value, valueType);
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          public String writeValue(final Object value) {
-            try {
-              return jacksonMapper.writeValueAsString(value);
-            } catch (JsonProcessingException e) {
-              throw new RuntimeException(e);
-            }
-          }
-        });
+    UnirestInitialiser.initialise(jacksonMapper);
   }
 
   /**
@@ -103,7 +80,7 @@ class CollectionExerciseClient {
       return new ImmutablePair<>(statusCode, location);
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to create collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to create collection exercise: %s", e);
     }
   }
 
@@ -124,7 +101,7 @@ class CollectionExerciseClient {
           .getBody();
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
     }
   }
 
@@ -144,7 +121,7 @@ class CollectionExerciseClient {
           .getBody();
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
     }
   }
 
@@ -176,9 +153,9 @@ class CollectionExerciseClient {
 
       return linkResponse.getStatus();
     } catch (JSONException e) {
-      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload", e);
+      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload: %s", e);
     } catch (UnirestException e) {
-      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload", e);
+      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload: %s", e);
     }
   }
 
@@ -215,7 +192,7 @@ class CollectionExerciseClient {
       return Arrays.asList(linkArray);
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise", e);
+          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
     }
   }
 
