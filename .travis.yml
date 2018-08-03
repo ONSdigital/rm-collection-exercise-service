@@ -1,22 +1,24 @@
 sudo: required
 
 services:
-  - docker
+- docker
 
 language: java
 jdk: openjdk8
 
-before_install: "cp .maven.settings.xml $HOME/.m2/settings.xml"
+before_install:
+- cp .maven.settings.xml $HOME/.m2/settings.xml"
+- mvn fmt:check
 
 install: mvn install -DskipTests -DskipITs -Ddocker.skip -Ddockerfile.skip -Dmaven.javadoc.skip=true -Dhttp.wait.skip -B -V
-script: mvn fmt:check cobertura:cobertura-integration-test
+script: mvn cobertura:cobertura-integration-test
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-    docker push sdcplatform/collectionexercisesvc;
-    fi
-  - bash <(curl -s https://codecov.io/bash)
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+  docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+  docker push sdcplatform/collectionexercisesvc;
+  fi
+- bash <(curl -s https://codecov.io/bash)
 
 notifications:
   slack:
@@ -30,5 +32,5 @@ cache:
   - $HOME/.m2
 
 branches:
-    only:
-        - master
+  only:
+  - master
