@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,14 +38,6 @@ public class SampleUnitRepositoryIT {
   @Autowired private SampleUnitRepository sampleUnitRepo;
   @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
 
-  @After
-  public void tearDown() {
-    // This really shouldn't be needed but some of the other tests seem to expect an empty DB
-    sampleUnitRepo.deleteAll();
-    sampleUnitGroupRepo.deleteAll();
-    collexRepo.deleteAll();
-  }
-
   @Test
   public void testSampleUnitNonExistent() {
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -60,6 +51,9 @@ public class SampleUnitRepositoryIT {
             "ABC123", SampleUnitType.B, collectionExercise);
 
     assertEquals(false, actual);
+
+    // Tear down specific entities because of dodgy data created by other tests
+    collexRepo.delete(collectionExercise);
   }
 
   @Test
@@ -82,13 +76,18 @@ public class SampleUnitRepositoryIT {
     exerciseSampleUnit.setSampleUnitRef("ABC123");
     exerciseSampleUnit.setSampleUnitId(UUID.randomUUID());
     exerciseSampleUnit.setSampleUnitType(SampleUnitType.B);
-    sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
+    exerciseSampleUnit = sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
     boolean actual =
         sampleUnitRepo.existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
             "ABC123", SampleUnitType.B, collectionExercise);
 
     assertEquals(true, actual);
+
+    // Tear down specific entities because of dodgy data created by other tests
+    sampleUnitRepo.delete(exerciseSampleUnit);
+    sampleUnitGroupRepo.delete(sampleUnitGroup);
+    collexRepo.delete(collectionExercise);
   }
 
   @Test
@@ -106,24 +105,30 @@ public class SampleUnitRepositoryIT {
     sampleUnitGroup.setCreatedDateTime(new Timestamp(new Date().getTime()));
     sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
 
-    ExerciseSampleUnit exerciseSampleUnit = new ExerciseSampleUnit();
-    exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
-    exerciseSampleUnit.setSampleUnitRef("D1SC0");
-    exerciseSampleUnit.setSampleUnitId(UUID.randomUUID());
-    exerciseSampleUnit.setSampleUnitType(SampleUnitType.B);
-    sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
+    ExerciseSampleUnit exerciseSampleUnitOne = new ExerciseSampleUnit();
+    exerciseSampleUnitOne.setSampleUnitGroup(sampleUnitGroup);
+    exerciseSampleUnitOne.setSampleUnitRef("D1SC0");
+    exerciseSampleUnitOne.setSampleUnitId(UUID.randomUUID());
+    exerciseSampleUnitOne.setSampleUnitType(SampleUnitType.B);
+    exerciseSampleUnitOne = sampleUnitRepo.saveAndFlush(exerciseSampleUnitOne);
 
-    exerciseSampleUnit = new ExerciseSampleUnit();
-    exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
-    exerciseSampleUnit.setSampleUnitRef("B15C17");
-    exerciseSampleUnit.setSampleUnitId(UUID.randomUUID());
-    exerciseSampleUnit.setSampleUnitType(SampleUnitType.B);
-    sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
+    ExerciseSampleUnit exerciseSampleUnitTwo = new ExerciseSampleUnit();
+    exerciseSampleUnitTwo.setSampleUnitGroup(sampleUnitGroup);
+    exerciseSampleUnitTwo.setSampleUnitRef("B15C17");
+    exerciseSampleUnitTwo.setSampleUnitId(UUID.randomUUID());
+    exerciseSampleUnitTwo.setSampleUnitType(SampleUnitType.B);
+    exerciseSampleUnitTwo = sampleUnitRepo.saveAndFlush(exerciseSampleUnitTwo);
 
     List<ExerciseSampleUnit> sampleUnits =
         sampleUnitRepo.findBySampleUnitGroupCollectionExerciseAndSampleUnitGroupStateFK(
             collectionExercise, SampleUnitGroupState.FAILEDVALIDATION);
 
     assertEquals(2, sampleUnits.size());
+
+    // Tear down specific entities because of dodgy data created by other tests
+    sampleUnitRepo.delete(exerciseSampleUnitOne);
+    sampleUnitRepo.delete(exerciseSampleUnitTwo);
+    sampleUnitGroupRepo.delete(sampleUnitGroup);
+    collexRepo.delete(collectionExercise);
   }
 }
