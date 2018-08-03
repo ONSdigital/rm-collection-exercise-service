@@ -346,7 +346,7 @@ public class SampleUnitDistributor {
     return exercise;
   }
 
-  private String getActiveActionPlanId(
+  protected String getActiveActionPlanId(
       Integer exercisefk, String sampleunittypefk, UUID surveyuuid) {
     String actionPlanId = null;
 
