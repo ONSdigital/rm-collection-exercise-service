@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,14 +38,6 @@ public class SampleUnitDistributorIT {
   @Autowired private CaseTypeDefaultRepository caseTypeDefaultRepo;
   @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepo;
 
-  @After
-  public void tearDown() {
-    // This really shouldn't be needed but some of the other tests seem to expect an empty DB
-    caseTypeDefaultRepo.deleteAll();
-    caseTypeOverrideRepo.deleteAll();
-    collexRepo.deleteAll();
-  }
-
   @Test
   public void testGetActiveActionPlanIdOverride() {
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -60,13 +51,17 @@ public class SampleUnitDistributorIT {
     caseTypeOverride.setActionPlanId(expectedActionPlanId);
     caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
     caseTypeOverride.setSampleUnitTypeFK("B");
-    caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
+    caseTypeOverride = caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
 
     String actualActionPlanId =
         sampleUnitDistributor.getActiveActionPlanId(
             collectionExercise.getExercisePK(), "B", UUID.randomUUID());
 
     assertEquals(expectedActionPlanId.toString(), actualActionPlanId);
+
+    // Teardown
+    caseTypeOverrideRepo.delete(caseTypeOverride);
+    collexRepo.delete(collectionExercise);
   }
 
   @Test
@@ -83,12 +78,16 @@ public class SampleUnitDistributorIT {
     caseTypeDefault.setActionPlanId(expectedActionPlanId);
     caseTypeDefault.setSampleUnitTypeFK("B");
     caseTypeDefault.setSurveyId(surveyId);
-    caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
+    caseTypeDefault = caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
 
     String actualActionPlanId =
         sampleUnitDistributor.getActiveActionPlanId(
             collectionExercise.getExercisePK(), "B", surveyId);
 
     assertEquals(expectedActionPlanId.toString(), actualActionPlanId);
+
+    // Teardown
+    caseTypeDefaultRepo.delete(caseTypeDefault);
+    collexRepo.delete(collectionExercise);
   }
 }
