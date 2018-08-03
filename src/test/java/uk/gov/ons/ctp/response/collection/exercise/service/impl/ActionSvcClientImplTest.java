@@ -6,6 +6,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -62,6 +63,9 @@ public class ActionSvcClientImplTest {
     actionPlanDTO.setName(ACTION_PLAN_NAME);
     actionPlanDTO.setDescription(ACTION_PLAN_DESCRIPTION);
     actionPlanDTO.setCreatedBy("SYSTEM");
+    HashMap<String, String> selectors = new HashMap<>();
+    selectors.put("testSelector", "testValue");
+    actionPlanDTO.setSelectors(selectors);
 
     HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
     when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
@@ -71,7 +75,7 @@ public class ActionSvcClientImplTest {
 
     // When
     ActionPlanDTO createdActionPlanDTO =
-        actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
+        actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION, selectors);
 
     // Then
     verify(restTemplate)
@@ -106,6 +110,9 @@ public class ActionSvcClientImplTest {
     actionPlanDTO.setName(ACTION_PLAN_NAME);
     actionPlanDTO.setDescription(ACTION_PLAN_DESCRIPTION);
     actionPlanDTO.setCreatedBy("SYSTEM");
+    HashMap<String, String> selectors = new HashMap<>();
+    selectors.put("testSelector", "testValue");
+    actionPlanDTO.setSelectors(selectors);
     HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
     when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
     when(restTemplate.postForObject(
@@ -113,7 +120,7 @@ public class ActionSvcClientImplTest {
         .thenThrow(RestClientException.class);
 
     // When
-    actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION);
+    actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION, selectors);
 
     // Then RestClientException is thrown
   }
