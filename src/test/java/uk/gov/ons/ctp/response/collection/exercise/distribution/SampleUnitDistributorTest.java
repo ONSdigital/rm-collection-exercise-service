@@ -44,8 +44,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
@@ -91,9 +89,7 @@ public class SampleUnitDistributorTest {
 
   @Mock private SampleUnitRepository sampleUnitRepo;
 
-  @Mock private CaseTypeDefaultRepository caseTypeDefaultRepo;
-
-  @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
+  @Mock private SampleUnitDistributorHelper sampleUnitDistributorHelper;
 
   @Mock
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent>
@@ -163,21 +159,11 @@ public class SampleUnitDistributorTest {
 
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitParentOnly);
 
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            collectionExercise.getExercisePK(), "B"))
-        .thenReturn(null);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), eq("BI"), any()))
+        .thenReturn(childActionPlanCaseType.getActionPlanId().toString());
 
-    when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(
-            collectionExercise.getSurveyId(), "B"))
-        .thenReturn(parentActionPlanCaseType);
-
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            collectionExercise.getExercisePK(), "BI"))
-        .thenReturn(null);
-
-    when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(
-            collectionExercise.getSurveyId(), "BI"))
-        .thenReturn(childActionPlanCaseType);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), eq("B"), any()))
+        .thenReturn(parentActionPlanCaseType.getActionPlanId().toString());
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
@@ -260,9 +246,8 @@ public class SampleUnitDistributorTest {
     CaseTypeOverride overrideActionPlanCaseType = new CaseTypeOverride();
     overrideActionPlanCaseType.setActionPlanId(UUID.fromString(ACTION_PLAN_ID_OVERRIDE));
 
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            collectionExercise.getExercisePK(), "B"))
-        .thenReturn(overrideActionPlanCaseType);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), eq("B"), any()))
+        .thenReturn(overrideActionPlanCaseType.getActionPlanId().toString());
 
     events
         .get(0)
@@ -393,13 +378,7 @@ public class SampleUnitDistributorTest {
   public void noActionPlanIdThrowsCTPException() {
 
     // Override happy path scenario so no ActionPlanId is returned.
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            collectionExercise.getExercisePK(), "B"))
-        .thenReturn(null);
-
-    when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(
-            collectionExercise.getSurveyId(), "B"))
-        .thenReturn(null);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), any(), any())).thenReturn(null);
 
     // Count of SampleUnitGroups would not match as didn't publish the
     // SampleUnitGroups in the exercise as no child or ActionPlanId.

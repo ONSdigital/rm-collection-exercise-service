@@ -21,23 +21,25 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 
+/** Integration tests */
 @Slf4j
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class SampleUnitDistributorIT {
+public class SampleUnitDistributorHelperIT {
   // Gubbins to make spring wire itself up
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
   // Under test
-  @Autowired private SampleUnitDistributor sampleUnitDistributor;
+  @Autowired private SampleUnitDistributorHelper sampleUnitDistributorHelper;
 
   // Repos that we need
   @Autowired private CollectionExerciseRepository collexRepo;
   @Autowired private CaseTypeDefaultRepository caseTypeDefaultRepo;
   @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepo;
 
+  /** Integration test */
   @Test
   public void testGetActiveActionPlanIdOverride() {
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -54,7 +56,7 @@ public class SampleUnitDistributorIT {
     caseTypeOverride = caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
 
     String actualActionPlanId =
-        sampleUnitDistributor.getActiveActionPlanId(
+        sampleUnitDistributorHelper.getActiveActionPlanId(
             collectionExercise.getExercisePK(), "B", UUID.randomUUID());
 
     assertEquals(expectedActionPlanId.toString(), actualActionPlanId);
@@ -64,6 +66,7 @@ public class SampleUnitDistributorIT {
     collexRepo.delete(collectionExercise);
   }
 
+  /** Integration test */
   @Test
   public void testGetActiveActionPlanIdDefault() {
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -81,7 +84,7 @@ public class SampleUnitDistributorIT {
     caseTypeDefault = caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
 
     String actualActionPlanId =
-        sampleUnitDistributor.getActiveActionPlanId(
+        sampleUnitDistributorHelper.getActiveActionPlanId(
             collectionExercise.getExercisePK(), "B", surveyId);
 
     assertEquals(expectedActionPlanId.toString(), actualActionPlanId);

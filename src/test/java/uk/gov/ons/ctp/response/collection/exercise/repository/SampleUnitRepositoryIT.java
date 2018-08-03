@@ -23,6 +23,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 
+/** Integration tests */
 @Slf4j
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -38,6 +39,7 @@ public class SampleUnitRepositoryIT {
   @Autowired private SampleUnitRepository sampleUnitRepo;
   @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
 
+  /** Integration test */
   @Test
   public void testSampleUnitNonExistent() {
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -56,6 +58,7 @@ public class SampleUnitRepositoryIT {
     collexRepo.delete(collectionExercise);
   }
 
+  /** Integration test */
   @Test
   public void testSampleUnitExists() {
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -90,6 +93,7 @@ public class SampleUnitRepositoryIT {
     collexRepo.delete(collectionExercise);
   }
 
+  /** Integration test */
   @Test
   public void testFindByCollexAndState() {
     CollectionExercise collectionExercise = new CollectionExercise();

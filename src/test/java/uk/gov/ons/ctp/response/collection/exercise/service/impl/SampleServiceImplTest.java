@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
+/** Unit tests */
 @RunWith(MockitoJUnitRunner.class)
 public class SampleServiceImplTest {
   private static final UUID COLLEX_ID = UUID.randomUUID();
@@ -46,8 +47,9 @@ public class SampleServiceImplTest {
 
   @InjectMocks private SampleServiceImpl underTest;
 
+  /** Unit test */
   @Test
-  public void testAcceptSampleUnit_CountNotEqual() throws CTPException {
+  public void testAcceptSampleUnitCountNotEqual() throws CTPException {
     CollectionExercise collex = new CollectionExercise();
     collex.setId(COLLEX_ID);
     collex.setSampleSize(50);
@@ -59,8 +61,9 @@ public class SampleServiceImplTest {
     verify(collectionExerciseTransitionState, never()).transition(any(), any());
   }
 
+  /** Unit test */
   @Test
-  public void testAcceptSampleUnit_CountEqual() throws CTPException {
+  public void testAcceptSampleUnitCountEqual() throws CTPException {
     CollectionExercise collex = new CollectionExercise();
     collex.setId(COLLEX_ID);
     collex.setSampleSize(99);
@@ -78,8 +81,9 @@ public class SampleServiceImplTest {
     assertNotNull(collexArgumentCaptor.getValue().getActualExecutionDateTime());
   }
 
+  /** Unit test */
   @Test
-  public void testAcceptSampleUnit_AlreadyExists() throws CTPException {
+  public void testAcceptSampleUnitAlreadyExists() throws CTPException {
     CollectionExercise collex = new CollectionExercise();
     collex.setId(COLLEX_ID);
     collex.setSampleSize(99);
