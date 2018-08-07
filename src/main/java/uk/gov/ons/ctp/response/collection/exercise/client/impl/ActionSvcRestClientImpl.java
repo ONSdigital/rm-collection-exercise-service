@@ -1,6 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +15,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRulePostRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
@@ -69,5 +73,38 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         "Successfully posted to action service to create action plan, ActionPlanId: {}",
         createdActionPlan.getId());
     return createdActionPlan;
+  }
+
+  @Override
+  public ActionRuleDTO createActionRule(
+      final String name,
+      final String description,
+      final String actionTypeName,
+      final OffsetDateTime triggerDateTime,
+      final int priority,
+      final UUID actionPlanId)
+      throws RestClientException {
+    log.debug("Posting to action service to create action rule");
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(appConfig.getActionSvc().getActionRulesPath(), null);
+
+    final ActionRulePostRequestDTO actionRulePostRequestDTO = new ActionRulePostRequestDTO();
+    actionRulePostRequestDTO.setName(name);
+    actionRulePostRequestDTO.setActionTypeName(actionTypeName);
+    actionRulePostRequestDTO.setDescription(description);
+    actionRulePostRequestDTO.setActionPlanId(actionPlanId);
+    actionRulePostRequestDTO.setTriggerDateTime(triggerDateTime);
+    actionRulePostRequestDTO.setPriority(priority);
+
+    final HttpEntity<ActionRulePostRequestDTO> httpEntity =
+        restUtility.createHttpEntity(actionRulePostRequestDTO);
+    final ActionRuleDTO createdActionRule =
+        restTemplate.postForObject(uriComponents.toUri(), httpEntity, ActionRuleDTO.class);
+    log.debug(
+        "Successfully posted to action service to create action rule,"
+            + "ActionPlanId: {}, ActionRuleId: {}",
+        actionPlanId,
+        createdActionRule.getId());
+    return createdActionRule;
   }
 }
