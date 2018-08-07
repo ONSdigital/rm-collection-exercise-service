@@ -670,8 +670,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
     collex.setState(newState);
     updateCollectionExercise(collex);
-    rabbitTemplate.convertAndSend(
-        new CollectionTransitionEvent(collex.getId(), collex.getState()));
+    rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
   }
 
   @Override
