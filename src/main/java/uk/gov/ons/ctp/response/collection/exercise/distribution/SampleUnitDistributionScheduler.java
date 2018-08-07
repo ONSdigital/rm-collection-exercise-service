@@ -15,9 +15,16 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 @Component
 public class SampleUnitDistributionScheduler {
 
-  @Autowired private CollectionExerciseRepository collectRepo;
+  private CollectionExerciseRepository collectRepo;
 
-  @Autowired private SampleService sampleService;
+  private SampleService sampleService;
+
+  @Autowired
+  public SampleUnitDistributionScheduler(
+      CollectionExerciseRepository collectRepo, SampleService sampleService) {
+    this.collectRepo = collectRepo;
+    this.sampleService = sampleService;
+  }
 
   /** Carry out publish according to configured fixed delay. */
   @Scheduled(fixedDelayString = "#{appConfig.schedules.distributionScheduleDelayMilliSeconds}")

@@ -48,10 +48,6 @@ public class ValidateSampleUnits {
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
   private static final String VALIDATION_LIST_ID = "group";
-  // this is a bit of a kludge - jpa does not like having an IN clause with an
-  // empty list
-  // it does not return results when you expect it to - so ... always have this
-  // in the list of excluded case ids
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
 
   private AppConfig appConfig;

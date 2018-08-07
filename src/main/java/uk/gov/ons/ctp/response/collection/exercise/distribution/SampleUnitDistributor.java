@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -54,40 +55,28 @@ public class SampleUnitDistributor {
 
   private static final String DISTRIBUTION_LIST_ID = "group";
   private static final String ENABLED = "ENABLED";
-  // this is a bit of a kludge - jpa does not like having an IN clause with an
-  // empty list
-  // it does not return results when you expect it to - so ... always have this
-  // in the list of excluded case ids
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
   private static final int TRANSACTION_TIMEOUT = 60;
 
-  @Autowired private AppConfig appConfig;
+  private AppConfig appConfig;
 
-  @Autowired private CollectionExerciseRepository collectionExerciseRepo;
-  @Autowired private EventRepository eventRepository;
-  @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
-  @Autowired private SampleUnitRepository sampleUnitRepo;
+  private CollectionExerciseRepository collectionExerciseRepo;
+  private EventRepository eventRepository;
+  private SampleUnitGroupRepository sampleUnitGroupRepo;
+  private SampleUnitRepository sampleUnitRepo;
 
-  @Autowired private ActionSvcClient actionSvcClient;
-  @Autowired private PartySvcClient partySvcClient;
-  @Autowired private SurveySvcClient surveySvcClient;
+  private ActionSvcClient actionSvcClient;
+  private PartySvcClient partySvcClient;
+  private SurveySvcClient surveySvcClient;
 
-  @Autowired private SampleUnitPublisher publisher;
+  private SampleUnitPublisher publisher;
 
-  @Autowired
-  @Qualifier("collectionExercise")
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
       collectionExerciseTransitionState;
-
-  @Autowired
-  @Qualifier("sampleUnitGroup")
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
-  @Autowired
-  @Qualifier("distribution")
   private DistributedListManager<Integer> sampleDistributionListManager;
 
-  // single TransactionTemplate shared amongst all methods in this instance
   private final TransactionTemplate transactionTemplate;
 
   /**
@@ -96,7 +85,36 @@ public class SampleUnitDistributor {
    * @param transactionManager provided by Spring
    */
   @Autowired
-  public SampleUnitDistributor(final PlatformTransactionManager transactionManager) {
+  public SampleUnitDistributor(
+      AppConfig appConfig,
+      CollectionExerciseRepository collectionExerciseRepo,
+      EventRepository eventRepository,
+      SampleUnitGroupRepository sampleUnitGroupRepo,
+      SampleUnitRepository sampleUnitRepo,
+      ActionSvcClient actionSvcClient,
+      PartySvcClient partySvcClient,
+      SurveySvcClient surveySvcClient,
+      SampleUnitPublisher publisher,
+      @Qualifier("collectionExercise")
+          StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+              collectionExerciseTransitionState,
+      @Qualifier("sampleUnitGroup")
+          StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState,
+      @Qualifier("distribution") DistributedListManager<Integer> sampleDistributionListManager,
+      final PlatformTransactionManager transactionManager) {
+
+    this.appConfig = appConfig;
+    this.collectionExerciseRepo = collectionExerciseRepo;
+    this.eventRepository = eventRepository;
+    this.sampleUnitGroupRepo = sampleUnitGroupRepo;
+    this.sampleUnitRepo = sampleUnitRepo;
+    this.actionSvcClient = actionSvcClient;
+    this.partySvcClient = partySvcClient;
+    this.surveySvcClient = surveySvcClient;
+    this.publisher = publisher;
+    this.collectionExerciseTransitionState = collectionExerciseTransitionState;
+    this.sampleUnitGroupState = sampleUnitGroupState;
+    this.sampleDistributionListManager = sampleDistributionListManager;
     this.transactionTemplate = new TransactionTemplate(transactionManager);
     this.transactionTemplate.setTimeout(TRANSACTION_TIMEOUT);
   }
@@ -110,16 +128,17 @@ public class SampleUnitDistributor {
 
     try {
       List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercise);
-
-      for (ExerciseSampleUnitGroup anExerciseSampleUnitGroup : sampleUnitGroups) {
-        distributeSampleUnits(exercise, anExerciseSampleUnitGroup);
+      if (sampleUnitGroups.isEmpty()) {
+        log.debug(
+            "No sample unit groups to distribute for exercise, collectionExerciseId: {}",
+            exercise.getId());
+        return;
       }
 
-      if (!sampleUnitGroups.isEmpty()) {
-        collectionExerciseTransitionState(exercise);
-      }
+      sampleUnitGroups.forEach(sampleUnitGroup -> distributeSampleUnits(exercise, sampleUnitGroup));
+      collectionExerciseTransitionState(exercise);
 
-    } catch (LockingException | CTPException ex) {
+    } catch (LockingException ex) {
       log.error("Distribution failed due to {}", ex.getMessage());
       log.error("Stack trace: " + ex);
     } finally {
@@ -127,9 +146,8 @@ public class SampleUnitDistributor {
         sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
       } catch (LockingException ex) {
         log.error(
-            "Failed to release sampleDistributionListManager data - error msg is {}",
-            ex.getMessage());
-        log.error("Stack trace: " + ex);
+            "Failed to release sampleDistributionListManager data, error: {}", ex.getMessage());
+        log.error(ex.toString());
       }
     }
   }
@@ -141,7 +159,7 @@ public class SampleUnitDistributor {
    * @param sampleUnitGroup for which to distribute sample units.
    */
   private void distributeSampleUnits(
-      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
+      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
     List<SampleUnit> children = new ArrayList<>();
     SampleUnitParent parent = null;
@@ -153,22 +171,7 @@ public class SampleUnitDistributor {
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-
-        PartyDTO businessParty =
-            partySvcClient.requestParty(
-                sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-        Boolean activeEnrolment =
-            surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-        SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
-
-        parent.setActionPlanId(
-            actionSvcClient
-                .getActionPlansBySelectors(
-                    survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
-                .get(0)
-                .getId()
-                .toString());
-
+        parent.setActionPlanId(getActionPlanId(sampleUnit, exercise).toString());
         parent.setCollectionExerciseId(exercise.getId().toString());
       } else {
         SampleUnit child = new SampleUnit();
@@ -177,50 +180,25 @@ public class SampleUnitDistributor {
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-
-        PartyDTO businessParty =
-            partySvcClient.requestParty(
-                sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-        Boolean activeEnrolment =
-            surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-        SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
-        child.setActionPlanId(
-            actionSvcClient
-                .getActionPlansBySelectors(
-                    survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
-                .get(0)
-                .getId()
-                .toString());
-
+        child.setActionPlanId(getActionPlanId(sampleUnit, exercise).toString());
         children.add(child);
       }
     }
 
-    if ((parent != null)) {
-      if (!children.isEmpty()) {
-        parent.setSampleUnitChildren(new SampleUnitChildren(children));
-      }
-
-      if (parent.getActionPlanId() == null) {
-        String message =
-            String.format(
-                "Action Plan Id is required for collectionExerciseId=%s and sampleUnitId=%s",
-                exercise.getId(), parent.getId());
-        log.error(message);
-        throw new CTPException(CTPException.Fault.VALIDATION_FAILED, message);
-      }
+    if (parent != null) {
+      parent.setSampleUnitChildren(new SampleUnitChildren(children));
       publishSampleUnit(sampleUnitGroup, parent);
     } else {
       log.error(
-          "No Parent for SampleUnit in SampleUnitGroupPK {} ",
+          "No parent in sample unit group, sampleUnitGroupPK: {}",
           sampleUnitGroup.getSampleUnitGroupPK());
     }
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {
-    List<Association> associations = party.getAssociations();
     List<Enrolment> enrolments =
-        associations
+        party
+            .getAssociations()
             .stream()
             .map(Association::getEnrolments)
             .flatMap(List::stream)
@@ -233,6 +211,19 @@ public class SampleUnitDistributor {
   private boolean enrolmentIsEnabledForSurvey(final Enrolment enrolment, String surveyId) {
     return enrolment.getSurveyId().equals(surveyId)
         && enrolment.getEnrolmentStatus().equalsIgnoreCase(ENABLED);
+  }
+
+  private UUID getActionPlanId(ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
+    PartyDTO businessParty =
+        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    Boolean activeEnrolment =
+        surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
+    SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
+    return actionSvcClient
+        .getActionPlansBySelectors(
+            survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
+        .get(0)
+        .getId();
   }
 
   /**
