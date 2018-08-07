@@ -10,4 +10,5 @@ import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 public class ActionSvc {
   private RestUtilityConfig connectionConfig;
   private String actionPlansPath;
+  private String actionRulesPath;
 }

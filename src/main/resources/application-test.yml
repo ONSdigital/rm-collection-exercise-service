@@ -13,9 +13,17 @@ sample-svc:
   connection-config:
     port: 18002
 
+collection-instrument-svc:
+    connection-config:
+        port: 18002
+
+party-svc:
+    connection-config:
+        port: 18002
+
 action-svc:
   connection-config:
-    port: 38151
+    port: 18002
 
 redisson-config:
   address: localhost:17379
@@ -27,12 +35,4 @@ rabbitmq:
 schedules:
   validation-schedule-delay-milli-seconds: 5000
   distribution-schedule-delay-milli-seconds: 5000
-
-collection-instrument-svc:
-    connection-config:
-        port: 18002
-
-party-svc:
-    connection-config:
-        port: 18002
 
