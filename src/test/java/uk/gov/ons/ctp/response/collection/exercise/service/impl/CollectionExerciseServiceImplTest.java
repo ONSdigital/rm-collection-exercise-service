@@ -7,6 +7,7 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -397,26 +398,35 @@ public class CollectionExerciseServiceImplTest {
   }
 
   @Test
-  public void testUpdateCollectionExerciseSendsCollectionTransitionEvent() throws Exception {
+  public void testTransitionEventSentWhenTransition() throws Exception {
     // Given
     CollectionExercise existing =
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
-    UUID surveyId = UUID.fromString(survey.getId());
-    existing.setSurveyId(surveyId);
-    when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
-    when(surveyService.findSurvey(surveyId)).thenReturn(survey);
-    CollectionExerciseDTO toUpdate =
-        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
 
     // When
-    this.collectionExerciseServiceImpl.updateCollectionExercise(existing.getId(), toUpdate);
+    this.collectionExerciseServiceImpl.transitionCollectionExercise(
+        existing, CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE);
 
     // Then
     CollectionTransitionEvent collectionTransitionEvent =
         new CollectionTransitionEvent(
-            existing.getId(), CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+            existing.getId(), CollectionExerciseDTO.CollectionExerciseState.VALIDATED);
     verify(rabbitTemplate).convertAndSend(collectionTransitionEvent);
+  }
+
+  @Test
+  public void testTransitionEventNotSentWhenNoTransition() throws Exception {
+    // Given
+    CollectionExercise existing =
+        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    existing.setState(CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
+
+    // When
+    this.collectionExerciseServiceImpl.transitionCollectionExercise(
+        existing, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
+
+    // Then
+    verify(rabbitTemplate, never()).convertAndSend(any());
   }
 
   @Test
