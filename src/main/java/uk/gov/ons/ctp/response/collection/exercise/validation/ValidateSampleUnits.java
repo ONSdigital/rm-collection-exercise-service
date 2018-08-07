@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +36,10 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
-import uk.gov.ons.ctp.response.party.representation.Association;
-import uk.gov.ons.ctp.response.party.representation.Enrolment;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Class responsible for business logic to validate SampleUnits. */
 @Component
@@ -52,34 +48,48 @@ public class ValidateSampleUnits {
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
   private static final String VALIDATION_LIST_ID = "group";
-  private static final String ENABLED = "ENABLED";
   // this is a bit of a kludge - jpa does not like having an IN clause with an
   // empty list
   // it does not return results when you expect it to - so ... always have this
   // in the list of excluded case ids
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
 
-  @Autowired private AppConfig appConfig;
+  private AppConfig appConfig;
 
-  @Autowired private ExerciseSampleUnitService sampleUnitSvc;
+  private CollectionExerciseService collexService;
+  private ExerciseSampleUnitService sampleUnitSvc;
+  private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
 
-  @Autowired private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
+  private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
+  private PartySvcClient partySvcClient;
+  private SurveySvcClient surveySvcClient;
 
-  @Autowired private CollectionExerciseService collexService;
-
-  @Autowired
-  @Qualifier("sampleUnitGroup")
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
-  @Autowired private SurveySvcClient surveySvcClient;
-
-  @Autowired private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
-
-  @Autowired private PartySvcClient partySvcClient;
+  private DistributedListManager<Integer> sampleValidationListManager;
 
   @Autowired
-  @Qualifier("validation")
-  private DistributedListManager<Integer> sampleValidationListManager;
+  public ValidateSampleUnits(
+      AppConfig appConfig,
+      CollectionExerciseService collexService,
+      ExerciseSampleUnitService sampleUnitSvc,
+      ExerciseSampleUnitGroupService sampleUnitGroupSvc,
+      CollectionInstrumentSvcClient collectionInstrumentSvcClient,
+      PartySvcClient partySvcClient,
+      SurveySvcClient surveySvcClient,
+      @Qualifier("sampleUnitGroup")
+          StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState,
+      @Qualifier("validation") DistributedListManager<Integer> sampleValidationListManager) {
+    this.appConfig = appConfig;
+    this.collexService = collexService;
+    this.sampleUnitSvc = sampleUnitSvc;
+    this.sampleUnitGroupSvc = sampleUnitGroupSvc;
+    this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
+    this.partySvcClient = partySvcClient;
+    this.surveySvcClient = surveySvcClient;
+    this.sampleUnitGroupState = sampleUnitGroupState;
+    this.sampleValidationListManager = sampleValidationListManager;
+  }
 
   /** Validate SampleUnits */
   public void validateSampleUnits() {
@@ -104,7 +114,7 @@ public class ValidateSampleUnits {
 
         collections.forEach(
             (exercise, groups) -> {
-              generateSampleUnits(exercise, groups);
+              addCollectionInstrumentIds(exercise, groups);
 
               try {
                 CollectionExerciseEvent event = getCollectionExerciseTransitionState(exercise);
@@ -130,59 +140,33 @@ public class ValidateSampleUnits {
           log.error("Stack trace: " + ex);
         }
       }
-    } // End exercises not empty. Just check this to save processing if going
-    // to get empty sampleUnitGroups List to process
+    }
   }
 
   /**
-   * Populate Sample units for the SampleUnitGroups for a CollectionExercise. Creates the sample
-   * units for parent sample units, populating the party id by calling the party service. Also adds
-   * sample units for any enrolled respondents associated with the sample unit.
+   * Add collection instrument id and party id to each SampleUnit
    *
    * @param exercise for which to validate the SampleUnitGroups
-   * @param sampleUnitGroups in exercise.
-   * @return boolean false if fatal error validating, for example no classifierTypes
+   * @param sampleUnitGroups in exercise
    */
-  private void generateSampleUnits(
+  private void addCollectionInstrumentIds(
       CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
 
-    List<ExerciseSampleUnit> sampleUnitsWithRespondents = new ArrayList<>();
-
     for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
-
       List<ExerciseSampleUnit> sampleUnits = sampleUnitSvc.findBySampleUnitGroup(sampleUnitGroup);
-      for (ExerciseSampleUnit sampleUnitParent : sampleUnits) {
-        if (!sampleUnitParent.getSampleUnitType().isParent()) {
-          log.warn(
-              "Validation for SampleUnit PK: {} Is type {}",
-              sampleUnitParent.getSampleUnitPK(),
-              sampleUnitParent.getSampleUnitType());
-          // Skip current sampleUnit as not parent type. Respondent Unit.
-          // Something must have gone wrong before?
-          continue;
-        }
+      for (ExerciseSampleUnit sampleUnit : sampleUnits) {
         try {
-          String surveyId = exercise.getSurveyId().toString();
-          SurveyDTO survey = surveySvcClient.findSurvey(UUID.fromString(surveyId));
           UUID collectionInstrumentId =
-              requestCollectionInstrumentId(classifierTypes, sampleUnitParent, surveyId);
+              requestCollectionInstrumentId(
+                  classifierTypes, sampleUnit, exercise.getSurveyId().toString());
+          sampleUnit.setCollectionInstrumentId(collectionInstrumentId);
 
-          if (survey.getSurveyType() == SurveyDTO.SurveyType.Business) {
-            sampleUnitsWithRespondents =
-                createEnrolledRespondentSampleUnits(
-                    sampleUnitParent, sampleUnits, sampleUnitGroup, surveyId);
-
-          } else if (survey.getSurveyType() == SurveyDTO.SurveyType.Social) {
-            sampleUnitsWithRespondents.add(sampleUnitParent);
-          }
-
-          sampleUnitsWithRespondents.forEach(
-              updatedSampleUnit -> {
-                updatedSampleUnit.setCollectionInstrumentId(collectionInstrumentId);
-              });
-
+          PartyDTO party =
+              partySvcClient.requestParty(
+                  sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+          sampleUnit.setPartyId(UUID.fromString(party.getId()));
         } catch (RestClientException ex) {
           log.error(
               "Error in validation for SampleUnitGroup PK: {} due to: {}",
@@ -191,8 +175,7 @@ public class ValidateSampleUnits {
           log.error("Stack trace: " + ex);
         }
       }
-
-      saveUpdatedSampleUnits(sampleUnitGroup, sampleUnitsWithRespondents);
+      saveUpdatedSampleUnits(sampleUnitGroup, sampleUnits);
     }
   }
 
@@ -250,85 +233,6 @@ public class ValidateSampleUnits {
       sampleValidationListManager.unlockContainer();
     }
     return sampleUnitGroups;
-  }
-
-  /**
-   * Request party information from the Party Service. Update reporting unit with partyId. Create a
-   * SampleUnit for each enrolled respondent for the reporting unit for that survey. Operation is
-   * designed to be repeatable by checking if sampleUnit already exists for partyId.
-   *
-   * @param sampleUnit sampled reporting unit for which to request party information.
-   * @param sampleUnits all sampleUnits belonging to this group.
-   * @param sampleUnitGroup group to which sampleUnit belongs.
-   * @param surveyId Survey of which sampleUnit is a member.
-   * @return List<ExerciseSampleUnit> of updated, created sampleUnits
-   * @throws RestClientException something went wrong making http call.
-   */
-  private List<ExerciseSampleUnit> createEnrolledRespondentSampleUnits(
-      ExerciseSampleUnit sampleUnit,
-      List<ExerciseSampleUnit> sampleUnits,
-      ExerciseSampleUnitGroup sampleUnitGroup,
-      String surveyId)
-      throws RestClientException {
-    List<ExerciseSampleUnit> updatedSampleUnits = new ArrayList<>();
-    PartyDTO party =
-        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-    sampleUnit.setPartyId(UUID.fromString(party.getId()));
-    updatedSampleUnits.add(sampleUnit);
-    party
-        .getAssociations()
-        .forEach(
-            association -> {
-              association
-                  .getEnrolments()
-                  .forEach(
-                      enrolment -> {
-                        if (surveyHasEnrolledRespondent(enrolment, surveyId)) {
-                          Optional<ExerciseSampleUnit> existingRespondent =
-                              findExistingRespondent(sampleUnits, association);
-                          if (existingRespondent.isPresent()) {
-                            log.warn(
-                                "Validation for SampleUnit PK: {} Respondent already exists {}",
-                                sampleUnit.getSampleUnitPK(),
-                                association.getPartyId());
-                            updatedSampleUnits.add(existingRespondent.get());
-                          } else {
-                            ExerciseSampleUnit respondent =
-                                createNewRespondent(sampleUnitGroup, sampleUnit, association);
-                            updatedSampleUnits.add(respondent);
-                          }
-                        }
-                      });
-            });
-    return updatedSampleUnits;
-  }
-
-  private boolean surveyHasEnrolledRespondent(final Enrolment enrolment, String surveyId) {
-    return enrolment.getSurveyId().equals(surveyId)
-        && enrolment.getEnrolmentStatus().equalsIgnoreCase(ENABLED);
-  }
-
-  private Optional<ExerciseSampleUnit> findExistingRespondent(
-      List<ExerciseSampleUnit> sampleUnits, Association association) {
-    return sampleUnits
-        .stream()
-        .filter(
-            existingSampleUnit ->
-                association.getPartyId().equals(existingSampleUnit.getPartyId().toString()))
-        .findFirst();
-  }
-
-  private ExerciseSampleUnit createNewRespondent(
-      final ExerciseSampleUnitGroup sampleUnitGroup,
-      ExerciseSampleUnit sampleUnit,
-      Association association) {
-    ExerciseSampleUnit respondent = new ExerciseSampleUnit();
-    respondent.setSampleUnitId(UUID.randomUUID());
-    respondent.setSampleUnitGroup(sampleUnitGroup);
-    respondent.setPartyId(UUID.fromString(association.getPartyId()));
-    respondent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-    respondent.setSampleUnitType(sampleUnit.getSampleUnitType().getChild());
-    return respondent;
   }
 
   /**
@@ -437,10 +341,9 @@ public class ValidateSampleUnits {
    *
    * @param exercise to transition.
    * @return exercise Collection Exercise with new state.
-   * @throws CTPException
    */
-  private CollectionExerciseEvent getCollectionExerciseTransitionState(CollectionExercise exercise)
-      throws CTPException {
+  private CollectionExerciseEvent getCollectionExerciseTransitionState(
+      CollectionExercise exercise) {
     log.info("getCollectionExerciseTransitionState is called!");
     CollectionExerciseEvent event = null;
     long init =

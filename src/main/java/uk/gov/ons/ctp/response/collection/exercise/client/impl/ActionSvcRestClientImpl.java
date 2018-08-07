@@ -1,13 +1,19 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -69,5 +75,32 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         "Successfully posted to action service to create action plan, ActionPlanId: {}",
         createdActionPlan.getId());
     return createdActionPlan;
+  }
+
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  @Override
+  public List<ActionPlanDTO> getActionPlansBySelectors(
+      String surveyRef, String exerciseRef, Boolean activeEnrolment) throws RestClientException {
+    log.debug("Retrieving action plan for selectors");
+
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.add("surveyRef", surveyRef);
+    queryParams.add("exerciseRef", exerciseRef);
+    queryParams.add("activeEnrolment", activeEnrolment.toString());
+    UriComponents uriComponents =
+        restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
+
+    ResponseEntity<List<ActionPlanDTO>> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toString(),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
+
+    log.debug("Successfully retrieved action plan for selectors");
+    return responseEntity.getBody();
   }
 }

@@ -23,6 +23,9 @@ import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
+import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
@@ -39,6 +42,10 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.party.representation.Association;
+import uk.gov.ons.ctp.response.party.representation.Enrolment;
+import uk.gov.ons.ctp.response.party.representation.PartyDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
@@ -46,6 +53,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 public class SampleUnitDistributor {
 
   private static final String DISTRIBUTION_LIST_ID = "group";
+  private static final String ENABLED = "ENABLED";
   // this is a bit of a kludge - jpa does not like having an IN clause with an
   // empty list
   // it does not return results when you expect it to - so ... always have this
@@ -55,13 +63,14 @@ public class SampleUnitDistributor {
 
   @Autowired private AppConfig appConfig;
 
+  @Autowired private CollectionExerciseRepository collectionExerciseRepo;
   @Autowired private EventRepository eventRepository;
-
   @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
-
   @Autowired private SampleUnitRepository sampleUnitRepo;
 
-  @Autowired private CollectionExerciseRepository collectionExerciseRepo;
+  @Autowired private ActionSvcClient actionSvcClient;
+  @Autowired private PartySvcClient partySvcClient;
+  @Autowired private SurveySvcClient surveySvcClient;
 
   @Autowired private SampleUnitPublisher publisher;
 
@@ -144,11 +153,21 @@ public class SampleUnitDistributor {
         parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
+
+        PartyDTO businessParty =
+            partySvcClient.requestParty(
+                sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+        Boolean activeEnrolment =
+            surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
+        SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
+
         parent.setActionPlanId(
-            collectionExerciseRepo.getActiveActionPlanId(
-                exercise.getExercisePK(),
-                sampleUnit.getSampleUnitType().name(),
-                exercise.getSurveyId()));
+            actionSvcClient
+                .getActionPlansBySelectors(
+                    survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
+                .get(0)
+                .getId()
+                .toString());
 
         parent.setCollectionExerciseId(exercise.getId().toString());
       } else {
@@ -158,11 +177,21 @@ public class SampleUnitDistributor {
         child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
         child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
+
+        PartyDTO businessParty =
+            partySvcClient.requestParty(
+                sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+        Boolean activeEnrolment =
+            surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
+        SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
         child.setActionPlanId(
-            collectionExerciseRepo.getActiveActionPlanId(
-                exercise.getExercisePK(),
-                sampleUnit.getSampleUnitType().name(),
-                exercise.getSurveyId()));
+            actionSvcClient
+                .getActionPlansBySelectors(
+                    survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
+                .get(0)
+                .getId()
+                .toString());
+
         children.add(child);
       }
     }
@@ -188,6 +217,24 @@ public class SampleUnitDistributor {
     }
   }
 
+  private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {
+    List<Association> associations = party.getAssociations();
+    List<Enrolment> enrolments =
+        associations
+            .stream()
+            .map(Association::getEnrolments)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+    return enrolments
+        .stream()
+        .anyMatch(enrolment -> enrolmentIsEnabledForSurvey(enrolment, surveyId));
+  }
+
+  private boolean enrolmentIsEnabledForSurvey(final Enrolment enrolment, String surveyId) {
+    return enrolment.getSurveyId().equals(surveyId)
+        && enrolment.getEnrolmentStatus().equalsIgnoreCase(ENABLED);
+  }
+
   /**
    * Retrieve SampleUnitGroups to be distributed - state VALIDATED - but do not retrieve the same
    * SampleUnitGroups as other service instances.
@@ -205,7 +252,7 @@ public class SampleUnitDistributor {
         sampleDistributionListManager.findList(DISTRIBUTION_LIST_ID, false);
     log.debug("DISTRIBUTION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
 
-    excludedGroups.add(Integer.valueOf(IMPOSSIBLE_ID));
+    excludedGroups.add(IMPOSSIBLE_ID);
     sampleUnitGroups =
         sampleUnitGroupRepo
             .findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
@@ -225,7 +272,7 @@ public class SampleUnitDistributor {
           DISTRIBUTION_LIST_ID,
           sampleUnitGroups
               .stream()
-              .map(group -> group.getSampleUnitGroupPK())
+              .map(ExerciseSampleUnitGroup::getSampleUnitGroupPK)
               .collect(Collectors.toList()),
           true);
     } else {

@@ -69,12 +69,9 @@ public class CollectionExerciseEndpoint {
       Validation.buildDefaultValidatorFactory();
 
   private CollectionExerciseService collectionExerciseService;
-
-  private SurveyService surveyService;
-
-  private SampleService sampleService;
-
   private EventService eventService;
+  private SampleService sampleService;
+  private SurveyService surveyService;
 
   private MapperFacade mapperFacade;
 
@@ -133,7 +130,7 @@ public class CollectionExerciseEndpoint {
       collectionExerciseSummaryDTOList =
           collectionExerciseList
               .stream()
-              .map(collex -> getCollectionExerciseDTO(collex))
+              .map(this::getCollectionExerciseDTO)
               .collect(Collectors.toList());
       if (collectionExerciseList.isEmpty()) {
         return ResponseEntity.noContent().build();

@@ -6,6 +6,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Service responsible for making client calls to the Survey service */
 public interface SurveySvcClient extends SurveyService {
@@ -30,4 +31,6 @@ public interface SurveySvcClient extends SurveyService {
    */
   SurveyClassifierTypeDTO requestClassifierTypeSelector(UUID surveyId, UUID classifierType)
       throws RestClientException;
+
+  SurveyDTO findSurvey(UUID surveyId) throws RestClientException;
 }
