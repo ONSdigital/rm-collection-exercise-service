@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 
 public class EventValidator {
 
@@ -59,8 +59,8 @@ public class EventValidator {
    * @return
    */
   private boolean validateNonMandatoryEvents(final Map<String, Event> eventMap) {
-    Event referencePeriodStart = eventMap.get(EventService.Tag.ref_period_start.toString());
-    Event referencePeriodEnd = eventMap.get(EventService.Tag.ref_period_end.toString());
+    Event referencePeriodStart = eventMap.get(Tag.ref_period_start.toString());
+    Event referencePeriodEnd = eventMap.get(Tag.ref_period_end.toString());
 
     return referencePeriodInCorrectOrder(referencePeriodStart, referencePeriodEnd)
         && remindersDuringExercise(eventMap);
@@ -76,12 +76,12 @@ public class EventValidator {
   }
 
   private boolean remindersDuringExercise(final Map<String, Event> eventMap) {
-    Event goLive = eventMap.get(EventService.Tag.go_live.toString());
-    Event exerciseEnd = eventMap.get(EventService.Tag.exercise_end.toString());
+    Event goLive = eventMap.get(Tag.go_live.toString());
+    Event exerciseEnd = eventMap.get(Tag.exercise_end.toString());
 
-    Event reminder = eventMap.get(EventService.Tag.reminder.toString());
-    Event reminder2 = eventMap.get(EventService.Tag.reminder2.toString());
-    Event reminder3 = eventMap.get(EventService.Tag.reminder3.toString());
+    Event reminder = eventMap.get(Tag.reminder.toString());
+    Event reminder2 = eventMap.get(Tag.reminder2.toString());
+    Event reminder3 = eventMap.get(Tag.reminder3.toString());
     return eventDuringExercise(goLive, reminder, exerciseEnd)
         && eventDuringExercise(goLive, reminder2, exerciseEnd)
         && eventDuringExercise(goLive, reminder3, exerciseEnd);
@@ -101,10 +101,10 @@ public class EventValidator {
    * Validates the mandatory events are in the following order: MPS Go Live Return By Exercise End
    */
   private boolean validateMandatoryEvents(final Map<String, Event> eventMap) {
-    Event mpsEvent = eventMap.get(EventService.Tag.mps.toString());
-    Event goLiveEvent = eventMap.get(EventService.Tag.go_live.toString());
-    Event returnByEvent = eventMap.get(EventService.Tag.return_by.toString());
-    Event exerciseEndEvent = eventMap.get(EventService.Tag.exercise_end.toString());
+    Event mpsEvent = eventMap.get(Tag.mps.toString());
+    Event goLiveEvent = eventMap.get(Tag.go_live.toString());
+    Event returnByEvent = eventMap.get(Tag.return_by.toString());
+    Event exerciseEndEvent = eventMap.get(Tag.exercise_end.toString());
 
     return mpsEvent.getTimestamp().before(goLiveEvent.getTimestamp())
         && goLiveEvent.getTimestamp().before(returnByEvent.getTimestamp())
@@ -128,12 +128,10 @@ public class EventValidator {
   }
 
   private boolean isMandatory(final Event updatedEvent) {
-    return EventService.Tag.valueOf(updatedEvent.getTag()).isMandatory();
+    return Tag.valueOf(updatedEvent.getTag()).isMandatory();
   }
 
   private boolean isReminder(final Event updatedEvent) {
-    return EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder)
-        || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder2)
-        || EventService.Tag.valueOf(updatedEvent.getTag()).equals(EventService.Tag.reminder3);
+    return Tag.valueOf(updatedEvent.getTag()).isReminder();
   }
 }

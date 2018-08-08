@@ -1,14 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -19,11 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Random;
-import java.util.UUID;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
@@ -44,15 +39,11 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
@@ -120,30 +111,6 @@ public class CollectionExerciseEndpointIT {
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
   }
 
-  private void stubCreateActionPlan() throws IOException {
-    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
-    actionPlanDTO.setId(UUID.randomUUID());
-
-    wireMockRule.stubFor(
-        post(urlPathMatching("/actionplans"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(actionPlanDTO))));
-  }
-
-  private void stubCreateActionRule() throws IOException {
-    ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
-    actionRuleDTO.setId(UUID.randomUUID());
-
-    wireMockRule.stubFor(
-        post(urlPathMatching("/actionrules"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(actionRuleDTO))));
-  }
-
   /**
    * Method to test construction of a collection exercise via the API - Create a collection exercise
    * - Get the collection exercise from the returned Location header - Assert the collection
@@ -154,7 +121,6 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void shouldCreateCollectionExercise() throws Exception {
     stubCreateActionPlan();
-
     stubSurveyServiceBusiness();
     String exerciseRef = "899990";
     String userDescription = "Test Description";
@@ -170,28 +136,55 @@ public class CollectionExerciseEndpointIT {
     assertEquals(userDescription, newCollex.getUserDescription());
   }
 
-  /**
-   * Creates a new SimpleMessageSender based on the config in AppConfig
-   *
-   * @return a new SimpleMessageSender
-   */
-  private SimpleMessageSender getMessageSender() {
-    Rabbitmq config = this.appConfig.getRabbitmq();
+  @Test
+  public void shouldUpdateEventDate() throws IOException, CTPException {
+    stubCreateActionPlan();
+    stubCreateActionRule();
+    stubCollectionInstrumentCount();
+    stubSurveyServiceBusiness();
+    stubGetActionRulesByActionPlan();
+    stubUpdateActionRule();
+    String exerciseRef = "899990";
+    String userDescription = "Test Description";
 
-    return new SimpleMessageSender(
-        config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+    final Pair<Integer, String> response =
+        client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
+    final CollectionExerciseDTO collectionExercise =
+        client.getCollectionExercise(response.getRight());
+
+    final EventDTO mps = createEventDTO(collectionExercise, EventService.Tag.mps, 2);
+    final EventDTO goLive = createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
+    final EventDTO returnBy = createEventDTO(collectionExercise, EventService.Tag.return_by, 4);
+    final EventDTO exerciseEnd =
+        createEventDTO(collectionExercise, EventService.Tag.exercise_end, 5);
+
+    Date newDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+    mps.setTimestamp(newDate);
+    client.updateEvent(mps);
+
+    final List<EventDTO> events =
+        client
+            .getEvents(collectionExercise.getId())
+            .stream()
+            .filter(eventDTO -> EventService.Tag.mps.hasName(eventDTO.getTag()))
+            .collect(Collectors.toList());
+
+    final EventDTO createdEvent = events.get(0);
+    assertThat(createdEvent.getTag(), is(EventService.Tag.mps.name()));
+    assertThat(createdEvent.getTimestamp().getTime(), is(newDate.getTime()));
   }
 
-  /**
-   * Creates a new SimpleMessageListener based on the config in AppConfig
-   *
-   * @return a new SimpleMessageListener
-   */
-  private SimpleMessageListener getMessageListener() {
-    Rabbitmq config = this.appConfig.getRabbitmq();
+  private EventDTO createEventDTO(
+      final CollectionExerciseDTO collectionExercise,
+      final EventService.Tag go_live,
+      final Integer daysInFuture) {
+    final EventDTO event = new EventDTO();
+    event.setTimestamp(Date.from(Instant.now().plus(daysInFuture, ChronoUnit.DAYS)));
+    event.setTag(go_live.toString());
+    event.setCollectionExerciseId(collectionExercise.getId());
 
-    return new SimpleMessageListener(
-        config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+    client.createCollectionExerciseEvent(event);
+    return event;
   }
 
   @Test
@@ -357,6 +350,30 @@ public class CollectionExerciseEndpointIT {
     return sampleUnitParent;
   }
 
+  /**
+   * Creates a new SimpleMessageSender based on the config in AppConfig
+   *
+   * @return a new SimpleMessageSender
+   */
+  private SimpleMessageSender getMessageSender() {
+    Rabbitmq config = this.appConfig.getRabbitmq();
+
+    return new SimpleMessageSender(
+        config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+  }
+
+  /**
+   * Creates a new SimpleMessageListener based on the config in AppConfig
+   *
+   * @return a new SimpleMessageListener
+   */
+  private SimpleMessageListener getMessageListener() {
+    Rabbitmq config = this.appConfig.getRabbitmq();
+
+    return new SimpleMessageListener(
+        config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+  }
+
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
     JAXBContext jaxbContext = JAXBContext.newInstance(SampleUnit.class);
     StringWriter stringWriter = new StringWriter();
@@ -407,6 +424,50 @@ public class CollectionExerciseEndpointIT {
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+  }
+
+  private void stubCreateActionPlan() throws IOException {
+    final ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
+    actionPlanDTO.setId(UUID.randomUUID());
+
+    wireMockRule.stubFor(
+        post(urlPathMatching("/actionplans"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(actionPlanDTO))));
+  }
+
+  private void stubGetActionRulesByActionPlan() throws IOException {
+    final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
+    actionRuleDTO.setId(UUID.randomUUID());
+    actionRuleDTO.setActionTypeName(ActionType.BSNL);
+    actionRuleDTO.setPriority(3);
+
+    wireMockRule.stubFor(
+        get(urlPathMatching("/actionrules/actionplan/(.*)"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(Arrays.asList(actionRuleDTO)))));
+  }
+
+  private void stubCreateActionRule() throws IOException {
+    final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
+    actionRuleDTO.setId(UUID.randomUUID());
+
+    wireMockRule.stubFor(
+        post(urlPathMatching("/actionrules"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(actionRuleDTO))));
+  }
+
+  private void stubUpdateActionRule() {
+    wireMockRule.stubFor(
+        put(urlPathMatching("/actionrules/(.*)"))
+            .willReturn(aResponse().withHeader("Content-Type", "application/json")));
   }
 
   private SampleSummaryDTO stubSampleSummary() throws IOException {

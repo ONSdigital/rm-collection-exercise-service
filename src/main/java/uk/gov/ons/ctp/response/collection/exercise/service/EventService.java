@@ -41,6 +41,14 @@ public interface EventService {
 
       return actionableEvents.contains(this);
     }
+
+    public boolean hasName(final String eventName) {
+      return name().equals(eventName);
+    }
+
+    public boolean isReminder() {
+      return ORDERED_REMINDERS.contains(this);
+    }
   }
 
   Event createEvent(EventDTO eventDto) throws CTPException;

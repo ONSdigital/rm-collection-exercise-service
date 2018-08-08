@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -55,7 +56,7 @@ public class GoLiveActionRuleCreatorTest {
     goLiveActionRuleCreator.execute(
         new Event(), new CaseTypeOverride(), new CaseTypeOverride(), survey);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
@@ -72,7 +73,7 @@ public class GoLiveActionRuleCreatorTest {
     CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
     goLiveActionRuleCreator.execute(collectionExerciseEvent, bCaseTypeOverride, null, survey);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
@@ -100,7 +101,7 @@ public class GoLiveActionRuleCreatorTest {
     when(actionSvcClient.createActionRule(
             anyString(),
             anyString(),
-            eq("BSNE"),
+            eq(ActionType.BSNE),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID)))
@@ -115,7 +116,7 @@ public class GoLiveActionRuleCreatorTest {
         .createActionRule(
             eq(SURVEY_SHORT_NAME + "NOTE"),
             eq(SURVEY_SHORT_NAME + " Notification Email " + EXERCISE_REF),
-            eq("BSNE"),
+            eq(ActionType.BSNE),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID));
