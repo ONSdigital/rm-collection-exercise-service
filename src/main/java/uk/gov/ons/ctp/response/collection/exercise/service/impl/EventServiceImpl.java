@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher.MessageType;
@@ -26,23 +25,16 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
-import uk.gov.ons.ctp.response.collection.exercise.service.CaseTypeOverrideService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @Service
 @Slf4j
 public class EventServiceImpl implements EventService {
 
-  private static final String BUSINESS_INDIVIDUAL_SAMPLE_UNIT_TYPE = "BI";
-  private static final String BUSINESS_SAMPLE_UNIT_TYPE = "B";
   @Autowired private CollectionExerciseService collectionExerciseService;
-
-  @Autowired private CaseTypeOverrideService caseTypeOverrideService;
 
   @Autowired private EventRepository eventRepository;
 
@@ -86,7 +78,7 @@ public class EventServiceImpl implements EventService {
       throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
     }
 
-    createActionRulesForEvent(event, collex);
+    createActionRulesForEvent(event);
     event = eventRepository.save(event);
 
     fireEventChangeHandlers(MessageType.EventCreated, event);
@@ -95,27 +87,13 @@ public class EventServiceImpl implements EventService {
   }
 
   @Override
-  public void createActionRulesForEvent(
-      final Event collectionExerciseEvent, final CollectionExercise collectionExercise)
-      throws CTPException {
+  public void createActionRulesForEvent(final Event collectionExerciseEvent) throws CTPException {
     if (!Tag.valueOf(collectionExerciseEvent.getTag()).isActionable()) {
       return;
     }
 
-    final SurveyDTO survey = surveySvcClient.getSurveyForCollectionExercise(collectionExercise);
-
-    if (survey.getSurveyType() != SurveyType.Business) {
-      return;
-    }
-
-    final CaseTypeOverride businessCaseType =
-        caseTypeOverrideService.getCaseTypeOverride(collectionExercise, BUSINESS_SAMPLE_UNIT_TYPE);
-    final CaseTypeOverride businessIndividualCaseType =
-        caseTypeOverrideService.getCaseTypeOverride(
-            collectionExercise, BUSINESS_INDIVIDUAL_SAMPLE_UNIT_TYPE);
-
     for (ActionRuleCreator arc : actionRuleCreators) {
-      arc.execute(collectionExerciseEvent, businessCaseType, businessIndividualCaseType, survey);
+      arc.execute(collectionExerciseEvent);
     }
   }
 
@@ -132,7 +110,7 @@ public class EventServiceImpl implements EventService {
 
     event.setTimestamp(new Timestamp(date.getTime()));
     validateUpdatedEvents(collex, event);
-    updateActionRules(collex, event);
+    updateActionRules(event);
 
     eventRepository.save(event);
 
@@ -141,16 +119,10 @@ public class EventServiceImpl implements EventService {
     return event;
   }
 
-  private void updateActionRules(final CollectionExercise collex, final Event event)
-      throws CTPException {
-    final CaseTypeOverride bCaseOverride =
-        caseTypeOverrideService.getCaseTypeOverride(collex, BUSINESS_SAMPLE_UNIT_TYPE);
-    final CaseTypeOverride biCaseOverride =
-        caseTypeOverrideService.getCaseTypeOverride(collex, BUSINESS_INDIVIDUAL_SAMPLE_UNIT_TYPE);
-    final SurveyDTO survey = surveySvcClient.getSurveyForCollectionExercise(collex);
+  private void updateActionRules(final Event event) throws CTPException {
 
     for (final ActionRuleUpdater aru : actionRuleUpdaters) {
-      aru.execute(event, bCaseOverride, biCaseOverride, survey);
+      aru.execute(event);
     }
   }
 

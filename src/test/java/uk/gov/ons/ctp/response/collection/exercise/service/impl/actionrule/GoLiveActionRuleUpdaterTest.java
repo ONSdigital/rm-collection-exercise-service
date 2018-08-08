@@ -21,15 +21,18 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
@@ -39,11 +42,15 @@ public class GoLiveActionRuleUpdaterTest {
       "Multiple BSNE Action Rules Found for Action Plan %s, remove all but 1 before continuing";
   private static final String NO_BSNE_ACTION_RULES_FOUND_EXCEPTION =
       "No BSNE Action Rules Found for Action Plan %s, please create one instead";
-  private static final String ACTION_PLAN_NOT_FOUND_EXCEPTION = "Action Plan %s not found";
-  private static final UUID ACTION_PLAN_ID = UUID.randomUUID();
+  private static final UUID BUSINESS_INDIVIDUAL_ACTION_PLAN_ID = UUID.randomUUID();
   private static final UUID ACTION_RULE_ID = UUID.randomUUID();
+  private static final UUID EXERCISE_ID = UUID.randomUUID();
+
   @Rule public ExpectedException thrown = ExpectedException.none();
   @Mock private ActionSvcClient actionSvcClient;
+  @Mock private SurveyService surveyService;
+
+  @Spy private ActionRulesFilter actionRulesFilter;
 
   @InjectMocks private GoLiveActionRuleUpdater updater;
 
@@ -53,89 +60,86 @@ public class GoLiveActionRuleUpdaterTest {
 
   @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
-    final Event event = new Event();
-    event.setTag(Tag.go_live.name());
-
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
-    updater.execute(event, new CaseTypeOverride(), new CaseTypeOverride(), survey);
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
+    final Event event = new Event();
+    event.setCollectionExercise(collex);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    updater.execute(event);
     verify(actionSvcClient, times(0))
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
   public void doNothingIfNotGoLiveEvent() throws CTPException {
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(Tag.mps.name());
 
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
-    updater.execute(event, null, new CaseTypeOverride(), survey);
+    updater.execute(event);
 
     verify(actionSvcClient, never())
         .updateActionRule(
             any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
   }
 
-  @Test
-  public void raiseCTPExceptionIfActionPlanNotFound() throws CTPException {
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(String.format(ACTION_PLAN_NOT_FOUND_EXCEPTION, ACTION_PLAN_ID.toString()));
-
-    final Event event = new Event();
-    event.setTag(Tag.go_live.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
-
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(null);
-
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
-  }
-
-  @Test
   public void raiseCTPExceptionIfNoBSNEActionRulesFound() throws CTPException {
     thrown.expect(CTPException.class);
     thrown.expectMessage(
-        String.format(NO_BSNE_ACTION_RULES_FOUND_EXCEPTION, ACTION_PLAN_ID.toString()));
+        String.format(
+            NO_BSNE_ACTION_RULES_FOUND_EXCEPTION, BUSINESS_INDIVIDUAL_ACTION_PLAN_ID.toString()));
 
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(Tag.go_live.name());
 
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
     actionRuleDTO.setActionTypeName(ActionType.BSNL);
     final List<ActionRuleDTO> actionRuleDTOs = Collections.singletonList(actionRuleDTO);
 
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(actionRuleDTOs);
+    when(actionSvcClient.getActionRulesForActionPlan(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID))
+        .thenReturn(actionRuleDTOs);
 
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
+    updater.execute(event);
   }
 
   @Test
   public void raiseCTPExceptionIfMultipleBSNEActionRulesFound() throws CTPException {
     thrown.expect(CTPException.class);
     thrown.expectMessage(
-        String.format(MULTIPLE_ACTION_RULES_FOUND_EXCEPTION, ACTION_PLAN_ID.toString()));
+        String.format(
+            MULTIPLE_ACTION_RULES_FOUND_EXCEPTION, BUSINESS_INDIVIDUAL_ACTION_PLAN_ID.toString()));
 
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(Tag.go_live.name());
 
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
+    final ActionPlanDTO actionPlan = new ActionPlanDTO();
+    actionPlan.setId(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), true))
+        .thenReturn(actionPlan);
 
     final ActionRuleDTO actionRuleDTO1 = new ActionRuleDTO();
     actionRuleDTO1.setActionTypeName(ActionType.BSNE);
@@ -143,9 +147,10 @@ public class GoLiveActionRuleUpdaterTest {
     actionRuleDTO2.setActionTypeName(ActionType.BSNE);
     final List<ActionRuleDTO> actionRuleDTOs = Arrays.asList(actionRuleDTO1, actionRuleDTO2);
 
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(actionRuleDTOs);
+    when(actionSvcClient.getActionRulesForActionPlan(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID))
+        .thenReturn(actionRuleDTOs);
 
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
+    updater.execute(event);
   }
 
   @Test
@@ -153,15 +158,16 @@ public class GoLiveActionRuleUpdaterTest {
     final Instant eventTriggerInstant = Instant.now();
     final Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(Tag.go_live.name());
     event.setTimestamp(eventTriggerDate);
 
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
-
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
     actionRuleDTO.setId(ACTION_RULE_ID);
@@ -169,9 +175,15 @@ public class GoLiveActionRuleUpdaterTest {
     actionRuleDTO.setPriority(3);
     final List<ActionRuleDTO> actionRuleDTOs = Collections.singletonList(actionRuleDTO);
 
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(actionRuleDTOs);
+    when(actionSvcClient.getActionRulesForActionPlan(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID))
+        .thenReturn(actionRuleDTOs);
 
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
+    final ActionPlanDTO actionPlan = new ActionPlanDTO();
+    actionPlan.setId(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), true))
+        .thenReturn(actionPlan);
+
+    updater.execute(event);
 
     verify(actionSvcClient, atLeastOnce())
         .updateActionRule(

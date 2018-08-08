@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -8,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
@@ -90,28 +94,6 @@ public class ActionSvcRestClientImplTest {
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
   }
 
-  @Test
-  public void getActionPlansBySelectors404() {
-
-    // Given
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setActionPlansPath("test:path");
-    when(appConfig.getActionSvc()).thenReturn(actionSvc);
-    when(restTemplate.exchange(
-            any(String.class),
-            eq(HttpMethod.GET),
-            eq(null),
-            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-        .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-    // When
-    List<ActionPlanDTO> actionPlanDTOs =
-        actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
-
-    // Then Null is returned
-    assertNull(actionPlanDTOs);
-  }
-
   @Test(expected = HttpClientErrorException.class)
   public void getActionPlansBySelectorsFail() {
 
@@ -130,5 +112,91 @@ public class ActionSvcRestClientImplTest {
     actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
 
     // Then HTTPClientErrorException is thrown
+  }
+
+  @Test(expected = CTPException.class)
+  public void getActionPlanBySelectorsResourceNotFoundThrowsCTPException() throws CTPException {
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+    when(restTemplate.exchange(
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+
+    // When
+    actionSvcRestClient.getActionPlanBySelectors(COLLECTION_EXERCISE_ID, false);
+
+    // Then call is made to correct url
+    verify(restTemplate, times(1))
+        .exchange(
+            String.format(
+                "test:path?collectionExerciseId=%s&activeEnrolment=false", COLLECTION_EXERCISE_ID),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
+  }
+
+  @Test(expected = CTPException.class)
+  public void getActionPlanBySelectorsMultiplePlansThrowsCTPException() throws CTPException {
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+    when(restTemplate.exchange(
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenReturn(
+            new ResponseEntity<>(
+                Arrays.asList(new ActionPlanDTO(), new ActionPlanDTO()), HttpStatus.OK));
+
+    // When
+    actionSvcRestClient.getActionPlanBySelectors(COLLECTION_EXERCISE_ID, false);
+
+    // Then call is made to correct url
+    verify(restTemplate, times(1))
+        .exchange(
+            String.format(
+                "test:path?collectionExerciseId=%s&activeEnrolment=false", COLLECTION_EXERCISE_ID),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
+  }
+
+  @Test()
+  public void getActionPlanBySelectors() throws CTPException {
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+
+    ActionPlanDTO actionPlan = new ActionPlanDTO();
+
+    when(restTemplate.exchange(
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenReturn(new ResponseEntity<>(Collections.singletonList(actionPlan), HttpStatus.OK));
+
+    // When
+    final ActionPlanDTO response =
+        actionSvcRestClient.getActionPlanBySelectors(COLLECTION_EXERCISE_ID, false);
+
+    assertThat(response, is(actionPlan));
+
+    // Then call is made to correct url
+    verify(restTemplate, times(1))
+        .exchange(
+            String.format(
+                "test:path?collectionExerciseId=%s&activeEnrolment=false", COLLECTION_EXERCISE_ID),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
   }
 }

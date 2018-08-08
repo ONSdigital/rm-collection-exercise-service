@@ -6,13 +6,20 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,34 +29,28 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReminderActionRuleUpdaterTest {
-  private static final String MULTIPLE_BSRE_ACTION_RULES_FOUND_EXCEPTION =
-      "Multiple BSRE Action Rules Found for Action Plan %s, remove all but 1 before continuing";
-  private static final String MULTIPLE_BSRL_ACTION_RULES_FOUND_EXCEPTION =
-      "Multiple BSRL Action Rules Found for Action Plan %s, remove all but 1 before continuing";
-  private static final String ACTION_PLAN_NOT_FOUND_EXCEPTION = "Action Plan %s not found";
-  private static final UUID ACTION_PLAN_ID =
-      UUID.fromString("31cbf9ee-4c56-4a81-958b-4b952fc5cc2d");
-  private static final String NO_BSRE_ACTION_RULES_FOUND_EXCEPTION =
-      "No BSRE Action Rules Found for Action Plan %s, please create one instead";
-  private static final String NO_BSRL_ACTION_RULES_FOUND_EXCEPTION =
-      "No BSRL Action Rules Found for Action Plan %s, please create one instead";
+  private static final UUID EXERCISE_ID = UUID.randomUUID();
 
   @Rule public ExpectedException thrown = ExpectedException.none();
   @Mock private ActionSvcClient actionSvcClient;
+  @Mock private SurveyService surveyService;
 
   @Spy private ReminderSuffixGenerator reminderSuffixGenerator;
+  @Spy private ActionRulesFilter actionRulesFilter;
 
   @InjectMocks private ReminderActionRuleUpdater updater;
 
@@ -63,188 +64,32 @@ public class ReminderActionRuleUpdaterTest {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
-    updater.execute(new Event(), new CaseTypeOverride(), new CaseTypeOverride(), survey);
+    final CollectionExercise collex = new CollectionExercise();
+    final Event event = new Event();
+    event.setCollectionExercise(collex);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    updater.execute(event);
     verify(actionSvcClient, times(0))
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
   public void doNothingIfNotReminder() throws CTPException {
+    final CollectionExercise collex = new CollectionExercise();
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(Tag.employment.name());
 
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
-    updater.execute(event, null, new CaseTypeOverride(), survey);
+    updater.execute(event);
 
     verify(actionSvcClient, never())
         .updateActionRule(
             any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
-  }
-
-  @Test
-  public void raiseCTPExceptionIfNoActionPlanFound() throws CTPException {
-    final Event event = new Event();
-    event.setTag(Tag.reminder.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
-
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(null);
-
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(String.format(ACTION_PLAN_NOT_FOUND_EXCEPTION, ACTION_PLAN_ID.toString()));
-
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
-  }
-
-  @Test
-  public void raiseCTPExceptionNoBSREActionRulesFound() throws CTPException {
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(
-        String.format(NO_BSRE_ACTION_RULES_FOUND_EXCEPTION, ACTION_PLAN_ID.toString()));
-
-    final Event event = new Event();
-    event.setTag(Tag.reminder.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
-
-    final ActionRuleDTO actionRuleDTO = createActionRuleDTO(null, ActionType.BSRL, "+1");
-    final List<ActionRuleDTO> actionRuleDTOs = Collections.singletonList(actionRuleDTO);
-
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(actionRuleDTOs);
-
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
-  }
-
-  @Test
-  public void raiseCTPExceptionNoBSRLActionRulesFound() throws CTPException {
-
-    final Event event = new Event();
-    event.setTag(Tag.reminder.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
-    final UUID bActionPlanId = UUID.fromString("2346ddba-db99-4265-8d11-edbaa462e6a6");
-    bCaseTypeOverride.setActionPlanId(bActionPlanId);
-    final List<ActionRuleDTO> bActionRuleDTOs = new ArrayList<>();
-    when(actionSvcClient.getActionRulesForActionPlan(bActionPlanId)).thenReturn(bActionRuleDTOs);
-
-    final CaseTypeOverride biCaseTypeOverride = new CaseTypeOverride();
-    final UUID biActionPlanId = ACTION_PLAN_ID;
-    biCaseTypeOverride.setActionPlanId(biActionPlanId);
-
-    final ActionRuleDTO actionRuleDTO = createActionRuleDTO(null, ActionType.BSRE, "+1");
-    final List<ActionRuleDTO> biActionRuleDTOs = Collections.singletonList(actionRuleDTO);
-    when(actionSvcClient.getActionRulesForActionPlan(biActionPlanId)).thenReturn(biActionRuleDTOs);
-
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(
-        String.format(NO_BSRL_ACTION_RULES_FOUND_EXCEPTION, bActionPlanId.toString()));
-
-    updater.execute(event, bCaseTypeOverride, biCaseTypeOverride, survey);
-  }
-
-  @Test
-  public void raiseCTPExceptionNoBSRLOrBSREActionRulesFound() throws CTPException {
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(
-        String.format(NO_BSRE_ACTION_RULES_FOUND_EXCEPTION, ACTION_PLAN_ID.toString()));
-
-    final Event event = new Event();
-    event.setTag(Tag.reminder.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(ACTION_PLAN_ID);
-
-    final ActionRuleDTO actionRuleDTO = createActionRuleDTO(null, ActionType.SOCIALNOT, "+44");
-    final List<ActionRuleDTO> actionRuleDTOs = Collections.singletonList(actionRuleDTO);
-
-    when(actionSvcClient.getActionRulesForActionPlan(ACTION_PLAN_ID)).thenReturn(actionRuleDTOs);
-
-    updater.execute(event, null, businessIndividualCaseTypeOverride, survey);
-  }
-
-  @Test
-  public void raiseCTPExceptionWhenMoreThanOneBSREActionRuleFound() throws CTPException {
-    final UUID bsrlActionPlanId = UUID.fromString("a1dbb1c9-1ae0-45ec-9e09-3ef70be7d3d9");
-    final UUID bsreActionPlanId = UUID.fromString("3e1bc645-d37f-4055-8d27-4a4f02a7602a");
-
-    final Event event = new Event();
-    event.setTag(Tag.reminder.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(bsreActionPlanId);
-
-    final ActionRuleDTO bsreActionRule1 = createActionRuleDTO(null, ActionType.BSRE, "+1");
-    final ActionRuleDTO bsreActionRule2 = createActionRuleDTO(null, ActionType.BSRE, "+1");
-
-    final List<ActionRuleDTO> bsreDtos = Arrays.asList(bsreActionRule1, bsreActionRule2);
-    when(actionSvcClient.getActionRulesForActionPlan(bsreActionPlanId)).thenReturn(bsreDtos);
-
-    final CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(bsrlActionPlanId);
-
-    final ActionRuleDTO bsrlActionRule1 = new ActionRuleDTO();
-    bsrlActionRule1.setActionTypeName(ActionType.BSRL);
-    bsrlActionRule1.setName("+1");
-    final List<ActionRuleDTO> bsrlDtos = Arrays.asList(bsrlActionRule1);
-    when(actionSvcClient.getActionRulesForActionPlan(bsrlActionPlanId)).thenReturn(bsrlDtos);
-
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(
-        String.format(MULTIPLE_BSRE_ACTION_RULES_FOUND_EXCEPTION, bsreActionPlanId));
-
-    updater.execute(event, businessCaseTypeOverride, businessIndividualCaseTypeOverride, survey);
-  }
-
-  @Test
-  public void raiseCTPExceptionWhenMoreThanOneBSRLActionRuleFound() throws CTPException {
-    final UUID bsrlActionPlanId = UUID.fromString("5df76355-f167-4fa8-8e11-e07d67bde5ad");
-    final UUID bsreActionPlanId = UUID.fromString("a7c10382-d069-42cb-b3d4-63a3392dab04");
-
-    thrown.expect(CTPException.class);
-    thrown.expectMessage(
-        String.format(String.format(MULTIPLE_BSRL_ACTION_RULES_FOUND_EXCEPTION, bsrlActionPlanId)));
-
-    final Event event = new Event();
-    event.setTag(Tag.reminder.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(bsreActionPlanId);
-
-    final CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(bsrlActionPlanId);
-
-    final ActionRuleDTO bsreActionRule = createActionRuleDTO(null, ActionType.BSRE, "+1");
-    final List<ActionRuleDTO> bsreDtos = Collections.singletonList(bsreActionRule);
-    when(actionSvcClient.getActionRulesForActionPlan(bsreActionPlanId)).thenReturn(bsreDtos);
-
-    final ActionRuleDTO bsrlActionRule1 = createActionRuleDTO(null, ActionType.BSRL, "+1");
-    final ActionRuleDTO bsrlActionRule2 = createActionRuleDTO(null, ActionType.BSRL, "+1");
-    final List<ActionRuleDTO> bsrlDtos = Arrays.asList(bsrlActionRule1, bsrlActionRule2);
-    when(actionSvcClient.getActionRulesForActionPlan(bsrlActionPlanId)).thenReturn(bsrlDtos);
-
-    updater.execute(event, businessCaseTypeOverride, businessIndividualCaseTypeOverride, survey);
   }
 
   @Test
@@ -266,35 +111,53 @@ public class ReminderActionRuleUpdaterTest {
     final Instant eventTriggerInstant = Instant.now();
     final Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(tag.name());
     event.setTimestamp(eventTriggerDate);
 
-    final UUID bActionPlanId = UUID.fromString("29f312e4-fe2e-4042-97c6-98e7d48cacfa");
-    final CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(bActionPlanId);
+    final UUID inactiveActionPlanId = UUID.fromString("29f312e4-fe2e-4042-97c6-98e7d48cacfa");
+    final UUID activeActionPlanId = UUID.fromString("1795efdf-9961-40eb-b22a-db4b3612c1f3");
 
-    final UUID biActionPlanId = UUID.fromString("1795efdf-9961-40eb-b22a-db4b3612c1f3");
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(biActionPlanId);
+    final HashMap<String, String> inactiveEnrolmentSelector = new HashMap<>();
+    inactiveEnrolmentSelector.put("activeEnrolment", "false");
+
+    final ActionPlanDTO inactiveActionPlanDTO = new ActionPlanDTO();
+    inactiveActionPlanDTO.setSelectors(inactiveEnrolmentSelector);
+    inactiveActionPlanDTO.setId(inactiveActionPlanId);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), false))
+        .thenReturn(inactiveActionPlanDTO);
+
+    final HashMap<String, String> activeEnrolmentSelector = new HashMap<>();
+    activeEnrolmentSelector.put("activeEnrolment", "true");
+
+    final ActionPlanDTO activeActionPlanDTO = new ActionPlanDTO();
+    activeActionPlanDTO.setSelectors(activeEnrolmentSelector);
+    activeActionPlanDTO.setId(activeActionPlanId);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), true))
+        .thenReturn(activeActionPlanDTO);
 
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     final String actionRuleSuffix = reminderSuffixGenerator.getReminderSuffix(tag.name());
     final UUID actionRuleId1 = UUID.fromString("7186077b-809f-46c7-a0ba-43139d3efa23");
     final ActionRuleDTO actionRuleDTO1 =
         createActionRuleDTO(actionRuleId1, ActionType.BSRE, actionRuleSuffix);
     final List<ActionRuleDTO> biActionRules = Arrays.asList(actionRuleDTO1);
-    when(actionSvcClient.getActionRulesForActionPlan(biActionPlanId)).thenReturn(biActionRules);
+    when(actionSvcClient.getActionRulesForActionPlan(activeActionPlanId)).thenReturn(biActionRules);
 
     final UUID actionRuleId2 = UUID.fromString("012cda1e-916a-4182-8d9a-cc66e32f8860");
     final ActionRuleDTO actionRuleDTO2 =
         createActionRuleDTO(actionRuleId2, ActionType.BSRL, actionRuleSuffix);
     final List<ActionRuleDTO> bActionRuleDTOs = Arrays.asList(actionRuleDTO2);
-    when(actionSvcClient.getActionRulesForActionPlan(bActionPlanId)).thenReturn(bActionRuleDTOs);
+    when(actionSvcClient.getActionRulesForActionPlan(inactiveActionPlanId))
+        .thenReturn(bActionRuleDTOs);
 
-    updater.execute(event, businessCaseTypeOverride, businessIndividualCaseTypeOverride, survey);
+    updater.execute(event);
 
     verify(actionSvcClient, atLeastOnce())
         .updateActionRule(
@@ -317,21 +180,38 @@ public class ReminderActionRuleUpdaterTest {
     final Instant eventTriggerInstant = Instant.now();
     final Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     final Event event = new Event();
+    event.setCollectionExercise(collex);
     event.setTag(Tag.reminder.name());
     event.setTimestamp(eventTriggerDate);
 
-    final UUID bActionPlanId = UUID.fromString("29f312e4-fe2e-4042-97c6-98e7d48cacfa");
-    final CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(bActionPlanId);
+    final UUID inactiveActionPlanId = UUID.fromString("29f312e4-fe2e-4042-97c6-98e7d48cacfa");
+    final UUID activeActionPlanId = UUID.fromString("1795efdf-9961-40eb-b22a-db4b3612c1f3");
 
-    final UUID biActionPlanId = UUID.fromString("1795efdf-9961-40eb-b22a-db4b3612c1f3");
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(biActionPlanId);
+    final HashMap<String, String> inactiveEnrolmentSelector = new HashMap<>();
+    inactiveEnrolmentSelector.put("activeEnrolment", "false");
+
+    final ActionPlanDTO inactiveActionPlanDTO = new ActionPlanDTO();
+    inactiveActionPlanDTO.setSelectors(inactiveEnrolmentSelector);
+    inactiveActionPlanDTO.setId(inactiveActionPlanId);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), false))
+        .thenReturn(inactiveActionPlanDTO);
+
+    final HashMap<String, String> activeEnrolmentSelector = new HashMap<>();
+    activeEnrolmentSelector.put("activeEnrolment", "true");
+
+    final ActionPlanDTO activeActionPlanDTO = new ActionPlanDTO();
+    activeActionPlanDTO.setSelectors(activeEnrolmentSelector);
+    activeActionPlanDTO.setId(activeActionPlanId);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), true))
+        .thenReturn(activeActionPlanDTO);
 
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
     survey.setShortName("QBS");
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     final UUID actionRuleId1 = UUID.fromString("7186077b-809f-46c7-a0ba-43139d3efa23");
     final ActionRuleDTO actionRuleDTO1 =
@@ -340,7 +220,7 @@ public class ReminderActionRuleUpdaterTest {
     final ActionRuleDTO actionRuleDTO2 =
         createActionRuleDTO(actionRuleId2, ActionType.BSRE, "QBSREME+3");
     final List<ActionRuleDTO> biActionRules = Arrays.asList(actionRuleDTO1, actionRuleDTO2);
-    when(actionSvcClient.getActionRulesForActionPlan(biActionPlanId)).thenReturn(biActionRules);
+    when(actionSvcClient.getActionRulesForActionPlan(activeActionPlanId)).thenReturn(biActionRules);
 
     final UUID actionRuleId3 = UUID.fromString("50acbf7c-ffbd-4428-b200-5cf62b4de99a");
     final ActionRuleDTO actionRuleDTO3 =
@@ -349,9 +229,10 @@ public class ReminderActionRuleUpdaterTest {
     final ActionRuleDTO actionRuleDTO4 =
         createActionRuleDTO(actionRuleId4, ActionType.BSRL, "QBSREMF+2");
     final List<ActionRuleDTO> bActionRuleDTOs = Arrays.asList(actionRuleDTO3, actionRuleDTO4);
-    when(actionSvcClient.getActionRulesForActionPlan(bActionPlanId)).thenReturn(bActionRuleDTOs);
+    when(actionSvcClient.getActionRulesForActionPlan(inactiveActionPlanId))
+        .thenReturn(bActionRuleDTOs);
 
-    updater.execute(event, businessCaseTypeOverride, businessIndividualCaseTypeOverride, survey);
+    updater.execute(event);
 
     verify(actionSvcClient, atLeastOnce())
         .updateActionRule(
