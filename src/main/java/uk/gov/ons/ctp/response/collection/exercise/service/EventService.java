@@ -1,9 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
@@ -20,7 +22,9 @@ public interface EventService {
     reminder3(false),
     ref_period_start(false),
     ref_period_end(false),
-    employment_date(false);
+    employment(false);
+
+    public static final List<Tag> ORDERED_REMINDERS = Arrays.asList(reminder, reminder2, reminder3);
 
     Tag(final boolean mandatory) {
       this.mandatory = mandatory;
@@ -31,6 +35,12 @@ public interface EventService {
     }
 
     private boolean mandatory;
+
+    public boolean isActionable() {
+      List<Tag> actionableEvents = Arrays.asList(mps, go_live, reminder, reminder2, reminder3);
+
+      return actionableEvents.contains(this);
+    }
   }
 
   Event createEvent(EventDTO eventDto) throws CTPException;
@@ -79,4 +89,14 @@ public interface EventService {
    * @throws CTPException thrown if error occurred scheduling event
    */
   void scheduleEvent(Event event) throws CTPException;
+
+  /**
+   * Create action rules for collection exercise event
+   *
+   * @param event the event to create action rules for
+   * @param collectionExercise the event is for
+   * @throws CTPException on error
+   */
+  void createActionRulesForEvent(Event event, CollectionExercise collectionExercise)
+      throws CTPException;
 }

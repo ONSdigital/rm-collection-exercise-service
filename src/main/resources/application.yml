@@ -116,6 +116,7 @@ survey-svc:
 
 action-svc:
   action-plans-path: /actionplans
+  action-rules-path: /actionrules
   connection-config:
     scheme: http
     host: localhost
