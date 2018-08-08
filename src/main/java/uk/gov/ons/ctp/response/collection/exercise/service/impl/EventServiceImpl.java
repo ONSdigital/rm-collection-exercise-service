@@ -28,8 +28,8 @@ import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 @Service
 @Slf4j
