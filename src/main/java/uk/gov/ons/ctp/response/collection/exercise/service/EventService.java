@@ -24,6 +24,8 @@ public interface EventService {
     ref_period_end(false),
     employment(false);
 
+    public static final List<Tag> ORDERED_REMINDERS = Arrays.asList(reminder, reminder2, reminder3);
+
     Tag(final boolean mandatory) {
       this.mandatory = mandatory;
     }

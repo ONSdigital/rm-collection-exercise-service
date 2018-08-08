@@ -6,7 +6,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -78,21 +80,21 @@ public class ReminderActionRuleCreatorTest {
   @Test
   public void testCreateCorrectActionRulesForReminderEvent() {
     // Given
-    testReminderTagCreatesActionRules(Tag.reminder.name());
+    testReminderTagCreatesActionRules(Tag.reminder.name(), "+1");
   }
 
   /** Test correct action rules are created for new mps event */
   @Test
   public void testCreateCorrectActionRulesForReminder2Event() {
     // Given
-    testReminderTagCreatesActionRules(Tag.reminder2.name());
+    testReminderTagCreatesActionRules(Tag.reminder2.name(), "+2");
   }
 
   /** Test correct action rules are created for new mps event */
   @Test
   public void testCreateCorrectActionRulesForReminder3Event() {
     // Given
-    testReminderTagCreatesActionRules(Tag.reminder3.name());
+    testReminderTagCreatesActionRules(Tag.reminder3.name(), "+3");
   }
 
   private Event createCollectionExerciseEvent(
@@ -114,7 +116,7 @@ public class ReminderActionRuleCreatorTest {
     return collex;
   }
 
-  private void testReminderTagCreatesActionRules(final String tag) {
+  private void testReminderTagCreatesActionRules(final String tag, final String suffixNumber) {
     Instant eventTriggerInstant = Instant.now();
     Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
@@ -168,7 +170,7 @@ public class ReminderActionRuleCreatorTest {
     // Then
     verify(actionSvcClient)
         .createActionRule(
-            eq(SURVEY_SHORT_NAME + "REME"),
+            eq(SURVEY_SHORT_NAME + "REME" + suffixNumber),
             eq(SURVEY_SHORT_NAME + " Reminder Email " + EXERCISE_REF),
             eq("BSRE"),
             eq(eventTriggerOffsetDateTime),
@@ -176,7 +178,7 @@ public class ReminderActionRuleCreatorTest {
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID));
     verify(actionSvcClient)
         .createActionRule(
-            eq(SURVEY_SHORT_NAME + "REMF"),
+            eq(SURVEY_SHORT_NAME + "REMF" + suffixNumber),
             eq(SURVEY_SHORT_NAME + " Reminder File " + EXERCISE_REF),
             eq("BSRL"),
             eq(eventTriggerOffsetDateTime),
