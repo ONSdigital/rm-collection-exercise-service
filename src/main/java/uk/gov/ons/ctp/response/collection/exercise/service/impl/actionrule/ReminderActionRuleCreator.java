@@ -40,8 +40,10 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
     final OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
     final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
 
+    final String reminderSuffix = getReminderSuffix(collectionExerciseEvent.getTag());
+
     actionSvcClient.createActionRule(
-        survey.getShortName() + "REME",
+        survey.getShortName() + "REME" + reminderSuffix,
         survey.getShortName() + " Reminder Email " + collectionExercise.getExerciseRef(),
         "BSRE",
         offsetDateTime,
@@ -49,12 +51,17 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
         businessIndividualCaseTypeOverride.getActionPlanId());
 
     actionSvcClient.createActionRule(
-        survey.getShortName() + "REMF",
+        survey.getShortName() + "REMF" + reminderSuffix,
         survey.getShortName() + " Reminder File " + collectionExercise.getExerciseRef(),
         "BSRL",
         offsetDateTime,
         3,
         businessCaseTypeOverride.getActionPlanId());
+  }
+
+  private String getReminderSuffix(final String tag) {
+    final int reminderIndex = Tag.ORDERED_REMINDERS.indexOf(Tag.valueOf(tag));
+    return String.format("+%d", reminderIndex + 1);
   }
 
   private boolean isReminder(final Event collectionExerciseEvent) {
