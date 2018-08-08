@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @Service
 @Slf4j
@@ -98,6 +99,11 @@ public class EventServiceImpl implements EventService {
     }
 
     final SurveyDTO survey = surveySvcClient.findSurvey(collectionExercise.getSurveyId());
+
+    if (survey.getSurveyType() != SurveyType.Business) {
+      return;
+    }
+
     final CaseTypeOverride businessCaseType = getCaseTypeOverride(collectionExercise, "B");
     final CaseTypeOverride businessIndividualCaseType =
         getCaseTypeOverride(collectionExercise, "BI");

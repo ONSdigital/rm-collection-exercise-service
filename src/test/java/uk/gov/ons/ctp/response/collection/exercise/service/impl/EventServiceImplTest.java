@@ -4,7 +4,9 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +36,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +118,12 @@ public class EventServiceImplTest {
     CollectionExercise collex = new CollectionExercise();
     CaseTypeOverride biCaseTypeOverride = new CaseTypeOverride();
     collex.setExercisePK(1);
+    collex.setSurveyId(SURVEY_ID);
     event.setTag(Tag.mps.name());
+
+    final SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Business);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
 
     when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "B")).thenReturn(null);
     when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "BI"))
@@ -139,7 +147,12 @@ public class EventServiceImplTest {
     CollectionExercise collex = new CollectionExercise();
     CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
     collex.setExercisePK(1);
+    collex.setSurveyId(SURVEY_ID);
     event.setTag(tag);
+
+    final SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Business);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
 
     when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "B"))
         .thenReturn(bCaseTypeOverride);
@@ -164,7 +177,8 @@ public class EventServiceImplTest {
     collex.setExercisePK(exercisePk);
     collex.setSurveyId(SURVEY_ID);
 
-    SurveyDTO surveyDto = new SurveyDTO();
+    final SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Business);
     when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
 
     CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
@@ -210,6 +224,43 @@ public class EventServiceImplTest {
             eq(businessCaseTypeOverride),
             eq(businessIndividualCaseTypeOverride),
             eq(surveyDto));
+  }
+
+  @Test
+  public void testNoActionRulesCreatedForNonActionableEvents() throws CTPException {
+    // Given
+    final Event collectionExerciseEvent = new Event();
+    final CollectionExercise collex = new CollectionExercise();
+
+    collectionExerciseEvent.setCollectionExercise(collex);
+    collectionExerciseEvent.setTag(Tag.employment.name());
+
+    // When
+    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+
+    // Then
+    verify(actionRuleCreator, never()).execute(any(), any(), any(), any());
+  }
+
+  @Test
+  public void testNoActionRulesCreatedForNonBusinessesSurveyEvents() throws CTPException {
+    // Given
+    final Event collectionExerciseEvent = new Event();
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setSurveyId(SURVEY_ID);
+
+    SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Social);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
+
+    collectionExerciseEvent.setCollectionExercise(collex);
+    collectionExerciseEvent.setTag(Tag.mps.name());
+
+    // When
+    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+
+    // Then
+    verify(actionRuleCreator, never()).execute(any(), any(), any(), any());
   }
 
   private List<Event> createEventList(Tag... tags) {
