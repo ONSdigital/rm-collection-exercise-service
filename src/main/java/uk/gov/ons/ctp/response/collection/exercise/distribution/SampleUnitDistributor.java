@@ -186,7 +186,9 @@ public class SampleUnitDistributor {
     }
 
     if (parent != null) {
-      parent.setSampleUnitChildren(new SampleUnitChildren(children));
+      if (!children.isEmpty()) {
+        parent.setSampleUnitChildren(new SampleUnitChildren(children));
+      }
       publishSampleUnit(sampleUnitGroup, parent);
     } else {
       log.error(

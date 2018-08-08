@@ -29,7 +29,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -119,7 +118,8 @@ public class ValidateSampleUnits {
                   this.collexService.transitionCollectionExercise(exercise, event);
                 }
               } catch (CTPException e) {
-                log.error("Error validating collection exercise {}: {}", exercise.getId(), e);
+                log.error("Error validating collection exercise, collectionExerciseId: {}", exercise.getId());
+                log.error("Stack trace: {}", e);
               }
             }); // End looping collections
 
@@ -140,13 +140,57 @@ public class ValidateSampleUnits {
   }
 
   /**
+   * Retrieve SampleUnitGroups to be validated - state INIT - but do not retrieve the same
+   * SampleUnitGroups as other service instances.
+   *
+   * @param exercises for which to return sampleUnitGroups.
+   * @return list of SampleUnitGroups.
+   * @throws LockingException problem obtaining lock for data shared across instances.
+   */
+  private List<ExerciseSampleUnitGroup> retrieveSampleUnitGroups(List<CollectionExercise> exercises)
+          throws LockingException {
+
+    List<Integer> excludedGroups = sampleValidationListManager.findList(VALIDATION_LIST_ID, false);
+    log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+
+    excludedGroups.add(IMPOSSIBLE_ID);
+    List<ExerciseSampleUnitGroup> sampleUnitGroups =
+            sampleUnitGroupSvc
+                    .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
+                            SampleUnitGroupState.INIT,
+                            exercises,
+                            excludedGroups,
+                            new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
+
+    if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
+      log.debug(
+              "VALIDATION retrieved sampleUnitGroup PKs {}",
+              sampleUnitGroups
+                      .stream()
+                      .map(group -> group.getSampleUnitGroupPK().toString())
+                      .collect(Collectors.joining(",")));
+      sampleValidationListManager.saveList(
+              VALIDATION_LIST_ID,
+              sampleUnitGroups
+                      .stream()
+                      .map(ExerciseSampleUnitGroup::getSampleUnitGroupPK)
+                      .collect(Collectors.toList()),
+              true);
+    } else {
+      log.debug("VALIDATION retrieved 0 sampleUnitGroup PKs");
+      sampleValidationListManager.unlockContainer();
+    }
+    return sampleUnitGroups;
+  }
+
+  /**
    * Add collection instrument id and party id to each SampleUnit
    *
    * @param exercise for which to validate the SampleUnitGroups
    * @param sampleUnitGroups in exercise
    */
   private void addCollectionInstrumentIds(
-      CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
+          CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
 
@@ -169,66 +213,57 @@ public class ValidateSampleUnits {
               sampleUnitGroup.getSampleUnitGroupPK(),
               ex.getMessage());
           log.error("Stack trace: " + ex);
+          throw ex;
         }
       }
       saveUpdatedSampleUnits(sampleUnitGroup, sampleUnits);
     }
   }
 
-  private void saveUpdatedSampleUnits(
-      final ExerciseSampleUnitGroup sampleUnitGroup,
-      final List<ExerciseSampleUnit> sampleUnitsWithRespondents) {
-    ExerciseSampleUnitGroup updatedSampleUnitGroup =
-        transitionSampleUnitGroupState(sampleUnitGroup, sampleUnitsWithRespondents);
-    updatedSampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-    sampleUnitGroupSvc.storeExerciseSampleUnitGroup(
-        updatedSampleUnitGroup, sampleUnitsWithRespondents);
-  }
-
   /**
-   * Retrieve SampleUnitGroups to be validated - state INIT - but do not retrieve the same
-   * SampleUnitGroups as other service instances.
+   * Request the classifier type selectors from the Survey service.
    *
-   * @param exercises for which to return sampleUnitGroups.
-   * @return list of SampleUnitGroups.
-   * @throws LockingException problem obtaining lock for data shared across instances.
+   * @param exercise for which to get collection instrument classifier selectors.
+   * @return List<String> Survey classifier type selectors for exercise
    */
-  private List<ExerciseSampleUnitGroup> retrieveSampleUnitGroups(List<CollectionExercise> exercises)
-      throws LockingException {
+  private List<String> requestSurveyClassifiers(CollectionExercise exercise) {
 
-    List<ExerciseSampleUnitGroup> sampleUnitGroups;
+    SurveyClassifierTypeDTO classifierTypeSelector;
+    List<String> classifierTypes = new ArrayList<>();
 
-    List<Integer> excludedGroups = sampleValidationListManager.findList(VALIDATION_LIST_ID, false);
-    log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
-
-    excludedGroups.add(IMPOSSIBLE_ID);
-    sampleUnitGroups =
-        sampleUnitGroupSvc
-            .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
-                SampleUnitGroupDTO.SampleUnitGroupState.INIT,
-                exercises,
-                excludedGroups,
-                new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
-
-    if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
-      log.debug(
-          "VALIDATION retrieved sampleUnitGroup PKs {}",
-          sampleUnitGroups
-              .stream()
-              .map(group -> group.getSampleUnitGroupPK().toString())
-              .collect(Collectors.joining(",")));
-      sampleValidationListManager.saveList(
-          VALIDATION_LIST_ID,
-          sampleUnitGroups
-              .stream()
-              .map(ExerciseSampleUnitGroup::getSampleUnitGroupPK)
-              .collect(Collectors.toList()),
-          true);
-    } else {
-      log.debug("VALIDATION retrieved 0 sampleUnitGroup PKs");
-      sampleValidationListManager.unlockContainer();
+    // Call Survey Service
+    // Get Classifier types for Collection Instruments
+    try {
+      List<SurveyClassifierDTO> classifierTypeSelectors =
+              surveySvcClient.requestClassifierTypeSelectors(exercise.getSurveyId());
+      SurveyClassifierDTO chosenSelector =
+              classifierTypeSelectors
+                      .stream()
+                      .filter(classifierType -> CASE_TYPE_SELECTOR.equals(classifierType.getName()))
+                      .findAny()
+                      .orElse(null);
+      if (chosenSelector != null) {
+        classifierTypeSelector =
+                surveySvcClient.requestClassifierTypeSelector(
+                        exercise.getSurveyId(), UUID.fromString(chosenSelector.getId()));
+        if (classifierTypeSelector != null) {
+          classifierTypes = classifierTypeSelector.getClassifierTypes();
+        } else {
+          log.error(
+                  "Error requesting Survey Classifier Types for SurveyId: {},  caseTypeSelectorId: {}",
+                  exercise.getSurveyId(),
+                  chosenSelector.getId());
+        }
+      } else {
+        log.error(
+                "Error requesting Survey Classifier Types for SurveyId: {}", exercise.getSurveyId());
+      }
+    } catch (RestClientException ex) {
+      log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
     }
-    return sampleUnitGroups;
+
+    return classifierTypes;
   }
 
   /**
@@ -242,14 +277,14 @@ public class ValidateSampleUnits {
    * @throws RestClientException something went wrong making http call
    */
   private UUID requestCollectionInstrumentId(
-      List<String> classifierTypes, ExerciseSampleUnit sampleUnit, String surveyId)
-      throws RestClientException {
+          List<String> classifierTypes, ExerciseSampleUnit sampleUnit, String surveyId)
+          throws RestClientException {
     Map<String, String> classifiers = new HashMap<>();
     classifiers.put("SURVEY_ID", surveyId);
     for (String classifier : classifierTypes) {
       try {
         CollectionInstrumentClassifierTypes classifierType =
-            CollectionInstrumentClassifierTypes.valueOf(classifier);
+                CollectionInstrumentClassifierTypes.valueOf(classifier);
         classifiers.put(classifierType.name(), classifierType.apply(sampleUnit));
       } catch (IllegalArgumentException e) {
         log.warn("Classifier not supported {}", classifier);
@@ -257,16 +292,16 @@ public class ValidateSampleUnits {
     }
     String searchString = convertToJSON(classifiers);
     List<CollectionInstrumentDTO> collectionInstruments =
-        collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
+            collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
     UUID collectionInstrumentId;
     if (collectionInstruments.isEmpty()) {
       log.error("No collection instruments found for: {}", searchString);
       collectionInstrumentId = null;
     } else if (collectionInstruments.size() > 1) {
       log.warn(
-          "{} collection instruments found for: {}, taking most recent first",
-          collectionInstruments.size(),
-          searchString);
+              "{} collection instruments found for: {}, taking most recent first",
+              collectionInstruments.size(),
+              searchString);
       collectionInstrumentId = collectionInstruments.get(0).getId();
     } else {
       collectionInstrumentId = collectionInstruments.get(0).getId();
@@ -286,50 +321,14 @@ public class ValidateSampleUnits {
     return searchString.toString();
   }
 
-  /**
-   * Request the classifier type selectors from the Survey service.
-   *
-   * @param exercise for which to get collection instrument classifier selectors.
-   * @return List<String> Survey classifier type selectors for exercise
-   */
-  private List<String> requestSurveyClassifiers(CollectionExercise exercise) {
-
-    SurveyClassifierTypeDTO classifierTypeSelector;
-    List<String> classifierTypes = new ArrayList<>();
-
-    // Call Survey Service
-    // Get Classifier types for Collection Instruments
-    try {
-      List<SurveyClassifierDTO> classifierTypeSelectors =
-          surveySvcClient.requestClassifierTypeSelectors(exercise.getSurveyId());
-      SurveyClassifierDTO chosenSelector =
-          classifierTypeSelectors
-              .stream()
-              .filter(classifierType -> CASE_TYPE_SELECTOR.equals(classifierType.getName()))
-              .findAny()
-              .orElse(null);
-      if (chosenSelector != null) {
-        classifierTypeSelector =
-            surveySvcClient.requestClassifierTypeSelector(
-                exercise.getSurveyId(), UUID.fromString(chosenSelector.getId()));
-        if (classifierTypeSelector != null) {
-          classifierTypes = classifierTypeSelector.getClassifierTypes();
-        } else {
-          log.error(
-              "Error requesting Survey Classifier Types for SurveyId: {},  caseTypeSelectorId: {}",
-              exercise.getSurveyId(),
-              chosenSelector.getId());
-        }
-      } else {
-        log.error(
-            "Error requesting Survey Classifier Types for SurveyId: {}", exercise.getSurveyId());
-      }
-    } catch (RestClientException ex) {
-      log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
-    }
-
-    return classifierTypes;
+  private void saveUpdatedSampleUnits(
+      final ExerciseSampleUnitGroup sampleUnitGroup,
+      final List<ExerciseSampleUnit> sampleUnitsWithRespondents) {
+    ExerciseSampleUnitGroup updatedSampleUnitGroup =
+        transitionSampleUnitGroupState(sampleUnitGroup, sampleUnitsWithRespondents);
+    updatedSampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
+    sampleUnitGroupSvc.storeExerciseSampleUnitGroup(
+        updatedSampleUnitGroup, sampleUnitsWithRespondents);
   }
 
   /**
@@ -344,13 +343,13 @@ public class ValidateSampleUnits {
     CollectionExerciseEvent event = null;
     long init =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
-            SampleUnitGroupDTO.SampleUnitGroupState.INIT, exercise);
+            SampleUnitGroupState.INIT, exercise);
     long validated =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
-            SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED, exercise);
+            SampleUnitGroupState.VALIDATED, exercise);
     long failed =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
-            SampleUnitGroupDTO.SampleUnitGroupState.FAILEDVALIDATION, exercise);
+            SampleUnitGroupState.FAILEDVALIDATION, exercise);
 
     if (validated == exercise.getSampleSize().longValue()) {
       // All sample units validated, set exercise state to VALIDATED
