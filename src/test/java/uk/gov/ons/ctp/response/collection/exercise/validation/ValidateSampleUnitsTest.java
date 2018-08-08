@@ -4,9 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
-
 import java.util.*;
-
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,29 +42,22 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
 /** Tests for the ValidatesSampleTest */
- @RunWith(MockitoJUnitRunner.class)
- public class ValidateSampleUnitsTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ValidateSampleUnitsTest {
 
-  @Mock
-  private DistributedListManager<Integer> sampleValidationListManager;
+  @Mock private DistributedListManager<Integer> sampleValidationListManager;
 
-  @Mock
-  private CollectionExerciseRepository collectRepo;
+  @Mock private CollectionExerciseRepository collectRepo;
 
-  @Mock
-  private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
+  @Mock private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
 
-  @Mock
-  private ExerciseSampleUnitService sampleUnitSvc;
+  @Mock private ExerciseSampleUnitService sampleUnitSvc;
 
-  @Mock
-  private SurveySvcClient surveySvcClient;
+  @Mock private SurveySvcClient surveySvcClient;
 
-  @Mock
-  private PartySvcRestClientImpl partySvcClient;
+  @Mock private PartySvcRestClientImpl partySvcClient;
 
-  @Mock
-  private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
+  @Mock private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   @Mock
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
@@ -75,17 +66,13 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
   @Mock
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
-  @Mock
-  private AppConfig appConfig;
+  @Mock private AppConfig appConfig;
 
-  @Mock
-  private ScheduleSettings scheduleSettings;
+  @Mock private ScheduleSettings scheduleSettings;
 
-  @Mock
-  private CollectionExerciseService collexService;
+  @Mock private CollectionExerciseService collexService;
 
-  @InjectMocks
-  private ValidateSampleUnits validateSampleUnits;
+  @InjectMocks private ValidateSampleUnits validateSampleUnits;
 
   private static final String VALIDATION_LIST_ID = "group";
   private static final List<Integer> EMPTY_VALIDATION_LIST = new ArrayList<>();
@@ -119,63 +106,69 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
     // Mock data
     collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     sampleUnits = FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class);
-    List<ExerciseSampleUnitGroup> sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
-    List<SurveyClassifierDTO> classifierTypeSelectors = FixtureHelper.loadClassFixtures(SurveyClassifierDTO[].class);
-    List<SurveyClassifierTypeDTO> classifierTypeSelector = FixtureHelper.loadClassFixtures(SurveyClassifierTypeDTO[].class);
-    List<CollectionInstrumentDTO> collectionInstruments = FixtureHelper.loadClassFixtures(CollectionInstrumentDTO[].class);
+    List<ExerciseSampleUnitGroup> sampleUnitGroups =
+        FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
+    List<SurveyClassifierDTO> classifierTypeSelectors =
+        FixtureHelper.loadClassFixtures(SurveyClassifierDTO[].class);
+    List<SurveyClassifierTypeDTO> classifierTypeSelector =
+        FixtureHelper.loadClassFixtures(SurveyClassifierTypeDTO[].class);
+    List<CollectionInstrumentDTO> collectionInstruments =
+        FixtureHelper.loadClassFixtures(CollectionInstrumentDTO[].class);
     List<PartyDTO> parties = FixtureHelper.loadClassFixtures(PartyDTO[].class);
 
     // Given
     when(collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
-            .thenReturn(collectionExercises);
+        .thenReturn(collectionExercises);
 
     // Mock retrieveSampleUnitGroups
     when(sampleValidationListManager.findList(VALIDATION_LIST_ID, false))
-            .thenReturn(EMPTY_VALIDATION_LIST);
-    when(sampleUnitGroupSvc.findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
-            SampleUnitGroupDTO.SampleUnitGroupState.INIT,
-            collectionExercises,
-            EMPTY_VALIDATION_LIST,
-            new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax())))
-            .thenReturn(sampleUnitGroups);
+        .thenReturn(EMPTY_VALIDATION_LIST);
+    when(sampleUnitGroupSvc
+            .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
+                SampleUnitGroupDTO.SampleUnitGroupState.INIT,
+                collectionExercises,
+                EMPTY_VALIDATION_LIST,
+                new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax())))
+        .thenReturn(sampleUnitGroups);
 
     // Mock addCollectionInstrumentIds
     when(sampleUnitSvc.findBySampleUnitGroup(any())).thenReturn(sampleUnits);
 
     // Mock requestSurveyClassifiers
     when(surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(classifierTypeSelectors);
-    when(surveySvcClient.requestClassifierTypeSelector(any(), any())).thenReturn(classifierTypeSelector.get(0));
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
+        .thenReturn(classifierTypeSelector.get(0));
 
     // Mock requestCollectionInstrumentId
-    when(collectionInstrumentSvcClient.requestCollectionInstruments(new JSONObject(CI_1_SVC_SEARCH).toString()))
-            .thenReturn(collectionInstruments);
-    when(partySvcClient.requestParty(sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
-            .thenReturn(parties.get(0));
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+            new JSONObject(CI_1_SVC_SEARCH).toString()))
+        .thenReturn(collectionInstruments);
+    when(partySvcClient.requestParty(
+            sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
+        .thenReturn(parties.get(0));
 
     // Mock getCollectionExerciseTransistionState
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.INIT, collectionExercises.get(0)))
-            .thenReturn(0L);
+        .thenReturn(0L);
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.VALIDATED, collectionExercises.get(0)))
-            .thenReturn(collectionExercises.get(0).getSampleSize().longValue());
+        .thenReturn(collectionExercises.get(0).getSampleSize().longValue());
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.FAILEDVALIDATION, collectionExercises.get(0)))
-            .thenReturn(0L);
+        .thenReturn(0L);
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.INIT, collectionExercises.get(1)))
-            .thenReturn(0L);
+        .thenReturn(0L);
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.VALIDATED, collectionExercises.get(1)))
-            .thenReturn(collectionExercises.get(1).getSampleSize().longValue());
+        .thenReturn(collectionExercises.get(1).getSampleSize().longValue());
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.FAILEDVALIDATION, collectionExercises.get(1)))
-            .thenReturn(0L);
+        .thenReturn(0L);
   }
 
-  /**
-   * Test happy path through to validate all SampleUnitGroups and CollectionExercises.
-   */
+  /** Test happy path through to validate all SampleUnitGroups and CollectionExercises. */
   @Test
   public void testValidateSampleUnits() throws Exception {
 
@@ -183,42 +176,40 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
     validateSampleUnits.validateSampleUnits();
 
     // Then
-    verify(sampleUnitGroupSvc, times(4))
-            .storeExerciseSampleUnitGroup(any(), any());
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, times(1))
-            .transitionCollectionExercise(
-                    collectionExercises.get(0), CollectionExerciseEvent.VALIDATE);
+        .transitionCollectionExercise(collectionExercises.get(0), CollectionExerciseEvent.VALIDATE);
     verify(collexService, times(1))
-            .transitionCollectionExercise(
-                    collectionExercises.get(1), CollectionExerciseEvent.VALIDATE);
-    verify(sampleValidationListManager, times(1))
-            .deleteList(VALIDATION_LIST_ID, true);
+        .transitionCollectionExercise(collectionExercises.get(1), CollectionExerciseEvent.VALIDATE);
+    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 
   @Test
   public void testValidateSampleUnitsNoExercises() throws Exception {
     // Given
     when(collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
-            .thenReturn(Collections.EMPTY_LIST);
+        .thenReturn(Collections.EMPTY_LIST);
 
     // When
     validateSampleUnits.validateSampleUnits();
 
     // Then
     verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(collexService, never()).transitionCollectionExercise(
+    verify(collexService, never())
+        .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 
   @Test
   public void testValidateSampleUnitsNoSampleUnitGroups() throws Exception {
     // Given
-    when(sampleUnitGroupSvc.findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
-            SampleUnitGroupDTO.SampleUnitGroupState.INIT,
-            collectionExercises,
-            EMPTY_VALIDATION_LIST,
-            new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax())))
-            .thenReturn(Collections.EMPTY_LIST);
+    when(sampleUnitGroupSvc
+            .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
+                SampleUnitGroupDTO.SampleUnitGroupState.INIT,
+                collectionExercises,
+                EMPTY_VALIDATION_LIST,
+                new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax())))
+        .thenReturn(Collections.EMPTY_LIST);
 
     // When
     validateSampleUnits.validateSampleUnits();
@@ -226,24 +217,26 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
     // Then
     verify(sampleValidationListManager, times(1)).unlockContainer();
     verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(collexService, never()).transitionCollectionExercise(
+    verify(collexService, never())
+        .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
-    verify(sampleValidationListManager, times(1))
-            .deleteList(VALIDATION_LIST_ID, true);
+    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 
   @Test(expected = RestClientException.class)
   public void testValidateSampleUnitsPartyRestClientException() throws Exception {
     // Given
-    when(partySvcClient.requestParty(sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
-            .thenThrow(RestClientException.class);
+    when(partySvcClient.requestParty(
+            sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
+        .thenThrow(RestClientException.class);
 
     // When
     validateSampleUnits.validateSampleUnits();
 
     // Then
     verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(collexService, never()).transitionCollectionExercise(
+    verify(collexService, never())
+        .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 
@@ -253,47 +246,43 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
     // Given
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.VALIDATED, collectionExercises.get(0)))
-            .thenReturn(collectionExercises.get(0).getSampleSize().longValue() - 1);
+        .thenReturn(collectionExercises.get(0).getSampleSize().longValue() - 1);
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.FAILEDVALIDATION, collectionExercises.get(0)))
-            .thenReturn(1L);
+        .thenReturn(1L);
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.VALIDATED, collectionExercises.get(1)))
-            .thenReturn(collectionExercises.get(1).getSampleSize().longValue() - 1);
+        .thenReturn(collectionExercises.get(1).getSampleSize().longValue() - 1);
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.FAILEDVALIDATION, collectionExercises.get(1)))
-            .thenReturn(1L);
+        .thenReturn(1L);
 
     // When
     validateSampleUnits.validateSampleUnits();
 
     // Then
-    verify(sampleUnitGroupSvc, times(4))
-            .storeExerciseSampleUnitGroup(any(), any());
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, times(1))
-            .transitionCollectionExercise(
-                    collectionExercises.get(0), CollectionExerciseEvent.INVALIDATE);
+        .transitionCollectionExercise(
+            collectionExercises.get(0), CollectionExerciseEvent.INVALIDATE);
     verify(collexService, times(1))
-            .transitionCollectionExercise(
-                    collectionExercises.get(1), CollectionExerciseEvent.INVALIDATE);
-    verify(sampleValidationListManager, times(1))
-            .deleteList(VALIDATION_LIST_ID, true);
+        .transitionCollectionExercise(
+            collectionExercises.get(1), CollectionExerciseEvent.INVALIDATE);
+    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 
   @Test
   public void testValidateSampleUnitsTransitionCTPError() throws Exception {
     // Given
     doThrow(CTPException.class)
-            .when(collexService)
-            .transitionCollectionExercise(collectionExercises.get(0), CollectionExerciseEvent.VALIDATE);
+        .when(collexService)
+        .transitionCollectionExercise(collectionExercises.get(0), CollectionExerciseEvent.VALIDATE);
 
     // When
     validateSampleUnits.validateSampleUnits();
 
     // Then
-    verify(sampleUnitGroupSvc, times(4))
-            .storeExerciseSampleUnitGroup(any(), any());
-    verify(sampleValidationListManager, times(1))
-            .deleteList(VALIDATION_LIST_ID, true);
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
+    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 }
