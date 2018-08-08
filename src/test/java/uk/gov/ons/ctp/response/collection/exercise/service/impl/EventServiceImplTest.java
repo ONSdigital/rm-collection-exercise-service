@@ -1,8 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import static org.junit.Assert.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
@@ -143,12 +143,14 @@ public class EventServiceImplTest {
     collex.setId(collexUuid);
 
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
-    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name())).thenReturn(null);
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
+        .thenReturn(null);
     final List<Event> existingEvents = new ArrayList<>();
     final Event event = new Event();
     existingEvents.add(event);
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
-    when(eventValidator.validateOnCreate(existingEvents, event, collex.getState())).thenReturn(false);
+    when(eventValidator.validateOnCreate(existingEvents, event, collex.getState()))
+        .thenReturn(false);
 
     try {
       eventService.createEvent(eventDto);

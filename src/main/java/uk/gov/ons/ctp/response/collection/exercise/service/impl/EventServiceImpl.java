@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
     }
 
     final Event existing =
-            eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
+        eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
 
     if (existing != null) {
       throw new CTPException(
@@ -81,6 +81,11 @@ public class EventServiceImpl implements EventService {
     event.setId(UUID.randomUUID());
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
+    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
+
+    if (!eventValidator.validateOnCreate(existingEvents, event, collex.getState())) {
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
+    }
 
     createActionRulesForEvent(event, collex);
     event = eventRepository.save(event);

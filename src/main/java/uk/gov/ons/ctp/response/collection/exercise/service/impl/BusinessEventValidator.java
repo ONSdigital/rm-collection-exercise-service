@@ -90,7 +90,7 @@ public class BusinessEventValidator implements EventValidator {
   private void addEvent(
       Map<String, Event> eventMap, Event newEvent, List<Event> events, String eventTag) {
     final Optional<Event> existingEvent = Optional.ofNullable(eventMap.get(eventTag));
-    if (newEvent.getTag().equals(eventTag)) {
+    if (newEvent != null && newEvent.getTag().equals(eventTag)) {
       events.add(newEvent);
     } else {
       existingEvent.ifPresent(events::add);
