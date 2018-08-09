@@ -1,7 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
@@ -70,7 +68,7 @@ public class BusinessEventValidator implements EventValidator {
       final CollectionExerciseState collectionExerciseState) {
     Map<String, Event> events =
         existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
-    if (collectionExerciseState.equals(CollectionExerciseState. CREATED)) {
+    if (collectionExerciseState.equals(CollectionExerciseState.CREATED)) {
       return validateMandatoryEventsOnCreate(events, newEvent);
     }
     return false;
@@ -80,11 +78,12 @@ public class BusinessEventValidator implements EventValidator {
   private boolean validateMandatoryEventsOnCreate(
       final Map<String, Event> eventMap, Event newEvent) {
 
-    List<Event> events = Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end)
-          .stream()
-          .map(tag->getEventByTag(tag, newEvent, eventMap))
-          .filter(Objects::nonNull)
-          .collect(Collectors.toList());
+    List<Event> events =
+        Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end)
+            .stream()
+            .map(tag -> getEventByTag(tag, newEvent, eventMap))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
 
     return datesInValidOrder(events);
   }

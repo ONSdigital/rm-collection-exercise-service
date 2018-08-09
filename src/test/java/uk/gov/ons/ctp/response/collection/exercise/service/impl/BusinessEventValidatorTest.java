@@ -123,7 +123,9 @@ public class BusinessEventValidatorTest {
 
     assertTrue(
         this.validator.validate(
-            this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.SCHEDULED));
+            this.mandatoryEvents,
+            mpsEvent,
+            CollectionExerciseDTO.CollectionExerciseState.SCHEDULED));
   }
 
   @Test
