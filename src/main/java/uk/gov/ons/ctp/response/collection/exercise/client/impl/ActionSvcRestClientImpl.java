@@ -87,18 +87,16 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectors(
-      final String surveyRef, final String exerciseRef, final Boolean activeEnrolment)
+      final String collectionExerciseId, final Boolean activeEnrolment)
       throws RestClientException {
     log.debug(
         "Retrieving action plan for selectors, "
-            + "surveyRef: {}, exerciseRef: {}, activeEnrolment: {}",
-        surveyRef,
-        exerciseRef,
+            + "collectionExerciseId: {}, activeEnrolment: {}",
+        collectionExerciseId,
         activeEnrolment);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add("surveyRef", surveyRef);
-    queryParams.add("exerciseRef", exerciseRef);
+    queryParams.add("collectionExericseId", collectionExerciseId);
     queryParams.add("activeEnrolment", activeEnrolment.toString());
     UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
@@ -112,9 +110,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
 
     log.debug(
         "Successfully retrieved action plan for selectors, "
-            + "surveyRef: {}, exerciseRef: {}, activeEnrolment: {}",
-        surveyRef,
-        exerciseRef,
+            + "collectionExerciseId: {}, activeEnrolment: {}",
+        collectionExerciseId,
         activeEnrolment);
     return responseEntity.getBody();
   }

@@ -24,7 +24,7 @@ public interface ActionSvcClient {
       throws RestClientException;
 
   List<ActionPlanDTO> getActionPlansBySelectors(
-      String surveyRef, String exerciseRef, Boolean activeEnrolment) throws RestClientException;
+      String collectionExerciseId, Boolean activeEnrolment) throws RestClientException;
 
   /**
    * Request action rule is created.
