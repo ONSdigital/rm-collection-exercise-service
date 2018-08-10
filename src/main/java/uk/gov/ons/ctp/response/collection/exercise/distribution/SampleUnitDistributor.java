@@ -65,6 +65,8 @@ public class SampleUnitDistributor {
 
   @Autowired private SampleUnitPublisher publisher;
 
+  @Autowired private SampleUnitDistributorHelper sampleUnitDistributorHelper;
+
   @Autowired
   @Qualifier("collectionExercise")
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
@@ -145,7 +147,7 @@ public class SampleUnitDistributor {
         parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         parent.setActionPlanId(
-            collectionExerciseRepo.getActiveActionPlanId(
+            sampleUnitDistributorHelper.getActiveActionPlanId(
                 exercise.getExercisePK(),
                 sampleUnit.getSampleUnitType().name(),
                 exercise.getSurveyId()));
@@ -159,7 +161,7 @@ public class SampleUnitDistributor {
         child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
         child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
         child.setActionPlanId(
-            collectionExerciseRepo.getActiveActionPlanId(
+            sampleUnitDistributorHelper.getActiveActionPlanId(
                 exercise.getExercisePK(),
                 sampleUnit.getSampleUnitType().name(),
                 exercise.getSurveyId()));
