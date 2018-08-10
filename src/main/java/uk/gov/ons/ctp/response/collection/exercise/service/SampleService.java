@@ -45,10 +45,10 @@ public interface SampleService {
   /**
    * Get the sample unit validation errors for a given collection exercise
    *
-   * @param collectionExerciseId a collection exercise
+   * @param collectionExercise a collection exercise
    * @return an array of validation errors
    */
-  SampleUnitValidationErrorDTO[] getValidationErrors(UUID collectionExerciseId);
+  SampleUnitValidationErrorDTO[] getValidationErrors(CollectionExercise collectionExercise);
 
   /**
    * Gets a list of sample links for a given sample summary

@@ -615,7 +615,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
     collex.setUpdated(new Timestamp(new Date().getTime()));
-    rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
     return this.collectRepo.saveAndFlush(collex);
   }
 
@@ -664,10 +663,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     CollectionExerciseDTO.CollectionExerciseState oldState = collex.getState();
     CollectionExerciseDTO.CollectionExerciseState newState =
         collectionExerciseTransitionState.transition(collex.getState(), event);
-    if (oldState != newState) {
-      collex.setState(newState);
-      updateCollectionExercise(collex);
+
+    if (oldState == newState) {
+      return;
     }
+
+    collex.setState(newState);
+    updateCollectionExercise(collex);
+    rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
   }
 
   @Override

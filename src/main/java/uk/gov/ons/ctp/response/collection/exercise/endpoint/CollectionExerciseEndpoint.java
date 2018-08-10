@@ -421,32 +421,24 @@ public class CollectionExerciseEndpoint {
         "Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
         collex.getExerciseRef(),
         collex.getSurveyRef());
-    String surveyId = collex.getSurveyId();
-    String surveyRef = collex.getSurveyRef();
-    SurveyDTO survey;
+    SurveyDTO survey = getSurveyFromCollex(collex);
 
-    // Retrieve survey from survey service if it exists
-    if (!StringUtils.isBlank(surveyId)) {
-      survey = this.surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
-    } else if (!StringUtils.isBlank(surveyRef)) {
-      survey = this.surveyService.findSurveyByRef(surveyRef);
-      // Downstream expects the surveyId to be present so add it now
-      collex.setSurveyId(survey.getId());
-    } else {
-      throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
-    }
     if (survey == null) {
-      throw new CTPException(CTPException.Fault.BAD_REQUEST, "Invalid survey: " + surveyId);
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST, "Invalid survey: " + collex.getSurveyId());
     }
+
+    collex.setSurveyId(survey.getId());
     // Check if collection exercise already exists
     CollectionExercise existing =
         this.collectionExerciseService.findCollectionExercise(collex.getExerciseRef(), survey);
+
     if (existing != null) {
       throw new CTPException(
           CTPException.Fault.RESOURCE_VERSION_CONFLICT,
           String.format(
               "Collection exercise already exists, ExerciseRef: %s, SurveyRef: %s",
-              collex.getExerciseRef(), surveyRef));
+              collex.getExerciseRef(), collex.getSurveyRef()));
     }
 
     CollectionExercise newCollex =
@@ -460,6 +452,24 @@ public class CollectionExerciseEndpoint {
     log.info(
         "Successfully created collection exercise, CollectionExerciseId: {}", newCollex.getId());
     return ResponseEntity.created(location).build();
+  }
+
+  private SurveyDTO getSurveyFromCollex(
+      @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody
+          final CollectionExerciseDTO collex)
+      throws CTPException {
+    final String surveyId = collex.getSurveyId();
+    final String surveyRef = collex.getSurveyRef();
+
+    if (!StringUtils.isBlank(surveyId)) {
+      return surveyService.findSurvey(UUID.fromString(collex.getSurveyId()));
+    }
+
+    if (!StringUtils.isBlank(surveyRef)) {
+      return surveyService.findSurveyByRef(surveyRef);
+    }
+
+    throw new CTPException(CTPException.Fault.BAD_REQUEST, "No survey specified");
   }
 
   /**
@@ -649,7 +659,7 @@ public class CollectionExerciseEndpoint {
     if (collectionExercise.getState()
         == CollectionExerciseDTO.CollectionExerciseState.FAILEDVALIDATION) {
       SampleUnitValidationErrorDTO[] errors =
-          this.sampleService.getValidationErrors(collectionExercise.getId());
+          this.sampleService.getValidationErrors(collectionExercise);
 
       collectionExerciseDTO.setValidationErrors(errors);
     }

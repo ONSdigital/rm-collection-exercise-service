@@ -4,9 +4,14 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,23 +22,50 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceImplTest {
+  public static final UUID SURVEY_ID = UUID.fromString("4ca97b1b-de9c-4fed-9898-fac594d1565f");
+  @Mock private SurveySvcClient surveySvcClient;
+
   @Mock private EventRepository eventRepository;
+
+  @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
 
   @Mock private CollectionExerciseService collectionExerciseService;
 
+  @Mock private ActionRuleCreator actionRuleCreator;
+
+  @Mock private ActionRuleCreator actionRuleCreator2;
+
+  @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<ActionRuleCreator>();
+
   @InjectMocks private EventServiceImpl eventService;
+
+  private static Event createEvent(Tag tag) {
+    Timestamp eventTime = new Timestamp(new Date().getTime());
+    Event event = new Event();
+    event.setTimestamp(eventTime);
+    event.setTag(tag.name());
+
+    return event;
+  }
 
   /* Given collection excercise does not exist When event is created Then exception is thrown */
   @Test
@@ -54,8 +86,8 @@ public class EventServiceImplTest {
 
   /* Given event already exists When event is created Then exception is thrown */
   @Test
-  public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() {
-    String tag = EventService.Tag.mps.name();
+  public void givenEventAlreadyExistsWhenEventIsCreatedThenExceptionIsThrown() throws CTPException {
+    String tag = Tag.mps.name();
     EventDTO eventDto = new EventDTO();
     CollectionExercise collex = new CollectionExercise();
     UUID collexUuid = UUID.randomUUID();
@@ -76,16 +108,162 @@ public class EventServiceImplTest {
     }
   }
 
-  private static Event createEvent(EventService.Tag tag) {
-    Timestamp eventTime = new Timestamp(new Date().getTime());
+  /**
+   * Test CTP exception thrown if no business case type override found, so no action plans have been
+   * associated to CE
+   */
+  @Test
+  public void testCreateActionRulesRaisesCTPExceptionIfNoBCaseOverRide() {
     Event event = new Event();
-    event.setTimestamp(eventTime);
-    event.setTag(tag.name());
+    CollectionExercise collex = new CollectionExercise();
+    CaseTypeOverride biCaseTypeOverride = new CaseTypeOverride();
+    collex.setExercisePK(1);
+    collex.setSurveyId(SURVEY_ID);
+    event.setTag(Tag.mps.name());
 
-    return event;
+    final SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Business);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
+
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "B")).thenReturn(null);
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "BI"))
+        .thenReturn(biCaseTypeOverride);
+    try {
+      eventService.createActionRulesForEvent(event, collex);
+      fail("Trying to create action rules when no action plans associated");
+    } catch (CTPException e) {
+      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+    }
   }
 
-  private List<Event> createEventList(EventService.Tag... tags) {
+  /**
+   * Test CTP exception thrown if no business individual case type override found, so no action
+   * plans have been associated to CE
+   */
+  @Test
+  public void testCreateActionRulesRaisesCTPExceptionIfNoBICaseOverRide() {
+    String tag = Tag.mps.name();
+    Event event = new Event();
+    CollectionExercise collex = new CollectionExercise();
+    CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
+    collex.setExercisePK(1);
+    collex.setSurveyId(SURVEY_ID);
+    event.setTag(tag);
+
+    final SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Business);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
+
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "B"))
+        .thenReturn(bCaseTypeOverride);
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "BI")).thenReturn(null);
+    try {
+      eventService.createActionRulesForEvent(event, collex);
+      fail("Trying to create action rules when no action plans associated");
+    } catch (CTPException e) {
+      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+    }
+  }
+
+  @Test
+  public void testCreateCorrectActionRulesForAnyEvent() throws CTPException {
+    // Given
+    String businessSampleType = "B";
+    String businessIndividualSampleType = "BI";
+    Event collectionExerciseEvent = new Event();
+
+    CollectionExercise collex = new CollectionExercise();
+    int exercisePk = 6433;
+    collex.setExercisePK(exercisePk);
+    collex.setSurveyId(SURVEY_ID);
+
+    final SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Business);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
+
+    CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
+    UUID businessActionPlanId = UUID.randomUUID();
+    businessCaseTypeOverride.setActionPlanId(businessActionPlanId);
+
+    CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
+    UUID businessIndividualActionPlanId = UUID.randomUUID();
+    businessIndividualCaseTypeOverride.setActionPlanId(businessIndividualActionPlanId);
+
+    Instant eventTriggerInstant = Instant.now();
+    Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
+
+    collectionExerciseEvent.setCollectionExercise(collex);
+    collectionExerciseEvent.setTag(Tag.mps.name());
+    collectionExerciseEvent.setTimestamp(eventTriggerDate);
+    UUID collectionExerciseEventId = UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
+    collectionExerciseEvent.setId(collectionExerciseEventId);
+
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
+            exercisePk, businessSampleType))
+        .thenReturn(businessCaseTypeOverride);
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
+            exercisePk, businessIndividualSampleType))
+        .thenReturn(businessIndividualCaseTypeOverride);
+
+    actionRuleCreators.add(actionRuleCreator);
+    actionRuleCreators.add(actionRuleCreator2);
+
+    // When
+    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+
+    // Then
+    verify(actionRuleCreator)
+        .execute(
+            eq(collectionExerciseEvent),
+            eq(businessCaseTypeOverride),
+            eq(businessIndividualCaseTypeOverride),
+            eq(surveyDto));
+    verify(actionRuleCreator2)
+        .execute(
+            eq(collectionExerciseEvent),
+            eq(businessCaseTypeOverride),
+            eq(businessIndividualCaseTypeOverride),
+            eq(surveyDto));
+  }
+
+  @Test
+  public void testNoActionRulesCreatedForNonActionableEvents() throws CTPException {
+    // Given
+    final Event collectionExerciseEvent = new Event();
+    final CollectionExercise collex = new CollectionExercise();
+
+    collectionExerciseEvent.setCollectionExercise(collex);
+    collectionExerciseEvent.setTag(Tag.employment.name());
+
+    // When
+    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+
+    // Then
+    verify(actionRuleCreator, never()).execute(any(), any(), any(), any());
+  }
+
+  @Test
+  public void testNoActionRulesCreatedForNonBusinessesSurveyEvents() throws CTPException {
+    // Given
+    final Event collectionExerciseEvent = new Event();
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setSurveyId(SURVEY_ID);
+
+    SurveyDTO surveyDto = new SurveyDTO();
+    surveyDto.setSurveyType(SurveyType.Social);
+    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
+
+    collectionExerciseEvent.setCollectionExercise(collex);
+    collectionExerciseEvent.setTag(Tag.mps.name());
+
+    // When
+    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+
+    // Then
+    verify(actionRuleCreator, never()).execute(any(), any(), any(), any());
+  }
+
+  private List<Event> createEventList(Tag... tags) {
     return Arrays.stream(tags).map(EventServiceImplTest::createEvent).collect(Collectors.toList());
   }
 
@@ -102,7 +280,7 @@ public class EventServiceImplTest {
   @Test
   public void givenSomeEventsWhenScheduledIsCheckedThenFalse() throws CTPException {
     UUID collexUuid = UUID.randomUUID();
-    List<Event> events = createEventList(EventService.Tag.mps, EventService.Tag.exercise_end);
+    List<Event> events = createEventList(Tag.mps, Tag.exercise_end);
     when(eventRepository.findByCollectionExerciseId(collexUuid)).thenReturn(events);
 
     boolean scheduled = this.eventService.isScheduled(collexUuid);
@@ -113,7 +291,7 @@ public class EventServiceImplTest {
   @Test
   public void givenAllEventsWhenScheduledIsCheckedThenTrue() throws CTPException {
     UUID collexUuid = UUID.randomUUID();
-    List<Event> events = createEventList(EventService.Tag.values());
+    List<Event> events = createEventList(Tag.values());
     when(eventRepository.findByCollectionExerciseId(collexUuid)).thenReturn(events);
 
     boolean scheduled = this.eventService.isScheduled(collexUuid);

@@ -72,7 +72,6 @@ public class SampleUnitDistributorTest {
   private static final String SAMPLE_UNIT_REF = "50000065975";
   private static final String SAMPLE_UNIT_TYPE_PARENT = "B";
   private static final String ACTION_PLAN_ID_PARENT = "5381731e-e386-41a1-8462-26373744db86";
-  private static final String ACTION_PLAN_ID_CHILD = "0009e978-0932-463b-a2a1-b45cb3ffcb2a";
   private static final String TEST_EXCEPTION = "Test Exception thrown";
 
   @InjectMocks private SampleUnitDistributor sampleUnitDistributor;
@@ -132,6 +131,7 @@ public class SampleUnitDistributorTest {
     scheduleSettings.setDistributionScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
     scheduleSettings.setValidationScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
     scheduleSettings.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
+
     appConfig.setSchedules(scheduleSettings);
 
     sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
@@ -168,14 +168,6 @@ public class SampleUnitDistributorTest {
     when(surveySvcClient.findSurvey(collectionExercise.getSurveyId())).thenReturn(surveys.get(0));
 
     when(actionSvcClient.getActionPlansBySelectors(any(), any(), any())).thenReturn(actionPlans);
-
-    when(collectionExerciseRepo.getActiveActionPlanId(
-            collectionExercise.getExercisePK(), "B", collectionExercise.getSurveyId()))
-        .thenReturn(ACTION_PLAN_ID_PARENT);
-
-    when(collectionExerciseRepo.getActiveActionPlanId(
-            collectionExercise.getExercisePK(), "BI", collectionExercise.getSurveyId()))
-        .thenReturn(ACTION_PLAN_ID_CHILD);
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
