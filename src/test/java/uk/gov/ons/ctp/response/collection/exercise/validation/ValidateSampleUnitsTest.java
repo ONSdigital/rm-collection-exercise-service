@@ -91,6 +91,11 @@ public class ValidateSampleUnitsTest {
 
   private List<CollectionExercise> collectionExercises;
   private List<ExerciseSampleUnit> sampleUnits;
+  private List<ExerciseSampleUnitGroup> sampleUnitGroups;
+  private List<SurveyClassifierDTO> classifierTypeSelectors;
+  private List<SurveyClassifierTypeDTO> classifierTypeSelector;
+  private List<CollectionInstrumentDTO> collectionInstruments;
+  private List<PartyDTO> parties;
 
   /**
    * Setup Mock responses when all created and injected into test subject.
@@ -106,15 +111,11 @@ public class ValidateSampleUnitsTest {
     // Mock data
     collectionExercises = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
     sampleUnits = FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class);
-    List<ExerciseSampleUnitGroup> sampleUnitGroups =
-        FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
-    List<SurveyClassifierDTO> classifierTypeSelectors =
-        FixtureHelper.loadClassFixtures(SurveyClassifierDTO[].class);
-    List<SurveyClassifierTypeDTO> classifierTypeSelector =
-        FixtureHelper.loadClassFixtures(SurveyClassifierTypeDTO[].class);
-    List<CollectionInstrumentDTO> collectionInstruments =
-        FixtureHelper.loadClassFixtures(CollectionInstrumentDTO[].class);
-    List<PartyDTO> parties = FixtureHelper.loadClassFixtures(PartyDTO[].class);
+    sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
+    classifierTypeSelectors = FixtureHelper.loadClassFixtures(SurveyClassifierDTO[].class);
+    classifierTypeSelector = FixtureHelper.loadClassFixtures(SurveyClassifierTypeDTO[].class);
+    collectionInstruments = FixtureHelper.loadClassFixtures(CollectionInstrumentDTO[].class);
+    parties = FixtureHelper.loadClassFixtures(PartyDTO[].class);
 
     // Given
     when(collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
@@ -168,9 +169,11 @@ public class ValidateSampleUnitsTest {
         .thenReturn(0L);
   }
 
-  /** Test happy path through to validate all SampleUnitGroups and CollectionExercises. */
+  /** Test validate all SampleUnitGroups and CollectionExercises */
   @Test
   public void testValidateSampleUnits() throws Exception {
+
+    // Given setup()
 
     // When
     validateSampleUnits.validateSampleUnits();
@@ -181,11 +184,12 @@ public class ValidateSampleUnitsTest {
         .transitionCollectionExercise(collectionExercises.get(0), CollectionExerciseEvent.VALIDATE);
     verify(collexService, times(1))
         .transitionCollectionExercise(collectionExercises.get(1), CollectionExerciseEvent.VALIDATE);
-    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 
+  /** Test no exerises in EXECUTED state */
   @Test
   public void testValidateSampleUnitsNoExercises() throws Exception {
+
     // Given
     when(collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED))
         .thenReturn(Collections.EMPTY_LIST);
@@ -200,8 +204,10 @@ public class ValidateSampleUnitsTest {
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 
+  /** Test no sample unit groups found for collection exercises */
   @Test
   public void testValidateSampleUnitsNoSampleUnitGroups() throws Exception {
+
     // Given
     when(sampleUnitGroupSvc
             .findByStateFKAndCollectionExerciseInAndSampleUnitGroupPKNotInOrderByCreatedDateTimeAsc(
@@ -215,16 +221,16 @@ public class ValidateSampleUnitsTest {
     validateSampleUnits.validateSampleUnits();
 
     // Then
-    verify(sampleValidationListManager, times(1)).unlockContainer();
     verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, never())
         .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
-    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 
+  /** Test party service throws RestClientException */
   @Test(expected = RestClientException.class)
   public void testValidateSampleUnitsPartyRestClientException() throws Exception {
+
     // Given
     when(partySvcClient.requestParty(
             sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
@@ -240,6 +246,10 @@ public class ValidateSampleUnitsTest {
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 
+  /**
+   * Test sampleUnitGroup transition to FAILEDVALIDATION state when not all sample groups are
+   * VALIDATED
+   */
   @Test
   public void testValidateSampleUnitsInvalidTransition() throws Exception {
 
@@ -268,11 +278,12 @@ public class ValidateSampleUnitsTest {
     verify(collexService, times(1))
         .transitionCollectionExercise(
             collectionExercises.get(1), CollectionExerciseEvent.INVALIDATE);
-    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 
+  /** Test transition collection exercise throws CTPException */
   @Test
   public void testValidateSampleUnitsTransitionCTPError() throws Exception {
+
     // Given
     doThrow(CTPException.class)
         .when(collexService)
@@ -283,6 +294,5 @@ public class ValidateSampleUnitsTest {
 
     // Then
     verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
-    verify(sampleValidationListManager, times(1)).deleteList(VALIDATION_LIST_ID, true);
   }
 }

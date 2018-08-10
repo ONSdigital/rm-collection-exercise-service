@@ -1,7 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -17,12 +16,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitChildren;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
@@ -120,9 +118,9 @@ public class SampleUnitDistributor {
   }
 
   /**
-   * Distribute SampleUnits for a CollectionExercise.
+   * Distribute SampleUnits for a CollectionExercise
    *
-   * @param exercise for which to distribute sample units.
+   * @param exercise for which to distribute sample units
    */
   public void distributeSampleUnits(CollectionExercise exercise) {
 
@@ -135,12 +133,21 @@ public class SampleUnitDistributor {
         return;
       }
 
-      sampleUnitGroups.forEach(sampleUnitGroup -> distributeSampleUnits(exercise, sampleUnitGroup));
+      for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
+        try {
+          distributeSampleUnitGroup(exercise, sampleUnitGroup);
+        } catch (RestClientException ex) {
+          log.error(
+              "Failed to distribute sample unit group, sampleUnitGroupPK: {}",
+              sampleUnitGroup.getSampleUnitGroupPK());
+        }
+      }
+
       collectionExerciseTransitionState(exercise);
 
     } catch (LockingException ex) {
-      log.error("Distribution failed due to {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Sample Unit Distribution failed, error: {}", ex.getMessage());
+      log.error(ex.toString());
     } finally {
       try {
         sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
@@ -153,48 +160,84 @@ public class SampleUnitDistributor {
   }
 
   /**
-   * Distribute SampleUnits for a SampleUnitGroup.
+   * Retrieve SampleUnitGroups to be distributed - state VALIDATED - but do not retrieve the same
+   * SampleUnitGroups as other service instances.
    *
-   * @param exercise CollectionExercise of which sampleUnitGroup is a member.
-   * @param sampleUnitGroup for which to distribute sample units.
+   * @param exercise in VALIDATED state for which to return sampleUnitGroups.
+   * @return list of SampleUnitGroups.
+   * @throws LockingException problem obtaining lock for data shared across instances.
    */
-  private void distributeSampleUnits(
-      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
-    List<ExerciseSampleUnit> sampleUnits = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup);
-    List<SampleUnit> children = new ArrayList<>();
-    SampleUnitParent parent = null;
-    for (ExerciseSampleUnit sampleUnit : sampleUnits) {
-      if (sampleUnit.getSampleUnitType().isParent()) {
-        parent = new SampleUnitParent();
-        parent.setId(sampleUnit.getSampleUnitId().toString());
-        parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
-        parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-        parent.setActionPlanId(getActionPlanId(sampleUnit, exercise).toString());
-        parent.setCollectionExerciseId(exercise.getId().toString());
-      } else {
-        SampleUnit child = new SampleUnit();
-        child.setId(sampleUnit.getSampleUnitId().toString());
-        child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
-        child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-        child.setActionPlanId(getActionPlanId(sampleUnit, exercise).toString());
-        children.add(child);
-      }
-    }
+  private List<ExerciseSampleUnitGroup> retrieveSampleUnitGroups(CollectionExercise exercise)
+      throws LockingException {
 
-    if (parent != null) {
-      if (!children.isEmpty()) {
-        parent.setSampleUnitChildren(new SampleUnitChildren(children));
-      }
-      publishSampleUnit(sampleUnitGroup, parent);
+    List<Integer> excludedGroups =
+        sampleDistributionListManager.findList(DISTRIBUTION_LIST_ID, false);
+    log.debug("DISTRIBUTION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+
+    excludedGroups.add(IMPOSSIBLE_ID);
+    List<ExerciseSampleUnitGroup> sampleUnitGroups =
+        sampleUnitGroupRepo
+            .findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
+                SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
+                exercise,
+                excludedGroups,
+                new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
+
+    if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
+      List<Integer> sampleUnitGroupPKs =
+          sampleUnitGroups
+              .stream()
+              .map(ExerciseSampleUnitGroup::getSampleUnitGroupPK)
+              .collect(Collectors.toList());
+      log.debug(
+          "DISTRIBUTION retrieved sampleUnitGroups, sampleUnitGroupPKs: {}",
+          sampleUnitGroupPKs.stream().map(Object::toString));
+      sampleDistributionListManager.saveList(DISTRIBUTION_LIST_ID, sampleUnitGroupPKs, true);
     } else {
-      log.error(
-          "No parent in sample unit group, sampleUnitGroupPK: {}",
-          sampleUnitGroup.getSampleUnitGroupPK());
+      log.debug("DISTRIBUTION retrieved 0 sampleUnitGroups PKs");
+      sampleDistributionListManager.unlockContainer();
     }
+    return sampleUnitGroups;
+  }
+
+  /**
+   * Distribute SampleUnits for a SampleUnitGroup
+   *
+   * @param exercise CollectionExercise of which sampleUnitGroup is a member
+   * @param sampleUnitGroup for which to distribute sample units
+   */
+  private void distributeSampleUnitGroup(
+      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup)
+      throws RestClientException {
+    ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
+
+    // SampleUnitParents/Children are being removed
+    // We only expect one sample unit per sample unit group now
+    // but still use SampleUnitParent class until it's removed from rabbit message
+    SampleUnitParent sampleUnitParent = new SampleUnitParent();
+    sampleUnitParent.setId(sampleUnit.getSampleUnitId().toString());
+    sampleUnitParent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+    sampleUnitParent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
+    sampleUnitParent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
+    sampleUnitParent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
+    sampleUnitParent.setCollectionExerciseId(exercise.getId().toString());
+    sampleUnitParent.setActionPlanId(getActionPlanId(sampleUnit, exercise).toString());
+
+    publishSampleUnit(sampleUnitGroup, sampleUnitParent);
+  }
+
+  private UUID getActionPlanId(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
+      throws RestClientException {
+    PartyDTO businessParty =
+        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    Boolean activeEnrolment =
+        surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
+    SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
+    return actionSvcClient
+        .getActionPlansBySelectors(
+            survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
+        .get(0)
+        .getId();
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {
@@ -213,66 +256,6 @@ public class SampleUnitDistributor {
   private boolean enrolmentIsEnabledForSurvey(final Enrolment enrolment, String surveyId) {
     return enrolment.getSurveyId().equals(surveyId)
         && enrolment.getEnrolmentStatus().equalsIgnoreCase(ENABLED);
-  }
-
-  private UUID getActionPlanId(ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
-    PartyDTO businessParty =
-        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-    Boolean activeEnrolment =
-        surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-    SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
-    return actionSvcClient
-        .getActionPlansBySelectors(
-            survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
-        .get(0)
-        .getId();
-  }
-
-  /**
-   * Retrieve SampleUnitGroups to be distributed - state VALIDATED - but do not retrieve the same
-   * SampleUnitGroups as other service instances.
-   *
-   * @param exercise in VALIDATED state for which to return sampleUnitGroups.
-   * @return list of SampleUnitGroups.
-   * @throws LockingException problem obtaining lock for data shared across instances.
-   */
-  private List<ExerciseSampleUnitGroup> retrieveSampleUnitGroups(CollectionExercise exercise)
-      throws LockingException {
-
-    List<ExerciseSampleUnitGroup> sampleUnitGroups;
-
-    List<Integer> excludedGroups =
-        sampleDistributionListManager.findList(DISTRIBUTION_LIST_ID, false);
-    log.debug("DISTRIBUTION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
-
-    excludedGroups.add(IMPOSSIBLE_ID);
-    sampleUnitGroups =
-        sampleUnitGroupRepo
-            .findByStateFKAndCollectionExerciseAndSampleUnitGroupPKNotInOrderByModifiedDateTimeAsc(
-                SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
-                exercise,
-                excludedGroups,
-                new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
-
-    if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
-      log.debug(
-          "DISTRIBUTION retrieved sampleUnitGroup PKs {}",
-          sampleUnitGroups
-              .stream()
-              .map(group -> group.getSampleUnitGroupPK().toString())
-              .collect(Collectors.joining(",")));
-      sampleDistributionListManager.saveList(
-          DISTRIBUTION_LIST_ID,
-          sampleUnitGroups
-              .stream()
-              .map(ExerciseSampleUnitGroup::getSampleUnitGroupPK)
-              .collect(Collectors.toList()),
-          true);
-    } else {
-      log.debug("DISTRIBUTION retrieved 0 sampleUnitGroups PKs");
-      sampleDistributionListManager.unlockContainer();
-    }
-    return sampleUnitGroups;
   }
 
   /**
@@ -295,7 +278,7 @@ public class SampleUnitDistributor {
               publisher.sendSampleUnit(sampleUnitMessage);
             } catch (CTPException ex) {
               log.error("Sample Unit group state transition failed: {}", ex.getMessage());
-              log.error("Stack trace: " + ex);
+              log.error(ex.toString());
             }
           }
         });
@@ -305,28 +288,24 @@ public class SampleUnitDistributor {
    * Transition Sample Unit Group state for publish.
    *
    * @param sampleUnitGroup to be transitioned.
-   * @return sampleUnitGroup with new state.
    * @throws CTPException if state transition fails.
    */
-  private ExerciseSampleUnitGroup sampleUnitGroupTransitionState(
-      ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
+  private void sampleUnitGroupTransitionState(ExerciseSampleUnitGroup sampleUnitGroup)
+      throws CTPException {
 
     sampleUnitGroup.setStateFK(
         sampleUnitGroupState.transition(
             sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.PUBLISH));
     sampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
     sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
-
-    return sampleUnitGroup;
   }
 
   /**
    * Transition Collection Exercise state for distribution.
    *
    * @param exercise to transition.
-   * @return exercise Collection Exercise with new state.
    */
-  private CollectionExercise collectionExerciseTransitionState(CollectionExercise exercise) {
+  private void collectionExerciseTransitionState(CollectionExercise exercise) {
 
     long published =
         sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
@@ -335,17 +314,12 @@ public class SampleUnitDistributor {
     try {
       if (published == exercise.getSampleSize().longValue()) {
 
-        Boolean isGoLiveInPast = Boolean.FALSE;
+        // Check if go_live date is in the past
         if ((eventRepository
                 .findOneByCollectionExerciseAndTag(exercise, EventService.Tag.go_live.name())
                 .getTimestamp()
                 .getTime())
             < System.currentTimeMillis()) {
-
-          isGoLiveInPast = Boolean.TRUE;
-        }
-
-        if (isGoLiveInPast) {
           log.debug(
               "Attempting to transition collection exercise to Live, collectionExerciseId={}",
               exercise.getId());
@@ -374,6 +348,5 @@ public class SampleUnitDistributor {
       log.error("Collection Exercise state transition failed: {}", ex.getMessage());
       log.error("Stack trace: " + ex);
     }
-    return exercise;
   }
 }

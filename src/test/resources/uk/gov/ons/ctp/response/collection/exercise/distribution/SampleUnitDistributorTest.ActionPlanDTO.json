@@ -1,0 +1,14 @@
+[
+  {
+    "id": "5381731e-e386-41a1-8462-26373744db86",
+    "name": "BRES B 2017",
+    "description": "BRES B Case 2017",
+    "createdBy": "SYSTEM",
+    "lastRunDateTime": "2017-06-15T10:00:00Z",
+    "selectors": {
+      "surveyRef": "221",
+      "exerciseRef": "201712",
+      "activeEnrolment": "true"
+    }
+  }
+]
