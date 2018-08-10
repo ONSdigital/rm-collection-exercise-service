@@ -94,7 +94,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         activeEnrolment);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add("collectionExericseId", collectionExerciseId);
+    queryParams.add("collectionExerciseId", collectionExerciseId);
     queryParams.add("activeEnrolment", activeEnrolment.toString());
     UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
