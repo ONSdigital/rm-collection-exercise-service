@@ -448,15 +448,14 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
 
     // Create action plan with appropriate name and description
-    String exerciseRef = collectionExercise.getExerciseRef();
     HashMap<String, String> selectors = new HashMap<>();
-    selectors.put("exerciseRef", exerciseRef);
-    selectors.put("surveyRef", survey.getSurveyRef());
+    selectors.put("collectionExerciseId", collectionExercise.getId().toString());
     if (!"H".equals(sampleUnitType) && !"HI".equals(sampleUnitType)) {
       String activeEnrolment = Boolean.toString("BI".equals(sampleUnitType));
       selectors.put("activeEnrolment", activeEnrolment);
     }
     String shortName = survey.getShortName();
+    String exerciseRef = collectionExercise.getExerciseRef();
     String name = String.format("%s %s %s", shortName, sampleUnitType, exerciseRef);
     String description = String.format("%s %s Case %s", shortName, sampleUnitType, exerciseRef);
     ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description, selectors);
