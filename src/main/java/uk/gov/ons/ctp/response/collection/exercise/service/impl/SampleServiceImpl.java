@@ -76,11 +76,10 @@ public class SampleServiceImpl implements SampleService {
     dto.setSampleUnitRef(su.getSampleUnitRef());
     List<SampleUnitValidationErrorDTO.ValidationError> errors = new ArrayList<>();
 
-    if (su.getCollectionInstrumentId() == null
-        || !(su.getCollectionInstrumentId() instanceof UUID)) {
+    if (su.getCollectionInstrumentId() == null) {
       errors.add(SampleUnitValidationErrorDTO.ValidationError.MISSING_COLLECTION_INSTRUMENT);
     }
-    if (su.getPartyId() == null || !(su.getPartyId() instanceof UUID)) {
+    if (su.getPartyId() == null) {
       errors.add(SampleUnitValidationErrorDTO.ValidationError.MISSING_PARTY);
     }
 
@@ -207,10 +206,9 @@ public class SampleServiceImpl implements SampleService {
   @Override
   public SampleUnitValidationErrorDTO[] getValidationErrors(final UUID collectionExerciseId) {
     List<ExerciseSampleUnit> sampleUnits =
-        this.sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
+        sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
     Predicate<ExerciseSampleUnit> validTest =
-        su ->
-            !(su.getPartyId() instanceof UUID) || !(su.getCollectionInstrumentId() instanceof UUID);
+        su -> su.getPartyId() == null || su.getCollectionInstrumentId() == null;
     return sampleUnits
         .stream()
         .filter(validTest)
@@ -220,12 +218,12 @@ public class SampleServiceImpl implements SampleService {
 
   @Override
   public List<SampleLink> getSampleLinksForSummary(final UUID sampleSummaryId) {
-    return this.sampleLinkRepository.findBySampleSummaryId(sampleSummaryId);
+    return sampleLinkRepository.findBySampleSummaryId(sampleSummaryId);
   }
 
   @Override
   public SampleLink saveSampleLink(final SampleLink sampleLink) {
-    return this.sampleLinkRepository.saveAndFlush(sampleLink);
+    return sampleLinkRepository.saveAndFlush(sampleLink);
   }
 
   @Override
