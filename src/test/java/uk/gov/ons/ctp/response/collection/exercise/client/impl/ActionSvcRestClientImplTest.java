@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -22,6 +23,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
@@ -43,6 +45,8 @@ public class ActionSvcRestClientImplTest {
   @InjectMocks private ActionSvcRestClientImpl actionSvcRestClient;
 
   private ResponseEntity<List<ActionPlanDTO>> responseEntity;
+  private ResponseEntity<List<ActionPlanDTO>> responseEntity404;
+  private ResponseEntity<List<ActionPlanDTO>> responseEntityFail;
 
   @Before
   public void setup() {
@@ -57,6 +61,8 @@ public class ActionSvcRestClientImplTest {
     actionPlans.add(actionPlan);
 
     responseEntity = new ResponseEntity(actionPlans, HttpStatus.OK);
+    responseEntity404 = new ResponseEntity(HttpStatus.NOT_FOUND);
+    responseEntityFail = new ResponseEntity(HttpStatus.BAD_REQUEST);
 
     MockitoAnnotations.initMocks(this);
   }
@@ -73,7 +79,7 @@ public class ActionSvcRestClientImplTest {
             eq(HttpMethod.GET),
             eq(null),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-        .thenReturn(responseEntity);
+        .thenReturn(responseEntityFail);
 
     // When
     actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
@@ -86,5 +92,47 @@ public class ActionSvcRestClientImplTest {
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
+  }
+
+  @Test
+  public void getActionPlansBySelectors404() {
+
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+    when(restTemplate.exchange(
+      any(String.class),
+      eq(HttpMethod.GET),
+      eq(null),
+      eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+      .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+    // When
+    List<ActionPlanDTO> actionPlanDTOs =
+      actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
+
+    // Then call is made to correct url
+    assertNull(actionPlanDTOs);
+  }
+
+  @Test(expected = HttpClientErrorException.class)
+  public void getActionPlansBySelectorsFail() {
+
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+    when(restTemplate.exchange(
+      any(String.class),
+      eq(HttpMethod.GET),
+      eq(null),
+      eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+      .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+    // When
+    actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
+
+    // Then HTTPClientErrorException is thrown
   }
 }
