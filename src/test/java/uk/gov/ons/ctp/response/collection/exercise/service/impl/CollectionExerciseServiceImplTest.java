@@ -280,18 +280,15 @@ public class CollectionExerciseServiceImplTest {
     verify(actionService, times(1)).createActionPlan("BRES B", "BRES B Case", null);
     verify(actionService, times(1)).createActionPlan("BRES BI", "BRES BI Case", null);
 
-    String exerciseRef = collectionExercise.getExerciseRef();
-    String surveyRef = survey.getSurveyRef();
+    String exerciseId = collectionExercise.getId().toString();
     HashMap<String, String> overrideBSelectors = new HashMap<>();
-    overrideBSelectors.put("surveyRef", surveyRef);
-    overrideBSelectors.put("exerciseRef", exerciseRef);
+    overrideBSelectors.put("collectionExerciseId", exerciseId);
     overrideBSelectors.put("activeEnrolment", "false");
     verify(actionService, times(1))
         .createActionPlan("BRES B 202103", "BRES B Case 202103", overrideBSelectors);
 
     HashMap<String, String> overrideBISelectors = new HashMap<>();
-    overrideBISelectors.put("surveyRef", surveyRef);
-    overrideBISelectors.put("exerciseRef", exerciseRef);
+    overrideBISelectors.put("collectionExerciseId", exerciseId);
     overrideBISelectors.put("activeEnrolment", "true");
     verify(actionService, times(1))
         .createActionPlan("BRES BI 202103", "BRES BI Case 202103", overrideBISelectors);
