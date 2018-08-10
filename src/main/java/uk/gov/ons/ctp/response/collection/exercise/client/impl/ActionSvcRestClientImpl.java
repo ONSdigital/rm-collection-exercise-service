@@ -90,7 +90,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectors(
       final String collectionExerciseId, final Boolean activeEnrolment)
-    throws HttpClientErrorException {
+      throws HttpClientErrorException {
     log.debug(
         "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
         collectionExerciseId,
@@ -105,14 +105,13 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     ResponseEntity<List<ActionPlanDTO>> responseEntity;
     try {
       responseEntity =
-        restTemplate.exchange(
-          uriComponents.toString(),
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<List<ActionPlanDTO>>() {
-          });
+          restTemplate.exchange(
+              uriComponents.toString(),
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
     } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() ==  HttpStatus.NOT_FOUND) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
       throw e;

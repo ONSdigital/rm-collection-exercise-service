@@ -102,15 +102,15 @@ public class ActionSvcRestClientImplTest {
     actionSvc.setActionPlansPath("test:path");
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
-      any(String.class),
-      eq(HttpMethod.GET),
-      eq(null),
-      eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-      .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
     // When
     List<ActionPlanDTO> actionPlanDTOs =
-      actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
+        actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
 
     // Then call is made to correct url
     assertNull(actionPlanDTOs);
@@ -124,11 +124,11 @@ public class ActionSvcRestClientImplTest {
     actionSvc.setActionPlansPath("test:path");
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
-      any(String.class),
-      eq(HttpMethod.GET),
-      eq(null),
-      eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-      .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
     // When
     actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
