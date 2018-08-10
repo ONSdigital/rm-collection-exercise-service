@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
@@ -21,6 +22,9 @@ public interface ActionSvcClient {
    */
   ActionPlanDTO createActionPlan(String name, String description, HashMap<String, String> selectors)
       throws RestClientException;
+
+  List<ActionPlanDTO> getActionPlansBySelectors(
+      String surveyRef, String exerciseRef, Boolean activeEnrolment) throws RestClientException;
 
   /**
    * Request action rule is created.
