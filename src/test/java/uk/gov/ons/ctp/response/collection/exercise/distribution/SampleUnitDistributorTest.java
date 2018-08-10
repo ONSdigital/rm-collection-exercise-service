@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,8 @@ import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.ScheduleSettings;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
@@ -71,6 +74,7 @@ public class SampleUnitDistributorTest {
   private static final String SAMPLE_UNIT_TYPE_CHILD = "BI";
   private static final String ACTION_PLAN_ID_PARENT = "e71002ac-3575-47eb-b87f-cd9db92bf9a7";
   private static final String ACTION_PLAN_ID_CHILD = "0009e978-0932-463b-a2a1-b45cb3ffcb2a";
+  private static final String ACTION_PLAN_ID_OVERRIDE = "6669e978-0666-463b-a666-b45cb666ca2b";
   private static final String TEST_EXCEPTION = "Test Exception thrown";
 
   @InjectMocks private SampleUnitDistributor sampleUnitDistributor;
@@ -84,6 +88,8 @@ public class SampleUnitDistributorTest {
   @Mock private EventRepository eventRepository;
 
   @Mock private SampleUnitRepository sampleUnitRepo;
+
+  @Mock private SampleUnitDistributorHelper sampleUnitDistributorHelper;
 
   @Mock
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupDTO.SampleUnitGroupEvent>
@@ -123,6 +129,12 @@ public class SampleUnitDistributorTest {
     scheduleSettings.setValidationScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
     scheduleSettings.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
 
+    CaseTypeDefault parentActionPlanCaseType = new CaseTypeDefault();
+    parentActionPlanCaseType.setActionPlanId(UUID.fromString(ACTION_PLAN_ID_PARENT));
+
+    CaseTypeDefault childActionPlanCaseType = new CaseTypeDefault();
+    childActionPlanCaseType.setActionPlanId(UUID.fromString(ACTION_PLAN_ID_CHILD));
+
     appConfig.setSchedules(scheduleSettings);
 
     sampleUnitGroups = FixtureHelper.loadClassFixtures(ExerciseSampleUnitGroup[].class);
@@ -147,13 +159,12 @@ public class SampleUnitDistributorTest {
 
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitParentOnly);
 
-    when(collectionExerciseRepo.getActiveActionPlanId(
-            collectionExercise.getExercisePK(), "B", collectionExercise.getSurveyId()))
-        .thenReturn(ACTION_PLAN_ID_PARENT);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), eq("BI"), any()))
+        .thenReturn(childActionPlanCaseType.getActionPlanId().toString());
 
-    when(collectionExerciseRepo.getActiveActionPlanId(
-            collectionExercise.getExercisePK(), "BI", collectionExercise.getSurveyId()))
-        .thenReturn(ACTION_PLAN_ID_CHILD);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), eq("B"), any()))
+        .thenReturn(parentActionPlanCaseType.getActionPlanId().toString());
+
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
         .thenReturn(2L);
@@ -225,6 +236,42 @@ public class SampleUnitDistributorTest {
         (exercise) -> {
           assertEquals(COLLECTION_EXERCISE_ID, exercise.getId().toString());
           assertEquals(CollectionExerciseState.READY_FOR_LIVE, exercise.getState());
+        });
+  }
+
+  /** Test case type override */
+  @Test
+  public void sampleUnitCaseTypeOverride() {
+
+    CaseTypeOverride overrideActionPlanCaseType = new CaseTypeOverride();
+    overrideActionPlanCaseType.setActionPlanId(UUID.fromString(ACTION_PLAN_ID_OVERRIDE));
+
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), eq("B"), any()))
+        .thenReturn(overrideActionPlanCaseType.getActionPlanId().toString());
+
+    events
+        .get(0)
+        .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+    doReturn(events.get(0))
+        .when(eventRepository)
+        .findOneByCollectionExerciseAndTag(collectionExercise, EventService.Tag.go_live.name());
+
+    sampleUnitDistributor.distributeSampleUnits(collectionExercise);
+
+    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave =
+        ArgumentCaptor.forClass(SampleUnitParent.class);
+    verify(publisher, times(2)).sendSampleUnit(sampleUnitParentSave.capture());
+    List<SampleUnitParent> savedSampleUnitParents = sampleUnitParentSave.getAllValues();
+    assertTrue(savedSampleUnitParents.size() == 2);
+    savedSampleUnitParents.forEach(
+        (message) -> {
+          assertEquals(SAMPLE_UNIT_REF, message.getSampleUnitRef());
+          assertEquals(SAMPLE_UNIT_TYPE_PARENT, message.getSampleUnitType());
+          assertEquals(PARTY_ID_PARENT, message.getPartyId());
+          assertEquals(COLLECTION_INSTRUMENT_ID, message.getCollectionInstrumentId());
+          assertEquals(COLLECTION_EXERCISE_ID, message.getCollectionExerciseId());
+          assertEquals(ACTION_PLAN_ID_OVERRIDE, message.getActionPlanId());
+          assertNull(message.getSampleUnitChildren());
         });
   }
 
@@ -331,9 +378,7 @@ public class SampleUnitDistributorTest {
   public void noActionPlanIdThrowsCTPException() {
 
     // Override happy path scenario so no ActionPlanId is returned.
-    when(collectionExerciseRepo.getActiveActionPlanId(
-            collectionExercise.getExercisePK(), "B", collectionExercise.getSurveyId()))
-        .thenReturn(null);
+    when(sampleUnitDistributorHelper.getActiveActionPlanId(any(), any(), any())).thenReturn(null);
 
     // Count of SampleUnitGroups would not match as didn't publish the
     // SampleUnitGroups in the exercise as no child or ActionPlanId.
