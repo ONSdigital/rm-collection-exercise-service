@@ -1,11 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,6 +29,13 @@ import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Predicate;
 
 /** The implementation of the SampleService */
 @Service
@@ -134,61 +135,61 @@ public class SampleServiceImpl implements SampleService {
       readOnly = false,
       timeout = TRANSACTION_TIMEOUT)
   @Override
-  public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
+  public ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit) throws CTPException {
     log.debug("Processing sample unit: {}", sampleUnit);
-    ExerciseSampleUnit exerciseSampleUnit = null;
-
-    CollectionExercise collectionExercise =
+    final CollectionExercise collectionExercise =
         collectRepo.findOneById(UUID.fromString(sampleUnit.getCollectionExerciseId()));
 
     // Check collection exercise exists
-    if (collectionExercise != null) {
-      // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(
-          collectionExercise.getExercisePK(),
-          sampleUnit.getSampleUnitRef(),
-          sampleUnit.getSampleUnitType())) {
-
-        ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
-        sampleUnitGroup.setCollectionExercise(collectionExercise);
-        sampleUnitGroup.setFormType(sampleUnit.getFormType());
-        sampleUnitGroup.setStateFK(SampleUnitGroupState.INIT);
-        sampleUnitGroup.setCreatedDateTime(new Timestamp(new Date().getTime()));
-        sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
-
-        exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
-        exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        exerciseSampleUnit.setSampleUnitId(UUID.fromString(sampleUnit.getId()));
-        exerciseSampleUnit.setSampleUnitType(
-            SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
-
-        sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
-
-        if (sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
-            == collectionExercise.getSampleSize()) {
-          collectionExercise.setState(
-              collectionExerciseTransitionState.transition(
-                  collectionExercise.getState(), CollectionExerciseEvent.EXECUTION_COMPLETE));
-          collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
-          collectRepo.saveAndFlush(collectionExercise);
-        }
-
-      } else {
-        log.warn(
-            "SampleUnitRef {} with"
-                + " setSampleUnitTypeFK {} already exists for CollectionExercise {}",
-            sampleUnit.getSampleUnitRef(),
-            sampleUnit.getSampleUnitType(),
-            sampleUnit.getCollectionExerciseId());
-      }
-    } else {
+    if (collectionExercise == null) {
       log.error(
           "No CollectionExercise {} for SampleUnit Ref: {} Type: {}, FormType: {}",
           sampleUnit.getCollectionExerciseId(),
           sampleUnit.getSampleUnitRef(),
           sampleUnit.getSampleUnitType(),
           sampleUnit.getFormType());
+
+      return null;
+    }
+
+    // Check Sample Unit doesn't already exist for collection exercise
+    if (sampleUnitRepo.tupleExists(
+        collectionExercise.getExercisePK(),
+        sampleUnit.getSampleUnitRef(),
+        sampleUnit.getSampleUnitType())) {
+      log.warn(
+          "SampleUnitRef {} with"
+              + " setSampleUnitTypeFK {} already exists for CollectionExercise {}",
+          sampleUnit.getSampleUnitRef(),
+          sampleUnit.getSampleUnitType(),
+          sampleUnit.getCollectionExerciseId());
+
+      return null;
+    }
+
+    ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
+    sampleUnitGroup.setCollectionExercise(collectionExercise);
+    sampleUnitGroup.setFormType(sampleUnit.getFormType());
+    sampleUnitGroup.setStateFK(SampleUnitGroupState.INIT);
+    sampleUnitGroup.setCreatedDateTime(new Timestamp(new Date().getTime()));
+    sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
+
+    final ExerciseSampleUnit exerciseSampleUnit = new ExerciseSampleUnit();
+    exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
+    exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
+    exerciseSampleUnit.setSampleUnitId(UUID.fromString(sampleUnit.getId()));
+    exerciseSampleUnit.setSampleUnitType(
+        SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
+
+    sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
+
+    if (sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
+        == collectionExercise.getSampleSize()) {
+      collectionExercise.setState(
+          collectionExerciseTransitionState.transition(
+              collectionExercise.getState(), CollectionExerciseEvent.EXECUTION_COMPLETE));
+      collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
+      collectRepo.saveAndFlush(collectionExercise);
     }
 
     return exerciseSampleUnit;

@@ -1,5 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -19,18 +30,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
-
-import java.util.UUID;
-
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SampleServiceImplTest {
@@ -109,7 +108,7 @@ public class SampleServiceImplTest {
 
     when(collectionExerciseTransitionState.transition(any(), any()))
         .thenReturn(CollectionExerciseState.EXECUTED);
-    when(sampleUnitRepo.tupleExists(any(), any(), any())).thenReturn(false);
+    when(sampleUnitRepo.tupleExists(any(), any(), any())).thenReturn(true);
 
     SampleUnit sampleUnit =
         SampleUnit.builder()
