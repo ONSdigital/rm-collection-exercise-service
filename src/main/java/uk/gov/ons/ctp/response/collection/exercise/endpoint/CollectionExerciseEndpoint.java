@@ -662,7 +662,7 @@ public class CollectionExerciseEndpoint {
     if (collectionExercise.getState()
         == CollectionExerciseDTO.CollectionExerciseState.FAILEDVALIDATION) {
       SampleUnitValidationErrorDTO[] errors =
-          this.sampleService.getValidationErrors(collectionExercise.getId());
+          this.sampleService.getValidationErrors(collectionExercise);
 
       collectionExerciseDTO.setValidationErrors(errors);
     }

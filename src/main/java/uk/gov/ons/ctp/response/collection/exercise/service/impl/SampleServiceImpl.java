@@ -143,10 +143,11 @@ public class SampleServiceImpl implements SampleService {
     // Check collection exercise exists
     if (collectionExercise != null) {
       // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo.tupleExists(
-          collectionExercise.getExercisePK(),
-          sampleUnit.getSampleUnitRef(),
-          sampleUnit.getSampleUnitType())) {
+      if (!sampleUnitRepo
+          .existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
+              sampleUnit.getSampleUnitRef(),
+              SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()),
+              collectionExercise)) {
 
         ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
         sampleUnitGroup.setCollectionExercise(collectionExercise);
@@ -204,9 +205,11 @@ public class SampleServiceImpl implements SampleService {
   }
 
   @Override
-  public SampleUnitValidationErrorDTO[] getValidationErrors(final UUID collectionExerciseId) {
+  public SampleUnitValidationErrorDTO[] getValidationErrors(
+      final CollectionExercise collectionExercise) {
     List<ExerciseSampleUnit> sampleUnits =
-        sampleUnitRepo.findInvalidByCollectionExercise(collectionExerciseId);
+        sampleUnitRepo.findBySampleUnitGroupCollectionExerciseAndSampleUnitGroupStateFK(
+            collectionExercise, SampleUnitGroupState.FAILEDVALIDATION);
     Predicate<ExerciseSampleUnit> validTest =
         su -> su.getPartyId() == null || su.getCollectionInstrumentId() == null;
     return sampleUnits
