@@ -24,16 +24,14 @@ public interface ActionSvcClient {
       throws RestClientException;
 
   /**
-   * Get action plans for the given selectors
+   * Request list of action plans with given selectors
    *
-   * @param surveyRef surveyRef for action plan to be retrieved
-   * @param exerciseRef surveyRef for action plan to be retrieved
-   * @param activeEnrolment boolean for if the sampleunit already has an active enrolment
-   * @return List of ActionPlanDTO representations of matching action plans
-   * @throws RestClientException for failed connection to action service
+   * @param collectionExerciseId collectionExerciseId to find action plans for
+   * @param activeEnrolment boolean for if sample unit has an active enrolment associated with it
+   * @return List<ActionPlanDTO> representation of the created action plan
    */
   List<ActionPlanDTO> getActionPlansBySelectors(
-      String surveyRef, String exerciseRef, Boolean activeEnrolment) throws RestClientException;
+      String collectionExerciseId, Boolean activeEnrolment);
 
   /**
    * Request action rule is created.

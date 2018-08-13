@@ -10,12 +10,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -87,25 +89,38 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectors(
-      String surveyRef, String exerciseRef, Boolean activeEnrolment) throws RestClientException {
-    log.debug("Retrieving action plan for selectors");
+      final String collectionExerciseId, final Boolean activeEnrolment) {
+    log.debug(
+        "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
+        collectionExerciseId,
+        activeEnrolment);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add("surveyRef", surveyRef);
-    queryParams.add("exerciseRef", exerciseRef);
+    queryParams.add("collectionExerciseId", collectionExerciseId);
     queryParams.add("activeEnrolment", activeEnrolment.toString());
     UriComponents uriComponents =
-      restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
+        restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
-    ResponseEntity<List<ActionPlanDTO>> responseEntity =
-      restTemplate.exchange(
-        uriComponents.toString(),
-        HttpMethod.GET,
-        null,
-        new ParameterizedTypeReference<List<ActionPlanDTO>>() {
-        });
+    ResponseEntity<List<ActionPlanDTO>> responseEntity;
+    try {
+      responseEntity =
+          restTemplate.exchange(
+              uriComponents.toString(),
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
+      }
+      throw e;
+    }
 
-    log.debug("Successfully retrieved action plan for selectors");
+    log.debug(
+        "Successfully retrieved action plan for selectors, "
+            + "collectionExerciseId: {}, activeEnrolment: {}",
+        collectionExerciseId,
+        activeEnrolment);
     return responseEntity.getBody();
   }
 
