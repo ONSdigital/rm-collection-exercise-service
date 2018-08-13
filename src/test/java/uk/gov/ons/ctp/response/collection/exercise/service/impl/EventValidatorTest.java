@@ -17,7 +17,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 @RunWith(MockitoJUnitRunner.class)
 public class EventValidatorTest {
 
-  private EventValidator validator;
+  private BusinessEventValidator validator;
 
   private List<Event> mandatoryEvents;
 
@@ -25,7 +25,7 @@ public class EventValidatorTest {
 
   @Before
   public void setUp() {
-    this.validator = new EventValidator();
+    this.validator = new BusinessEventValidator();
     this.mandatoryEvents = createMandatoryEvents();
     this.allEvents = createAllEvents();
   }

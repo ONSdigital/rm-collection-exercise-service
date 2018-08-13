@@ -30,6 +30,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CaseTypeOverrideServi
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
@@ -79,6 +80,11 @@ public class EventServiceImpl implements EventService {
     event.setId(UUID.randomUUID());
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
+
+    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
+    if (!eventValidator.validateOnCreate(existingEvents, event, collex.getState())) {
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
+    }
 
     createActionRulesForEvent(event, collex);
     event = eventRepository.save(event);

@@ -41,6 +41,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.CaseTypeOverrideService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
