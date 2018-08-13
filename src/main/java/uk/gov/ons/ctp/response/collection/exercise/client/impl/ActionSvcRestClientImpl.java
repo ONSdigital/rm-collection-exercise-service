@@ -89,8 +89,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectors(
-      final String collectionExerciseId, final Boolean activeEnrolment)
-      throws HttpClientErrorException {
+      final String collectionExerciseId, final Boolean activeEnrolment) {
     log.debug(
         "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
         collectionExerciseId,
