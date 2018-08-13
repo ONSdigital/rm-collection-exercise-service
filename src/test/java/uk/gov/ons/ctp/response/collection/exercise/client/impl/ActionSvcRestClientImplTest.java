@@ -36,7 +36,7 @@ public class ActionSvcRestClientImplTest {
 
   private static final String COLLECTION_EXERCISE_ID = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
 
-  @Spy RestUtility restUtility = new RestUtility(RestUtilityConfig.builder().build());
+  @Spy private RestUtility restUtility = new RestUtility(RestUtilityConfig.builder().build());
 
   @Mock private RestTemplate restTemplate;
 
@@ -45,11 +45,9 @@ public class ActionSvcRestClientImplTest {
   @InjectMocks private ActionSvcRestClientImpl actionSvcRestClient;
 
   private ResponseEntity<List<ActionPlanDTO>> responseEntity;
-  private ResponseEntity<List<ActionPlanDTO>> responseEntity404;
-  private ResponseEntity<List<ActionPlanDTO>> responseEntityFail;
 
   @Before
-  public void setup() {
+  public void setUp() {
     ActionPlanDTO actionPlan = new ActionPlanDTO();
     actionPlan.setName("Test");
     actionPlan.setId(UUID.fromString("14fb3e68-4dca-46db-bf49-04b84e07e77c"));
@@ -61,8 +59,6 @@ public class ActionSvcRestClientImplTest {
     actionPlans.add(actionPlan);
 
     responseEntity = new ResponseEntity(actionPlans, HttpStatus.OK);
-    responseEntity404 = new ResponseEntity(HttpStatus.NOT_FOUND);
-    responseEntityFail = new ResponseEntity(HttpStatus.BAD_REQUEST);
 
     MockitoAnnotations.initMocks(this);
   }
@@ -79,7 +75,7 @@ public class ActionSvcRestClientImplTest {
             eq(HttpMethod.GET),
             eq(null),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-        .thenReturn(responseEntityFail);
+        .thenReturn(responseEntity);
 
     // When
     actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
@@ -112,7 +108,7 @@ public class ActionSvcRestClientImplTest {
     List<ActionPlanDTO> actionPlanDTOs =
         actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
 
-    // Then call is made to correct url
+    // Then Null is returned
     assertNull(actionPlanDTOs);
   }
 
