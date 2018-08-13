@@ -117,11 +117,12 @@ public class BusinessEventValidatorTest {
     mpsEvent.setTag(EventService.Tag.mps.toString());
     mpsEvent.setTimestamp(new Timestamp(now + 1500000));
     assertFalse(
-      this.validator.validate(
-        this.mandatoryEvents,
-        mpsEvent,
-        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+        this.validator.validate(
+            this.mandatoryEvents,
+            mpsEvent,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
   }
+
   @Test
   public void testInvalidMpsEventUpdateLiveState() {
     long now = System.currentTimeMillis();
@@ -129,8 +130,8 @@ public class BusinessEventValidatorTest {
     mpsEvent.setTag(EventService.Tag.mps.toString());
     mpsEvent.setTimestamp(new Timestamp(now + 1500000));
     assertFalse(
-      this.validator.validate(
-        this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
+        this.validator.validate(
+            this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
   }
 
   @Test
@@ -140,11 +141,12 @@ public class BusinessEventValidatorTest {
     goLiveEvent.setTag(EventService.Tag.go_live.toString());
     goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
     assertFalse(
-      this.validator.validate(
-        this.mandatoryEvents,
-        goLiveEvent,
-        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+        this.validator.validate(
+            this.mandatoryEvents,
+            goLiveEvent,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
   }
+
   @Test
   public void testInvalidGoLiveEventUpdateLiveState() {
     long now = System.currentTimeMillis();
@@ -152,8 +154,8 @@ public class BusinessEventValidatorTest {
     goLiveEvent.setTag(EventService.Tag.go_live.toString());
     goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
     assertFalse(
-      this.validator.validate(
-        this.mandatoryEvents, goLiveEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
+        this.validator.validate(
+            this.mandatoryEvents, goLiveEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
   }
 
   @Test
