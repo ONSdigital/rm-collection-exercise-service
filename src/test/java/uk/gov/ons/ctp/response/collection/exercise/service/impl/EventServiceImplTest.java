@@ -33,7 +33,6 @@ import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -76,8 +75,6 @@ public class EventServiceImplTest {
   @Mock private ActionRuleUpdater actionRuleUpdater2;
 
   @Mock private EventRepository eventRepository;
-
-  @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
 
   @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
 
@@ -134,63 +131,6 @@ public class EventServiceImplTest {
     } catch (CTPException e) {
       // Expected 409
       assertThat(e.getFault(), is(Fault.RESOURCE_VERSION_CONFLICT));
-    }
-  }
-
-  /**
-   * Test CTP exception thrown if no business case type override found, so no action plans have been
-   * associated to CE
-   */
-  @Test
-  public void testCreateActionRulesRaisesCTPExceptionIfNoBCaseOverRide() {
-    Event event = new Event();
-    CollectionExercise collex = new CollectionExercise();
-    CaseTypeOverride biCaseTypeOverride = new CaseTypeOverride();
-    collex.setExercisePK(1);
-    collex.setSurveyId(SURVEY_ID);
-    event.setTag(Tag.mps.name());
-
-    final SurveyDTO surveyDto = new SurveyDTO();
-    surveyDto.setSurveyType(SurveyType.Business);
-    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
-
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "B")).thenReturn(null);
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "BI"))
-        .thenReturn(biCaseTypeOverride);
-    try {
-      eventService.createActionRulesForEvent(event, collex);
-      fail("Trying to create action rules when no action plans associated");
-    } catch (CTPException e) {
-      assertThat(e.getFault(), is(Fault.RESOURCE_NOT_FOUND));
-    }
-  }
-
-  /**
-   * Test CTP exception thrown if no business individual case type override found, so no action
-   * plans have been associated to CE
-   */
-  @Test
-  public void testCreateActionRulesRaisesCTPExceptionIfNoBICaseOverRide() {
-    String tag = Tag.mps.name();
-    Event event = new Event();
-    CollectionExercise collex = new CollectionExercise();
-    CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
-    collex.setExercisePK(1);
-    collex.setSurveyId(SURVEY_ID);
-    event.setTag(tag);
-
-    final SurveyDTO surveyDto = new SurveyDTO();
-    surveyDto.setSurveyType(SurveyType.Business);
-    when(surveySvcClient.findSurvey(SURVEY_ID)).thenReturn(surveyDto);
-
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "B"))
-        .thenReturn(bCaseTypeOverride);
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(1, "BI")).thenReturn(null);
-    try {
-      eventService.createActionRulesForEvent(event, collex);
-      fail("Trying to create action rules when no action plans associated");
-    } catch (CTPException e) {
-      assertThat(e.getFault(), is(Fault.RESOURCE_NOT_FOUND));
     }
   }
 
