@@ -6,9 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -19,8 +17,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -41,6 +41,7 @@ public class ReminderActionRuleCreatorTest {
   private static final int EXERCISE_PK = 6433;
   @Mock private ActionSvcClient actionSvcClient;
   @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
+  @Spy private ReminderSuffixGenerator reminderSuffix;
   @InjectMocks private ReminderActionRuleCreator reminderActionRuleCreator;
 
   @Test
@@ -56,7 +57,7 @@ public class ReminderActionRuleCreatorTest {
     reminderActionRuleCreator.execute(
         new Event(), new CaseTypeOverride(), new CaseTypeOverride(), survey);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
@@ -74,7 +75,7 @@ public class ReminderActionRuleCreatorTest {
     reminderActionRuleCreator.execute(
         collectionExerciseEvent, new CaseTypeOverride(), new CaseTypeOverride(), survey);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
@@ -146,7 +147,7 @@ public class ReminderActionRuleCreatorTest {
     when(actionSvcClient.createActionRule(
             anyString(),
             anyString(),
-            eq("BSRE"),
+            eq(ActionType.BSRE),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID)))
@@ -154,7 +155,7 @@ public class ReminderActionRuleCreatorTest {
     when(actionSvcClient.createActionRule(
             anyString(),
             anyString(),
-            eq("BSRL"),
+            eq(ActionType.BSRL),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_ACTION_PLAN_ID)))
@@ -172,7 +173,7 @@ public class ReminderActionRuleCreatorTest {
         .createActionRule(
             eq(SURVEY_SHORT_NAME + "REME" + suffixNumber),
             eq(SURVEY_SHORT_NAME + " Reminder Email " + EXERCISE_REF),
-            eq("BSRE"),
+            eq(ActionType.BSRE),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID));
@@ -180,7 +181,7 @@ public class ReminderActionRuleCreatorTest {
         .createActionRule(
             eq(SURVEY_SHORT_NAME + "REMF" + suffixNumber),
             eq(SURVEY_SHORT_NAME + " Reminder File " + EXERCISE_REF),
-            eq("BSRL"),
+            eq(ActionType.BSRL),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_ACTION_PLAN_ID));

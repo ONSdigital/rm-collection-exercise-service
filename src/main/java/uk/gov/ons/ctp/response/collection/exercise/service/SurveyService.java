@@ -1,6 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import java.util.UUID;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Service responsible for dealing with samples */
@@ -21,4 +23,13 @@ public interface SurveyService {
    * @return the survey object
    */
   SurveyDTO findSurveyByRef(String surveyRef);
+
+  /**
+   * Get Survey linked to collection exercise.
+   *
+   * @param collex the collection exercise.
+   * @return the survey object
+   * @throws CTPException on not found
+   */
+  SurveyDTO getSurveyForCollectionExercise(final CollectionExercise collex) throws CTPException;
 }

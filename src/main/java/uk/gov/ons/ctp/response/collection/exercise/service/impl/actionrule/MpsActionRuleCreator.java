@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -42,13 +43,13 @@ public final class MpsActionRuleCreator implements ActionRuleCreator {
     actionSvcClient.createActionRule(
         survey.getShortName() + "NOTF",
         survey.getShortName() + " Notification File " + collectionExercise.getExerciseRef(),
-        "BSNL",
+        ActionType.BSNL,
         offsetDateTime,
         3,
         businessCaseTypeOverride.getActionPlanId());
   }
 
   private boolean isMps(final Event collectionExerciseEvent) {
-    return Tag.valueOf(collectionExerciseEvent.getTag()).equals(Tag.mps);
+    return Tag.mps.hasName(collectionExerciseEvent.getTag());
   }
 }
