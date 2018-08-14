@@ -94,9 +94,9 @@ public class BusinessEventValidator implements EventValidator {
     for (int i = 0; i < eventsArray.length - 1; i++) {
       Timestamp t1 = eventsArray[i].getTimestamp();
       Timestamp t2 = eventsArray[i + 1].getTimestamp();
-      if (dateLessThan24HoursLater(t1, t2)) {
-        result = false;
-      }
+      //      if (dateLessThan24HoursLater(t1, t2)) {
+      //        result = false;
+      //      }
       if (t1.after(t2)) {
         result = false;
       }
