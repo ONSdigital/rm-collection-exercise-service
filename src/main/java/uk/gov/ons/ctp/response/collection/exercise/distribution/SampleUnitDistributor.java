@@ -44,7 +44,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.party.representation.Association;
 import uk.gov.ons.ctp.response.party.representation.Enrolment;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
@@ -232,10 +231,8 @@ public class SampleUnitDistributor {
         partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
     Boolean activeEnrolment =
         surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-    SurveyDTO survey = surveySvcClient.findSurvey(exercise.getSurveyId());
     return actionSvcClient
-        .getActionPlansBySelectors(
-            survey.getSurveyRef(), exercise.getExerciseRef(), activeEnrolment)
+        .getActionPlansBySelectors(exercise.getId().toString(), activeEnrolment)
         .get(0)
         .getId();
   }

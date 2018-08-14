@@ -167,7 +167,7 @@ public class SampleUnitDistributorTest {
 
     when(surveySvcClient.findSurvey(collectionExercise.getSurveyId())).thenReturn(surveys.get(0));
 
-    when(actionSvcClient.getActionPlansBySelectors(any(), any(), any())).thenReturn(actionPlans);
+    when(actionSvcClient.getActionPlansBySelectors(any(), any())).thenReturn(actionPlans);
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
