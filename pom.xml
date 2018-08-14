@@ -97,7 +97,7 @@
         <dependency>
             <groupId>uk.gov.ons.ctp.product</groupId>
             <artifactId>actionsvc-api</artifactId>
-            <version>10.49.22</version>
+            <version>10.49.24</version>
         </dependency>
 
         <dependency>

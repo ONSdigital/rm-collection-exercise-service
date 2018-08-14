@@ -5,6 +5,10 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import uk.gov.ons.ctp.common.UnirestInitialiser;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -44,6 +49,55 @@ class CollectionExerciseClient {
     this.password = aPassword;
 
     UnirestInitialiser.initialise(jacksonMapper);
+  }
+
+  List<EventDTO> getEvents(final UUID collexId) throws CTPException {
+    try {
+      return new ArrayList<>(
+          Arrays.asList(
+              Unirest.get("http://localhost:" + this.port + "/collectionexercises/{id}/events")
+                  .routeParam("id", collexId.toString())
+                  .basicAuth(username, password)
+                  .header("accept", "application/json")
+                  .asObject(EventDTO[].class)
+                  .getBody()));
+    } catch (UnirestException e) {
+      throw new CTPException(
+          CTPException.Fault.SYSTEM_ERROR,
+          String.format("Failed to get events for collection exercise: %s", collexId),
+          e);
+    }
+  }
+
+  void updateEvent(final EventDTO event) {
+    final OffsetDateTime offsetDateTime =
+        OffsetDateTime.ofInstant(event.getTimestamp().toInstant(), ZoneOffset.systemDefault());
+    final String date = DateTimeFormatter.ISO_DATE_TIME.format(offsetDateTime);
+
+    HttpResponse<String> response = null;
+    try {
+      response =
+          Unirest.put("http://localhost:" + this.port + "/collectionexercises/{id}/events/{tag}")
+              .routeParam("id", event.getCollectionExerciseId().toString())
+              .routeParam("tag", event.getTag())
+              .basicAuth(this.username, this.password)
+              .header("accept", "application/json")
+              .header("Content-Type", "text/plain")
+              .body(date)
+              .asString();
+    } catch (UnirestException e) {
+      throw new RuntimeException(
+          String.format(
+              "Could not update collection exercise events colletionExerciseId=%s tag=%s",
+              event.getCollectionExerciseId(), event.getTag()),
+          e);
+    }
+    if (response.getStatus() != HttpStatus.NO_CONTENT.value() && response.getStatus() != 409) {
+      throw new RuntimeException(
+          String.format(
+              "Could not update collection exercise events colletionExerciseId=%s tag=%s status=%s",
+              event.getCollectionExerciseId(), event.getTag(), response.getStatus()));
+    }
   }
 
   /**
@@ -101,7 +155,9 @@ class CollectionExerciseClient {
           .getBody();
     } catch (UnirestException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Failed to get collection exercise: %s", e);
+          CTPException.Fault.SYSTEM_ERROR,
+          String.format("Failed to get collection exercise: %s", collexId),
+          e);
     }
   }
 

@@ -11,4 +11,6 @@ public class ActionSvc {
   private RestUtilityConfig connectionConfig;
   private String actionPlansPath;
   private String actionRulesPath;
+  private String actionRulePath;
+  private String actionRulesForActionPlanPath;
 }

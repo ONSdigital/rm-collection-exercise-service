@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -55,7 +56,7 @@ public class MpsActionRuleCreatorTest {
     mpsActionRuleCreator.execute(
         new Event(), new CaseTypeOverride(), new CaseTypeOverride(), survey);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
@@ -74,7 +75,7 @@ public class MpsActionRuleCreatorTest {
     final CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
     mpsActionRuleCreator.execute(collectionExerciseEvent, bCaseTypeOverride, null, survey);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
@@ -105,7 +106,7 @@ public class MpsActionRuleCreatorTest {
     when(actionSvcClient.createActionRule(
             anyString(),
             anyString(),
-            eq("BSNL"),
+            eq(ActionType.BSNL),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_ACTION_PLAN_ID)))
@@ -119,7 +120,7 @@ public class MpsActionRuleCreatorTest {
         .createActionRule(
             eq(SURVEY_SHORT_NAME + "NOTF"),
             eq(SURVEY_SHORT_NAME + " Notification File " + EXERCISE_REF),
-            eq("BSNL"),
+            eq(ActionType.BSNL),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_ACTION_PLAN_ID));

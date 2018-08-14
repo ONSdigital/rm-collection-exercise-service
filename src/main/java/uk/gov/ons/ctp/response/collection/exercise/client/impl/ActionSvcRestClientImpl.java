@@ -25,6 +25,8 @@ import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRulePostRequestDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRulePutRequestDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
@@ -128,7 +130,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   public ActionRuleDTO createActionRule(
       final String name,
       final String description,
-      final String actionTypeName,
+      final ActionType actionTypeName,
       final OffsetDateTime triggerDateTime,
       final int priority,
       final UUID actionPlanId)
@@ -155,5 +157,54 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         actionPlanId,
         createdActionRule.getId());
     return createdActionRule;
+  }
+
+  public ActionRuleDTO updateActionRule(
+      final UUID actionRuleId,
+      final String name,
+      final String description,
+      final OffsetDateTime triggerDateTime,
+      final int priority)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getActionSvc().getActionRulePath(), null, actionRuleId);
+
+    final ActionRulePutRequestDTO actionRulePutRequestDTO = new ActionRulePutRequestDTO();
+    actionRulePutRequestDTO.setName(name);
+    actionRulePutRequestDTO.setDescription(description);
+    actionRulePutRequestDTO.setTriggerDateTime(triggerDateTime);
+    actionRulePutRequestDTO.setPriority(priority);
+
+    final HttpEntity<ActionRulePutRequestDTO> httpEntity =
+        restUtility.createHttpEntity(actionRulePutRequestDTO);
+    return restTemplate
+        .exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, ActionRuleDTO.class)
+        .getBody();
+  }
+
+  @Override
+  public List<ActionRuleDTO> getActionRulesForActionPlan(final UUID actionPlanId) {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getActionSvc().getActionRulesForActionPlanPath(), null, actionPlanId);
+
+    ResponseEntity<List<ActionRuleDTO>> response;
+
+    try {
+      response =
+          restTemplate.exchange(
+              uriComponents.toUri(),
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ActionRuleDTO>>() {});
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
+      }
+      throw e;
+    }
+
+    return response.getBody();
   }
 }
