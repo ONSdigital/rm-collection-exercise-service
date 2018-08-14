@@ -341,7 +341,6 @@ public class ValidateSampleUnits {
    */
   private CollectionExerciseEvent getCollectionExerciseTransitionState(
       CollectionExercise exercise) {
-    log.info("getCollectionExerciseTransitionState is called!");
     CollectionExerciseEvent event = null;
     long init =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(SampleUnitGroupState.INIT, exercise);
@@ -357,11 +356,8 @@ public class ValidateSampleUnits {
       event = CollectionExerciseEvent.VALIDATE;
       log.info("State of collection exercise id: {} is now VALIDATE", exercise.getId());
     } else if (init < 1 && failed > 0) {
-      // None left to validate but some failed, set exercise to
-      // FAILEDVALIDATION
-      log.info(
-          "State of collection exercise id: {} is now INVALIDATED (FAILEDVALIDATION)",
-          exercise.getId());
+      log.info("init: {}, failed: {}", Long.toString(init), Long.toString(failed));
+      // None left to validate but some failed, set exercise to FAILEDVALIDATION
       event = CollectionExerciseEvent.INVALIDATE;
     }
 
@@ -387,6 +383,9 @@ public class ValidateSampleUnits {
             sampleUnitGroupState.transition(
                 sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.VALIDATE));
       } else {
+        log.info(
+            "Setting sample unit group to FAILEDVALIDATION, sampleUnitGroupPK: {}",
+            sampleUnitGroup.getSampleUnitGroupPK());
         sampleUnitGroup.setStateFK(
             sampleUnitGroupState.transition(
                 sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.INVALIDATE));
