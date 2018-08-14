@@ -3,6 +3,8 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,10 +71,10 @@ public class MultipleBusinessEventsValidatorTest {
   @Test
   public void testValidMpsEventCreation() {
     List<Event> events = getExistingEvents();
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(2, ChronoUnit.DAYS);
     Event newMpsEvent = new Event();
     newMpsEvent.setTag((EventService.Tag.mps.toString()));
-    newMpsEvent.setTimestamp(new Timestamp(now + 12000000));
+    newMpsEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
         this.validator.validateOnCreate(
             events, newMpsEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
@@ -81,10 +83,10 @@ public class MultipleBusinessEventsValidatorTest {
   @Test
   public void testValidGoLiveEventCreation() {
     List<Event> events = getExistingEvents();
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(4, ChronoUnit.DAYS);
     Event newGoLiveEvent = new Event();
     newGoLiveEvent.setTag((EventService.Tag.go_live.toString()));
-    newGoLiveEvent.setTimestamp(new Timestamp(now + 16500000));
+    newGoLiveEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
         this.validator.validateOnCreate(
             events, newGoLiveEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
@@ -93,10 +95,10 @@ public class MultipleBusinessEventsValidatorTest {
   @Test
   public void testValidReturnByEventCreation() {
     List<Event> events = getExistingEvents();
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(6, ChronoUnit.DAYS);
     Event newReturnByEvent = new Event();
     newReturnByEvent.setTag((EventService.Tag.return_by.toString()));
-    newReturnByEvent.setTimestamp(new Timestamp(now + 17500000));
+    newReturnByEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
         this.validator.validateOnCreate(
             events, newReturnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
@@ -105,10 +107,10 @@ public class MultipleBusinessEventsValidatorTest {
   @Test
   public void testValidExerciseEndEventCreation() {
     List<Event> events = getExistingEvents();
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(8, ChronoUnit.DAYS);
     Event newExerciseEndEvent = new Event();
     newExerciseEndEvent.setTag((EventService.Tag.exercise_end.toString()));
-    newExerciseEndEvent.setTimestamp(new Timestamp(now + 19000000));
+    newExerciseEndEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
         this.validator.validateOnCreate(
             events, newExerciseEndEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
@@ -132,34 +134,34 @@ public class MultipleBusinessEventsValidatorTest {
   }
 
   private static Event getMpsEvent() {
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(2, ChronoUnit.DAYS);
     Event mpsEvent = new Event();
     mpsEvent.setTag((EventService.Tag.mps.toString()));
-    mpsEvent.setTimestamp(new Timestamp(now + 15000000));
+    mpsEvent.setTimestamp(Timestamp.from(timestamp));
     return mpsEvent;
   }
 
   private static Event getGoLiveEvent() {
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(4, ChronoUnit.DAYS);
     Event event = new Event();
     event.setTag((EventService.Tag.go_live.toString()));
-    event.setTimestamp(new Timestamp(now + 16000000));
+    event.setTimestamp(Timestamp.from(timestamp));
     return event;
   }
 
   private static Event getReturnByEvent() {
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(6, ChronoUnit.DAYS);
     Event event = new Event();
     event.setTag((EventService.Tag.return_by.toString()));
-    event.setTimestamp(new Timestamp(now + 17000000));
+    event.setTimestamp(Timestamp.from(timestamp));
     return event;
   }
 
   private static Event getExerciseEndEvent() {
-    long now = System.currentTimeMillis();
+    Instant timestamp = Instant.now().plus(8, ChronoUnit.DAYS);
     Event event = new Event();
     event.setTag((EventService.Tag.exercise_end.toString()));
-    event.setTimestamp(new Timestamp(now + 18000000));
+    event.setTimestamp(Timestamp.from(timestamp));
     return event;
   }
 }

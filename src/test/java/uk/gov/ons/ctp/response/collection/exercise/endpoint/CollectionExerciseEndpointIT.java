@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -586,16 +587,20 @@ public class CollectionExerciseEndpointIT {
         this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
     String collexId = StringUtils.substringAfterLast(result.getRight(), "/");
     UUID collectionExerciseId = UUID.fromString(collexId);
-    Arrays.stream(EventService.Tag.values())
-        .filter(EventService.Tag::isMandatory)
-        .forEach(
-            t -> {
-              EventDTO event = new EventDTO();
-              event.setCollectionExerciseId(collectionExerciseId);
-              event.setTag(t.name());
-              event.setTimestamp(new Date());
-              this.client.createCollectionExerciseEvent(event);
-            });
+    List<EventService.Tag> tags =
+        Arrays.stream(EventService.Tag.values())
+            .filter(EventService.Tag::isMandatory)
+            .collect(Collectors.toList());
+    int days = 0;
+    for (EventService.Tag t : tags) {
+      EventDTO event = new EventDTO();
+      event.setCollectionExerciseId(collectionExerciseId);
+      event.setTag(t.name());
+      // mandatory dates must be minimum of 24 hours apart
+      event.setTimestamp(Timestamp.from(Instant.now().plus(days, ChronoUnit.DAYS)));
+      this.client.createCollectionExerciseEvent(event);
+      days += 2;
+    }
     return collectionExerciseId;
   }
 

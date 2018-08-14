@@ -4,6 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -32,10 +34,9 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testValidMpsEventCreation() {
-    long now = System.currentTimeMillis();
     Event mpsEvent = new Event();
     mpsEvent.setTag((EventService.Tag.mps.toString()));
-    mpsEvent.setTimestamp(new Timestamp(now + 15000000));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     List<Event> events = new ArrayList<>();
     assertTrue(
         this.validator.validateOnCreate(
@@ -44,10 +45,9 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testValidGoLiveEventCreation() {
-    long now = System.currentTimeMillis();
     Event goLiveEvent = new Event();
     goLiveEvent.setTag((EventService.Tag.mps.toString()));
-    goLiveEvent.setTimestamp(new Timestamp(now + 15000000));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
     List<Event> events = new ArrayList<>();
     assertTrue(
         this.validator.validateOnCreate(
@@ -56,13 +56,12 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testInvalidGoLiveEventCreation() {
-    long now = System.currentTimeMillis();
     Event mpsEvent = new Event();
     mpsEvent.setTag((EventService.Tag.mps.toString()));
-    mpsEvent.setTimestamp(new Timestamp(now + 15000000));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(10, ChronoUnit.DAYS)));
     Event goLive = new Event();
     goLive.setTag((EventService.Tag.go_live.toString()));
-    goLive.setTimestamp((new Timestamp(now + 11000000)));
+    goLive.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     List<Event> events = new ArrayList<>();
     events.add(mpsEvent);
     assertFalse(
@@ -72,19 +71,18 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testInvalidReturnByEventCreation() {
-    long now = System.currentTimeMillis();
     Event mpsEvent = new Event();
     mpsEvent.setTag((EventService.Tag.mps.toString()));
-    mpsEvent.setTimestamp(new Timestamp(now + 15000000));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     Event goLiveEvent = new Event();
     goLiveEvent.setTag((EventService.Tag.go_live.toString()));
-    goLiveEvent.setTimestamp((new Timestamp(now + 17000000)));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
     List<Event> events = new ArrayList<>();
     events.add(mpsEvent);
     events.add(goLiveEvent);
     Event returnByEvent = new Event();
     returnByEvent.setTag((EventService.Tag.return_by.toString()));
-    returnByEvent.setTimestamp((new Timestamp(now + 11000000)));
+    returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     assertFalse(
         this.validator.validateOnCreate(
             events, returnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
@@ -92,19 +90,18 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testValidReturnByEventCreation() {
-    long now = System.currentTimeMillis();
     Event mpsEvent = new Event();
     mpsEvent.setTag((EventService.Tag.mps.toString()));
-    mpsEvent.setTimestamp(new Timestamp(now + 15000000));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     Event goLiveEvent = new Event();
     goLiveEvent.setTag((EventService.Tag.go_live.toString()));
-    goLiveEvent.setTimestamp((new Timestamp(now + 17000000)));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
     List<Event> events = new ArrayList<>();
     events.add(mpsEvent);
     events.add(goLiveEvent);
     Event returnByEvent = new Event();
     returnByEvent.setTag((EventService.Tag.return_by.toString()));
-    returnByEvent.setTimestamp((new Timestamp(now + 19000000)));
+    returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(6, ChronoUnit.DAYS)));
     assertTrue(
         this.validator.validateOnCreate(
             events, returnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
@@ -112,10 +109,9 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testInvalidMpsEventUpdateReadyForLiveState() {
-    long now = System.currentTimeMillis();
     Event mpsEvent = new Event();
     mpsEvent.setTag(EventService.Tag.mps.toString());
-    mpsEvent.setTimestamp(new Timestamp(now + 1500000));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     assertFalse(
         this.validator.validate(
             this.mandatoryEvents,
@@ -125,10 +121,9 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testInvalidMpsEventUpdateLiveState() {
-    long now = System.currentTimeMillis();
     Event mpsEvent = new Event();
     mpsEvent.setTag(EventService.Tag.mps.toString());
-    mpsEvent.setTimestamp(new Timestamp(now + 1500000));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     assertFalse(
         this.validator.validate(
             this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
@@ -136,10 +131,9 @@ public class BusinessEventValidatorTest {
 
   @Test
   public void testInvalidGoLiveEventUpdateReadyForLiveState() {
-    long now = System.currentTimeMillis();
     Event goLiveEvent = new Event();
     goLiveEvent.setTag(EventService.Tag.go_live.toString());
-    goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     assertFalse(
         this.validator.validate(
             this.mandatoryEvents,
