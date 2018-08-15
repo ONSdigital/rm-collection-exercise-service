@@ -196,11 +196,11 @@ public class ValidateSampleUnits {
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
     if (classifierTypes.isEmpty()) {
       log.error(
-          "Failed to retrieve survey classifiers, surveyId: {}",
-          exercise.getSurveyId().toString());
+          "Failed to retrieve survey classifiers, surveyId: {}", exercise.getSurveyId().toString());
       throw new CTPException(
-        CTPException.Fault.RESOURCE_NOT_FOUND,
-        String.format("surveyId: %s", exercise.getId().toString()));
+          CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "%s, surveyId: %s", SURVEY_CLASSIFIER_TYPES_NOT_FOUND, exercise.getId().toString()));
     }
 
     for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
