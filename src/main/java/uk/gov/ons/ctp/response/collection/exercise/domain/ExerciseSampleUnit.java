@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +17,8 @@ import lombok.NoArgsConstructor;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnit;
+import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /** Domain model object for sample units. */
@@ -57,4 +60,28 @@ public class ExerciseSampleUnit {
   @Enumerated(EnumType.STRING)
   @Column(name = "sampleunittypefk")
   private SampleUnitDTO.SampleUnitType sampleUnitType;
+
+  public SampleUnitParent toSampleUnitParent(
+      final String activeActionPlanId, final UUID collectionExerciseId) {
+    final SampleUnitParent parent = new SampleUnitParent();
+    populateSampleUnit(activeActionPlanId, parent);
+    parent.setCollectionExerciseId(collectionExerciseId.toString());
+
+    return parent;
+  }
+
+  public SampleUnit toSampleUnitChild(final String activeActionPlanId) {
+    final SampleUnit child = new SampleUnit();
+    populateSampleUnit(activeActionPlanId, child);
+    return child;
+  }
+
+  private void populateSampleUnit(final String activeActionPlanId, final SampleUnit sampleUnit) {
+    sampleUnit.setId(getSampleUnitId().toString());
+    sampleUnit.setSampleUnitRef(getSampleUnitRef());
+    sampleUnit.setSampleUnitType(getSampleUnitType().name());
+    sampleUnit.setPartyId(Objects.toString(getPartyId(), null));
+    sampleUnit.setCollectionInstrumentId(getCollectionInstrumentId().toString());
+    sampleUnit.setActionPlanId(activeActionPlanId);
+  }
 }
