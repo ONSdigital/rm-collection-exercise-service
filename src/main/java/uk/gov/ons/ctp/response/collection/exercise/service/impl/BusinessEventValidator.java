@@ -94,9 +94,6 @@ public class BusinessEventValidator implements EventValidator {
     for (int i = 0; i < eventsArray.length - 1; i++) {
       Timestamp t1 = eventsArray[i].getTimestamp();
       Timestamp t2 = eventsArray[i + 1].getTimestamp();
-      if (dateLessThan24HoursLater(t1, t2)) {
-        result = false;
-      }
       if (t1.after(t2)) {
         result = false;
       }
@@ -105,6 +102,7 @@ public class BusinessEventValidator implements EventValidator {
   }
 
   /** Validates dates are 24 hours apart. */
+  @SuppressWarnings("unused")
   private boolean dateLessThan24HoursLater(Timestamp t1, Timestamp t2) {
     long days = DAYS.between(t1.toInstant(), t2.toInstant());
     return days < 1;
