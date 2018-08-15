@@ -4,6 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -15,9 +17,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventValidatorTest {
+public class BusinessEventValidatorTest {
 
-  private EventValidator validator;
+  private BusinessEventValidator validator;
 
   private List<Event> mandatoryEvents;
 
@@ -25,9 +27,129 @@ public class EventValidatorTest {
 
   @Before
   public void setUp() {
-    this.validator = new EventValidator();
+    this.validator = new BusinessEventValidator();
     this.mandatoryEvents = createMandatoryEvents();
     this.allEvents = createAllEvents();
+  }
+
+  @Test
+  public void testValidMpsEventCreation() {
+    Event mpsEvent = new Event();
+    mpsEvent.setTag((EventService.Tag.mps.toString()));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    List<Event> events = new ArrayList<>();
+    assertTrue(
+        this.validator.validateOnCreate(
+            events, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
+  }
+
+  @Test
+  public void testValidGoLiveEventCreation() {
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag((EventService.Tag.mps.toString()));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
+    List<Event> events = new ArrayList<>();
+    assertTrue(
+        this.validator.validateOnCreate(
+            events, goLiveEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
+  }
+
+  @Test
+  public void testInvalidGoLiveEventCreation() {
+    Event mpsEvent = new Event();
+    mpsEvent.setTag((EventService.Tag.mps.toString()));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(10, ChronoUnit.DAYS)));
+    Event goLive = new Event();
+    goLive.setTag((EventService.Tag.go_live.toString()));
+    goLive.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    List<Event> events = new ArrayList<>();
+    events.add(mpsEvent);
+    assertFalse(
+        this.validator.validateOnCreate(
+            events, goLive, CollectionExerciseDTO.CollectionExerciseState.CREATED));
+  }
+
+  @Test
+  public void testInvalidReturnByEventCreation() {
+    Event mpsEvent = new Event();
+    mpsEvent.setTag((EventService.Tag.mps.toString()));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag((EventService.Tag.go_live.toString()));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
+    List<Event> events = new ArrayList<>();
+    events.add(mpsEvent);
+    events.add(goLiveEvent);
+    Event returnByEvent = new Event();
+    returnByEvent.setTag((EventService.Tag.return_by.toString()));
+    returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    assertFalse(
+        this.validator.validateOnCreate(
+            events, returnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
+  }
+
+  @Test
+  public void testValidReturnByEventCreation() {
+    Event mpsEvent = new Event();
+    mpsEvent.setTag((EventService.Tag.mps.toString()));
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag((EventService.Tag.go_live.toString()));
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
+    List<Event> events = new ArrayList<>();
+    events.add(mpsEvent);
+    events.add(goLiveEvent);
+    Event returnByEvent = new Event();
+    returnByEvent.setTag((EventService.Tag.return_by.toString()));
+    returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(6, ChronoUnit.DAYS)));
+    assertTrue(
+        this.validator.validateOnCreate(
+            events, returnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
+  }
+
+  @Test
+  public void testInvalidMpsEventUpdateReadyForLiveState() {
+    Event mpsEvent = new Event();
+    mpsEvent.setTag(EventService.Tag.mps.toString());
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents,
+            mpsEvent,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+  }
+
+  @Test
+  public void testInvalidMpsEventUpdateLiveState() {
+    Event mpsEvent = new Event();
+    mpsEvent.setTag(EventService.Tag.mps.toString());
+    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents, mpsEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
+  }
+
+  @Test
+  public void testInvalidGoLiveEventUpdateReadyForLiveState() {
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag(EventService.Tag.go_live.toString());
+    goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents,
+            goLiveEvent,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE));
+  }
+
+  @Test
+  public void testInvalidGoLiveEventUpdateLiveState() {
+    long now = System.currentTimeMillis();
+    Event goLiveEvent = new Event();
+    goLiveEvent.setTag(EventService.Tag.go_live.toString());
+    goLiveEvent.setTimestamp(new Timestamp(now + 2500000));
+    assertFalse(
+        this.validator.validate(
+            this.mandatoryEvents, goLiveEvent, CollectionExerciseDTO.CollectionExerciseState.LIVE));
   }
 
   @Test
