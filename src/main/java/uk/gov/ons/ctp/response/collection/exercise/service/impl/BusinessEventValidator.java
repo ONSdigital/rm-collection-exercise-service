@@ -1,16 +1,25 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
-public class EventValidator {
+@Slf4j
+public class BusinessEventValidator implements EventValidator {
 
   /**
    * q Validates the events timestamps are in the correct order and the updated event can be
@@ -23,12 +32,11 @@ public class EventValidator {
   public boolean validate(
       final List<Event> existingEvents,
       final Event updatedEvent,
-      final CollectionExerciseDTO.CollectionExerciseState collectionExerciseState) {
+      final CollectionExerciseState collectionExerciseState) {
 
     // Can only update reminders of the non mandatory events when READY_FOR_LIVE
-    if ((collectionExerciseState.equals(
-                CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE)
-            || collectionExerciseState.equals(CollectionExerciseDTO.CollectionExerciseState.LIVE))
+    if ((collectionExerciseState.equals(CollectionExerciseState.READY_FOR_LIVE)
+            || collectionExerciseState.equals(CollectionExerciseState.LIVE))
         && (isMandatory(updatedEvent) || !isReminder(updatedEvent))) {
       return false;
     }
@@ -48,6 +56,56 @@ public class EventValidator {
     Map<String, Event> eventMap = generateEventsMap(existingEvents, updatedEvent);
 
     return validateMandatoryEvents(eventMap) && validateNonMandatoryEvents(eventMap);
+  }
+
+  /** Validates the dates on event creation */
+  public boolean validateOnCreate(
+      final List<Event> existingEvents,
+      final Event newEvent,
+      final CollectionExerciseState collectionExerciseState) {
+    Map<String, Event> events =
+        existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
+    if (collectionExerciseState.equals(CollectionExerciseState.CREATED)) {
+      return validateMandatoryEventsOnCreate(events, newEvent);
+    }
+    return false;
+  }
+
+  /** Validates the mandatory dates on event creation. Event dates can be added in any order. */
+  private boolean validateMandatoryEventsOnCreate(
+      final Map<String, Event> eventMap, Event newEvent) {
+    List<Event> events =
+        Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end)
+            .stream()
+            .map(tag -> getEventByTag(tag, newEvent, eventMap))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    return datesInValidOrder(events);
+  }
+
+  private Event getEventByTag(Tag tag, Event newEvent, Map<String, Event> eventMap) {
+    return newEvent.getTag().equals(tag.toString()) ? newEvent : eventMap.get(tag.toString());
+  }
+
+  /** Validates list of events in chronological order. */
+  private boolean datesInValidOrder(List<Event> events) {
+    Event[] eventsArray = events.stream().toArray(Event[]::new);
+    boolean result = true;
+    for (int i = 0; i < eventsArray.length - 1; i++) {
+      Timestamp t1 = eventsArray[i].getTimestamp();
+      Timestamp t2 = eventsArray[i + 1].getTimestamp();
+      if (t1.after(t2)) {
+        result = false;
+      }
+    }
+    return result;
+  }
+
+  /** Validates dates are 24 hours apart. */
+  @SuppressWarnings("unused")
+  private boolean dateLessThan24HoursLater(Timestamp t1, Timestamp t2) {
+    long days = DAYS.between(t1.toInstant(), t2.toInstant());
+    return days < 1;
   }
 
   /**
