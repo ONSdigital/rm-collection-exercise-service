@@ -32,5 +32,12 @@ public interface SurveySvcClient extends SurveyService {
   SurveyClassifierTypeDTO requestClassifierTypeSelector(UUID surveyId, UUID classifierType)
       throws RestClientException;
 
+  /**
+   * Get classifier type selector for Survey UUID and ClassifierType UUID.
+   *
+   * @param surveyId UUID for which to request classifiers.
+   * @return SurveyDTO representation of survey
+   * @throws RestClientException something went wrong making http call.
+   */
   SurveyDTO findSurvey(UUID surveyId) throws RestClientException;
 }

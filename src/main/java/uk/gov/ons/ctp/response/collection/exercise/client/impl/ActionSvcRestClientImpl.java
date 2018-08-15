@@ -90,7 +90,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
-  public List<ActionPlanDTO> getActionPlansBySelectors(
+  public List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
       final String collectionExerciseId, final Boolean activeEnrolment) {
     log.debug(
         "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",

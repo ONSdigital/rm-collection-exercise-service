@@ -78,7 +78,7 @@ public class ActionSvcRestClientImplTest {
         .thenReturn(responseEntity);
 
     // When
-    actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
+    actionSvcRestClient.getActionPlansBySelectorsBusiness(COLLECTION_EXERCISE_ID, false);
 
     // Then call is made to correct url
     verify(restTemplate, times(1))
@@ -106,7 +106,7 @@ public class ActionSvcRestClientImplTest {
 
     // When
     List<ActionPlanDTO> actionPlanDTOs =
-        actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
+        actionSvcRestClient.getActionPlansBySelectorsBusiness(COLLECTION_EXERCISE_ID, false);
 
     // Then Null is returned
     assertNull(actionPlanDTOs);
@@ -127,7 +127,7 @@ public class ActionSvcRestClientImplTest {
         .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
     // When
-    actionSvcRestClient.getActionPlansBySelectors(COLLECTION_EXERCISE_ID, false);
+    actionSvcRestClient.getActionPlansBySelectorsBusiness(COLLECTION_EXERCISE_ID, false);
 
     // Then HTTPClientErrorException is thrown
   }

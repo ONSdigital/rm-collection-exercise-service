@@ -26,17 +26,17 @@ public interface ActionSvcClient {
       throws RestClientException;
 
   /**
-   * Request list of action plans with given selectors
+   * Request list of business action plans with given selectors
    *
    * @param collectionExerciseId collectionExerciseId to find action plans for
    * @param activeEnrolment boolean for if sample unit has an active enrolment associated with it
    * @return List<ActionPlanDTO> representation of the created action plan
    */
-  List<ActionPlanDTO> getActionPlansBySelectors(
+  List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
       String collectionExerciseId, Boolean activeEnrolment);
 
   /**
-   * Request list of action plans with given selectors
+   * Request list of social action plans with given selectors
    *
    * @param collectionExerciseId collectionExerciseId to find action plans for
    * @return List<ActionPlanDTO> representation of the created action plan

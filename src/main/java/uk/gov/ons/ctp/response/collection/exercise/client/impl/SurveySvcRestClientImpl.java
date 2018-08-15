@@ -134,9 +134,8 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
             appConfig.getSurveySvc().getSurveyDetailPath(), null, surveyId);
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
-    ResponseEntity<String> responseEntity = null;
-    SurveyDTO survey = null;
-
+    ResponseEntity<String> responseEntity;
+    SurveyDTO survey;
     try {
       log.debug(
           "about to get to the Survey SVC with surveyId {} from {}",

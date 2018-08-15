@@ -238,7 +238,7 @@ public class SampleUnitDistributor {
     Boolean activeEnrolment =
         surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
     return actionSvcClient
-        .getActionPlansBySelectors(exercise.getId().toString(), activeEnrolment)
+        .getActionPlansBySelectorsBusiness(exercise.getId().toString(), activeEnrolment)
         .get(0)
         .getId();
   }
