@@ -207,8 +207,8 @@ public class ValidateSampleUnits {
 
           if (sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.B) {
             PartyDTO party =
-              partySvcClient.requestParty(
-                sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+                partySvcClient.requestParty(
+                    sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
             sampleUnit.setPartyId(UUID.fromString(party.getId()));
           }
         } catch (RestClientException ex) {

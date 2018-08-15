@@ -243,12 +243,11 @@ public class SampleUnitDistributor {
         .getId();
   }
 
-  private UUID getActionPlanIdSocial(CollectionExercise exercise)
-    throws RestClientException {
+  private UUID getActionPlanIdSocial(CollectionExercise exercise) throws RestClientException {
     return actionSvcClient
-      .getActionPlansBySelectorsSocial(exercise.getId().toString())
-      .get(0)
-      .getId();
+        .getActionPlansBySelectorsSocial(exercise.getId().toString())
+        .get(0)
+        .getId();
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {

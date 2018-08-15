@@ -89,34 +89,34 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-    @Override
-    public List<ActionPlanDTO> getActionPlansBySelectors(
-    final String collectionExerciseId, final Boolean activeEnrolment) {
-      log.debug(
+  @Override
+  public List<ActionPlanDTO> getActionPlansBySelectors(
+      final String collectionExerciseId, final Boolean activeEnrolment) {
+    log.debug(
         "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
         collectionExerciseId,
         activeEnrolment);
 
-      MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-      queryParams.add("collectionExerciseId", collectionExerciseId);
-      queryParams.add("activeEnrolment", activeEnrolment.toString());
-      UriComponents uriComponents =
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.add("collectionExerciseId", collectionExerciseId);
+    queryParams.add("activeEnrolment", activeEnrolment.toString());
+    UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
-      ResponseEntity<List<ActionPlanDTO>> responseEntity;
-      try {
-        responseEntity =
+    ResponseEntity<List<ActionPlanDTO>> responseEntity;
+    try {
+      responseEntity =
           restTemplate.exchange(
-            uriComponents.toString(),
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
-      } catch (HttpClientErrorException e) {
-        if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-          return null;
-        }
-        throw e;
+              uriComponents.toString(),
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
       }
+      throw e;
+    }
 
     log.debug(
         "Successfully retrieved action plan for selectors, "
@@ -127,28 +127,28 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   }
 
   @Retryable(
-    value = {RestClientException.class},
-    maxAttemptsExpression = "#{${retries.maxAttempts}}",
-    backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
     log.debug(
-      "Retrieving action plan for selectors, " + "collectionExerciseId: {}", collectionExerciseId);
+        "Retrieving action plan for selectors, " + "collectionExerciseId: {}",
+        collectionExerciseId);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add("collectionExerciseId", collectionExerciseId);
     UriComponents uriComponents =
-      restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
+        restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
     ResponseEntity<List<ActionPlanDTO>> responseEntity;
     try {
       responseEntity =
-        restTemplate.exchange(
-          uriComponents.toString(),
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<List<ActionPlanDTO>>() {
-          });
+          restTemplate.exchange(
+              uriComponents.toString(),
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
     } catch (HttpClientErrorException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
@@ -157,8 +157,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     }
 
     log.debug(
-      "Successfully retrieved action plan for selectors, "
-        + "collectionExerciseId: {}", collectionExerciseId);
+        "Successfully retrieved action plan for selectors, " + "collectionExerciseId: {}",
+        collectionExerciseId);
     return responseEntity.getBody();
   }
 

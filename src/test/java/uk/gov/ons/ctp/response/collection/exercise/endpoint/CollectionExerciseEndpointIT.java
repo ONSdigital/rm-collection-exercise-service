@@ -447,11 +447,11 @@ public class CollectionExerciseEndpointIT {
     actionPlan.setId(UUID.randomUUID());
 
     wireMockRule.stubFor(
-      get(urlPathMatching("/actionplans?(.*)"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(mapper.writeValueAsString(Collections.singletonList(actionPlan)))));
+        get(urlPathMatching("/actionplans?(.*)"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(Collections.singletonList(actionPlan)))));
   }
 
   private void stubGetActionRulesByActionPlan() throws IOException {
@@ -461,11 +461,11 @@ public class CollectionExerciseEndpointIT {
     actionRuleDTO.setPriority(3);
 
     wireMockRule.stubFor(
-      get(urlPathMatching("/actionrules/actionplan/(.*)"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(mapper.writeValueAsString(Arrays.asList(actionRuleDTO)))));
+        get(urlPathMatching("/actionrules/actionplan/(.*)"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(Arrays.asList(actionRuleDTO)))));
   }
 
   private void stubCreateActionRule() throws IOException {
