@@ -295,4 +295,53 @@ public class ValidateSampleUnitsTest {
     // Then
     verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
   }
+
+  @Test
+  public void testValidateSampleUnitsRequestSurveyClassifierTypeSelectorsFail() throws Exception {
+
+    // Given
+    when(surveySvcClient.requestClassifierTypeSelectors(any()))
+        .thenThrow(RestClientException.class);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, never())
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsRequestSurveyClassifierTypeSelectorsEmpty() throws Exception {
+
+    // Given
+    when(surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(Collections.EMPTY_LIST);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, never())
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsRequestSurveyClassifierTypeSelectorEmpty() throws Exception {
+
+    // Given
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any())).thenReturn(null);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, never())
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
 }

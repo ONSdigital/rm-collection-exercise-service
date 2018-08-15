@@ -37,12 +37,12 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 @Primary
 public class SurveySvcRestClientImpl implements SurveySvcClient {
 
-  private AppConfig appConfig;
+  private final AppConfig appConfig;
 
-  private RestTemplate restTemplate;
-  private RestUtility restUtility;
+  private final RestTemplate restTemplate;
+  private final RestUtility restUtility;
 
-  private ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
   @Autowired
   public SurveySvcRestClientImpl(

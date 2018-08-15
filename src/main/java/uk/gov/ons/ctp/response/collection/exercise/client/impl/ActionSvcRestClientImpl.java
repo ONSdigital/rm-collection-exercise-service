@@ -35,6 +35,9 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 @Slf4j
 public class ActionSvcRestClientImpl implements ActionSvcClient {
 
+  private static final String COLLECTION_EXERCISE_ID = "collectionExerciseId";
+  private static final String ACTIVE_ENROLMENT = "activeEnrolment";
+
   private AppConfig appConfig;
 
   private RestTemplate restTemplate;
@@ -98,8 +101,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         activeEnrolment);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add("collectionExerciseId", collectionExerciseId);
-    queryParams.add("activeEnrolment", activeEnrolment.toString());
+    queryParams.add(COLLECTION_EXERCISE_ID, collectionExerciseId);
+    queryParams.add(ACTIVE_ENROLMENT, activeEnrolment.toString());
     UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
@@ -136,7 +139,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         "Retrieving action plan for selectors, collectionExerciseId: {}", collectionExerciseId);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add("collectionExerciseId", collectionExerciseId);
+    queryParams.add(COLLECTION_EXERCISE_ID, collectionExerciseId);
     UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
@@ -156,7 +159,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     }
 
     log.debug(
-        "Successfully retrieved action plan for selectors, " + "collectionExerciseId: {}",
+        "Successfully retrieved action plan for selectors, collectionExerciseId: {}",
         collectionExerciseId);
     return responseEntity.getBody();
   }

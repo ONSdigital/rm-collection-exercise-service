@@ -49,6 +49,9 @@ public class ValidateSampleUnits {
   private static final String VALIDATION_LIST_ID = "group";
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
 
+  private static final String SURVEY_CLASSIFIER_TYPES_NOT_FOUND =
+      "Survey classifier types not found";
+
   private AppConfig appConfig;
 
   private CollectionExerciseService collexService;
@@ -109,21 +112,16 @@ public class ValidateSampleUnits {
 
         collections.forEach(
             (exercise, groups) -> {
-              addCollectionInstrumentIds(exercise, groups);
-
               try {
-                CollectionExerciseEvent event = getCollectionExerciseTransitionState(exercise);
-
-                if (event != null) {
-                  this.collexService.transitionCollectionExercise(exercise, event);
-                }
+                addCollectionInstrumentIds(exercise, groups);
+                transitionCollectionExercise(exercise);
               } catch (CTPException e) {
                 log.error(
                     "Error validating collection exercise, collectionExerciseId: {}",
                     exercise.getId());
                 log.error("Stack trace: {}", e);
               }
-            }); // End looping collections
+            });
 
       } catch (LockingException ex) {
         log.error("Validation failed due to {}", ex.getMessage());
@@ -192,9 +190,18 @@ public class ValidateSampleUnits {
    * @param sampleUnitGroups in exercise
    */
   private void addCollectionInstrumentIds(
-      CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups) {
+      CollectionExercise exercise, List<ExerciseSampleUnitGroup> sampleUnitGroups)
+      throws CTPException {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
+    if (classifierTypes.isEmpty()) {
+      log.error(
+          "Failed to retrieve survey classifiers, surveyId: {}",
+          exercise.getSurveyId().toString());
+      throw new CTPException(
+        CTPException.Fault.RESOURCE_NOT_FOUND,
+        String.format("surveyId: %s", exercise.getId().toString()));
+    }
 
     for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
       List<ExerciseSampleUnit> sampleUnits = sampleUnitSvc.findBySampleUnitGroup(sampleUnitGroup);
@@ -263,8 +270,8 @@ public class ValidateSampleUnits {
             "Error requesting Survey Classifier Types for SurveyId: {}", exercise.getSurveyId());
       }
     } catch (RestClientException ex) {
-      log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Error retrieving survey classifiers, error: {}", ex.getMessage());
+      log.error(ex.toString());
     }
 
     return classifierTypes;
@@ -341,8 +348,8 @@ public class ValidateSampleUnits {
    * @param exercise to transition.
    * @return exercise Collection Exercise with new state.
    */
-  private CollectionExerciseEvent getCollectionExerciseTransitionState(
-      CollectionExercise exercise) {
+  private CollectionExerciseEvent transitionCollectionExercise(CollectionExercise exercise)
+      throws CTPException {
     CollectionExerciseEvent event = null;
     long init =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(SampleUnitGroupState.INIT, exercise);
@@ -361,6 +368,10 @@ public class ValidateSampleUnits {
       log.info("init: {}, failed: {}", Long.toString(init), Long.toString(failed));
       // None left to validate but some failed, set exercise to FAILEDVALIDATION
       event = CollectionExerciseEvent.INVALIDATE;
+    }
+
+    if (event != null) {
+      this.collexService.transitionCollectionExercise(exercise, event);
     }
 
     return event;
