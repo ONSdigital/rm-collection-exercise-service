@@ -3,7 +3,6 @@ package uk.gov.ons.ctp.response.collection.exercise.distribution;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +73,6 @@ public class SampleUnitDistributor {
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
   private DistributedListManager<Integer> sampleDistributionListManager;
-
   private final TransactionTemplate transactionTemplate;
 
   /**
@@ -211,23 +209,18 @@ public class SampleUnitDistributor {
       throws RestClientException {
     ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
 
+    String actionPlanId;
+    if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
+      actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
+    } else {
+      actionPlanId = getActionPlanIdSocial(exercise).toString();
+    }
+
     // SampleUnitParents/Children are being removed
     // We only expect one sample unit per sample unit group now
     // but still use SampleUnitParent class until it's removed from rabbit message
-    SampleUnitParent sampleUnitParent = new SampleUnitParent();
-    sampleUnitParent.setId(sampleUnit.getSampleUnitId().toString());
-    sampleUnitParent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-    sampleUnitParent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-    sampleUnitParent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
-    sampleUnitParent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-    sampleUnitParent.setCollectionExerciseId(exercise.getId().toString());
-
-    if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
-      sampleUnitParent.setActionPlanId(getActionPlanIdBusiness(sampleUnit, exercise).toString());
-    } else {
-      sampleUnitParent.setActionPlanId(getActionPlanIdSocial(exercise).toString());
-    }
-
+    SampleUnitParent sampleUnitParent =
+        sampleUnit.toSampleUnitParent(actionPlanId, exercise.getId());
     publishSampleUnit(sampleUnitGroup, sampleUnitParent);
   }
 
