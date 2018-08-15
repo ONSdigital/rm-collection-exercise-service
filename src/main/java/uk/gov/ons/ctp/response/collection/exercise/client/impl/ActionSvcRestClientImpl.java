@@ -133,8 +133,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
     log.debug(
-        "Retrieving action plan for selectors, " + "collectionExerciseId: {}",
-        collectionExerciseId);
+        "Retrieving action plan for selectors, collectionExerciseId: {}", collectionExerciseId);
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add("collectionExerciseId", collectionExerciseId);

@@ -37,15 +37,24 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 @Primary
 public class SurveySvcRestClientImpl implements SurveySvcClient {
 
-  @Autowired private AppConfig appConfig;
+  private AppConfig appConfig;
 
-  @Autowired private RestTemplate restTemplate;
-
-  @Qualifier("surveyRestUtility")
-  @Autowired
+  private RestTemplate restTemplate;
   private RestUtility restUtility;
 
-  @Autowired private ObjectMapper objectMapper;
+  private ObjectMapper objectMapper;
+
+  @Autowired
+  public SurveySvcRestClientImpl(
+      AppConfig appConfig,
+      RestTemplate restTemplate,
+      @Qualifier("surveyRestUtility") RestUtility restUtility,
+      @Qualifier("customObjectMapper") ObjectMapper objectMapper) {
+    this.appConfig = appConfig;
+    this.restTemplate = restTemplate;
+    this.restUtility = restUtility;
+    this.objectMapper = objectMapper;
+  }
 
   @Retryable(
       value = {RestClientException.class},
@@ -80,6 +89,10 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     return result;
   }
 
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public SurveyClassifierTypeDTO requestClassifierTypeSelector(
       final UUID surveyId, final UUID classifierType) throws RestClientException {
@@ -127,6 +140,10 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     return result;
   }
 
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public SurveyDTO findSurvey(final UUID surveyId) {
     UriComponents uriComponents =
@@ -154,6 +171,10 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     return survey;
   }
 
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public SurveyDTO findSurveyByRef(final String surveyRef) {
     UriComponents uriComponents =
