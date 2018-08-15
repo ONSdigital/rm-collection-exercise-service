@@ -153,10 +153,9 @@ public class CollectionExerciseEndpointIT {
         client.getCollectionExercise(response.getRight());
 
     final EventDTO mps = createEventDTO(collectionExercise, EventService.Tag.mps, 2);
-    final EventDTO goLive = createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
-    final EventDTO returnBy = createEventDTO(collectionExercise, EventService.Tag.return_by, 4);
-    final EventDTO exerciseEnd =
-        createEventDTO(collectionExercise, EventService.Tag.exercise_end, 5);
+    createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
+    createEventDTO(collectionExercise, EventService.Tag.return_by, 4);
+    createEventDTO(collectionExercise, EventService.Tag.exercise_end, 5);
 
     Date newDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
     mps.setTimestamp(newDate);
@@ -186,117 +185,116 @@ public class CollectionExerciseEndpointIT {
     client.createCollectionExerciseEvent(event);
     return event;
   }
-  //
-  //  @Test
-  //  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink()
-  //      throws Exception {
-  //    // Given
-  //    stubCreateActionPlan();
-  //    stubCreateActionRule();
-  //    stubSurveyServiceBusiness();
-  //    stubCollectionInstrumentCount();
-  //    stubGetPartyBySampleUnitRef();
-  //    SampleSummaryDTO sampleSummary = stubSampleSummary();
-  //    UUID collectionExerciseId = createScheduledCollectionExercise();
-  //
-  //    // When
-  //    BlockingQueue<String> queue =
-  //        getMessageListener()
-  //            .listen(
-  //                SimpleMessageBase.ExchangeType.Direct,
-  //                "collex-transition-exchange",
-  //                "Collex.Transition.binding");
-  //    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
-  //
-  //    // Then
-  //    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
-  //
-  //    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
-  //    assertEquals(
-  //        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
-  //        collectionTransitionEvent.getState());
-  //
-  //    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
-  //    assertEquals(
-  //        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
-  //  }
 
-  //  @Test
-  //  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
-  //      throws Exception {
-  //    // Given;
-  //    stubCreateActionPlan();
-  //    stubCreateActionRule();
-  //    stubSurveyServiceBusiness();
-  //    stubCollectionInstrumentCount();
-  //    stubGetPartyBySampleUnitRef();
-  //    SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
-  //    UUID collectionExerciseId = createScheduledCollectionExercise();
-  //    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
-  //    BlockingQueue<String> queue =
-  //        getMessageListener()
-  //            .listen(
-  //                SimpleMessageBase.ExchangeType.Direct,
-  //                "collex-transition-exchange",
-  //                "Collex.Transition.binding");
-  //
-  //    // This will cause an exception to be thrown as there is no collection instrument service
-  // but
-  //    // this is harmless to our purpose
-  //    // When
-  //    getMessageSender()
-  //        .sendMessage(
-  //            "sample-outbound-exchange",
-  //            "Sample.SampleUploadFinished.binding",
-  //            this.mapper.writeValueAsString(sampleSummary));
-  //
-  //    // Then
-  //    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
-  //
-  //    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
-  //    assertEquals(
-  //        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
-  //        collectionTransitionEvent.getState());
-  //
-  //    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
-  //    assertEquals(
-  //        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
-  //  }
-  //
-  //  @Test
-  //  public void ensureSampleUnitIdIsPropagatedHereSocial() throws Exception {
-  //    stubCreateActionPlan();
-  //    stubGetPartyBySampleUnitRef();
-  //    createSurveyServiceSocialStub();
-  //    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("H");
-  //
-  //    assertNull("Party id must be null", sampleUnit.getPartyId());
-  //  }
-  //
-  //  @Test
-  //  public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
-  //    stubCreateActionPlan();
-  //    stubSurveyServiceBusiness();
-  //    stubGetPartyBySampleUnitRef();
-  //    createPartyServiceNoAssociationsStub();
-  //    stubCollectionInstrumentCount();
-  //    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
-  //
-  //    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
-  //  }
-  //
-  //  @Test
-  //  public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws
-  // Exception {
-  //    stubCreateActionPlan();
-  //    stubSurveyServiceBusiness();
-  //    stubGetPartyBySampleUnitRef();
-  //    createPartyServicesWithAssociationsStub();
-  //    stubCollectionInstrumentCount();
-  //    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
-  //
-  //    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
-  //  }
+  @Test
+  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink()
+      throws Exception {
+    // Given
+    stubCreateActionPlan();
+    stubCreateActionRule();
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    stubGetPartyBySampleUnitRef();
+    SampleSummaryDTO sampleSummary = stubSampleSummary();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
+
+    // When
+    BlockingQueue<String> queue =
+        getMessageListener()
+            .listen(
+                SimpleMessageBase.ExchangeType.Direct,
+                "collex-transition-exchange",
+                "Collex.Transition.binding");
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+
+    // Then
+    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
+
+    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
+        collectionTransitionEvent.getState());
+
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
+  }
+
+  @Test
+  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
+      throws Exception {
+    // Given;
+    stubCreateActionPlan();
+    stubCreateActionRule();
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    stubGetPartyBySampleUnitRef();
+    SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+    BlockingQueue<String> queue =
+        getMessageListener()
+            .listen(
+                SimpleMessageBase.ExchangeType.Direct,
+                "collex-transition-exchange",
+                "Collex.Transition.binding");
+
+    // This will cause an exception to be thrown as there is no collection instrument service
+    // this is harmless to our purpose
+    // When
+    getMessageSender()
+        .sendMessage(
+            "sample-outbound-exchange",
+            "Sample.SampleUploadFinished.binding",
+            this.mapper.writeValueAsString(sampleSummary));
+
+    // Then
+    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
+
+    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
+        collectionTransitionEvent.getState());
+
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
+  }
+
+  @Test
+  public void ensureSampleUnitIdIsPropagatedHereSocial() throws Exception {
+    stubCreateActionPlan();
+    stubGetSurvey();
+    stubGetActionPlansBySelectors();
+    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("H");
+
+    assertNull("Party id must be null", sampleUnit.getPartyId());
+  }
+
+  @Test
+  public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
+    stubCreateActionPlan();
+    stubSurveyServiceBusiness();
+    stubGetPartyNoAssociations();
+    stubCollectionInstrumentCount();
+    stubGetActionPlansBySelectors();
+
+    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
+
+    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+  }
+
+  @Test
+  public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
+    stubCreateActionPlan();
+    stubSurveyServiceBusiness();
+    stubGetPartyWithAssociations();
+    stubCollectionInstrumentCount();
+    stubGetActionPlansBySelectors();
+    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
+
+    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+  }
 
   private SampleUnitParent ensureSampleUnitIdIsPropagatedHere(String type) throws Exception {
     createCollectionInstrumentStub();
@@ -398,7 +396,7 @@ public class CollectionExerciseEndpointIT {
     return this.client.getCollectionExercise(result.getRight());
   }
 
-  private void setSampleSize(CollectionExerciseDTO collex, int sampleSize) throws Exception {
+  private void setSampleSize(CollectionExerciseDTO collex, int sampleSize) {
     CollectionExercise c = collexRepository.findOneById(collex.getId());
     c.setSampleSize(sampleSize);
     collexRepository.saveAndFlush(c);
@@ -410,8 +408,7 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void setState(
-      CollectionExerciseDTO collex, CollectionExerciseDTO.CollectionExerciseState state)
-      throws Exception {
+      CollectionExerciseDTO collex, CollectionExerciseDTO.CollectionExerciseState state) {
     CollectionExercise c = collexRepository.findOneById(collex.getId());
     c.setState(state);
     collexRepository.saveAndFlush(c);
@@ -445,6 +442,18 @@ public class CollectionExerciseEndpointIT {
                     .withBody(mapper.writeValueAsString(actionPlanDTO))));
   }
 
+  private void stubGetActionPlansBySelectors() throws IOException {
+    ActionPlanDTO actionPlan = new ActionPlanDTO();
+    actionPlan.setId(UUID.randomUUID());
+
+    wireMockRule.stubFor(
+      get(urlPathMatching("/actionplans?(.*)"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mapper.writeValueAsString(Collections.singletonList(actionPlan)))));
+  }
+
   private void stubGetActionRulesByActionPlan() throws IOException {
     final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
     actionRuleDTO.setId(UUID.randomUUID());
@@ -452,11 +461,11 @@ public class CollectionExerciseEndpointIT {
     actionRuleDTO.setPriority(3);
 
     wireMockRule.stubFor(
-        get(urlPathMatching("/actionrules/actionplan/(.*)"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(Arrays.asList(actionRuleDTO)))));
+      get(urlPathMatching("/actionrules/actionplan/(.*)"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mapper.writeValueAsString(Arrays.asList(actionRuleDTO)))));
   }
 
   private void stubCreateActionRule() throws IOException {
@@ -531,7 +540,7 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createPartyServiceNoAssociationsStub() throws IOException {
+  private void stubGetPartyNoAssociations() throws IOException {
     String json =
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
@@ -541,7 +550,7 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createPartyServicesWithAssociationsStub() throws IOException {
+  private void stubGetPartyWithAssociations() throws IOException {
     String json =
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
@@ -570,7 +579,7 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createSurveyServiceSocialStub() throws IOException {
+  private void stubGetSurvey() throws IOException {
     createSurveyServiceClassifierStubs();
 
     String json =

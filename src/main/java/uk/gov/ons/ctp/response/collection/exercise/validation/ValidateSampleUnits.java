@@ -205,10 +205,12 @@ public class ValidateSampleUnits {
                   classifierTypes, sampleUnit, exercise.getSurveyId().toString());
           sampleUnit.setCollectionInstrumentId(collectionInstrumentId);
 
-          PartyDTO party =
+          if (sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.B) {
+            PartyDTO party =
               partySvcClient.requestParty(
-                  sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-          sampleUnit.setPartyId(UUID.fromString(party.getId()));
+                sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+            sampleUnit.setPartyId(UUID.fromString(party.getId()));
+          }
         } catch (RestClientException ex) {
           log.error(
               "Error in validation for SampleUnitGroup PK: {} due to: {}",

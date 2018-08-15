@@ -44,6 +44,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.party.representation.Association;
 import uk.gov.ons.ctp.response.party.representation.Enrolment;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
@@ -220,12 +221,17 @@ public class SampleUnitDistributor {
     sampleUnitParent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
     sampleUnitParent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
     sampleUnitParent.setCollectionExerciseId(exercise.getId().toString());
-    sampleUnitParent.setActionPlanId(getActionPlanId(sampleUnit, exercise).toString());
+
+    if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
+      sampleUnitParent.setActionPlanId(getActionPlanIdBusiness(sampleUnit, exercise).toString());
+    } else {
+      sampleUnitParent.setActionPlanId(getActionPlanIdSocial(exercise).toString());
+    }
 
     publishSampleUnit(sampleUnitGroup, sampleUnitParent);
   }
 
-  private UUID getActionPlanId(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
+  private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
       throws RestClientException {
     PartyDTO businessParty =
         partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
@@ -235,6 +241,14 @@ public class SampleUnitDistributor {
         .getActionPlansBySelectors(exercise.getId().toString(), activeEnrolment)
         .get(0)
         .getId();
+  }
+
+  private UUID getActionPlanIdSocial(CollectionExercise exercise)
+    throws RestClientException {
+    return actionSvcClient
+      .getActionPlansBySelectorsSocial(exercise.getId().toString())
+      .get(0)
+      .getId();
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {

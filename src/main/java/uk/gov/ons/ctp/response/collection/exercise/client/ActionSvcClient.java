@@ -36,6 +36,14 @@ public interface ActionSvcClient {
       String collectionExerciseId, Boolean activeEnrolment);
 
   /**
+   * Request list of action plans with given selectors
+   *
+   * @param collectionExerciseId collectionExerciseId to find action plans for
+   * @return List<ActionPlanDTO> representation of the created action plan
+   */
+  List<ActionPlanDTO> getActionPlansBySelectorsSocial(String collectionExerciseId);
+
+  /**
    * Request action rule is created.
    *
    * @param name name of action rule
