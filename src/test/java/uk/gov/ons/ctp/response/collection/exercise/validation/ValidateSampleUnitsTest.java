@@ -394,7 +394,7 @@ public class ValidateSampleUnitsTest {
 
     // Given one of the sample units will fail validation
     when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
-      .thenReturn(classifierTypeSelector.get(1));
+        .thenReturn(classifierTypeSelector.get(1));
 
     // When
     validateSampleUnits.validateSampleUnits();
@@ -402,8 +402,8 @@ public class ValidateSampleUnitsTest {
     // Then
     verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, times(2))
-      .transitionCollectionExercise(
-        isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 
   @Test
@@ -411,8 +411,8 @@ public class ValidateSampleUnitsTest {
 
     // Given one of the sample units will fail validation
     when(collectionInstrumentSvcClient.requestCollectionInstruments(
-      new JSONObject(CI_1_SVC_SEARCH).toString()))
-      .thenReturn(Collections.EMPTY_LIST);
+            new JSONObject(CI_1_SVC_SEARCH).toString()))
+        .thenReturn(Collections.EMPTY_LIST);
 
     // When
     validateSampleUnits.validateSampleUnits();
@@ -420,8 +420,8 @@ public class ValidateSampleUnitsTest {
     // Then
     verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, times(2))
-      .transitionCollectionExercise(
-        isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 
   @Test
@@ -429,8 +429,8 @@ public class ValidateSampleUnitsTest {
 
     // Given one of the sample units will fail validation
     when(collectionInstrumentSvcClient.requestCollectionInstruments(
-      new JSONObject(CI_1_SVC_SEARCH).toString()))
-      .thenReturn(collectionInstruments);
+            new JSONObject(CI_1_SVC_SEARCH).toString()))
+        .thenReturn(collectionInstruments);
 
     // When
     validateSampleUnits.validateSampleUnits();
@@ -438,7 +438,7 @@ public class ValidateSampleUnitsTest {
     // Then
     verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, times(2))
-      .transitionCollectionExercise(
-        isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 }
