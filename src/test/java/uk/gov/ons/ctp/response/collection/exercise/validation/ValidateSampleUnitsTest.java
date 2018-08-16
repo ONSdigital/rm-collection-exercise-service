@@ -146,7 +146,7 @@ public class ValidateSampleUnitsTest {
     // Mock requestCollectionInstrumentId
     when(collectionInstrumentSvcClient.requestCollectionInstruments(
             new JSONObject(CI_1_SVC_SEARCH).toString()))
-        .thenReturn(collectionInstruments);
+        .thenReturn(collectionInstruments.subList(0, 1));
     when(partySvcClient.requestParty(
             sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
         .thenReturn(parties.get(0));
@@ -387,5 +387,58 @@ public class ValidateSampleUnitsTest {
     verify(collexService, times(2))
         .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsInvalidClassifier() throws Exception {
+
+    // Given one of the sample units will fail validation
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
+      .thenReturn(classifierTypeSelector.get(1));
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, times(2))
+      .transitionCollectionExercise(
+        isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsNoCollectionInstruments() throws Exception {
+
+    // Given one of the sample units will fail validation
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+      new JSONObject(CI_1_SVC_SEARCH).toString()))
+      .thenReturn(Collections.EMPTY_LIST);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, times(2))
+      .transitionCollectionExercise(
+        isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsMultipleCollectionInstruments() throws Exception {
+
+    // Given one of the sample units will fail validation
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+      new JSONObject(CI_1_SVC_SEARCH).toString()))
+      .thenReturn(collectionInstruments);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, times(2))
+      .transitionCollectionExercise(
+        isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
 }

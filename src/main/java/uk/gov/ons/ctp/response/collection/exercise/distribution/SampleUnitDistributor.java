@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -56,6 +55,8 @@ public class SampleUnitDistributor {
 
   private AppConfig appConfig;
 
+  private SampleUnitPublisher publisher;
+
   private CollectionExerciseRepository collectionExerciseRepo;
   private EventRepository eventRepository;
   private SampleUnitGroupRepository sampleUnitGroupRepo;
@@ -64,8 +65,6 @@ public class SampleUnitDistributor {
   private ActionSvcClient actionSvcClient;
   private PartySvcClient partySvcClient;
 
-  private SampleUnitPublisher publisher;
-
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
       collectionExerciseTransitionState;
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
@@ -73,21 +72,15 @@ public class SampleUnitDistributor {
   private DistributedListManager<Integer> sampleDistributionListManager;
   private final TransactionTemplate transactionTemplate;
 
-  /**
-   * Constructor into which the Spring PlatformTransactionManager is injected
-   *
-   * @param transactionManager provided by Spring
-   */
-  @Autowired
   public SampleUnitDistributor(
       final AppConfig appConfig,
+      final SampleUnitPublisher publisher,
       final CollectionExerciseRepository collectionExerciseRepo,
       final EventRepository eventRepository,
       final SampleUnitGroupRepository sampleUnitGroupRepo,
       final SampleUnitRepository sampleUnitRepo,
       final ActionSvcClient actionSvcClient,
       final PartySvcClient partySvcClient,
-      final SampleUnitPublisher publisher,
       final @Qualifier("collectionExercise") StateTransitionManager<
                   CollectionExerciseState, CollectionExerciseEvent>
               collectionExerciseTransitionState,
@@ -98,13 +91,13 @@ public class SampleUnitDistributor {
               sampleDistributionListManager,
       final PlatformTransactionManager transactionManager) {
     this.appConfig = appConfig;
+    this.publisher = publisher;
     this.collectionExerciseRepo = collectionExerciseRepo;
     this.eventRepository = eventRepository;
     this.sampleUnitGroupRepo = sampleUnitGroupRepo;
     this.sampleUnitRepo = sampleUnitRepo;
     this.actionSvcClient = actionSvcClient;
     this.partySvcClient = partySvcClient;
-    this.publisher = publisher;
     this.collectionExerciseTransitionState = collectionExerciseTransitionState;
     this.sampleUnitGroupState = sampleUnitGroupState;
     this.sampleDistributionListManager = sampleDistributionListManager;
@@ -128,15 +121,16 @@ public class SampleUnitDistributor {
         return;
       }
 
-      for (ExerciseSampleUnitGroup sampleUnitGroup : sampleUnitGroups) {
-        try {
-          distributeSampleUnitGroup(exercise, sampleUnitGroup);
-        } catch (RestClientException ex) {
-          log.error(
-              "Failed to distribute sample unit group, sampleUnitGroupPK: {}",
-              sampleUnitGroup.getSampleUnitGroupPK());
-        }
-      }
+      sampleUnitGroups.forEach(
+          sampleUnitGroup -> {
+            try {
+              distributeSampleUnitGroup(exercise, sampleUnitGroup);
+            } catch (RestClientException ex) {
+              log.error(
+                  "Failed to distribute sample unit group, sampleUnitGroupPK: {}",
+                  sampleUnitGroup.getSampleUnitGroupPK());
+            }
+          });
 
       collectionExerciseTransitionState(exercise);
 
@@ -221,8 +215,7 @@ public class SampleUnitDistributor {
     publishSampleUnit(sampleUnitGroup, sampleUnitParent);
   }
 
-  private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
-      throws RestClientException {
+  private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
     PartyDTO businessParty =
         partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
     Boolean activeEnrolment =
@@ -233,7 +226,7 @@ public class SampleUnitDistributor {
         .getId();
   }
 
-  private UUID getActionPlanIdSocial(CollectionExercise exercise) throws RestClientException {
+  private UUID getActionPlanIdSocial(CollectionExercise exercise) {
     return actionSvcClient
         .getActionPlansBySelectorsSocial(exercise.getId().toString())
         .get(0)

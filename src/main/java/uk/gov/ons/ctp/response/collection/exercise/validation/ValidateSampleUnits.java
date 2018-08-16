@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -66,7 +65,6 @@ public class ValidateSampleUnits {
 
   private DistributedListManager<Integer> sampleValidationListManager;
 
-  @Autowired
   public ValidateSampleUnits(
       final AppConfig appConfig,
       final CollectionExerciseService collexService,
@@ -95,47 +93,42 @@ public class ValidateSampleUnits {
 
     List<CollectionExercise> exercises =
         collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
+    if (exercises.isEmpty()) {
+      log.debug("No exercises in EXECUTED state");
+      return;
+    }
 
-    if (!exercises.isEmpty()) {
+    try {
+      List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercises);
+      Map<CollectionExercise, List<ExerciseSampleUnitGroup>> collections =
+          sampleUnitGroups
+              .stream()
+              .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
 
+      collections.forEach(
+          (exercise, groups) -> {
+            try {
+              addCollectionInstrumentIds(exercise, groups);
+              transitionCollectionExercise(exercise);
+            } catch (CTPException e) {
+              log.error(
+                  "Error validating collection exercise, collectionExerciseId: {}",
+                  exercise.getId());
+              log.error("Stack trace: {}", e);
+            }
+          });
+
+    } catch (LockingException ex) {
+      log.error("Validation failed due to {}", ex.getMessage());
+      log.error("Stack trace: " + ex);
+    } finally {
       try {
-
-        List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercises);
-
-        // Not searching DB for individual Collection Exercise above when
-        // getting batch of SampleUnitGroups to process but processing in
-        // Collection Exercise order will save external service calls so sorting
-        // them now.
-        Map<CollectionExercise, List<ExerciseSampleUnitGroup>> collections =
-            sampleUnitGroups
-                .stream()
-                .collect(Collectors.groupingBy(ExerciseSampleUnitGroup::getCollectionExercise));
-
-        collections.forEach(
-            (exercise, groups) -> {
-              try {
-                addCollectionInstrumentIds(exercise, groups);
-                transitionCollectionExercise(exercise);
-              } catch (CTPException e) {
-                log.error(
-                    "Error validating collection exercise, collectionExerciseId: {}",
-                    exercise.getId());
-                log.error("Stack trace: {}", e);
-              }
-            });
-
+        sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
       } catch (LockingException ex) {
-        log.error("Validation failed due to {}", ex.getMessage());
+        log.error(
+            "Failed to release sampleValidationListManager data - error msg is {}",
+            ex.getMessage());
         log.error("Stack trace: " + ex);
-      } finally {
-        try {
-          sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
-        } catch (LockingException ex) {
-          log.error(
-              "Failed to release sampleValidationListManager data - error msg is {}",
-              ex.getMessage());
-          log.error("Stack trace: " + ex);
-        }
       }
     }
   }
@@ -288,8 +281,7 @@ public class ValidateSampleUnits {
    * @throws RestClientException something went wrong making http call
    */
   private UUID requestCollectionInstrumentId(
-      List<String> classifierTypes, ExerciseSampleUnit sampleUnit, String surveyId)
-      throws RestClientException {
+      List<String> classifierTypes, ExerciseSampleUnit sampleUnit, String surveyId) {
     Map<String, String> classifiers = new HashMap<>();
     classifiers.put("SURVEY_ID", surveyId);
     for (String classifier : classifierTypes) {
@@ -310,7 +302,7 @@ public class ValidateSampleUnits {
       collectionInstrumentId = null;
     } else if (collectionInstruments.size() > 1) {
       log.warn(
-          "{} collection instruments found for: {}, taking most recent first",
+          "Multiple collection instruments found selecting first, count: {}, selectors: {}",
           collectionInstruments.size(),
           searchString);
       collectionInstrumentId = collectionInstruments.get(0).getId();
