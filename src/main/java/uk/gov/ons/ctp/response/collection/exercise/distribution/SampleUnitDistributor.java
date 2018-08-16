@@ -196,8 +196,7 @@ public class SampleUnitDistributor {
    * @param sampleUnitGroup for which to distribute sample units
    */
   private void distributeSampleUnitGroup(
-      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup)
-      throws RestClientException {
+      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
     ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
 
     String actionPlanId;
