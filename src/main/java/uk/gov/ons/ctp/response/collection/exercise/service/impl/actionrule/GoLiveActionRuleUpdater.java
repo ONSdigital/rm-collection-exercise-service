@@ -3,31 +3,42 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl.actionrule;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @Component
-public final class GoLiveActionRuleUpdater extends AbstractActionRuleUpdater {
-  private GoLiveActionRuleUpdater(final ActionSvcClient actionSvcClient) {
-    super(actionSvcClient);
+public final class GoLiveActionRuleUpdater implements ActionRuleUpdater {
+  private final ActionRulesFilter actionRulesFilter;
+  private final ActionSvcClient actionSvcClient;
+  private final SurveyService surveyService;
+
+  private GoLiveActionRuleUpdater(
+      ActionRulesFilter actionRulesFilter,
+      ActionSvcClient actionSvcClient,
+      SurveyService surveyService) {
+    this.actionRulesFilter = actionRulesFilter;
+    this.actionSvcClient = actionSvcClient;
+    this.surveyService = surveyService;
   }
 
   @Override
-  public void execute(
-      final Event event,
-      final CaseTypeOverride businessCaseTypeOverride,
-      final CaseTypeOverride businessIndividualCaseTypeOverride,
-      final SurveyDTO survey)
-      throws CTPException {
+  public void execute(final Event event) throws CTPException {
+
+    final CollectionExercise collectionExercise = event.getCollectionExercise();
+
+    final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
+
     if (survey.getSurveyType() != SurveyType.Business) {
       return;
     }
@@ -36,11 +47,13 @@ public final class GoLiveActionRuleUpdater extends AbstractActionRuleUpdater {
       return;
     }
 
-    final UUID actionPlanId = businessIndividualCaseTypeOverride.getActionPlanId();
-    final List<ActionRuleDTO> actionRules = getActionRulesForActionPlan(actionPlanId);
-    final List<ActionRuleDTO> bsneRules =
-        filterActionRulesByType(actionRules, ActionType.BSNE, actionPlanId);
-    final ActionRuleDTO bsneRule = bsneRules.get(0);
+    final ActionPlanDTO actionPlan =
+        actionSvcClient.getActionPlanBySelectors(collectionExercise.getId().toString(), true);
+
+    final List<ActionRuleDTO> actionRules =
+        actionSvcClient.getActionRulesForActionPlan(actionPlan.getId());
+    final ActionRuleDTO bsneRule =
+        actionRulesFilter.getActionRuleByType(actionRules, ActionType.BSNE, actionPlan.getId());
 
     actionSvcClient.updateActionRule(
         bsneRule.getId(),

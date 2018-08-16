@@ -4,13 +4,15 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
@@ -18,20 +20,23 @@ import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 public final class ReminderActionRuleCreator implements ActionRuleCreator {
   private final ActionSvcClient actionSvcClient;
   private final ReminderSuffixGenerator reminderSuffixGenerator;
+  private final SurveyService surveyService;
 
   public ReminderActionRuleCreator(
       final ActionSvcClient actionSvcClient,
-      final ReminderSuffixGenerator reminderSuffixGenerator) {
+      final ReminderSuffixGenerator reminderSuffixGenerator,
+      final SurveyService surveyService) {
     this.actionSvcClient = actionSvcClient;
     this.reminderSuffixGenerator = reminderSuffixGenerator;
+    this.surveyService = surveyService;
   }
 
   @Override
-  public void execute(
-      final Event collectionExerciseEvent,
-      final CaseTypeOverride businessCaseTypeOverride,
-      final CaseTypeOverride businessIndividualCaseTypeOverride,
-      final SurveyDTO survey) {
+  public void execute(final Event collectionExerciseEvent) throws CTPException {
+    final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
+
+    final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
+
     if (survey.getSurveyType() != SurveyType.Business) {
       return;
     }
@@ -42,7 +47,12 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
 
     final Instant instant = Instant.ofEpochMilli(collectionExerciseEvent.getTimestamp().getTime());
     final OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
-    final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
+    final String CollectionExerciseId = collectionExercise.getId().toString();
+
+    final ActionPlanDTO activeActionPlan =
+        actionSvcClient.getActionPlanBySelectors(CollectionExerciseId, true);
+    final ActionPlanDTO inactiveActionPlan =
+        actionSvcClient.getActionPlanBySelectors(CollectionExerciseId, false);
 
     final String reminderSuffix =
         reminderSuffixGenerator.getReminderSuffix(collectionExerciseEvent.getTag());
@@ -53,7 +63,7 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
         ActionType.BSRE,
         offsetDateTime,
         3,
-        businessIndividualCaseTypeOverride.getActionPlanId());
+        activeActionPlan.getId());
 
     actionSvcClient.createActionRule(
         survey.getShortName() + "REMF" + reminderSuffix,
@@ -61,6 +71,6 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
         ActionType.BSRL,
         offsetDateTime,
         3,
-        businessCaseTypeOverride.getActionPlanId());
+        inactiveActionPlan.getId());
   }
 }

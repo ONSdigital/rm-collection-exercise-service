@@ -30,7 +30,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -38,31 +37,21 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
-import uk.gov.ons.ctp.response.collection.exercise.service.CaseTypeOverrideService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceImplTest {
   private static final UUID SURVEY_ID = UUID.fromString("4ca97b1b-de9c-4fed-9898-fac594d1565f");
-  private static final UUID BUSINESS_INDIVIDUAL_ACTION_PLAN_ID =
-      UUID.fromString("84a3afcd-bb2c-4a89-b8c6-3f117420f047");
-  private static final UUID BUSINESS_ACTION_PLAN_ID =
-      UUID.fromString("459304df-e4f9-450f-947b-ec7c2c85a1aa");
   private static final UUID COLLECTION_EXERCISE_EVENT_ID =
       UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
   private static final UUID COLLEX_UUID = UUID.fromString("f03206ee-137d-41e3-af5c-2dea393bb360");
-  private static final String BUSINESS_SAMPLE_TYPE = "B";
-  private static final String BUSINESS_INDIVIDUAL_SAMPLE_TYPE = "BI";
   private static final int EXERCISE_PK = 6433;
 
   @Mock private SurveySvcClient surveySvcClient;
-
-  @Mock private CaseTypeOverrideService caseTypeOverrideService;
 
   @Mock private CollectionExerciseService collectionExerciseService;
 
@@ -143,16 +132,6 @@ public class EventServiceImplTest {
     collex.setExercisePK(EXERCISE_PK);
     collex.setSurveyId(SURVEY_ID);
 
-    final SurveyDTO surveyDto = new SurveyDTO();
-    surveyDto.setSurveyType(SurveyType.Business);
-    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(surveyDto);
-
-    CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(BUSINESS_ACTION_PLAN_ID);
-
-    CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID);
-
     Instant eventTriggerInstant = Instant.now();
     Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
@@ -161,30 +140,15 @@ public class EventServiceImplTest {
     collectionExerciseEvent.setTimestamp(eventTriggerDate);
     collectionExerciseEvent.setId(COLLECTION_EXERCISE_EVENT_ID);
 
-    when(caseTypeOverrideService.getCaseTypeOverride(collex, BUSINESS_SAMPLE_TYPE))
-        .thenReturn(businessCaseTypeOverride);
-    when(caseTypeOverrideService.getCaseTypeOverride(collex, BUSINESS_INDIVIDUAL_SAMPLE_TYPE))
-        .thenReturn(businessIndividualCaseTypeOverride);
-
     actionRuleCreators.add(actionRuleCreator);
     actionRuleCreators.add(actionRuleCreator2);
 
     // When
-    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+    eventService.createActionRulesForEvent(collectionExerciseEvent);
 
     // Then
-    verify(actionRuleCreator)
-        .execute(
-            eq(collectionExerciseEvent),
-            eq(businessCaseTypeOverride),
-            eq(businessIndividualCaseTypeOverride),
-            eq(surveyDto));
-    verify(actionRuleCreator2)
-        .execute(
-            eq(collectionExerciseEvent),
-            eq(businessCaseTypeOverride),
-            eq(businessIndividualCaseTypeOverride),
-            eq(surveyDto));
+    verify(actionRuleCreator).execute(eq(collectionExerciseEvent));
+    verify(actionRuleCreator2).execute(eq(collectionExerciseEvent));
   }
 
   @Test
@@ -197,31 +161,10 @@ public class EventServiceImplTest {
     collectionExerciseEvent.setTag(Tag.employment.name());
 
     // When
-    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
+    eventService.createActionRulesForEvent(collectionExerciseEvent);
 
     // Then
-    verify(actionRuleCreator, never()).execute(any(), any(), any(), any());
-  }
-
-  @Test
-  public void testNoActionRulesCreatedForNonBusinessesSurveyEvents() throws CTPException {
-    // Given
-    final Event collectionExerciseEvent = new Event();
-    final CollectionExercise collex = new CollectionExercise();
-    collex.setSurveyId(SURVEY_ID);
-
-    SurveyDTO surveyDto = new SurveyDTO();
-    surveyDto.setSurveyType(SurveyType.Social);
-    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(surveyDto);
-
-    collectionExerciseEvent.setCollectionExercise(collex);
-    collectionExerciseEvent.setTag(Tag.mps.name());
-
-    // When
-    eventService.createActionRulesForEvent(collectionExerciseEvent, collex);
-
-    // Then
-    verify(actionRuleCreator, never()).execute(any(), any(), any(), any());
+    verify(actionRuleCreator, never()).execute(any());
   }
 
   @Test
@@ -318,17 +261,6 @@ public class EventServiceImplTest {
 
     final List<Event> existingEvents = new ArrayList<>();
 
-    final CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(BUSINESS_ACTION_PLAN_ID);
-
-    final CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID);
-
-    when(caseTypeOverrideService.getCaseTypeOverride(collex, BUSINESS_SAMPLE_TYPE))
-        .thenReturn(businessCaseTypeOverride);
-    when(caseTypeOverrideService.getCaseTypeOverride(collex, BUSINESS_INDIVIDUAL_SAMPLE_TYPE))
-        .thenReturn(businessIndividualCaseTypeOverride);
-
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     when(eventValidator.validate(existingEvents, existingEvent, collectionExerciseState))
         .thenReturn(true);
@@ -339,12 +271,8 @@ public class EventServiceImplTest {
     eventService.updateEvent(COLLEX_UUID, Tag.mps.name(), new Date());
 
     verify(eventRepository, atLeastOnce()).save(eq(existingEvent));
-    verify(actionRuleUpdater, atLeastOnce())
-        .execute(
-            existingEvent, businessCaseTypeOverride, businessIndividualCaseTypeOverride, survey);
-    verify(actionRuleUpdater2, atLeastOnce())
-        .execute(
-            existingEvent, businessCaseTypeOverride, businessIndividualCaseTypeOverride, survey);
+    verify(actionRuleUpdater, atLeastOnce()).execute(existingEvent);
+    verify(actionRuleUpdater2, atLeastOnce()).execute(existingEvent);
   }
 
   @Test

@@ -1,10 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.endsWith;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,8 +30,13 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.response.action.representation.*;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRulePostRequestDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionRulePutRequestDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.impl.ActionSvcRestClientImpl;
 import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -305,7 +311,7 @@ public class ActionSvcClientImplTest {
   }
 
   @Test
-  public void testGetActionRulesForActionPlan() {
+  public void testGetActionRulesForActionPlan() throws CTPException {
     // Given
     final ActionSvc actionSvcConfig = new ActionSvc();
     actionSvcConfig.setActionRulesForActionPlanPath(ACTION_RULES_FOR_PLAN_PATH);
@@ -340,7 +346,7 @@ public class ActionSvcClientImplTest {
   }
 
   @Test(expected = RestClientException.class)
-  public void testGetActionRulesForActionPlanRestClientException() {
+  public void testGetActionRulesForActionPlanRestClientException() throws CTPException {
     // Given
     final ActionSvc actionSvcConfig = new ActionSvc();
     actionSvcConfig.setActionRulesForActionPlanPath(ACTION_RULES_FOR_PLAN_PATH);
@@ -367,8 +373,8 @@ public class ActionSvcClientImplTest {
     actionSvcClient.getActionRulesForActionPlan(actionPlanId);
   }
 
-  @Test
-  public void testGetActionRulesForActionPlanReturnsNullOn404() {
+  @Test(expected = CTPException.class)
+  public void testGetActionRulesForActionPlanRaisesCTPExceptionOn404() throws CTPException {
     // Given
     final ActionSvc actionSvcConfig = new ActionSvc();
     actionSvcConfig.setActionRulesForActionPlanPath(ACTION_RULES_FOR_PLAN_PATH);
@@ -391,8 +397,7 @@ public class ActionSvcClientImplTest {
             eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
         .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-    // When
-    assertThat(actionSvcClient.getActionRulesForActionPlan(actionPlanId), nullValue());
+    actionSvcClient.getActionRulesForActionPlan(actionPlanId);
   }
 
   private ActionRulePutRequestDTO getActionRulePutRequestDTO() {

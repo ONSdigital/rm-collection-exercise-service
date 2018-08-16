@@ -1,9 +1,18 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -17,7 +26,13 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
@@ -44,7 +59,12 @@ import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.repository.*;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
@@ -138,7 +158,7 @@ public class CollectionExerciseEndpointIT {
   }
 
   @Test
-  public void shouldUpdateEventDate() throws IOException, CTPException {
+  public void shouldUpdateEventDate() throws IOException, CTPException, InterruptedException {
     stubCreateActionPlan();
     stubCreateActionRule();
     stubCollectionInstrumentCount();
@@ -153,6 +173,8 @@ public class CollectionExerciseEndpointIT {
     final CollectionExerciseDTO collectionExercise =
         client.getCollectionExercise(response.getRight());
 
+    setupStubsGetActionPlansBySelectors(collectionExercise.getId());
+
     final EventDTO mps = createEventDTO(collectionExercise, EventService.Tag.mps, 2);
     final EventDTO goLive = createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
     final EventDTO returnBy = createEventDTO(collectionExercise, EventService.Tag.return_by, 4);
@@ -160,6 +182,7 @@ public class CollectionExerciseEndpointIT {
         createEventDTO(collectionExercise, EventService.Tag.exercise_end, 5);
 
     Date newDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+
     mps.setTimestamp(newDate);
     client.updateEvent(mps);
 
@@ -173,19 +196,6 @@ public class CollectionExerciseEndpointIT {
     final EventDTO createdEvent = events.get(0);
     assertThat(createdEvent.getTag(), is(EventService.Tag.mps.name()));
     assertThat(createdEvent.getTimestamp().getTime(), is(newDate.getTime()));
-  }
-
-  private EventDTO createEventDTO(
-      final CollectionExerciseDTO collectionExercise,
-      final EventService.Tag go_live,
-      final Integer daysInFuture) {
-    final EventDTO event = new EventDTO();
-    event.setTimestamp(Date.from(Instant.now().plus(daysInFuture, ChronoUnit.DAYS)));
-    event.setTag(go_live.toString());
-    event.setCollectionExerciseId(collectionExercise.getId());
-
-    client.createCollectionExerciseEvent(event);
-    return event;
   }
 
   @Test
@@ -225,12 +235,14 @@ public class CollectionExerciseEndpointIT {
   public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
       throws Exception {
     // Given;
+
     stubCreateActionPlan();
     stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
     UUID collectionExerciseId = createScheduledCollectionExercise();
+
     this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
     BlockingQueue<String> queue =
         getMessageListener()
@@ -351,6 +363,19 @@ public class CollectionExerciseEndpointIT {
     return sampleUnitParent;
   }
 
+  private EventDTO createEventDTO(
+      final CollectionExerciseDTO collectionExercise,
+      final EventService.Tag tag,
+      final Integer daysInFuture) {
+    final EventDTO event = new EventDTO();
+    event.setTimestamp(Date.from(Instant.now().plus(daysInFuture, ChronoUnit.DAYS)));
+    event.setTag(tag.toString());
+    event.setCollectionExerciseId(collectionExercise.getId());
+
+    client.createCollectionExerciseEvent(event);
+    return event;
+  }
+
   /**
    * Creates a new SimpleMessageSender based on the config in AppConfig
    *
@@ -432,11 +457,43 @@ public class CollectionExerciseEndpointIT {
     actionPlanDTO.setId(UUID.randomUUID());
 
     wireMockRule.stubFor(
-        post(urlPathMatching("/actionplans"))
+        post(urlPathEqualTo("/actionplans"))
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
                     .withBody(mapper.writeValueAsString(actionPlanDTO))));
+  }
+
+  private void stubGetActionPlansBySelectors(
+      UUID collectionExerciseId, Boolean activeEnrolment, List<ActionPlanDTO> actionPlans)
+      throws IOException {
+    wireMockRule.stubFor(
+        get(urlPathEqualTo("/actionplans"))
+            .withQueryParam("collectionExerciseId", equalTo(collectionExerciseId.toString()))
+            .withQueryParam("activeEnrolment", equalTo(activeEnrolment.toString()))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(actionPlans))));
+  }
+
+  private void setupStubsGetActionPlansBySelectors(UUID collectionExerciseId) throws IOException {
+    HashMap<String, String> inactiveSelectors = new HashMap<>();
+
+    inactiveSelectors.put("activeEnrolment", "false");
+    ActionPlanDTO inactiveActionPlan = new ActionPlanDTO();
+    inactiveActionPlan.setSelectors(inactiveSelectors);
+
+    stubGetActionPlansBySelectors(
+        collectionExerciseId, false, Collections.singletonList(inactiveActionPlan));
+
+    HashMap<String, String> activeSelectors = new HashMap<>();
+
+    activeSelectors.put("activeEnrolment", "true");
+    ActionPlanDTO activeActionPlan = new ActionPlanDTO();
+    inactiveActionPlan.setSelectors(activeSelectors);
+    stubGetActionPlansBySelectors(
+        collectionExerciseId, true, Collections.singletonList(activeActionPlan));
   }
 
   private void stubGetActionRulesByActionPlan() throws IOException {
@@ -542,7 +599,8 @@ public class CollectionExerciseEndpointIT {
             "CollectionExerciseEndpointIT.SurveyClassifierDTO.json");
     this.wireMockRule.stubFor(
         get(urlPathMatching(
-                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/classifiertypeselectors"))
+                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+                    + "/classifiertypeselectors"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
     json =
         loadResourceAsString(
@@ -550,7 +608,9 @@ public class CollectionExerciseEndpointIT {
             "CollectionExerciseEndpointIT.SurveyClassifierTypeDTO.json");
     this.wireMockRule.stubFor(
         get(urlPathMatching(
-                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/classifiertypeselectors/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
+                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+                    + "/classifiertypeselectors/"
+                    + "([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
@@ -580,17 +640,21 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private UUID createScheduledCollectionExercise() throws CTPException {
+  private UUID createScheduledCollectionExercise() throws CTPException, IOException {
     String exerciseRef = getRandomRef();
     String userDescription = "Test Description";
     Pair<Integer, String> result =
         this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
     String collexId = StringUtils.substringAfterLast(result.getRight(), "/");
     UUID collectionExerciseId = UUID.fromString(collexId);
+
+    setupStubsGetActionPlansBySelectors(collectionExerciseId);
+
     List<EventService.Tag> tags =
         Arrays.stream(EventService.Tag.values())
             .filter(EventService.Tag::isMandatory)
             .collect(Collectors.toList());
+
     int days = 0;
     for (EventService.Tag t : tags) {
       EventDTO event = new EventDTO();
@@ -601,6 +665,7 @@ public class CollectionExerciseEndpointIT {
       this.client.createCollectionExerciseEvent(event);
       days += 2;
     }
+
     return collectionExerciseId;
   }
 
