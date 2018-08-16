@@ -23,7 +23,6 @@ import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
@@ -64,7 +63,6 @@ public class SampleUnitDistributor {
 
   private ActionSvcClient actionSvcClient;
   private PartySvcClient partySvcClient;
-  private SurveySvcClient surveySvcClient;
 
   private SampleUnitPublisher publisher;
 
@@ -82,23 +80,23 @@ public class SampleUnitDistributor {
    */
   @Autowired
   public SampleUnitDistributor(
-      AppConfig appConfig,
-      CollectionExerciseRepository collectionExerciseRepo,
-      EventRepository eventRepository,
-      SampleUnitGroupRepository sampleUnitGroupRepo,
-      SampleUnitRepository sampleUnitRepo,
-      ActionSvcClient actionSvcClient,
-      PartySvcClient partySvcClient,
-      SurveySvcClient surveySvcClient,
-      SampleUnitPublisher publisher,
-      @Qualifier("collectionExercise")
-          StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
+      final AppConfig appConfig,
+      final CollectionExerciseRepository collectionExerciseRepo,
+      final EventRepository eventRepository,
+      final SampleUnitGroupRepository sampleUnitGroupRepo,
+      final SampleUnitRepository sampleUnitRepo,
+      final ActionSvcClient actionSvcClient,
+      final PartySvcClient partySvcClient,
+      final SampleUnitPublisher publisher,
+      final @Qualifier("collectionExercise") StateTransitionManager<
+                  CollectionExerciseState, CollectionExerciseEvent>
               collectionExerciseTransitionState,
-      @Qualifier("sampleUnitGroup")
-          StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState,
-      @Qualifier("distribution") DistributedListManager<Integer> sampleDistributionListManager,
+      final @Qualifier("sampleUnitGroup") StateTransitionManager<
+                  SampleUnitGroupState, SampleUnitGroupEvent>
+              sampleUnitGroupState,
+      final @Qualifier("distribution") DistributedListManager<Integer>
+              sampleDistributionListManager,
       final PlatformTransactionManager transactionManager) {
-
     this.appConfig = appConfig;
     this.collectionExerciseRepo = collectionExerciseRepo;
     this.eventRepository = eventRepository;
@@ -106,7 +104,6 @@ public class SampleUnitDistributor {
     this.sampleUnitRepo = sampleUnitRepo;
     this.actionSvcClient = actionSvcClient;
     this.partySvcClient = partySvcClient;
-    this.surveySvcClient = surveySvcClient;
     this.publisher = publisher;
     this.collectionExerciseTransitionState = collectionExerciseTransitionState;
     this.sampleUnitGroupState = sampleUnitGroupState;

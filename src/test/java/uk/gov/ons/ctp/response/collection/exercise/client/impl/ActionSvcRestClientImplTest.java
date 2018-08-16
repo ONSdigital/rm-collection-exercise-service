@@ -105,11 +105,11 @@ public class ActionSvcRestClientImplTest {
         .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
     // When
-    List<ActionPlanDTO> actionPlanDTOs =
+    List<ActionPlanDTO> actionPlans =
         actionSvcRestClient.getActionPlansBySelectorsBusiness(COLLECTION_EXERCISE_ID, false);
 
     // Then Null is returned
-    assertNull(actionPlanDTOs);
+    assertNull(actionPlans);
   }
 
   @Test(expected = HttpClientErrorException.class)
@@ -130,5 +130,47 @@ public class ActionSvcRestClientImplTest {
     actionSvcRestClient.getActionPlansBySelectorsBusiness(COLLECTION_EXERCISE_ID, false);
 
     // Then HTTPClientErrorException is thrown
+  }
+
+  @Test
+  public void getActionPlansBySelectorsSocial404() {
+
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+    when(restTemplate.exchange(
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+    // When
+    List<ActionPlanDTO> actionPlans =
+        actionSvcRestClient.getActionPlansBySelectorsSocial(COLLECTION_EXERCISE_ID);
+
+    // Then
+    assertNull(actionPlans);
+  }
+
+  @Test(expected = HttpClientErrorException.class)
+  public void getActionPlansBySelectorsSocialFail() {
+
+    // Given
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setActionPlansPath("test:path");
+    when(appConfig.getActionSvc()).thenReturn(actionSvc);
+    when(restTemplate.exchange(
+            any(String.class),
+            eq(HttpMethod.GET),
+            eq(null),
+            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+        .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+    // When
+    actionSvcRestClient.getActionPlansBySelectorsSocial(COLLECTION_EXERCISE_ID);
+
+    // Then HttpClientErrorException is thrown
   }
 }

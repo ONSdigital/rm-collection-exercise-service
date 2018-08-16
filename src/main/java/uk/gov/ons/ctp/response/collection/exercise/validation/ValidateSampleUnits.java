@@ -68,16 +68,17 @@ public class ValidateSampleUnits {
 
   @Autowired
   public ValidateSampleUnits(
-      AppConfig appConfig,
-      CollectionExerciseService collexService,
-      ExerciseSampleUnitService sampleUnitSvc,
-      ExerciseSampleUnitGroupService sampleUnitGroupSvc,
-      CollectionInstrumentSvcClient collectionInstrumentSvcClient,
-      PartySvcClient partySvcClient,
-      SurveySvcClient surveySvcClient,
-      @Qualifier("sampleUnitGroup")
-          StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState,
-      @Qualifier("validation") DistributedListManager<Integer> sampleValidationListManager) {
+      final AppConfig appConfig,
+      final CollectionExerciseService collexService,
+      final ExerciseSampleUnitService sampleUnitSvc,
+      final ExerciseSampleUnitGroupService sampleUnitGroupSvc,
+      final CollectionInstrumentSvcClient collectionInstrumentSvcClient,
+      final PartySvcClient partySvcClient,
+      final SurveySvcClient surveySvcClient,
+      final @Qualifier("sampleUnitGroup") StateTransitionManager<
+                  SampleUnitGroupState, SampleUnitGroupEvent>
+              sampleUnitGroupState,
+      final @Qualifier("validation") DistributedListManager<Integer> sampleValidationListManager) {
     this.appConfig = appConfig;
     this.collexService = collexService;
     this.sampleUnitSvc = sampleUnitSvc;
@@ -224,7 +225,6 @@ public class ValidateSampleUnits {
               sampleUnitGroup.getSampleUnitGroupPK(),
               ex.getMessage());
           log.error("Stack trace: " + ex);
-          throw ex;
         }
       }
       saveUpdatedSampleUnits(sampleUnitGroup, sampleUnits);
@@ -333,23 +333,14 @@ public class ValidateSampleUnits {
   }
 
   private void saveUpdatedSampleUnits(
-      final ExerciseSampleUnitGroup sampleUnitGroup,
-      final List<ExerciseSampleUnit> sampleUnitsWithRespondents) {
+      final ExerciseSampleUnitGroup sampleUnitGroup, final List<ExerciseSampleUnit> sampleUnits) {
     ExerciseSampleUnitGroup updatedSampleUnitGroup =
-        transitionSampleUnitGroupState(sampleUnitGroup, sampleUnitsWithRespondents);
+        transitionSampleUnitGroupState(sampleUnitGroup, sampleUnits);
     updatedSampleUnitGroup.setModifiedDateTime(new Timestamp(new Date().getTime()));
-    sampleUnitGroupSvc.storeExerciseSampleUnitGroup(
-        updatedSampleUnitGroup, sampleUnitsWithRespondents);
+    sampleUnitGroupSvc.storeExerciseSampleUnitGroup(updatedSampleUnitGroup, sampleUnits);
   }
 
-  /**
-   * Transition Collection Exercise state for validation.
-   *
-   * @param exercise to transition.
-   * @return exercise Collection Exercise with new state.
-   */
-  private CollectionExerciseEvent transitionCollectionExercise(CollectionExercise exercise)
-      throws CTPException {
+  private void transitionCollectionExercise(CollectionExercise exercise) throws CTPException {
     CollectionExerciseEvent event = null;
     long init =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(SampleUnitGroupState.INIT, exercise);
@@ -373,8 +364,6 @@ public class ValidateSampleUnits {
     if (event != null) {
       this.collexService.transitionCollectionExercise(exercise, event);
     }
-
-    return event;
   }
 
   /**

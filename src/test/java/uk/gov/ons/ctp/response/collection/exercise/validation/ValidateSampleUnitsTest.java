@@ -12,10 +12,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
+import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
@@ -64,6 +66,7 @@ public class ValidateSampleUnitsTest {
       collectionExerciseTransitionState;
 
   @Mock
+  @Qualifier("sampleUnitGroup")
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
   @Mock private AppConfig appConfig;
@@ -148,6 +151,12 @@ public class ValidateSampleUnitsTest {
             sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
         .thenReturn(parties.get(0));
 
+    when(sampleUnitGroupState.transition(SampleUnitGroupState.INIT, SampleUnitGroupEvent.VALIDATE))
+        .thenReturn(SampleUnitGroupState.VALIDATED);
+    when(sampleUnitGroupState.transition(
+            SampleUnitGroupState.INIT, SampleUnitGroupEvent.INVALIDATE))
+        .thenReturn(SampleUnitGroupState.FAILEDVALIDATION);
+
     // Mock getCollectionExerciseTransistionState
     when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
             SampleUnitGroupState.INIT, collectionExercises.get(0)))
@@ -228,8 +237,8 @@ public class ValidateSampleUnitsTest {
   }
 
   /** Test party service throws RestClientException */
-  @Test(expected = RestClientException.class)
-  public void testValidateSampleUnitsPartyRestClientException() throws Exception {
+  @Test
+  public void testValidateSampleUnitsRequestPartyFail() throws Exception {
 
     // Given
     when(partySvcClient.requestParty(
@@ -240,8 +249,8 @@ public class ValidateSampleUnitsTest {
     validateSampleUnits.validateSampleUnits();
 
     // Then
-    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
-    verify(collexService, never())
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, times(2))
         .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
@@ -341,6 +350,41 @@ public class ValidateSampleUnitsTest {
     // Then
     verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
     verify(collexService, never())
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsListLockingException() throws Exception {
+
+    // Given
+    when(sampleValidationListManager.findList(VALIDATION_LIST_ID, false))
+        .thenThrow(LockingException.class);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, never()).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, never())
+        .transitionCollectionExercise(
+            isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testValidateSampleUnitsFailsValidation() throws Exception {
+
+    // Given one of the sample units will fail validation
+    when(partySvcClient.requestParty(
+            sampleUnits.get(0).getSampleUnitType(), sampleUnits.get(0).getSampleUnitRef()))
+        .thenThrow(RestClientException.class);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(sampleUnitGroupSvc, times(4)).storeExerciseSampleUnitGroup(any(), any());
+    verify(collexService, times(2))
         .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
   }
