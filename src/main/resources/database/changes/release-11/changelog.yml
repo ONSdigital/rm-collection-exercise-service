@@ -1,0 +1,21 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 11.1
+      author: Samiul Islam
+      changes:
+        - sqlFile:
+            comment: Remove survey names
+            path: remove_survey_name.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+
+  - changeSet:
+        id: 11.2
+        author: Samiul Islam
+        changes:
+          - sqlFile:
+              comment: Collection Exercise Survey Name Removal
+              path: recreate_collectionexercise_report.sql
+              relativeToChangelogFile: true
+              splitStatements: false
