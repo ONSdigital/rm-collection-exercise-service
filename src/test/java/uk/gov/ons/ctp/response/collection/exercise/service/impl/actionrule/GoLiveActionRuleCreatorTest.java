@@ -18,30 +18,32 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoLiveActionRuleCreatorTest {
 
-  public static final String EXERCISE_REF = "201802";
-  public static final String SURVEY_SHORT_NAME = "TEST_SURVEY";
+  private static final String EXERCISE_REF = "201802";
+  private static final String SURVEY_SHORT_NAME = "TEST_SURVEY";
   @Mock private ActionSvcClient actionSvcClient;
 
-  @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
+  @Mock private SurveyService surveyService;
 
   @InjectMocks private GoLiveActionRuleCreator goLiveActionRuleCreator;
-  public static final UUID BUSINESS_INDIVIDUAL_ACTION_PLAN_ID = UUID.randomUUID();
-  public static final int EXERCISE_PK = 6433;
+  private static final UUID BUSINESS_INDIVIDUAL_ACTION_PLAN_ID = UUID.randomUUID();
+  private static final int EXERCISE_PK = 6433;
+  private static final UUID EXERCISE_ID = UUID.randomUUID();
 
   @Test
   public void isActionRuleCreator() {
@@ -49,35 +51,36 @@ public class GoLiveActionRuleCreatorTest {
   }
 
   @Test
-  public void doNothingIfNotBusinessSurveyEvent() {
+  public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
-    goLiveActionRuleCreator.execute(
-        new Event(), new CaseTypeOverride(), new CaseTypeOverride(), survey);
+    final CollectionExercise collex = new CollectionExercise();
+    final Event event = createCollectionExerciseEvent(null, null, collex);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    goLiveActionRuleCreator.execute(event);
     verify(actionSvcClient, times(0))
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
-  public void doNothingIfNotGoLiveEvent() {
-    String tag = EventService.Tag.mps.name();
-    Event collectionExerciseEvent = new Event();
-    CollectionExercise collex = new CollectionExercise();
+  public void doNothingIfNotGoLiveEvent() throws CTPException {
     SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Business);
 
-    collectionExerciseEvent.setTag(tag);
-    collectionExerciseEvent.setCollectionExercise(collex);
+    final CollectionExercise collex = new CollectionExercise();
+    final Event collectionExerciseEvent =
+        createCollectionExerciseEvent(EventService.Tag.mps.name(), null, collex);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
-    CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
-    goLiveActionRuleCreator.execute(collectionExerciseEvent, bCaseTypeOverride, null, survey);
+    goLiveActionRuleCreator.execute(collectionExerciseEvent);
     verify(actionSvcClient, times(0))
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
-  public void testCreateCorrectActionRulesForGoLiveEvent() {
+  public void testCreateCorrectActionRulesForGoLiveEvent() throws CTPException {
     // Given
     Instant eventTriggerInstant = Instant.now();
     Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
@@ -89,12 +92,12 @@ public class GoLiveActionRuleCreatorTest {
     SurveyDTO survey = new SurveyDTO();
     survey.setShortName(SURVEY_SHORT_NAME);
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
-    CaseTypeOverride businessIndividualCaseTypeOverride = new CaseTypeOverride();
-    businessIndividualCaseTypeOverride.setActionPlanId(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID);
-
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(EXERCISE_PK, "BI"))
-        .thenReturn(businessIndividualCaseTypeOverride);
+    ActionPlanDTO actionPlan = new ActionPlanDTO();
+    actionPlan.setId(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID);
+    when(actionSvcClient.getActionPlanBySelectorsBusiness(EXERCISE_ID.toString(), true))
+        .thenReturn(actionPlan);
 
     OffsetDateTime eventTriggerOffsetDateTime =
         OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault());
@@ -108,8 +111,7 @@ public class GoLiveActionRuleCreatorTest {
         .thenReturn(new ActionRuleDTO());
 
     // When
-    goLiveActionRuleCreator.execute(
-        collectionExerciseEvent, null, businessIndividualCaseTypeOverride, survey);
+    goLiveActionRuleCreator.execute(collectionExerciseEvent);
 
     // Then
     verify(actionSvcClient)
@@ -136,6 +138,7 @@ public class GoLiveActionRuleCreatorTest {
 
   private CollectionExercise createCollectionExercise() {
     final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     collex.setExercisePK(GoLiveActionRuleCreatorTest.EXERCISE_PK);
     collex.setExerciseRef(EXERCISE_REF);
     return collex;

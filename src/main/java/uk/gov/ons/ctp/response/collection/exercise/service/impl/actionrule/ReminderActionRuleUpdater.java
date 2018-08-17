@@ -2,40 +2,50 @@ package uk.gov.ons.ctp.response.collection.exercise.service.impl.actionrule;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @Component
-public class ReminderActionRuleUpdater extends AbstractActionRuleUpdater {
+public class ReminderActionRuleUpdater implements ActionRuleUpdater {
 
   private final ReminderSuffixGenerator reminderSuffixGenerator;
+  private final SurveyService surveyService;
+  private final ActionRulesFilter actionRulesFilter;
+  private final ActionSvcClient actionSvcClient;
 
   public ReminderActionRuleUpdater(
-      final ActionSvcClient actionSvcClient,
-      final ReminderSuffixGenerator reminderSuffixGenerator) {
-    super(actionSvcClient);
+      final ReminderSuffixGenerator reminderSuffixGenerator,
+      final SurveyService surveyService,
+      final ActionRulesFilter actionRulesFilter,
+      final ActionSvcClient actionSvcClient) {
     this.reminderSuffixGenerator = reminderSuffixGenerator;
+    this.surveyService = surveyService;
+    this.actionRulesFilter = actionRulesFilter;
+    this.actionSvcClient = actionSvcClient;
   }
 
   @Override
-  public void execute(
-      final Event event,
-      final CaseTypeOverride businessCaseTypeOverride,
-      final CaseTypeOverride businessIndividualCaseTypeOverride,
-      final SurveyDTO survey)
-      throws CTPException {
+  public void execute(final Event event) throws CTPException {
+
+    final CollectionExercise collectionExercise = event.getCollectionExercise();
+
+    final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
+
     if (survey.getSurveyType() != SurveyType.Business) {
       return;
     }
@@ -43,25 +53,34 @@ public class ReminderActionRuleUpdater extends AbstractActionRuleUpdater {
     if (!Tag.valueOf(event.getTag()).isReminder()) {
       return;
     }
+
+    final String CollectionExerciseId = collectionExercise.getId().toString();
+    final ActionPlanDTO activeActionPlan =
+        actionSvcClient.getActionPlanBySelectorsBusiness(CollectionExerciseId, true);
+    final ActionPlanDTO inactiveActionPlan =
+        actionSvcClient.getActionPlanBySelectorsBusiness(CollectionExerciseId, false);
+
     final String reminderSuffix = reminderSuffixGenerator.getReminderSuffix(event.getTag());
 
-    final UUID biActionPlanId = businessIndividualCaseTypeOverride.getActionPlanId();
-    final List<ActionRuleDTO> biActionRules = getActionRulesForActionPlan(biActionPlanId);
+    final UUID biActionPlanId = activeActionPlan.getId();
+    final List<ActionRuleDTO> biActionRules =
+        actionSvcClient.getActionRulesForActionPlan(biActionPlanId);
     final List<ActionRuleDTO> biActionRulesMatchingSuffix =
         filterRulesMatchingSuffix(reminderSuffix, biActionRules);
-    final List<ActionRuleDTO> bsreRules =
-        filterActionRulesByType(biActionRulesMatchingSuffix, ActionType.BSRE, biActionPlanId);
+    final ActionRuleDTO bsreRule =
+        actionRulesFilter.getActionRuleByType(
+            biActionRulesMatchingSuffix, ActionType.BSRE, biActionPlanId);
 
-    final UUID bActionPlanId = businessCaseTypeOverride.getActionPlanId();
-    final List<ActionRuleDTO> bActionRules = getActionRulesForActionPlan(bActionPlanId);
+    final UUID bActionPlanId = inactiveActionPlan.getId();
+    final List<ActionRuleDTO> bActionRules =
+        actionSvcClient.getActionRulesForActionPlan(bActionPlanId);
     final List<ActionRuleDTO> bActionRulesMatchingSuffix =
         filterRulesMatchingSuffix(reminderSuffix, bActionRules);
-    final List<ActionRuleDTO> bsrlRules =
-        filterActionRulesByType(bActionRulesMatchingSuffix, ActionType.BSRL, bActionPlanId);
+    final ActionRuleDTO bsrlRule =
+        actionRulesFilter.getActionRuleByType(
+            bActionRulesMatchingSuffix, ActionType.BSRL, bActionPlanId);
 
-    final ArrayList<ActionRuleDTO> bsrlAndBsre = new ArrayList<>();
-    bsrlAndBsre.addAll(bsreRules);
-    bsrlAndBsre.addAll(bsrlRules);
+    final List<ActionRuleDTO> bsrlAndBsre = Arrays.asList(bsreRule, bsrlRule);
 
     for (final ActionRuleDTO actionRule : bsrlAndBsre) {
       actionSvcClient.updateActionRule(

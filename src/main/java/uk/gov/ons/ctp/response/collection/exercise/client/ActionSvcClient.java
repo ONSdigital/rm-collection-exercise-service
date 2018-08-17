@@ -44,6 +44,26 @@ public interface ActionSvcClient {
   List<ActionPlanDTO> getActionPlansBySelectorsSocial(String collectionExerciseId);
 
   /**
+   * Request single action plan with given selectors
+   *
+   * @param collectionExerciseId collectionExerciseId to find action plans for
+   * @param activeEnrolment boolean for if sample unit has an active enrolment associated with it
+   * @return ActionPlanDTO representation of the created action plan
+   * @throws CTPException Resource Not Found if not exactly one action plan found
+   */
+  ActionPlanDTO getActionPlanBySelectorsBusiness(
+      String collectionExerciseId, boolean activeEnrolment) throws CTPException;
+
+  /**
+   * Request single action plan with given selectors
+   *
+   * @param collectionExerciseId collectionExerciseId to find action plans for
+   * @return ActionPlanDTO representation of the created action plan
+   * @throws CTPException Resource Not Found if not exactly one action plan found
+   */
+  ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId) throws CTPException;
+
+  /**
    * Request action rule is created.
    *
    * @param name name of action rule

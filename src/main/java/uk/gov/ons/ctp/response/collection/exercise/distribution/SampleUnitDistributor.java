@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -112,39 +113,39 @@ public class SampleUnitDistributor {
    */
   public void distributeSampleUnits(CollectionExercise exercise) {
 
+    List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
     try {
-      List<ExerciseSampleUnitGroup> sampleUnitGroups = retrieveSampleUnitGroups(exercise);
-      if (sampleUnitGroups.isEmpty()) {
-        log.debug(
-            "No sample unit groups to distribute for exercise, collectionExerciseId: {}",
-            exercise.getId());
-        return;
-      }
-
-      sampleUnitGroups.forEach(
-          sampleUnitGroup -> {
-            try {
-              distributeSampleUnitGroup(exercise, sampleUnitGroup);
-            } catch (RestClientException ex) {
-              log.error(
-                  "Failed to distribute sample unit group, sampleUnitGroupPK: {}",
-                  sampleUnitGroup.getSampleUnitGroupPK());
-            }
-          });
-
-      collectionExerciseTransitionState(exercise);
-
+      sampleUnitGroups = retrieveSampleUnitGroups(exercise);
     } catch (LockingException ex) {
       log.error("Sample Unit Distribution failed, error: {}", ex.getMessage());
       log.error(ex.toString());
-    } finally {
-      try {
-        sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
-      } catch (LockingException ex) {
-        log.error(
-            "Failed to release sampleDistributionListManager data, error: {}", ex.getMessage());
-        log.error(ex.toString());
-      }
+    }
+    if (sampleUnitGroups.isEmpty()) {
+      log.debug(
+          "No sample unit groups to distribute for exercise, collectionExerciseId: {}",
+          exercise.getId());
+      return;
+    }
+
+    // Catch error distributing sample units so that only failing cases are stopped
+    sampleUnitGroups.forEach(
+        sampleUnitGroup -> {
+          try {
+            distributeSampleUnitGroup(exercise, sampleUnitGroup);
+          } catch (CTPException ex) {
+            log.error(
+                "Failed to distribute sample unit group, sampleUnitGroupPK: {}",
+                sampleUnitGroup.getSampleUnitGroupPK());
+          }
+        });
+
+    collectionExerciseTransitionState(exercise);
+
+    try {
+      sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
+    } catch (LockingException ex) {
+      log.error("Failed to release sampleDistributionListManager data, error: {}", ex.getMessage());
+      log.error(ex.toString());
     }
   }
 
@@ -196,7 +197,7 @@ public class SampleUnitDistributor {
    * @param sampleUnitGroup for which to distribute sample units
    */
   private void distributeSampleUnitGroup(
-      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) {
+      CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
     ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
 
     String actionPlanId;
@@ -214,22 +215,26 @@ public class SampleUnitDistributor {
     publishSampleUnit(sampleUnitGroup, sampleUnitParent);
   }
 
-  private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
-    PartyDTO businessParty =
-        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-    Boolean activeEnrolment =
-        surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
+  private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
+      throws CTPException {
+    boolean activeEnrolment;
+    try {
+      PartyDTO businessParty =
+          partySvcClient.requestParty(
+              sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+      activeEnrolment =
+          surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
+    } catch (RestClientException ex) {
+      throw new CTPException(
+          CTPException.Fault.VALIDATION_FAILED, "Failed to retrieve party for sample unit");
+    }
     return actionSvcClient
-        .getActionPlansBySelectorsBusiness(exercise.getId().toString(), activeEnrolment)
-        .get(0)
+        .getActionPlanBySelectorsBusiness(exercise.getId().toString(), activeEnrolment)
         .getId();
   }
 
-  private UUID getActionPlanIdSocial(CollectionExercise exercise) {
-    return actionSvcClient
-        .getActionPlansBySelectorsSocial(exercise.getId().toString())
-        .get(0)
-        .getId();
+  private UUID getActionPlanIdSocial(CollectionExercise exercise) throws CTPException {
+    return actionSvcClient.getActionPlanBySelectorsSocial(exercise.getId().toString()).getId();
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {

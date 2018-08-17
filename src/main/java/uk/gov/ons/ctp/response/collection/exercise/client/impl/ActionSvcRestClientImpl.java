@@ -21,6 +21,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
@@ -35,8 +37,18 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 @Slf4j
 public class ActionSvcRestClientImpl implements ActionSvcClient {
 
-  private static final String COLLECTION_EXERCISE_ID = "collectionExerciseId";
-  private static final String ACTIVE_ENROLMENT = "activeEnrolment";
+  public static final String FOUND_NO_ACTION_PLANS =
+      "Expected one action plan for selectors,"
+          + " collectionExerciseId: %s, activeEnrolment: %b But None Found";
+  public static final String FOUND_NO_ACTION_PLANS_2 =
+      "Expected one action plan for selectors," + " collectionExerciseId: %s, But None Found";
+  public static final String MULTIPLE_ACTION_PLANS_FOUND =
+      "Expected one action plan for selectors,"
+          + " collectionExerciseId: %s, activeEnrolment: %b But %d Found";
+  public static final String MULTIPLE_ACTION_PLANS_FOUND_2 =
+      "Expected one action plan for selectors," + " collectionExerciseId: %s, But %d Found";
+  public static final String SELECTOR_COLLECTION_EXERCISE_ID = "collectionExerciseId";
+  public static final String SELECTOR_ACTIVE_ENROLMENT = "activeEnrolment";
 
   private AppConfig appConfig;
 
@@ -67,8 +79,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public ActionPlanDTO createActionPlan(
-      final String name, final String description, final HashMap<String, String> selectors)
-      throws RestClientException {
+      final String name, final String description, final HashMap<String, String> selectors) {
     log.debug("Posting to action service to create action plan");
     UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), null);
@@ -100,33 +111,53 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         collectionExerciseId,
         activeEnrolment);
 
-    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add(COLLECTION_EXERCISE_ID, collectionExerciseId);
-    queryParams.add(ACTIVE_ENROLMENT, activeEnrolment.toString());
-    UriComponents uriComponents =
+    final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
+    queryParams.add(SELECTOR_ACTIVE_ENROLMENT, Boolean.toString(activeEnrolment));
+
+    final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
-    ResponseEntity<List<ActionPlanDTO>> responseEntity;
-    try {
-      responseEntity =
-          restTemplate.exchange(
-              uriComponents.toString(),
-              HttpMethod.GET,
-              null,
-              new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
-    } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        return null;
-      }
-      throw e;
-    }
+    final ResponseEntity<List<ActionPlanDTO>> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toString(),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.debug(
         "Successfully retrieved action plan for selectors, "
             + "collectionExerciseId: {}, activeEnrolment: {}",
         collectionExerciseId,
         activeEnrolment);
+
     return responseEntity.getBody();
+  }
+
+  @Override
+  public ActionPlanDTO getActionPlanBySelectorsBusiness(
+      String collectionExerciseId, boolean activeEnrolment) throws CTPException {
+
+    final List<ActionPlanDTO> actionPlans =
+        getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
+
+    if (actionPlans == null) {
+      throw new CTPException(
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
+    }
+
+    if (actionPlans.size() != 1) {
+      throw new CTPException(
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              MULTIPLE_ACTION_PLANS_FOUND,
+              collectionExerciseId,
+              activeEnrolment,
+              actionPlans.size()));
+    }
+
+    return actionPlans.get(0);
   }
 
   @Retryable(
@@ -138,30 +169,43 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     log.debug(
         "Retrieving action plan for selectors, collectionExerciseId: {}", collectionExerciseId);
 
-    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add(COLLECTION_EXERCISE_ID, collectionExerciseId);
-    UriComponents uriComponents =
+    final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
+    final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
-    ResponseEntity<List<ActionPlanDTO>> responseEntity;
-    try {
-      responseEntity =
-          restTemplate.exchange(
-              uriComponents.toString(),
-              HttpMethod.GET,
-              null,
-              new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
-    } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        return null;
-      }
-      throw e;
-    }
+    final ResponseEntity<List<ActionPlanDTO>> responseEntity;
+    responseEntity =
+        restTemplate.exchange(
+            uriComponents.toString(),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.debug(
         "Successfully retrieved action plan for selectors, collectionExerciseId: {}",
         collectionExerciseId);
     return responseEntity.getBody();
+  }
+
+  @Override
+  public ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId)
+      throws CTPException {
+
+    final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
+
+    if (actionPlans == null) {
+      throw new CTPException(
+          Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
+    }
+
+    if (actionPlans.size() != 1) {
+      throw new CTPException(
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
+    }
+
+    return actionPlans.get(0);
   }
 
   @Override
@@ -222,7 +266,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   }
 
   @Override
-  public List<ActionRuleDTO> getActionRulesForActionPlan(final UUID actionPlanId) {
+  public List<ActionRuleDTO> getActionRulesForActionPlan(final UUID actionPlanId)
+      throws CTPException {
     final UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getActionSvc().getActionRulesForActionPlanPath(), null, actionPlanId);
@@ -238,7 +283,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
               new ParameterizedTypeReference<List<ActionRuleDTO>>() {});
     } catch (HttpClientErrorException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        return null;
+        throw new CTPException(
+            Fault.SYSTEM_ERROR, String.format("Action Plan %s not found", actionPlanId));
       }
       throw e;
     }

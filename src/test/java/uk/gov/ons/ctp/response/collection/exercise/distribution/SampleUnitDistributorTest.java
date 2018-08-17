@@ -167,7 +167,11 @@ public class SampleUnitDistributorTest {
 
     when(surveySvcClient.findSurvey(collectionExercise.getSurveyId())).thenReturn(surveys.get(0));
 
-    when(actionSvcClient.getActionPlansBySelectorsBusiness(any(), any())).thenReturn(actionPlans);
+    when(actionSvcClient.getActionPlanBySelectorsBusiness(any(), eq(false)))
+        .thenReturn(actionPlans.get(0));
+    when(actionSvcClient.getActionPlanBySelectorsBusiness(any(), eq(true)))
+        .thenReturn(actionPlans.get(0));
+    when(actionSvcClient.getActionPlanBySelectorsSocial(any())).thenReturn(actionPlans.get(0));
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
