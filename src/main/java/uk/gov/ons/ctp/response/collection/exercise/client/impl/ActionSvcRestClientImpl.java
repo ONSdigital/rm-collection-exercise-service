@@ -113,6 +113,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
     queryParams.add(SELECTOR_ACTIVE_ENROLMENT, Boolean.toString(activeEnrolment));
 
+    HttpEntity httpEntity = restUtility.createHttpEntity(null);
+
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
@@ -120,7 +122,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         restTemplate.exchange(
             uriComponents.toString(),
             HttpMethod.GET,
-            null,
+            httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.debug(
