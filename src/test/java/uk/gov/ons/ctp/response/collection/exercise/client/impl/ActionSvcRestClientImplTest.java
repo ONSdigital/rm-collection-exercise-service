@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,11 +74,13 @@ public class ActionSvcRestClientImplTest {
     // Given
     ActionSvc actionSvc = new ActionSvc();
     actionSvc.setActionPlansPath("test:path");
+    HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
             any(String.class),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
         .thenReturn(responseEntity);
 
@@ -91,7 +94,7 @@ public class ActionSvcRestClientImplTest {
             String.format(
                 "test:path?collectionExerciseId=%s&activeEnrolment=false", COLLECTION_EXERCISE_ID),
             HttpMethod.GET,
-            null,
+            httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
     assertEquals(actionplan.getId(), actionPlans.get(0).getId());
   }
@@ -102,11 +105,13 @@ public class ActionSvcRestClientImplTest {
     // Given
     ActionSvc actionSvc = new ActionSvc();
     actionSvc.setActionPlansPath("test:path");
+    HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
             any(String.class),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
         .thenReturn(new ResponseEntity<>(Collections.EMPTY_LIST, HttpStatus.NO_CONTENT));
 
@@ -122,11 +127,13 @@ public class ActionSvcRestClientImplTest {
     // Given
     ActionSvc actionSvc = new ActionSvc();
     actionSvc.setActionPlansPath("test:path");
+    HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
             any(String.class),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
         .thenReturn(
             new ResponseEntity<>(
@@ -151,11 +158,13 @@ public class ActionSvcRestClientImplTest {
     // Given
     ActionSvc actionSvc = new ActionSvc();
     actionSvc.setActionPlansPath("test:path");
+    HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
             any(String.class),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
         .thenReturn(responseEntity);
 
@@ -168,7 +177,7 @@ public class ActionSvcRestClientImplTest {
         .exchange(
             String.format("test:path?collectionExerciseId=%s", COLLECTION_EXERCISE_ID),
             HttpMethod.GET,
-            null,
+            httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
     assertEquals(actionplan.getId(), actionPlans.get(0).getId());
   }
@@ -179,11 +188,13 @@ public class ActionSvcRestClientImplTest {
     // Given
     ActionSvc actionSvc = new ActionSvc();
     actionSvc.setActionPlansPath("test:path");
+    HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
             any(String.class),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
         .thenReturn(new ResponseEntity<>(Collections.EMPTY_LIST, HttpStatus.NO_CONTENT));
 
@@ -198,11 +209,13 @@ public class ActionSvcRestClientImplTest {
     // Given
     ActionSvc actionSvc = new ActionSvc();
     actionSvc.setActionPlansPath("test:path");
+    HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
     when(appConfig.getActionSvc()).thenReturn(actionSvc);
     when(restTemplate.exchange(
             any(String.class),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
         .thenReturn(
             new ResponseEntity<>(
@@ -217,7 +230,7 @@ public class ActionSvcRestClientImplTest {
             String.format(
                 "test:path?collectionExerciseId=%s&activeEnrolment=false", COLLECTION_EXERCISE_ID),
             HttpMethod.GET,
-            null,
+            httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
   }
 }

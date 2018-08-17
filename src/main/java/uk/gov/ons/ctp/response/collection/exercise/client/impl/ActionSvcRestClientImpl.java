@@ -114,15 +114,16 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
     queryParams.add(SELECTOR_ACTIVE_ENROLMENT, Boolean.toString(activeEnrolment));
-
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
+
+    HttpEntity httpEntity = restUtility.createHttpEntity(null);
 
     final ResponseEntity<List<ActionPlanDTO>> responseEntity =
         restTemplate.exchange(
             uriComponents.toString(),
             HttpMethod.GET,
-            null,
+            httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.debug(
@@ -174,12 +175,14 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
 
+    HttpEntity httpEntity = restUtility.createHttpEntity(null);
+
     final ResponseEntity<List<ActionPlanDTO>> responseEntity;
     responseEntity =
         restTemplate.exchange(
             uriComponents.toString(),
             HttpMethod.GET,
-            null,
+            httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.debug(
