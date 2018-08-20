@@ -36,13 +36,15 @@ public class MpsActionRuleUpdater implements ActionRuleUpdater {
   @Override
   public void execute(final Event event) throws CTPException {
 
-    CollectionExercise collectionExercise = event.getCollectionExercise();
-    final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
-    if (survey.getSurveyType() != SurveyType.Business) {
+    if (!Tag.mps.hasName(event.getTag())) {
       return;
     }
 
-    if (!Tag.mps.hasName(event.getTag())) {
+    final CollectionExercise collectionExercise = event.getCollectionExercise();
+
+    final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
+
+    if (survey.getSurveyType() != SurveyType.Business) {
       return;
     }
 

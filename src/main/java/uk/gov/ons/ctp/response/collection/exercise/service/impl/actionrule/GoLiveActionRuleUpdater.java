@@ -35,15 +35,15 @@ public final class GoLiveActionRuleUpdater implements ActionRuleUpdater {
   @Override
   public void execute(final Event event) throws CTPException {
 
+    if (!Tag.go_live.hasName(event.getTag())) {
+      return;
+    }
+
     final CollectionExercise collectionExercise = event.getCollectionExercise();
 
     final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
 
     if (survey.getSurveyType() != SurveyType.Business) {
-      return;
-    }
-
-    if (!Tag.go_live.hasName(event.getTag())) {
       return;
     }
 

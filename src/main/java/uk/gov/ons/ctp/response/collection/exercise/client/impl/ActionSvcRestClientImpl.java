@@ -287,13 +287,14 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
             appConfig.getActionSvc().getActionRulesForActionPlanPath(), null, actionPlanId);
 
     ResponseEntity<List<ActionRuleDTO>> response;
+    HttpEntity httpEntity = restUtility.createHttpEntity(null);
 
     try {
       response =
           restTemplate.exchange(
               uriComponents.toUri(),
               HttpMethod.GET,
-              null,
+              httpEntity,
               new ParameterizedTypeReference<List<ActionRuleDTO>>() {});
     } catch (HttpClientErrorException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
