@@ -4,6 +4,8 @@ liquibase:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:15432/postgres
+  zipkin:
+    baseUrl: http://nervous_chebyshev:9411
 
 survey-svc:
   connection-config:
