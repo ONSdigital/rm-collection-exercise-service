@@ -33,15 +33,16 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
 
   @Override
   public void execute(final Event collectionExerciseEvent) throws CTPException {
+
+    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isReminder()) {
+      return;
+    }
+
     final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
 
     final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
 
     if (survey.getSurveyType() != SurveyType.Business) {
-      return;
-    }
-
-    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isReminder()) {
       return;
     }
 

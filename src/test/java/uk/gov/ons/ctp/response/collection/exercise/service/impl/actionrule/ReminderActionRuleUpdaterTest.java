@@ -60,6 +60,18 @@ public class ReminderActionRuleUpdaterTest {
   }
 
   @Test
+  public void doNothingIfNotReminder() throws CTPException {
+    final Event event = new Event();
+    event.setTag(Tag.employment.name());
+
+    updater.execute(event);
+
+    verify(actionSvcClient, never())
+        .updateActionRule(
+            any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
@@ -67,29 +79,12 @@ public class ReminderActionRuleUpdaterTest {
     final CollectionExercise collex = new CollectionExercise();
     final Event event = new Event();
     event.setCollectionExercise(collex);
+    event.setTag(Tag.reminder.name());
     when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     updater.execute(event);
     verify(actionSvcClient, times(0))
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
-  }
-
-  @Test
-  public void doNothingIfNotReminder() throws CTPException {
-    final CollectionExercise collex = new CollectionExercise();
-    final Event event = new Event();
-    event.setCollectionExercise(collex);
-    event.setTag(Tag.employment.name());
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
-    updater.execute(event);
-
-    verify(actionSvcClient, never())
-        .updateActionRule(
-            any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
   }
 
   @Test

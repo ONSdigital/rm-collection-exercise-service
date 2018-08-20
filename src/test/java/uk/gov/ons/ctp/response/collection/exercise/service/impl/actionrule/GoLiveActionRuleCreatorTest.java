@@ -6,7 +6,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -26,7 +28,7 @@ import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
@@ -51,31 +53,26 @@ public class GoLiveActionRuleCreatorTest {
   }
 
   @Test
+  public void doNothingIfNotGoLiveEvent() throws CTPException {
+    final Event collectionExerciseEvent = createCollectionExerciseEvent(Tag.mps.name(), null, null);
+
+    goLiveActionRuleCreator.execute(collectionExerciseEvent);
+
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
     final CollectionExercise collex = new CollectionExercise();
-    final Event event = createCollectionExerciseEvent(null, null, collex);
+    final Event event = createCollectionExerciseEvent(Tag.go_live.name(), null, collex);
     when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     goLiveActionRuleCreator.execute(event);
-    verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
-  }
-
-  @Test
-  public void doNothingIfNotGoLiveEvent() throws CTPException {
-    SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CollectionExercise collex = new CollectionExercise();
-    final Event collectionExerciseEvent =
-        createCollectionExerciseEvent(EventService.Tag.mps.name(), null, collex);
-    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
-    goLiveActionRuleCreator.execute(collectionExerciseEvent);
-    verify(actionSvcClient, times(0))
+    verify(actionSvcClient, never())
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
@@ -85,7 +82,7 @@ public class GoLiveActionRuleCreatorTest {
     Instant eventTriggerInstant = Instant.now();
     Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
-    String tag = EventService.Tag.go_live.name();
+    String tag = Tag.go_live.name();
     CollectionExercise collex = createCollectionExercise();
     Event collectionExerciseEvent = createCollectionExerciseEvent(tag, eventTriggerDate, collex);
 

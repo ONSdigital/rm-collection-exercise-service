@@ -6,7 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,34 +55,27 @@ public class ReminderActionRuleCreatorTest {
   }
 
   @Test
+  public void doNothingIfNotReminderEvent() throws CTPException {
+    final String tag = Tag.go_live.name();
+    final Event collectionExerciseEvent = new Event();
+    collectionExerciseEvent.setTag(tag);
+
+    reminderActionRuleCreator.execute(collectionExerciseEvent);
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
     final CollectionExercise collex = new CollectionExercise();
-    final Event event = createCollectionExerciseEvent(null, null, collex);
+    final Event event = createCollectionExerciseEvent(Tag.reminder.name(), null, collex);
     when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     reminderActionRuleCreator.execute(event);
-    verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
-  }
-
-  @Test
-  public void doNothingIfNotReminderEvent() throws CTPException {
-    String tag = Tag.go_live.name();
-    Event collectionExerciseEvent = new Event();
-    CollectionExercise collex = new CollectionExercise();
-
-    collectionExerciseEvent.setTag(tag);
-    collectionExerciseEvent.setCollectionExercise(collex);
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-    reminderActionRuleCreator.execute(collectionExerciseEvent);
-    verify(actionSvcClient, times(0))
+    verify(actionSvcClient, never())
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
