@@ -106,7 +106,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
       final String collectionExerciseId, final Boolean activeEnrolment) {
-    log.debug(
+    log.info(
         "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
         collectionExerciseId,
         activeEnrolment);
@@ -126,7 +126,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
             httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
-    log.debug(
+    log.info(
         "Successfully retrieved action plan for selectors, "
             + "collectionExerciseId: {}, activeEnrolment: {}",
         collectionExerciseId,
@@ -143,12 +143,20 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
 
     if (actionPlans == null) {
+      log.error(
+          "Retrieved no action plans, collectionExerciseId: {}, activeEnrolment: {}",
+          collectionExerciseId,
+          activeEnrolment);
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
           String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
     }
 
     if (actionPlans.size() != 1) {
+      log.error(
+          "Retrieved more than one action plan, collectionExerciseId: {}, activeEnrolment: {}",
+          collectionExerciseId,
+          activeEnrolment);
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
           String.format(
@@ -167,7 +175,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
-    log.debug(
+    log.info(
         "Retrieving action plan for selectors, collectionExerciseId: {}", collectionExerciseId);
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
@@ -185,7 +193,7 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
             httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
-    log.debug(
+    log.info(
         "Successfully retrieved action plan for selectors, collectionExerciseId: {}",
         collectionExerciseId);
     return responseEntity.getBody();
@@ -198,17 +206,20 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
     final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
 
     if (actionPlans == null) {
+      log.error("Retrieved no action plans, collectionExerciseId: {}", collectionExerciseId);
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
     }
 
-    if (actionPlans.size() != 1) {
+    if (actionPlans.size() > 1) {
+      log.error(
+          "Retrieved more than one action plan, collectionExerciseId: {}", collectionExerciseId);
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
           String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
     }
 
-    return actionPlans.get(0);
+    return actionPlans.iterator().next();
   }
 
   @Override

@@ -127,7 +127,7 @@ public class SampleUnitDistributor {
       return;
     }
 
-    // Catch error distributing sample units so that only failing cases are stopped
+    // Catch errors distributing sample units so that only failing units are stopped
     sampleUnitGroups.forEach(
         sampleUnitGroup -> {
           try {
@@ -139,6 +139,8 @@ public class SampleUnitDistributor {
           }
         });
 
+    // Collection exercise will transition to LIVE/READY_FOR_LIVE
+    // if all sample units were distributed successfully
     collectionExerciseTransitionState(exercise);
 
     try {

@@ -196,7 +196,7 @@ public class ActionSvcRestClientImplTest {
             eq(HttpMethod.GET),
             eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-        .thenReturn(new ResponseEntity<>(Collections.EMPTY_LIST, HttpStatus.NO_CONTENT));
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
     // When
     actionSvcRestClient.getActionPlanBySelectorsSocial(COLLECTION_EXERCISE_ID);
