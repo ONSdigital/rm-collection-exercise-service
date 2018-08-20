@@ -42,15 +42,15 @@ public class ReminderActionRuleUpdater implements ActionRuleUpdater {
   @Override
   public void execute(final Event event) throws CTPException {
 
+    if (!Tag.valueOf(event.getTag()).isReminder()) {
+      return;
+    }
+
     final CollectionExercise collectionExercise = event.getCollectionExercise();
 
     final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
 
     if (survey.getSurveyType() != SurveyType.Business) {
-      return;
-    }
-
-    if (!Tag.valueOf(event.getTag()).isReminder()) {
       return;
     }
 

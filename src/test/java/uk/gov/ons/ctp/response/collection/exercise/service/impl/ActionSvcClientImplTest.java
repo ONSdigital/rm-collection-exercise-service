@@ -329,11 +329,14 @@ public class ActionSvcClientImplTest {
             endsWith(ACTION_RULES_FOR_PLAN_PATH), eq(null), eq(actionPlanId)))
         .thenReturn(uriComponents);
 
+    final HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
+
     final List<ActionRuleDTO> actionRuleDTOs = new ArrayList<>();
     when(restTemplate.exchange(
             eq(uriComponents.toUri()),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
         .thenReturn(new ResponseEntity<>(actionRuleDTOs, HttpStatus.OK));
 
@@ -362,10 +365,14 @@ public class ActionSvcClientImplTest {
     final UUID actionPlanId = UUID.randomUUID();
     when(restUtility.createUriComponents(any(String.class), eq(null), eq(actionPlanId)))
         .thenReturn(uriComponents);
+
+    final HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
+
     when(restTemplate.exchange(
             eq(uriComponents.toUri()),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
         .thenThrow(new RestClientException("Error"));
 
@@ -390,10 +397,14 @@ public class ActionSvcClientImplTest {
     final UUID actionPlanId = UUID.randomUUID();
     when(restUtility.createUriComponents(any(String.class), eq(null), eq(actionPlanId)))
         .thenReturn(uriComponents);
+
+    final HttpEntity httpEntity = new HttpEntity(null, null);
+    when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
+
     when(restTemplate.exchange(
             eq(uriComponents.toUri()),
             eq(HttpMethod.GET),
-            eq(null),
+            eq(httpEntity),
             eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
         .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 

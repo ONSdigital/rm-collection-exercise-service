@@ -30,21 +30,20 @@ public final class MpsActionRuleCreator implements ActionRuleCreator {
   @Override
   public void execute(final Event collectionExerciseEvent) throws CTPException {
 
-    final SurveyDTO survey =
-        surveyService.getSurveyForCollectionExercise(
-            collectionExerciseEvent.getCollectionExercise());
+    if (!isMps(collectionExerciseEvent)) {
+      return;
+    }
+
+    final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
+
+    final SurveyDTO survey = surveyService.getSurveyForCollectionExercise(collectionExercise);
 
     if (survey.getSurveyType() != SurveyDTO.SurveyType.Business) {
       return;
     }
 
-    if (!isMps(collectionExerciseEvent)) {
-      return;
-    }
-
     final Instant instant = Instant.ofEpochMilli(collectionExerciseEvent.getTimestamp().getTime());
     final OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
-    final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
 
     final ActionPlanDTO actionPlan =
         actionSvcClient.getActionPlanBySelectors(collectionExercise.getId().toString(), false);

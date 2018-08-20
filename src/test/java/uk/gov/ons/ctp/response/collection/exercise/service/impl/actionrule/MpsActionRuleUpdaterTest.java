@@ -5,7 +5,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -59,6 +62,18 @@ public class MpsActionRuleUpdaterTest {
   }
 
   @Test
+  public void doNothingIfNotMps() throws CTPException {
+    final Event event = new Event();
+    event.setTag(Tag.go_live.name());
+
+    updater.execute(event);
+
+    verify(actionSvcClient, never())
+        .updateActionRule(
+            any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
@@ -66,29 +81,12 @@ public class MpsActionRuleUpdaterTest {
     final CollectionExercise collex = new CollectionExercise();
     final Event event = new Event();
     event.setCollectionExercise(collex);
+    event.setTag(Tag.mps.name());
     when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     updater.execute(event);
-    verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
-  }
-
-  @Test
-  public void doNothingIfNotMps() throws CTPException {
-    final CollectionExercise collex = new CollectionExercise();
-    final Event event = new Event();
-    event.setTag(Tag.go_live.name());
-    event.setCollectionExercise(collex);
-
-    final SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
-    updater.execute(event);
-
     verify(actionSvcClient, never())
-        .updateActionRule(
-            any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test

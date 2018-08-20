@@ -6,7 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,32 +52,26 @@ public class MpsActionRuleCreatorTest {
   }
 
   @Test
+  public void doNothingIfNotMpsEvent() throws CTPException {
+    final Event collectionExerciseEvent =
+        createCollectionExerciseEvent(Tag.go_live.name(), null, null);
+
+    mpsActionRuleCreator.execute(collectionExerciseEvent);
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
     final CollectionExercise collectionExercise = createCollectionExercise();
-    final Event event = createCollectionExerciseEvent(null, null, collectionExercise);
+    final Event event = createCollectionExerciseEvent(Tag.mps.name(), null, collectionExercise);
     when(surveyService.getSurveyForCollectionExercise(collectionExercise)).thenReturn(survey);
 
     mpsActionRuleCreator.execute(event);
-    verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
-  }
-
-  @Test
-  public void doNothingIfNotMpsEvent() throws CTPException {
-    SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CollectionExercise collex = createCollectionExercise();
-    final Event collectionExerciseEvent =
-        createCollectionExerciseEvent(Tag.go_live.name(), null, collex);
-
-    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
-    mpsActionRuleCreator.execute(collectionExerciseEvent);
-    verify(actionSvcClient, times(0))
+    verify(actionSvcClient, never())
         .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
