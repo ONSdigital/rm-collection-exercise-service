@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
@@ -113,7 +113,9 @@ public class CollectionExerciseEndpointIT {
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @Rule public WireMockRule wireMockRule = new WireMockRule(options().port(18002));
+  @ClassRule
+  public static WireMockClassRule wireMockRule =
+      new WireMockClassRule(options().port(18002).bindAddress("localhost"));
 
   private CollectionExerciseClient client;
 
