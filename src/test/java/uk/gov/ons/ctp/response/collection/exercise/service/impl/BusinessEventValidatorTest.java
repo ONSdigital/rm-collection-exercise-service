@@ -36,15 +36,6 @@ public class BusinessEventValidatorTest {
   }
 
   @Test
-  public void testMandatoryEventShouldNotBeInThePast() {
-    Event mpsEvent = new Event();
-    mpsEvent.setTag((Tag.mps.toString()));
-    mpsEvent.setTimestamp(Timestamp.from(Instant.now().minus(2, ChronoUnit.DAYS)));
-    List<Event> events = new ArrayList<>();
-    assertFalse(validator.validate(events, mpsEvent, CollectionExerciseState.CREATED));
-  }
-
-  @Test
   public void testValidMpsEventCreation() {
     Event mpsEvent = new Event();
     mpsEvent.setTag((Tag.mps.toString()));
@@ -107,19 +98,6 @@ public class BusinessEventValidatorTest {
     returnByEvent.setTag((Tag.return_by.toString()));
     returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     assertFalse(validator.validate(events, returnByEvent, CollectionExerciseState.CREATED));
-  }
-
-  @Test
-  public void testMandatoryEventNot24HoursApart() {
-    Event mpsEvent = new Event();
-    mpsEvent.setTag((Tag.mps.toString()));
-    mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
-    Event goLive = new Event();
-    goLive.setTag((Tag.go_live.toString()));
-    goLive.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
-    List<Event> events = new ArrayList<>();
-    events.add(mpsEvent);
-    assertFalse(validator.validate(events, goLive, CollectionExerciseState.CREATED));
   }
 
   @Test
@@ -225,15 +203,6 @@ public class BusinessEventValidatorTest {
   }
 
   @Test
-  public void testNewReminderEventShouldNotBeInThePast() {
-    Event reminder = new Event();
-    reminder.setTag((Tag.reminder.toString()));
-    reminder.setTimestamp(Timestamp.from(Instant.now().minus(2, ChronoUnit.DAYS)));
-    List<Event> events = new ArrayList<>();
-    assertFalse(validator.validate(events, reminder, CollectionExerciseState.CREATED));
-  }
-
-  @Test
   public void testCantUpdatePastReminder() {
     Event reminder = new Event();
     reminder.setTag((Tag.reminder.toString()));
@@ -268,17 +237,16 @@ public class BusinessEventValidatorTest {
   }
 
   @Test
-  public void testReminderLessThan24hrBeforeExerciseEndInvalid() {
+  public void testReminderAfterExerciseEndInvalid() {
     long now = System.currentTimeMillis();
 
     final Event reminderEvent = new Event();
     reminderEvent.setTag(Tag.reminder3.toString());
-    reminderEvent.setTimestamp(
-        new Timestamp(now + 3 * DAYS_IN_MILLISECONDS + DAYS_IN_MILLISECONDS / 2));
+    reminderEvent.setTimestamp(new Timestamp(now + 4 * DAYS_IN_MILLISECONDS));
 
     final Event exerciseEnd = new Event();
     exerciseEnd.setTag((Tag.exercise_end.toString()));
-    exerciseEnd.setTimestamp(Timestamp.from(Instant.now().plus(4, ChronoUnit.DAYS)));
+    exerciseEnd.setTimestamp(Timestamp.from(Instant.now().plus(3, ChronoUnit.DAYS)));
 
     final List<Event> events = Collections.singletonList(exerciseEnd);
 
@@ -286,17 +254,17 @@ public class BusinessEventValidatorTest {
   }
 
   @Test
-  public void testReminderLessThan24hrsAfterGoliveInvalid() {
+  public void testReminderBeforeGoliveInvalid() {
     long now = System.currentTimeMillis();
 
     final Event goLive = new Event();
     goLive.setTag((Tag.go_live.toString()));
-    goLive.setTimestamp(Timestamp.from(Instant.now()));
+    goLive.setTimestamp(new Timestamp(now + 2 * DAYS_IN_MILLISECONDS));
     final List<Event> events = Collections.singletonList(goLive);
 
     final Event reminderEvent = new Event();
     reminderEvent.setTag(Tag.reminder.toString());
-    reminderEvent.setTimestamp(new Timestamp(now + DAYS_IN_MILLISECONDS / 2));
+    reminderEvent.setTimestamp(new Timestamp(now + DAYS_IN_MILLISECONDS));
 
     assertFalse(validator.validate(events, reminderEvent, CollectionExerciseState.SCHEDULED));
   }
@@ -306,19 +274,6 @@ public class BusinessEventValidatorTest {
     final Event reminder = new Event();
     reminder.setTag((Tag.reminder.toString()));
     reminder.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
-    final Event reminder2 = new Event();
-    reminder2.setTag((Tag.reminder2.toString()));
-    reminder2.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
-    final List<Event> events = new ArrayList<>();
-    events.add(reminder);
-    assertFalse(validator.validate(events, reminder2, CollectionExerciseState.CREATED));
-  }
-
-  @Test
-  public void testReminderEventNot24HoursApartIsInvalid() {
-    final Event reminder = new Event();
-    reminder.setTag((Tag.reminder.toString()));
-    reminder.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
     final Event reminder2 = new Event();
     reminder2.setTag((Tag.reminder2.toString()));
     reminder2.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
@@ -433,7 +388,7 @@ public class BusinessEventValidatorTest {
 
     final Event goLiveEvent = new Event();
     goLiveEvent.setTag(Tag.go_live.toString());
-    goLiveEvent.setTimestamp(new Timestamp(now + 3500000));
+    goLiveEvent.setTimestamp(new Timestamp(now + 8 * DAYS_IN_MILLISECONDS));
 
     assertFalse(
         validator.validate(mandatoryEvents, goLiveEvent, CollectionExerciseState.SCHEDULED));
