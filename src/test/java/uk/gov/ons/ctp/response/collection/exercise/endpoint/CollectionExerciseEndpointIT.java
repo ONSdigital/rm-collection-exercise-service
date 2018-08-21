@@ -658,7 +658,7 @@ public class CollectionExerciseEndpointIT {
             .filter(EventService.Tag::isMandatory)
             .collect(Collectors.toList());
 
-    int days = 0;
+    int days = 1;
     for (EventService.Tag t : tags) {
       EventDTO event = new EventDTO();
       event.setCollectionExerciseId(collectionExerciseId);

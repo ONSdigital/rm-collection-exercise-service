@@ -75,7 +75,7 @@ public class EventServiceImpl implements EventService {
     event.setCreated(new Timestamp(new Date().getTime()));
 
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
-    if (!eventValidator.validateOnCreate(existingEvents, event, collex.getState())) {
+    if (!eventValidator.validate(existingEvents, event, collex.getState())) {
       throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
     }
 

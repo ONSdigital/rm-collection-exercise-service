@@ -336,8 +336,7 @@ public class EventServiceImplTest {
     final Event event = new Event();
     existingEvents.add(event);
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
-    when(eventValidator.validateOnCreate(existingEvents, event, collex.getState()))
-        .thenReturn(false);
+    when(eventValidator.validate(existingEvents, event, collex.getState())).thenReturn(false);
     try {
       eventService.createEvent(eventDto);
       fail("No exception thrown on bad event");
