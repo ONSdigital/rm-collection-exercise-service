@@ -6,7 +6,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -18,14 +20,16 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
@@ -35,11 +39,11 @@ public class MpsActionRuleCreatorTest {
   private static final String SURVEY_SHORT_NAME = "TEST_SURVEY";
   private static final String EXERCISE_REF = "201808";
   @Mock private ActionSvcClient actionSvcClient;
-
-  @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
+  @Mock private SurveyService surveyService;
 
   @InjectMocks private MpsActionRuleCreator mpsActionRuleCreator;
   private static final UUID BUSINESS_ACTION_PLAN_ID = UUID.randomUUID();
+  private static final UUID EXERCISE_ID = UUID.randomUUID();
   private static final int EXERCISE_PK = 6433;
 
   @Test
@@ -48,78 +52,71 @@ public class MpsActionRuleCreatorTest {
   }
 
   @Test
-  public void doNothingIfNotBusinessSurveyEvent() {
+  public void doNothingIfNotMpsEvent() throws CTPException {
+    final Event collectionExerciseEvent =
+        createCollectionExerciseEvent(Tag.go_live.name(), null, null);
+
+    mpsActionRuleCreator.execute(collectionExerciseEvent);
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
+  public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
 
-    mpsActionRuleCreator.execute(
-        new Event(), new CaseTypeOverride(), new CaseTypeOverride(), survey);
-    verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
+    final CollectionExercise collectionExercise = createCollectionExercise();
+    final Event event = createCollectionExerciseEvent(Tag.mps.name(), null, collectionExercise);
+    when(surveyService.getSurveyForCollectionExercise(collectionExercise)).thenReturn(survey);
+
+    mpsActionRuleCreator.execute(event);
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
   }
 
   @Test
-  public void doNothingIfNotMpsEvent() {
-
-    String tag = EventService.Tag.go_live.name();
-    Event collectionExerciseEvent = new Event();
-    CollectionExercise collex = new CollectionExercise();
-
-    collectionExerciseEvent.setTag(tag);
-    collectionExerciseEvent.setCollectionExercise(collex);
-
-    SurveyDTO survey = new SurveyDTO();
-    survey.setSurveyType(SurveyType.Business);
-
-    final CaseTypeOverride bCaseTypeOverride = new CaseTypeOverride();
-    mpsActionRuleCreator.execute(collectionExerciseEvent, bCaseTypeOverride, null, survey);
-    verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), anyString(), any(), anyInt(), any());
-  }
-
-  @Test
-  public void testCreateCorrectActionRulesForMPSEvent() {
+  public void testCreateCorrectActionRulesForMPSEvent() throws CTPException {
     // Given
     Instant eventTriggerInstant = Instant.now();
     Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
 
-    String tag = EventService.Tag.mps.name();
+    String tag = Tag.mps.name();
     CollectionExercise collex = createCollectionExercise();
     Event collectionExerciseEvent = createCollectionExerciseEvent(tag, eventTriggerDate, collex);
 
     String businessSampleType = "B";
 
-    CaseTypeOverride businessCaseTypeOverride = new CaseTypeOverride();
-    businessCaseTypeOverride.setActionPlanId(BUSINESS_ACTION_PLAN_ID);
-
     SurveyDTO survey = new SurveyDTO();
     survey.setShortName(SURVEY_SHORT_NAME);
     survey.setSurveyType(SurveyType.Business);
+    when(surveyService.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            EXERCISE_PK, businessSampleType))
-        .thenReturn(businessCaseTypeOverride);
+    final ActionPlanDTO actionPlan = new ActionPlanDTO();
+    actionPlan.setId(BUSINESS_ACTION_PLAN_ID);
+    when(actionSvcClient.getActionPlanBySelectors(EXERCISE_ID.toString(), false))
+        .thenReturn(actionPlan);
 
     OffsetDateTime eventTriggerOffsetDateTime =
         OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault());
     when(actionSvcClient.createActionRule(
             anyString(),
             anyString(),
-            eq("BSNL"),
+            eq(ActionType.BSNL),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_ACTION_PLAN_ID)))
         .thenReturn(new ActionRuleDTO());
 
     // When
-    mpsActionRuleCreator.execute(collectionExerciseEvent, businessCaseTypeOverride, null, survey);
+    mpsActionRuleCreator.execute(collectionExerciseEvent);
 
     // Then
     verify(actionSvcClient)
         .createActionRule(
             eq(SURVEY_SHORT_NAME + "NOTF"),
             eq(SURVEY_SHORT_NAME + " Notification File " + EXERCISE_REF),
-            eq("BSNL"),
+            eq(ActionType.BSNL),
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_ACTION_PLAN_ID));
@@ -139,6 +136,7 @@ public class MpsActionRuleCreatorTest {
 
   private CollectionExercise createCollectionExercise() {
     final CollectionExercise collex = new CollectionExercise();
+    collex.setId(EXERCISE_ID);
     collex.setExercisePK(MpsActionRuleCreatorTest.EXERCISE_PK);
     collex.setExerciseRef(EXERCISE_REF);
     return collex;

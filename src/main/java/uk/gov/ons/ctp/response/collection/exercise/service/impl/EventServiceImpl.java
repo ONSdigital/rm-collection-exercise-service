@@ -15,29 +15,26 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher.MessageType;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
+import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
 @Service
 @Slf4j
 public class EventServiceImpl implements EventService {
 
   @Autowired private CollectionExerciseService collectionExerciseService;
-
-  @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepo;
 
   @Autowired private EventRepository eventRepository;
 
@@ -51,24 +48,18 @@ public class EventServiceImpl implements EventService {
 
   @Autowired private List<ActionRuleCreator> actionRuleCreators;
 
+  @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
+
   @Override
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
-    CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexId);
-
-    if (collex == null) {
-      throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format(
-              "Collection exercise %s does not exist", eventDto.getCollectionExerciseId()));
-    }
-
+    CollectionExercise collex = getCollectionExercise(collexId, Fault.RESOURCE_NOT_FOUND);
     Event existing =
         this.eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
 
     if (existing != null) {
       throw new CTPException(
-          CTPException.Fault.RESOURCE_VERSION_CONFLICT,
+          Fault.RESOURCE_VERSION_CONFLICT,
           String.format(
               "Event %s already exists for collection exercise %s",
               eventDto.getTag(), collex.getId()));
@@ -82,7 +73,12 @@ public class EventServiceImpl implements EventService {
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
 
-    createActionRulesForEvent(event, collex);
+    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
+    if (!eventValidator.validateOnCreate(existingEvents, event, collex.getState())) {
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
+    }
+
+    createActionRulesForEvent(event);
     event = eventRepository.save(event);
 
     fireEventChangeHandlers(MessageType.EventCreated, event);
@@ -91,53 +87,14 @@ public class EventServiceImpl implements EventService {
   }
 
   @Override
-  public void createActionRulesForEvent(
-      final Event collectionExerciseEvent, final CollectionExercise collectionExercise)
-      throws CTPException {
+  public void createActionRulesForEvent(final Event collectionExerciseEvent) throws CTPException {
     if (!Tag.valueOf(collectionExerciseEvent.getTag()).isActionable()) {
       return;
     }
 
-    final SurveyDTO survey = surveySvcClient.findSurvey(collectionExercise.getSurveyId());
-
-    if (survey.getSurveyType() != SurveyType.Business) {
-      return;
+    for (ActionRuleCreator arc : actionRuleCreators) {
+      arc.execute(collectionExerciseEvent);
     }
-
-    final CaseTypeOverride businessCaseType = getCaseTypeOverride(collectionExercise, "B");
-    final CaseTypeOverride businessIndividualCaseType =
-        getCaseTypeOverride(collectionExercise, "BI");
-
-    actionRuleCreators.forEach(
-        arc ->
-            arc.execute(
-                collectionExerciseEvent, businessCaseType, businessIndividualCaseType, survey));
-  }
-
-  private CaseTypeOverride getCaseTypeOverride(
-      final CollectionExercise collectionExercise, final String sampleUnitType)
-      throws CTPException {
-    final CaseTypeOverride businessIndividualCaseTypeOverride =
-        caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            collectionExercise.getExercisePK(), sampleUnitType);
-
-    if (businessIndividualCaseTypeOverride == null) {
-      logAndThrow(collectionExercise);
-      return null;
-    }
-    return businessIndividualCaseTypeOverride;
-  }
-
-  private void logAndThrow(final CollectionExercise collectionExercise) throws CTPException {
-    log.error(
-        "Business or business individual override action plans do not exist,"
-            + " CollectionExerciseId: {}}",
-        collectionExercise.getId());
-    throw new CTPException(
-        CTPException.Fault.RESOURCE_NOT_FOUND,
-        String.format(
-            "Override action plans do not exist for collection exercise %s",
-            collectionExercise.getId()));
   }
 
   @Override
@@ -146,37 +103,59 @@ public class EventServiceImpl implements EventService {
   }
 
   @Override
-  public Event updateEvent(UUID collexUuid, String tag, Date date) throws CTPException {
-    CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexUuid);
-    if (collex != null) {
-      Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
-      if (event != null) {
-        event.setTimestamp(new Timestamp(date.getTime()));
+  public Event updateEvent(final UUID collexUuid, final String tag, final Date date)
+      throws CTPException {
+    final CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
+    final Event event = getEventByTagAndCollectionExerciseId(tag, collex);
 
-        List<Event> existingEvents = this.eventRepository.findByCollectionExercise(collex);
+    event.setTimestamp(new Timestamp(date.getTime()));
+    validateUpdatedEvents(collex, event);
+    updateActionRules(event);
 
-        if (this.eventValidator.validate(existingEvents, event, collex.getState())) {
+    eventRepository.save(event);
 
-          this.eventRepository.save(event);
+    fireEventChangeHandlers(MessageType.EventUpdated, event);
 
-          fireEventChangeHandlers(MessageType.EventUpdated, event);
-        } else {
-          throw new CTPException(
-              CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
-        }
+    return event;
+  }
 
-      } else {
-        throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND,
-            String.format("Event %s does not exist", event.getId()));
-      }
+  private void updateActionRules(final Event event) throws CTPException {
 
-      return event;
-    } else {
-      throw new CTPException(
-          CTPException.Fault.BAD_REQUEST,
-          String.format("Collection exercise %s does not exist", collexUuid));
+    for (final ActionRuleUpdater aru : actionRuleUpdaters) {
+      aru.execute(event);
     }
+  }
+
+  private void validateUpdatedEvents(final CollectionExercise collex, final Event event)
+      throws CTPException {
+    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
+
+    if (!eventValidator.validate(existingEvents, event, collex.getState())) {
+      throw new CTPException(Fault.BAD_REQUEST, "Invalid event update");
+    }
+  }
+
+  private Event getEventByTagAndCollectionExerciseId(
+      final String tag, final CollectionExercise collex) throws CTPException {
+    final Event event = eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
+    if (event == null) {
+      throw new CTPException(
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "Event with tag %s for Collection Exercise %s does not exist", tag, collex.getId()));
+    }
+    return event;
+  }
+
+  private CollectionExercise getCollectionExercise(final UUID collexUuid, final Fault fault)
+      throws CTPException {
+    final CollectionExercise collex = collectionExerciseService.findCollectionExercise(collexUuid);
+
+    if (collex == null) {
+      throw new CTPException(
+          fault, String.format("Collection exercise %s does not exist", collexUuid));
+    }
+    return collex;
   }
 
   @Override
@@ -188,13 +167,12 @@ public class EventServiceImpl implements EventService {
         return event;
       } else {
         throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND,
-            String.format("Event %s does not exist", event.getId()));
+            Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event.getId()));
       }
 
     } else {
       throw new CTPException(
-          CTPException.Fault.BAD_REQUEST,
+          Fault.BAD_REQUEST,
           String.format("Collection exercise %s does not exist", collex.getId()));
     }
   }
@@ -205,7 +183,7 @@ public class EventServiceImpl implements EventService {
 
     if (event == null) {
       throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event));
+          Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event));
     } else {
       return event;
     }
@@ -224,12 +202,12 @@ public class EventServiceImpl implements EventService {
         return event;
       } else {
         throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
+            Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
       }
 
     } else {
       throw new CTPException(
-          CTPException.Fault.BAD_REQUEST,
+          Fault.BAD_REQUEST,
           String.format("Collection exercise %s does not exist", collex.getId()));
     }
   }
@@ -319,9 +297,7 @@ public class EventServiceImpl implements EventService {
       SchedulerConfiguration.unscheduleEvent(this.scheduler, event);
     } catch (SchedulerException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR,
-          String.format("Error unscheduling event %s", event.getId()),
-          e);
+          Fault.SYSTEM_ERROR, String.format("Error unscheduling event %s", event.getId()), e);
     }
   }
 
@@ -337,9 +313,7 @@ public class EventServiceImpl implements EventService {
       SchedulerConfiguration.scheduleEvent(this.scheduler, event);
     } catch (SchedulerException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR,
-          String.format("Error scheduling event %s", event.getId()),
-          e);
+          Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
     }
   }
 }

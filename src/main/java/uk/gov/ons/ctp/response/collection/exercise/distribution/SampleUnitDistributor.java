@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -52,19 +51,14 @@ public class SampleUnitDistributor {
   // in the list of excluded case ids
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
   private static final int TRANSACTION_TIMEOUT = 60;
-
+  // single TransactionTemplate shared amongst all methods in this instance
+  private final TransactionTemplate transactionTemplate;
   @Autowired private AppConfig appConfig;
-
   @Autowired private EventRepository eventRepository;
-
   @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
-
   @Autowired private SampleUnitRepository sampleUnitRepo;
-
   @Autowired private CollectionExerciseRepository collectionExerciseRepo;
-
   @Autowired private SampleUnitPublisher publisher;
-
   @Autowired private SampleUnitDistributorHelper sampleUnitDistributorHelper;
 
   @Autowired
@@ -79,9 +73,6 @@ public class SampleUnitDistributor {
   @Autowired
   @Qualifier("distribution")
   private DistributedListManager<Integer> sampleDistributionListManager;
-
-  // single TransactionTemplate shared amongst all methods in this instance
-  private final TransactionTemplate transactionTemplate;
 
   /**
    * Constructor into which the Spring PlatformTransactionManager is injected
@@ -139,55 +130,41 @@ public class SampleUnitDistributor {
     List<SampleUnit> children = new ArrayList<>();
     SampleUnitParent parent = null;
     for (ExerciseSampleUnit sampleUnit : sampleUnits) {
+      String activeActionPlanId =
+          sampleUnitDistributorHelper.getActiveActionPlanId(
+              exercise.getExercisePK(),
+              sampleUnit.getSampleUnitType().name(),
+              exercise.getSurveyId());
       if (sampleUnit.getSampleUnitType().isParent()) {
-        parent = new SampleUnitParent();
-        parent.setId(sampleUnit.getSampleUnitId().toString());
-        parent.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        parent.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        parent.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
-        parent.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-        parent.setActionPlanId(
-            sampleUnitDistributorHelper.getActiveActionPlanId(
-                exercise.getExercisePK(),
-                sampleUnit.getSampleUnitType().name(),
-                exercise.getSurveyId()));
-
-        parent.setCollectionExerciseId(exercise.getId().toString());
+        parent = sampleUnit.toSampleUnitParent(activeActionPlanId, exercise.getId());
       } else {
-        SampleUnit child = new SampleUnit();
-        child.setId(sampleUnit.getSampleUnitId().toString());
-        child.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        child.setSampleUnitType(sampleUnit.getSampleUnitType().name());
-        child.setPartyId(Objects.toString(sampleUnit.getPartyId(), null));
-        child.setCollectionInstrumentId(sampleUnit.getCollectionInstrumentId().toString());
-        child.setActionPlanId(
-            sampleUnitDistributorHelper.getActiveActionPlanId(
-                exercise.getExercisePK(),
-                sampleUnit.getSampleUnitType().name(),
-                exercise.getSurveyId()));
+        SampleUnit child = sampleUnit.toSampleUnitChild(activeActionPlanId);
         children.add(child);
       }
     }
 
-    if ((parent != null)) {
-      if (!children.isEmpty()) {
-        parent.setSampleUnitChildren(new SampleUnitChildren(children));
-      }
-
-      if (parent.getActionPlanId() == null) {
-        String message =
-            String.format(
-                "Action Plan Id is required for collectionExerciseId=%s and sampleUnitId=%s",
-                exercise.getId(), parent.getId());
-        log.error(message);
-        throw new CTPException(CTPException.Fault.VALIDATION_FAILED, message);
-      }
-      publishSampleUnit(sampleUnitGroup, parent);
-    } else {
+    if (parent == null) {
       log.error(
           "No Parent for SampleUnit in SampleUnitGroupPK {} ",
           sampleUnitGroup.getSampleUnitGroupPK());
+
+      return;
     }
+
+    if (!children.isEmpty()) {
+      parent.setSampleUnitChildren(new SampleUnitChildren(children));
+    }
+
+    if (parent.getActionPlanId() == null) {
+      String message =
+          String.format(
+              "Action Plan Id is required for collectionExerciseId=%s and sampleUnitId=%s",
+              exercise.getId(), parent.getId());
+      log.error(message);
+      throw new CTPException(CTPException.Fault.VALIDATION_FAILED, message);
+    }
+
+    publishSampleUnit(sampleUnitGroup, parent);
   }
 
   /**

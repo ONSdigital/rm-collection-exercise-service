@@ -20,9 +20,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
 import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -174,6 +177,18 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       log.error("Client error with status code = {}", e.getStatusCode(), e);
       throw e;
     }
+    return survey;
+  }
+
+  public SurveyDTO getSurveyForCollectionExercise(final CollectionExercise collex)
+      throws CTPException {
+    final SurveyDTO survey = findSurvey(collex.getSurveyId());
+
+    if (survey == null) {
+      throw new CTPException(
+          Fault.SYSTEM_ERROR, String.format("Could not find survey id %s", collex.getId()));
+    }
+
     return survey;
   }
 }

@@ -36,4 +36,34 @@ public class EventServiceTest {
   public void testTagShouldHaveReminder3AsAnActionableTag() {
     assertThat(Tag.reminder3.isActionable(), is(true));
   }
+
+  @Test
+  public void testCompareTagToItsName() {
+    assertThat(Tag.mps.hasName("mps"), is(true));
+  }
+
+  @Test
+  public void testCompareTagToRandomString() {
+    assertThat(Tag.mps.hasName("asdadfgsfgth"), is(false));
+  }
+
+  @Test
+  public void testTagShouldHaveReminderAsIsReminder() {
+    assertThat(Tag.reminder.isReminder(), is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveReminder2AsIsReminder() {
+    assertThat(Tag.reminder2.isReminder(), is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveReminder3AsIsReminder() {
+    assertThat(Tag.reminder3.isReminder(), is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveMPSAsIsNotReminder() {
+    assertThat(Tag.mps.isReminder(), is(false));
+  }
 }

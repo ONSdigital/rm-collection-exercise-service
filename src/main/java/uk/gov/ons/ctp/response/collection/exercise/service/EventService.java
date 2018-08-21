@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
@@ -40,6 +39,14 @@ public interface EventService {
       List<Tag> actionableEvents = Arrays.asList(mps, go_live, reminder, reminder2, reminder3);
 
       return actionableEvents.contains(this);
+    }
+
+    public boolean hasName(final String eventName) {
+      return name().equals(eventName);
+    }
+
+    public boolean isReminder() {
+      return ORDERED_REMINDERS.contains(this);
     }
   }
 
@@ -94,9 +101,7 @@ public interface EventService {
    * Create action rules for collection exercise event
    *
    * @param event the event to create action rules for
-   * @param collectionExercise the event is for
    * @throws CTPException on error
    */
-  void createActionRulesForEvent(Event event, CollectionExercise collectionExercise)
-      throws CTPException;
+  void createActionRulesForEvent(Event event) throws CTPException;
 }
