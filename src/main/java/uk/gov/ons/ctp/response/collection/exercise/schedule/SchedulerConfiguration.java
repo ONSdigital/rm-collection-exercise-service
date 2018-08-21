@@ -3,6 +3,8 @@ package uk.gov.ons.ctp.response.collection.exercise.schedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +13,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -33,8 +34,8 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 @Configuration
-@Slf4j
 public class SchedulerConfiguration {
+  private static final Logger log = LoggerFactory.getLogger(SchedulerConfiguration.class);
 
   @Autowired private EventService eventService;
 

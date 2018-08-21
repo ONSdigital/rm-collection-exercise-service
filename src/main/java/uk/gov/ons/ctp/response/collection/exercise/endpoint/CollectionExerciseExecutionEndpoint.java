@@ -1,7 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +16,9 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 /** The REST endpoint controller for Collection Exercises. */
 @RestController
 @RequestMapping(value = "/collectionexerciseexecution", produces = "application/json")
-@Slf4j
 public class CollectionExerciseExecutionEndpoint {
+  private static final Logger log =
+      LoggerFactory.getLogger(CollectionExerciseExecutionEndpoint.class);
 
   private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
 

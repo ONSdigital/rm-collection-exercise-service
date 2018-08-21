@@ -1,8 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -14,8 +15,8 @@ import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 
 /** Class to hold service activator method to handle incoming sample uploaded messages */
 @MessageEndpoint
-@Slf4j
 public class SampleUploadedInboundReceiver {
+  private static final Logger log = LoggerFactory.getLogger(SampleUploadedInboundReceiver.class);
 
   @Autowired private CollectionExerciseService collectionExerciseService;
 

@@ -16,7 +16,7 @@
     <parent>
         <groupId>uk.gov.ons.ctp.product</groupId>
         <artifactId>rm-common-config</artifactId>
-        <version>10.49.12</version>
+        <version>10.49.13</version>
     </parent>
 
     <dependencies>
@@ -229,6 +229,10 @@
             <version>2.9.6</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.godaddy</groupId>
+            <artifactId>logging</artifactId>
+        </dependency>
         <!-- Third party end -->
 
         <!-- Testing -->
