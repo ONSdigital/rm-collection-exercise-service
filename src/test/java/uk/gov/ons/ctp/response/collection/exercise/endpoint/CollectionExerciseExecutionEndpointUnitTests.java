@@ -7,9 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.ons.ctp.common.MvcHelper.*;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -26,8 +27,10 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
 /** Collection Exercise Endpoint Unit tests */
-@Slf4j
 public class CollectionExerciseExecutionEndpointUnitTests {
+  private static final Logger log =
+      LoggerFactory.getLogger(CollectionExerciseExecutionEndpointUnitTests.class);
+
   private static final UUID COLLECTIONEXERCISE_ID1 =
       UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
   private static final int SAMPLEUNITSTOTAL = 500;

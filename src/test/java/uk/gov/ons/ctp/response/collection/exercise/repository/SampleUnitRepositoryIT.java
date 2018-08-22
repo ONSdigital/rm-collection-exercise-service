@@ -2,11 +2,12 @@ package uk.gov.ons.ctp.response.collection.exercise.repository;
 
 import static org.junit.Assert.assertEquals;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,11 +25,11 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 
 /** Integration tests */
-@Slf4j
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SampleUnitRepositoryIT {
+  private static final Logger log = LoggerFactory.getLogger(SampleUnitRepositoryIT.class);
 
   // Gubbins to make spring wire itself up
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();

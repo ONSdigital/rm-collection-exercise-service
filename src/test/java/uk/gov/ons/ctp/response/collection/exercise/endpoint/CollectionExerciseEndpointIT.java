@@ -17,6 +17,8 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,7 +39,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,11 +79,11 @@ import uk.gov.ons.tools.rabbit.SimpleMessageListener;
 import uk.gov.ons.tools.rabbit.SimpleMessageSender;
 
 /** A class to contain integration tests for the collection exercise service */
-@Slf4j
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CollectionExerciseEndpointIT {
+  private static final Logger log = LoggerFactory.getLogger(CollectionExerciseEndpointIT.class);
 
   private static final UUID TEST_SURVEY_ID =
       UUID.fromString("c23bb1c1-5202-43bb-8357-7a07c844308f");

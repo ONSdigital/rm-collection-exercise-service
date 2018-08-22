@@ -1,10 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,8 +35,8 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component
-@Slf4j
 public class ActionSvcRestClientImpl implements ActionSvcClient {
+  private static final Logger log = LoggerFactory.getLogger(ActionSvcRestClientImpl.class);
 
   public static final String FOUND_NO_ACTION_PLANS =
       "Expected one action plan for selectors,"

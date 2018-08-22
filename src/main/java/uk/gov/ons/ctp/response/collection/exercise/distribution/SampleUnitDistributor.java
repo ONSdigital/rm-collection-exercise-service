@@ -1,12 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
@@ -46,8 +47,8 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
-@Slf4j
 public class SampleUnitDistributor {
+  private static final Logger log = LoggerFactory.getLogger(SampleUnitDistributor.class);
 
   private static final String DISTRIBUTION_LIST_ID = "group";
   private static final String ENABLED = "ENABLED";

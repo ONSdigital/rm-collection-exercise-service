@@ -2,6 +2,8 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static java.util.stream.Collectors.joining;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -18,7 +20,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
-import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Scheduler;
@@ -59,8 +60,8 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 /** The REST endpoint controller for Collection Exercises. */
 @RestController
 @RequestMapping(value = "/collectionexercises", produces = "application/json")
-@Slf4j
 public class CollectionExerciseEndpoint {
+  private static final Logger log = LoggerFactory.getLogger(CollectionExerciseEndpoint.class);
 
   private static final String RETURN_COLLECTIONEXERCISENOTFOUND =
       "Collection Exercise not found for collection exercise Id";

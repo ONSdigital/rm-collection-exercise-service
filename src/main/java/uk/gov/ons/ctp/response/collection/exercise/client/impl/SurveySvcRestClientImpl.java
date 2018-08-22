@@ -2,10 +2,11 @@ package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -32,10 +33,10 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** HTTP RestClient implementation for calls to the Survey service */
 @Component
-@Slf4j
 @Qualifier("restClient")
 @Primary
 public class SurveySvcRestClientImpl implements SurveySvcClient {
+  private static final Logger log = LoggerFactory.getLogger(SurveySvcRestClientImpl.class);
 
   private final AppConfig appConfig;
 
