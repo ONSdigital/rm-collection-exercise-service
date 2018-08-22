@@ -87,7 +87,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
       HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity =
           restUtility.createHttpEntity(requestDTO);
 
-      log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
+      log.with("collection_exercise_id", exercise.getId()).debug("about to get to the Sample SVC");
       ResponseEntity<String> responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
 
@@ -97,8 +97,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
         try {
           result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
         } catch (IOException e) {
-          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-          log.error(msg);
+          log.error("Unable to read party response", e);
         }
       }
       return result;
@@ -111,7 +110,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   @Override
   public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
-    log.debug("Getting sample summary sampleSummaryId={}", sampleSummaryId);
+    log.with("sample_summary_id", sampleSummaryId).debug("Getting sample summary");
     UriComponents uri =
         restUtility.createUriComponents(
             "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);
@@ -120,7 +119,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
         restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, SampleSummaryDTO.class);
 
     SampleSummaryDTO sampleSummary = response.getBody();
-    log.debug("Got sampleSummary={}", sampleSummary);
+    log.with("sample_summary", sampleSummary).debug("Got sample Summary");
     return sampleSummary;
   }
 }

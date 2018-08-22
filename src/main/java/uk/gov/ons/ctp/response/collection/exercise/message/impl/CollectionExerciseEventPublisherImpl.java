@@ -33,21 +33,21 @@ public class CollectionExerciseEventPublisherImpl implements CollectionExerciseE
     EventMessageDTO messageDto = new EventMessageDTO(messageType, eventDto);
 
     try {
-      String message = this.objectMapper.writeValueAsString(messageDto);
-      this.rabbitTemplate.convertAndSend(message);
+      String message = objectMapper.writeValueAsString(messageDto);
+      rabbitTemplate.convertAndSend(message);
       if (messageType == MessageType.EventElapsed) {
-        this.eventService.setEventMessageSent(eventDto.getId());
+        eventService.setEventMessageSent(eventDto.getId());
       }
     } catch (CTPException e) {
       String message = String.format("Failed to set event %s as message sent", eventDto.getId());
 
-      log.error(message);
+      log.with("event_id", eventDto.getId()).error(message, e);
 
       throw new CTPException(CTPException.Fault.SYSTEM_ERROR, message);
     } catch (JsonProcessingException e) {
       String message = String.format("Failed to serialise event %s to json", eventDto);
 
-      log.error(message);
+      log.with("event", eventDto).error(message, e);
 
       throw new CTPException(CTPException.Fault.SYSTEM_ERROR, message);
     }

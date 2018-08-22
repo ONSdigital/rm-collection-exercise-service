@@ -25,4 +25,5 @@ public class AppConfig {
   private ScheduleSettings schedules;
   private SwaggerSettings swaggerSettings;
   private Rabbitmq rabbitmq;
+  private Logging logging;
 }

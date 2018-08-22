@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -52,10 +53,9 @@ public class PartySvcRestClientImpl implements PartySvcClient {
 
     HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug(
-        "about to get the Party with Sample Unit Type: {} and Sample Unit Ref: {}",
-        sampleUnitType,
-        sampleUnitRef);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("sample_unit_ref", sampleUnitRef)
+        .debug("About to get the Party");
 
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
@@ -70,8 +70,7 @@ public class PartySvcRestClientImpl implements PartySvcClient {
       try {
         result = objectMapper.readValue(responseBody, PartyDTO.class);
       } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+        log.error("Unable to read party response", e);
       }
     }
 
@@ -88,25 +87,24 @@ public class PartySvcRestClientImpl implements PartySvcClient {
     sampleLinkCreationRequestDTO.setCollectionExerciseId(collectionExerciseId);
     HttpEntity<SampleLinkCreationRequestDTO> httpEntity =
         restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
-    ResponseEntity<SampleLinkDTO> responseEntity =
-        restTemplate.exchange(
-            uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
 
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      log.info(
-          "Created link Sample Summary Id: "
-              + sampleSummaryId
-              + " Collection exercise: "
-              + collectionExerciseId);
-    } else {
-      log.error(
-          "Couldn't link Sample Summary Id: "
-              + sampleSummaryId
-              + " Collection exercise: "
-              + collectionExerciseId
-              + " Status code: "
-              + responseEntity.getStatusCode());
+    ResponseEntity<SampleLinkDTO> responseEntity = null;
+
+    try {
+      responseEntity =
+          restTemplate.exchange(
+              uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
+      log.with("sample_summary_id", sampleSummaryId)
+          .with("collection_exercise", collectionExerciseId)
+          .info("Created link");
+    } catch (HttpStatusCodeException e) {
+      log.with("sample_summary_id", sampleSummaryId)
+          .with("collection_exercise", collectionExerciseId)
+          .with("status_code", e.getStatusCode())
+          .error("Couldn't link", e);
+      return null;
     }
+
     return responseEntity.getBody();
   }
 }

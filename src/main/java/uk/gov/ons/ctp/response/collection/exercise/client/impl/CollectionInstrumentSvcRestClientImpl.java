@@ -68,8 +68,7 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
             objectMapper.readValue(
                 responseBody, new TypeReference<List<CollectionInstrumentDTO>>() {});
       } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+        log.error("Unable to read collection instrument response", e);
       }
     }
 
@@ -93,7 +92,7 @@ public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrume
 
     String responseBody = responseEntity.getBody();
     int result = Integer.parseInt(responseBody);
-    log.debug("Got collection instrument count count={}", result);
+    log.with("count", result).debug("Got collection instrument count");
     return result;
   }
 }

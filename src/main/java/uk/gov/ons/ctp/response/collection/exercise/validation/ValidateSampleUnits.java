@@ -114,21 +114,18 @@ public class ValidateSampleUnits {
                   this.collexService.transitionCollectionExercise(exercise, event);
                 }
               } catch (CTPException e) {
-                log.error("Error validating collection exercise {}: {}", exercise.getId(), e);
+                log.with("collection_exercise_id", exercise.getId())
+                    .error("Error validating collection exercise", e);
               }
             }); // End looping collections
 
       } catch (LockingException ex) {
-        log.error("Validation failed due to {}", ex.getMessage());
-        log.error("Stack trace: " + ex);
+        log.error("Validation failed", ex);
       } finally {
         try {
           sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
         } catch (LockingException ex) {
-          log.error(
-              "Failed to release sampleValidationListManager data - error msg is {}",
-              ex.getMessage());
-          log.error("Stack trace: " + ex);
+          log.error("Failed to release sampleValidationListManager data", ex);
         }
       }
     } // End exercises not empty. Just check this to save processing if going
@@ -156,10 +153,9 @@ public class ValidateSampleUnits {
       List<ExerciseSampleUnit> sampleUnits = sampleUnitSvc.findBySampleUnitGroup(sampleUnitGroup);
       for (ExerciseSampleUnit sampleUnitParent : sampleUnits) {
         if (!sampleUnitParent.getSampleUnitType().isParent()) {
-          log.warn(
-              "Validation for SampleUnit PK: {} Is type {}",
-              sampleUnitParent.getSampleUnitPK(),
-              sampleUnitParent.getSampleUnitType());
+          log.with("sample_unit_pk", sampleUnitParent.getSampleUnitPK())
+              .with("sample_unit_type", sampleUnitParent.getSampleUnitType())
+              .warn("Validation for SampleUnit");
           // Skip current sampleUnit as not parent type. Respondent Unit.
           // Something must have gone wrong before?
           continue;
@@ -185,11 +181,8 @@ public class ValidateSampleUnits {
               });
 
         } catch (RestClientException ex) {
-          log.error(
-              "Error in validation for SampleUnitGroup PK: {} due to: {}",
-              sampleUnitGroup.getSampleUnitGroupPK(),
-              ex.getMessage());
-          log.error("Stack trace: " + ex);
+          log.with("sample_unit_group_pk", sampleUnitGroup.getSampleUnitGroupPK())
+              .error("Error in validation for SampleUnitGroup", ex);
         }
       }
 
@@ -221,7 +214,8 @@ public class ValidateSampleUnits {
     List<ExerciseSampleUnitGroup> sampleUnitGroups;
 
     List<Integer> excludedGroups = sampleValidationListManager.findList(VALIDATION_LIST_ID, false);
-    log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+    log.with("excluded_groups", excludedGroups)
+        .debug("VALIDATION - Retrieve sampleUnitGroups excluding");
 
     excludedGroups.add(IMPOSSIBLE_ID);
     sampleUnitGroups =
@@ -233,12 +227,13 @@ public class ValidateSampleUnits {
                 new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
 
     if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
-      log.debug(
-          "VALIDATION retrieved sampleUnitGroup PKs {}",
+      String sampleGroupPks =
           sampleUnitGroups
               .stream()
               .map(group -> group.getSampleUnitGroupPK().toString())
-              .collect(Collectors.joining(",")));
+              .collect(Collectors.joining(","));
+      log.with("sample_unit_group_pks", sampleGroupPks)
+          .debug("VALIDATION retrieved sampleUnitGroup PKs");
       sampleValidationListManager.saveList(
           VALIDATION_LIST_ID,
           sampleUnitGroups
@@ -288,10 +283,9 @@ public class ValidateSampleUnits {
                           Optional<ExerciseSampleUnit> existingRespondent =
                               findExistingRespondent(sampleUnits, association);
                           if (existingRespondent.isPresent()) {
-                            log.warn(
-                                "Validation for SampleUnit PK: {} Respondent already exists {}",
-                                sampleUnit.getSampleUnitPK(),
-                                association.getPartyId());
+                            log.with("sample_unit_pk", sampleUnit.getSampleUnitPK())
+                                .with("party_id", association.getPartyId())
+                                .warn("Respondent already exists");
                             updatedSampleUnits.add(existingRespondent.get());
                           } else {
                             ExerciseSampleUnit respondent =
@@ -353,7 +347,7 @@ public class ValidateSampleUnits {
             CollectionInstrumentClassifierTypes.valueOf(classifier);
         classifiers.put(classifierType.name(), classifierType.apply(sampleUnit));
       } catch (IllegalArgumentException e) {
-        log.warn("Classifier not supported {}", classifier);
+        log.with("classifier", classifier).warn("Classifier not supported", e);
       }
     }
     String searchString = convertToJSON(classifiers);
@@ -361,13 +355,12 @@ public class ValidateSampleUnits {
         collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
     UUID collectionInstrumentId;
     if (collectionInstruments.isEmpty()) {
-      log.error("No collection instruments found for: {}", searchString);
+      log.with("search_string", searchString).error("No collection instruments found");
       collectionInstrumentId = null;
     } else if (collectionInstruments.size() > 1) {
-      log.warn(
-          "{} collection instruments found for: {}, taking most recent first",
-          collectionInstruments.size(),
-          searchString);
+      log.with("collection_instruments_found", collectionInstruments.size())
+          .with("search_string", searchString)
+          .warn("Multiple collection instruments found, taking most recent first");
       collectionInstrumentId = collectionInstruments.get(0).getId();
     } else {
       collectionInstrumentId = collectionInstruments.get(0).getId();
@@ -416,18 +409,16 @@ public class ValidateSampleUnits {
         if (classifierTypeSelector != null) {
           classifierTypes = classifierTypeSelector.getClassifierTypes();
         } else {
-          log.error(
-              "Error requesting Survey Classifier Types for SurveyId: {},  caseTypeSelectorId: {}",
-              exercise.getSurveyId(),
-              chosenSelector.getId());
+          log.with("survey_id", exercise.getSurveyId())
+              .with("case_type_selector_id", chosenSelector.getId())
+              .error("Error requesting Survey Classifier Types");
         }
       } else {
-        log.error(
-            "Error requesting Survey Classifier Types for SurveyId: {}", exercise.getSurveyId());
+        log.with("survey_id", exercise.getSurveyId())
+            .error("Error requesting Survey Classifier Types for Survey");
       }
     } catch (RestClientException ex) {
-      log.error("Error requesting Survey service for classifierTypes: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Error requesting Survey service for classifierTypes", ex);
     }
 
     return classifierTypes;
@@ -442,7 +433,7 @@ public class ValidateSampleUnits {
    */
   private CollectionExerciseEvent getCollectionExerciseTransitionState(CollectionExercise exercise)
       throws CTPException {
-    log.info("getCollectionExerciseTransitionState is called!");
+    log.debug("getCollectionExerciseTransitionState is called!");
     CollectionExerciseEvent event = null;
     long init =
         sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
@@ -457,13 +448,13 @@ public class ValidateSampleUnits {
     if (validated == exercise.getSampleSize().longValue()) {
       // All sample units validated, set exercise state to VALIDATED
       event = CollectionExerciseEvent.VALIDATE;
-      log.info("State of collection exercise id: {} is now VALIDATE", exercise.getId());
+      log.with("collection_exercise_id", exercise.getId())
+          .debug("State of collection exercise is now VALIDATE");
     } else if (init < 1 && failed > 0) {
       // None left to validate but some failed, set exercise to
       // FAILEDVALIDATION
-      log.info(
-          "State of collection exercise id: {} is now INVALIDATED (FAILEDVALIDATION)",
-          exercise.getId());
+      log.with("collection_exercise_id", exercise.getId())
+          .info("State of collection exercise is now INVALIDATED (FAILEDVALIDATION)");
       event = CollectionExerciseEvent.INVALIDATE;
     }
 
@@ -494,8 +485,7 @@ public class ValidateSampleUnits {
                 sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.INVALIDATE));
       }
     } catch (CTPException ex) {
-      log.error("Sample Unit group state transition failed: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Sample Unit group state transition failed", ex);
     }
     return sampleUnitGroup;
   }

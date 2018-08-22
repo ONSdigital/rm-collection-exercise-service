@@ -129,7 +129,7 @@ public class SchedulerConfiguration {
 
       return result;
     } catch (SchedulerException e) {
-      log.error("Failed to get event information for job with key {} - {}", jobKey, e.getMessage());
+      log.with("job_key", jobKey).error("Failed to get event information for job", e);
 
       return null;
     }
@@ -152,7 +152,7 @@ public class SchedulerConfiguration {
           .filter(Objects::nonNull)
           .collect(Collectors.toList());
     } catch (SchedulerException e) {
-      log.error("Failed to get job keys for group {} - {}", groupName, e.getMessage());
+      log.with("group", groupName).error("Failed to get job keys for group", e);
 
       return null;
     }

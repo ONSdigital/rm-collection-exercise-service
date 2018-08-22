@@ -31,7 +31,10 @@ public class EventJob implements Job {
             dataMap.getString(SchedulerConfiguration.DataKey.collectionExercise.name()));
     UUID eventId = UUID.fromString(dataMap.getString(SchedulerConfiguration.DataKey.id.name()));
     Date date = new Date(dataMap.getLong(SchedulerConfiguration.DataKey.timestamp.name()));
-    log.info("Executing event: {} - {} - {}", tag, collexId, date);
+    log.with("tag", tag)
+        .with("collection_exercise_id", collexId)
+        .with("date", date)
+        .info("Executing event");
 
     try {
       EventDTO event = new EventDTO();

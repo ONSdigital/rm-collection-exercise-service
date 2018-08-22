@@ -41,8 +41,6 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   public static final String FOUND_NO_ACTION_PLANS =
       "Expected one action plan for selectors,"
           + " collectionExerciseId: %s, activeEnrolment: %b But None Found";
-  public static final String FOUND_NO_ACTION_PLANS_BY_COLLECTION_EXERCISE =
-      "Expected two action plans for selector," + " collectionExerciseId: %s but None Found";
   public static final String MULTIPLE_ACTION_PLANS_FOUND =
       "Expected one action plan for selectors,"
           + " collectionExerciseId: %s, activeEnrolment: %b But %d Found";
@@ -92,9 +90,8 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
 
     ActionPlanDTO createdActionPlan =
         restTemplate.postForObject(uriComponents.toUri(), httpEntity, ActionPlanDTO.class);
-    log.debug(
-        "Successfully posted to action service to create action plan, ActionPlanId: {}",
-        createdActionPlan.getId());
+    log.with("action_plan_id", createdActionPlan.getId())
+        .debug("Successfully posted to action service to create action plan");
     return createdActionPlan;
   }
 
@@ -105,10 +102,9 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
   @Override
   public List<ActionPlanDTO> getActionPlansBySelectors(
       final String collectionExerciseId, boolean activeEnrolment) {
-    log.debug(
-        "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
-        collectionExerciseId,
-        activeEnrolment);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .with("active_enrolment", activeEnrolment)
+        .debug("Retrieving action plan for selectors");
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
@@ -126,11 +122,9 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
             httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
-    log.debug(
-        "Successfully retrieved action plan for selectors, "
-            + "collectionExerciseId: {}, activeEnrolment: {}",
-        collectionExerciseId,
-        activeEnrolment);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .with("active_enrolment", activeEnrolment)
+        .debug("Successfully retrieved action plan for selectors");
 
     return responseEntity.getBody();
   }
@@ -186,11 +180,10 @@ public class ActionSvcRestClientImpl implements ActionSvcClient {
         restUtility.createHttpEntity(actionRulePostRequestDTO);
     final ActionRuleDTO createdActionRule =
         restTemplate.postForObject(uriComponents.toUri(), httpEntity, ActionRuleDTO.class);
-    log.debug(
-        "Successfully posted to action service to create action rule,"
-            + "ActionPlanId: {}, ActionRuleId: {}",
-        actionPlanId,
-        createdActionRule.getId());
+    log.with("action_rule_id", createdActionRule.getId())
+        .with("action_plan_id", actionPlanId)
+        .debug("Successfully posted to action service to create action rule");
+
     return createdActionRule;
   }
 

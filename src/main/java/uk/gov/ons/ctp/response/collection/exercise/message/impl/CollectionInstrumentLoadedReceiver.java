@@ -19,10 +19,10 @@ public class CollectionInstrumentLoadedReceiver {
 
   @ServiceActivator(inputChannel = "ciMessageDto")
   public void acceptSampleUnit(CollectionInstrumentMessageDTO message) throws CTPException {
-    log.info("json: {}", message);
+    log.with(message).debug("Consumed message");
 
     UUID collexId = message.getExerciseId();
 
-    this.collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(collexId);
+    collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(collexId);
   }
 }

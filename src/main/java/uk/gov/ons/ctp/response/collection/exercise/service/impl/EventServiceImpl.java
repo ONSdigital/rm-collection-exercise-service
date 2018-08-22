@@ -227,12 +227,9 @@ public class EventServiceImpl implements EventService {
               try {
                 handler.handleEventLifecycle(messageType, event);
               } catch (CTPException e) {
-                log.error(
-                    "Failed to handle event change for {} of {} - {} ({})",
-                    messageType,
-                    event.getId(),
-                    e.getMessage(),
-                    e.getFault());
+                log.with("message_type", messageType)
+                    .with("event_id", event.getId())
+                    .error("Failed to handle event change", e);
               }
             });
   }

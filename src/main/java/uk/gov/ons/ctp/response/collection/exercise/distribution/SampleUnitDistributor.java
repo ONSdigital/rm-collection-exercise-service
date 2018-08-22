@@ -105,16 +105,12 @@ public class SampleUnitDistributor {
       }
 
     } catch (LockingException | CTPException ex) {
-      log.error("Distribution failed due to {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Distribution failed", ex);
     } finally {
       try {
         sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
       } catch (LockingException ex) {
-        log.error(
-            "Failed to release sampleDistributionListManager data - error msg is {}",
-            ex.getMessage());
-        log.error("Stack trace: " + ex);
+        log.error("Failed to release sampleDistributionListManager data", ex);
       }
     }
   }
@@ -145,10 +141,8 @@ public class SampleUnitDistributor {
     }
 
     if (parent == null) {
-      log.error(
-          "No Parent for SampleUnit in SampleUnitGroupPK {} ",
-          sampleUnitGroup.getSampleUnitGroupPK());
-
+      log.with("sample_unit_group_pk", sampleUnitGroup.getSampleUnitGroupPK())
+          .error("No Parent for SampleUnit in SampleUnitGroup");
       return;
     }
 
@@ -161,7 +155,9 @@ public class SampleUnitDistributor {
           String.format(
               "Action Plan Id is required for collectionExerciseId=%s and sampleUnitId=%s",
               exercise.getId(), parent.getId());
-      log.error(message);
+      log.with("collection_exercise_id", exercise.getId())
+          .with("sample_unit_id", parent.getId())
+          .error("Action Plan Id is required");
       throw new CTPException(CTPException.Fault.VALIDATION_FAILED, message);
     }
 
@@ -183,7 +179,7 @@ public class SampleUnitDistributor {
 
     List<Integer> excludedGroups =
         sampleDistributionListManager.findList(DISTRIBUTION_LIST_ID, false);
-    log.debug("DISTRIBUTION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+    log.with("excluded_groups", excludedGroups).debug("DISTRIBUTION - Retrieve sampleUnitGroups");
 
     excludedGroups.add(Integer.valueOf(IMPOSSIBLE_ID));
     sampleUnitGroups =
@@ -195,12 +191,13 @@ public class SampleUnitDistributor {
                 new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
 
     if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
-      log.debug(
-          "DISTRIBUTION retrieved sampleUnitGroup PKs {}",
+      String sampleUnitGroupsPks =
           sampleUnitGroups
               .stream()
               .map(group -> group.getSampleUnitGroupPK().toString())
-              .collect(Collectors.joining(",")));
+              .collect(Collectors.joining(","));
+      log.with("sample_unit_group_pks", sampleUnitGroupsPks)
+          .debug("DISTRIBUTION retrieved sampleUnitGroup PKs");
       sampleDistributionListManager.saveList(
           DISTRIBUTION_LIST_ID,
           sampleUnitGroups
@@ -234,8 +231,7 @@ public class SampleUnitDistributor {
               sampleUnitGroupTransitionState(sampleUnitGroup);
               publisher.sendSampleUnit(sampleUnitMessage);
             } catch (CTPException ex) {
-              log.error("Sample Unit group state transition failed: {}", ex.getMessage());
-              log.error("Stack trace: " + ex);
+              log.error("Sample Unit group state transition failed", ex);
             }
           }
         });
@@ -286,33 +282,28 @@ public class SampleUnitDistributor {
         }
 
         if (isGoLiveInPast) {
-          log.debug(
-              "Attempting to transition collection exercise to Live, collectionExerciseId={}",
-              exercise.getId());
+          log.with("collection_exercise_id", exercise.getId())
+              .debug("Attempting to transition collection exercise to Live");
           // All sample units published and go live date in past, set exercise state to LIVE
           exercise.setState(
               collectionExerciseTransitionState.transition(
                   exercise.getState(), CollectionExerciseEvent.GO_LIVE));
         } else {
           // All sample units published, set exercise state to READY_FOR_LIVE
-          log.debug(
-              "Attempting to transition collection exercise to Ready for Live, "
-                  + "collectionExerciseId={}",
-              exercise.getId());
+          log.with("collection_exercise_id", exercise.getId())
+              .debug("Attempting to transition collection exercise to Ready for Live");
           exercise.setState(
               collectionExerciseTransitionState.transition(
                   exercise.getState(), CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
           exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
         }
-        log.debug(
-            "Successfully set collection exercise state collectionExerciseId={}, state={}",
-            exercise.getId(),
-            exercise.getState());
+        log.with("collection_exercise_id", exercise.getId())
+            .with("state", exercise.getState())
+            .debug("Successfully set collection exercise state");
         collectionExerciseRepo.saveAndFlush(exercise);
       }
     } catch (CTPException ex) {
-      log.error("Collection Exercise state transition failed: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Collection Exercise state transition failed", ex);
     }
     return exercise;
   }

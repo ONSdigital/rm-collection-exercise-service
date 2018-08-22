@@ -62,7 +62,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
 
     HttpEntity<List<SurveyClassifierDTO>> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
+    log.with("survey_id", surveyId).debug("about to get to the Survey SVC");
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
@@ -73,8 +73,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
         result =
             objectMapper.readValue(responseBody, new TypeReference<List<SurveyClassifierDTO>>() {});
       } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+        log.error("Unable to read Survey Classifier response", e);
       }
     }
 
@@ -94,10 +93,9 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug(
-        "about to get to the Survey SVC with surveyId {} and classifierType {}",
-        surveyId,
-        classifierType);
+    log.with("survey_id", surveyId)
+        .with("classifier_type", classifierType)
+        .debug("about to get to the Survey SVC");
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
@@ -107,8 +105,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       try {
         result = objectMapper.readValue(responseBody, SurveyClassifierTypeDTO.class);
       } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+        log.error("Unable to read Survey Classifier response", e);
       }
     }
     return result;
@@ -121,8 +118,7 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       try {
         result = objectMapper.readValue(responseBody, SurveyDTO.class);
       } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
+        log.error("Unable to read Survey response", e);
       }
     }
     return result;
@@ -139,10 +135,9 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
     SurveyDTO survey = null;
 
     try {
-      log.debug(
-          "about to get to the Survey SVC with surveyId {} from {}",
-          surveyId,
-          uriComponents.toUri());
+      log.with("survey_id", surveyId)
+          .with("uri", uriComponents.toUri())
+          .debug("about to get to the Survey SVC");
       responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
       survey = getSurveyDtoFromResponseEntity(responseEntity);
@@ -150,7 +145,6 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
-      log.error("Client error with status code = {}", e.getStatusCode(), e);
       throw e;
     }
     return survey;
@@ -175,7 +169,6 @@ public class SurveySvcRestClientImpl implements SurveySvcClient {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
-      log.error("Client error with status code = {}", e.getStatusCode(), e);
       throw e;
     }
     return survey;

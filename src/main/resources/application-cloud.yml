@@ -9,6 +9,7 @@ info:
 # logging config here as a reminder as to how to override logback from cmd line
 # ie -Dlogging.level.org.springframework=DEBUG
 logging:
+  useJson: true
   level:
     uk.gov.ons.ctp: INFO
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
