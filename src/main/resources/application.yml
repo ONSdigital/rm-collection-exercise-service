@@ -53,7 +53,10 @@ spring:
   output:
     ansi:
       enabled: never
-
+  zipkin:
+    baseUrl: http://localhost:9411
+    enabled: false
+    
   application:
     name: ONS CollectionExerciseSvc
 
