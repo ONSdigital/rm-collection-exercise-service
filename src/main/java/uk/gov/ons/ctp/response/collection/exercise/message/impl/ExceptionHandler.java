@@ -1,8 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.MessageHandlingException;
@@ -14,8 +15,8 @@ import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionInstrum
  * a map that's more friendly to posting as messages
  */
 @MessageEndpoint
-@Slf4j
 public class ExceptionHandler {
+  private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
 
   /**
    * Service activator method that accepts a MessageHandlingException, pulls out the important bits

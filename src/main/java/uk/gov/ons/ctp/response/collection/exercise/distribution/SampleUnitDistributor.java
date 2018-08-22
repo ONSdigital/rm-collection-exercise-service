@@ -1,11 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,8 +42,8 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 /** Class responsible for business logic to distribute SampleUnits. */
 @Component
-@Slf4j
 public class SampleUnitDistributor {
+  private static final Logger log = LoggerFactory.getLogger(SampleUnitDistributor.class);
 
   private static final String DISTRIBUTION_LIST_ID = "group";
   // this is a bit of a kludge - jpa does not like having an IN clause with an

@@ -9,30 +9,49 @@
     value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p})  %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}" />
   <property name="SYSLOG_PATTERN"
     value="${LOG_LEVEL_PATTERN:-%5level} %-40.40logger{39} : %message%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}" />
+  <property name="ISO8601_DATE_FORMAT" value="yyyy-MM-dd'T'HH:mm:ss'Z'" />
 
   <appender name="CLOUD" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
       <providers>
-        <mdc/>
-        <pattern>
-          <pattern>
-            {
-            "created": "%date{ISO8601}",
-            "service": "collectionexercisesvc",
-            "level": "%level",
-            "event": "%message"
-            }
-          </pattern>
-        </pattern>
+        <timestamp>
+          <timeZone>UTC</timeZone>
+          <pattern>${ISO8601_DATE_FORMAT}</pattern>
+          <fieldName>created</fieldName>
+        </timestamp>
+        <globalCustomFields>
+          <customFields>{"service":"collectionexercisesvc"}</customFields>
+        </globalCustomFields>
+        <message>
+          <fieldName>event</fieldName>
+        </message>
+        <loggerName/>
+        <threadName/>
+        <logLevel>
+          <fieldName>level</fieldName>
+        </logLevel>
         <stackTrace>
           <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-            <maxDepthPerThrowable>30</maxDepthPerThrowable>
-            <shortenedClassNameLength>20</shortenedClassNameLength>
+            <maxDepthPerThrowable>20</maxDepthPerThrowable>
+            <maxLength>1000</maxLength>
+            <shortenedClassNameLength>30</shortenedClassNameLength>
+            <rootCauseFirst>true</rootCauseFirst>
             <exclude>^sun\.reflect\..*\.invoke</exclude>
             <exclude>^net\.sf\.cglib\.proxy\.MethodProxy\.invoke</exclude>
-            <rootCauseFirst>true</rootCauseFirst>
           </throwableConverter>
         </stackTrace>
+        <context/>
+        <jsonMessage/>
+        <mdc>
+          <includeMdcKeyName>included</includeMdcKeyName>
+        </mdc>
+        <contextMap/>
+        <tags/>
+        <logstashMarkers/>
+        <arguments>
+          <includeNonStructuredArguments>true</includeNonStructuredArguments>
+          <nonStructuredArgumentsFieldPrefix>prefix</nonStructuredArgumentsFieldPrefix>
+        </arguments>
       </providers>
     </encoder>
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">

@@ -2,9 +2,10 @@ package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -25,8 +26,9 @@ import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionIn
 
 /** HTTP RestClient implementation for calls to the Collection Instrument service. */
 @Component
-@Slf4j
 public class CollectionInstrumentSvcRestClientImpl implements CollectionInstrumentSvcClient {
+  private static final Logger log =
+      LoggerFactory.getLogger(CollectionInstrumentSvcRestClientImpl.class);
 
   @Autowired private AppConfig appConfig;
 
