@@ -2,7 +2,8 @@ package uk.gov.ons.ctp.response.collection.exercise.message.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,8 +15,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 @Component
-@Slf4j
 public class CollectionExerciseEventPublisherImpl implements CollectionExerciseEventPublisher {
+  private static final Logger log =
+      LoggerFactory.getLogger(CollectionExerciseEventPublisherImpl.class);
 
   @Autowired private EventService eventService;
 

@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
+import com.godaddy.logging.LoggingConfigs;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -225,6 +226,8 @@ public class CollectionExerciseApplication {
    * @param args These are the optional command line arguments
    */
   public static void main(String[] args) {
+    LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
+
     SpringApplication.run(CollectionExerciseApplication.class, args);
   }
 }
