@@ -21,8 +21,8 @@ import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.client.impl.PartySvcRestClientImpl;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.ScheduleSettings;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -57,7 +57,7 @@ public class ValidateSampleUnitsTest {
 
   @Mock private SurveySvcClient surveySvcClient;
 
-  @Mock private PartySvcRestClientImpl partySvcClient;
+  @Mock private PartySvcClient partySvcClient;
 
   @Mock private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 

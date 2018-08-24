@@ -47,6 +47,7 @@ import uk.gov.ons.ctp.common.matcher.DateMatcher;
 import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -56,7 +57,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSu
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
@@ -103,7 +103,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   @Mock private CollectionExerciseService collectionExerciseService;
 
-  @Mock private SurveyService surveyService;
+  @Mock private SurveySvcClient surveyService;
 
   @Mock private EventService eventService;
 

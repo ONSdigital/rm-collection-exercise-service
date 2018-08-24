@@ -1,13 +1,52 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
+import uk.gov.ons.response.survey.representation.SurveyDTO;
 
-/** Service responsible for making client calls to the Sample service */
-public interface SampleSvcClient {
+/** HTTP RestClient implementation for calls to the Sample service */
+@Component
+public class SampleSvcClient {
+  private static final Logger log = LoggerFactory.getLogger(SampleSvcClient.class);
+
+  @Autowired private AppConfig appConfig;
+
+  @Autowired private RestTemplate restTemplate;
+
+  @Autowired private SampleLinkRepository sampleLinkRepository;
+
+  @Qualifier("sampleRestUtility")
+  @Autowired
+  private RestUtility restUtility;
+
+  @Autowired private ObjectMapper objectMapper;
+
+  @Autowired private SurveySvcClient surveyService;
 
   /**
    * Request the delivery of sample units from the Sample Service via a message queue.
@@ -15,7 +54,75 @@ public interface SampleSvcClient {
    * @param exercise the Collection Exercise for which to request sample units.
    * @return the total number of sample units in the collection exercise.
    */
-  SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException;
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  public SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException {
 
-  SampleSummaryDTO getSampleSummary(UUID sampleSummaryId);
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getRequestSampleUnitsPath(), null, exercise);
+
+    List<SampleLink> sampleLinks =
+        sampleLinkRepository.findByCollectionExerciseId(exercise.getId());
+    List<UUID> sampleSummaryUUIDList = new ArrayList<>();
+    for (SampleLink samplelink : sampleLinks) {
+      sampleSummaryUUIDList.add(samplelink.getSampleSummaryId());
+    }
+
+    SurveyDTO surveyDto = this.surveyService.findSurvey(exercise.getSurveyId());
+
+    if (surveyDto == null) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST,
+          String.format(
+              "Invalid survey %s for collection exercise %s",
+              exercise.getSurveyId(), exercise.getId()));
+    } else {
+      CollectionExerciseJobCreationRequestDTO requestDTO =
+          new CollectionExerciseJobCreationRequestDTO();
+      requestDTO.setCollectionExerciseId(exercise.getId());
+      requestDTO.setSurveyRef(surveyDto.getSurveyRef());
+      requestDTO.setExerciseDateTime(exercise.getScheduledStartDateTime());
+      requestDTO.setSampleSummaryUUIDList(sampleSummaryUUIDList);
+
+      HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity =
+          restUtility.createHttpEntity(requestDTO);
+
+      log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
+      ResponseEntity<String> responseEntity =
+          restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
+
+      SampleUnitsRequestDTO result = null;
+      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+        String responseBody = responseEntity.getBody();
+        try {
+          result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
+        } catch (IOException e) {
+          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
+          log.error(msg);
+        }
+      }
+      return result;
+    }
+  }
+
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
+    log.debug("Getting sample summary sampleSummaryId={}", sampleSummaryId);
+    UriComponents uri =
+        restUtility.createUriComponents(
+            "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
+    ResponseEntity<SampleSummaryDTO> response =
+        restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, SampleSummaryDTO.class);
+
+    SampleSummaryDTO sampleSummary = response.getBody();
+    log.debug("Got sampleSummary={}", sampleSummary);
+    return sampleSummary;
+  }
 }

@@ -1,13 +1,22 @@
 package uk.gov.ons.ctp.response.collection.exercise.message;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.annotation.MessageEndpoint;
+import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /**
- * Interface for the receipt of sample unit messages from the Spring Integration inbound message
- * queue
+ * Service implementation responsible for receipt of sample units. See Spring Integration flow for
+ * details of inbound queue.
  */
-public interface SampleUnitReceiver {
+@CoverageIgnore
+@MessageEndpoint
+public class SampleUnitReceiver {
+
+  @Autowired private SampleService sampleService;
 
   /**
    * Method called with the deserialised message
@@ -15,5 +24,8 @@ public interface SampleUnitReceiver {
    * @param sampleUnit The java representation of the message body
    * @throws CTPException when collection exercise state transition error
    */
-  void acceptSampleUnit(SampleUnit sampleUnit) throws CTPException;
+  @ServiceActivator(inputChannel = "sampleUnitTransformed", adviceChain = "sampleUnitRetryAdvice")
+  public void acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
+    sampleService.acceptSampleUnit(sampleUnit);
+  }
 }
