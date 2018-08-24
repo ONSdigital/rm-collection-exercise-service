@@ -8,6 +8,6 @@ public interface EventValidator {
 
   boolean validate(
       final List<Event> existingEvents,
-      final Event newEvent,
+      final Event submittedEvent,
       final CollectionExerciseState collectionExerciseState);
 }
