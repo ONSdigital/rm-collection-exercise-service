@@ -33,3 +33,8 @@ applications:
     endpoints_enabled: ENDPOINT_ENABLED
     security_user_name: REPLACE_BA_USERNAME
     security_user_password: REPLACE_BA_PASSWORD
+    actionSvc_connectionConfig_host: actionsvc-SPACE.DOMAIN
+    actionSvc_connectionConfig_port: "REPLACE_PORT"
+    actionSvc_connectionConfig_scheme: REPLACE_PROTOCOL
+    actionSvc_connectionConfig_username: REPLACE_BA_USERNAME
+    actionSvc_connectionConfig_password: REPLACE_BA_PASSWORD
