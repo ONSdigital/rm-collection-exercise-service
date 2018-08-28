@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -197,7 +199,9 @@ public class CollectionExerciseEndpointIT {
 
     final EventDTO createdEvent = events.get(0);
     assertThat(createdEvent.getTag(), is(EventService.Tag.mps.name()));
-    assertThat(createdEvent.getTimestamp().getTime(), is(newDate.getTime()));
+    assertThat(
+        DateUtils.round(createdEvent.getTimestamp(), Calendar.MINUTE).getTime(),
+        is(DateUtils.round(newDate, Calendar.MINUTE).getTime()));
   }
 
   @Test
