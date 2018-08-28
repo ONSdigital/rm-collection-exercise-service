@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl.change;
 
-import lombok.extern.slf4j.Slf4j;
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -15,8 +16,8 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
  * created or updated
  */
 @Component
-@Slf4j
 public final class ScheduledStartDateHandler implements EventChangeHandler {
+  private static final Logger log = LoggerFactory.getLogger(ScheduledStartDateHandler.class);
 
   @Autowired private CollectionExerciseService collectionExerciseService;
 

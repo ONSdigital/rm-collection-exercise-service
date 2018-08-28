@@ -17,6 +17,8 @@ import static uk.gov.ons.ctp.common.MvcHelper.postJson;
 import static uk.gov.ons.ctp.common.MvcHelper.putJson;
 import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.hamcrest.core.Is;
 import org.junit.Before;
@@ -61,8 +62,10 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Collection Exercise Endpoint Unit tests */
-@Slf4j
 public class CollectionExerciseEndpointUnitTests {
+  private static final Logger log =
+      LoggerFactory.getLogger(CollectionExerciseEndpointUnitTests.class);
+
   private static final String LINK_SAMPLE_SUMMARY_JSON =
       "{\"sampleSummaryIds\": [\"87043936-4d38-4696-952a-fcd55a51be96\", \"cf23b621-c613-424c-9d0d-53a9cfa82f3a\"]}";
   private static final UUID SURVEY_ID_1 = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");

@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,7 +11,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,8 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
 @Service
-@Slf4j
 public class EventServiceImpl implements EventService {
+  private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
 
   @Autowired private CollectionExerciseService collectionExerciseService;
 

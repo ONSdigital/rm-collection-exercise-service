@@ -1,8 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.schedule;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.Date;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -15,8 +16,9 @@ import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEve
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 @Component
-@Slf4j
 public class EventJob implements Job {
+  private static final Logger log = LoggerFactory.getLogger(EventJob.class);
+
   @Autowired private CollectionExerciseEventPublisher eventPublisher;
 
   @Override

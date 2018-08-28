@@ -1,7 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,9 @@ import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGro
 
 /** Implementation to deal with sampleUnitGroups. */
 @Service
-@Slf4j
 public class ExerciseSampleUnitGroupServiceImpl implements ExerciseSampleUnitGroupService {
+  private static final Logger log =
+      LoggerFactory.getLogger(ExerciseSampleUnitGroupServiceImpl.class);
 
   private static final int TRANSACTION_TIMEOUT = 60;
 

@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.validation;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +48,8 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Class responsible for business logic to validate SampleUnits. */
 @Component
-@Slf4j
 public class ValidateSampleUnits {
+  private static final Logger log = LoggerFactory.getLogger(ValidateSampleUnits.class);
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
   private static final String VALIDATION_LIST_ID = "group";

@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -42,8 +43,8 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** The implementation of the SampleService */
 @Service
-@Slf4j
 public class CollectionExerciseServiceImpl implements CollectionExerciseService {
+  private static final Logger log = LoggerFactory.getLogger(CollectionExerciseServiceImpl.class);
 
   private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
