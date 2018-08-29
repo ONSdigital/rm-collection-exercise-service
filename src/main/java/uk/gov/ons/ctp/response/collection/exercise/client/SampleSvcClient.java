@@ -90,7 +90,8 @@ public class SampleSvcClient {
       HttpEntity<CollectionExerciseJobCreationRequestDTO> httpEntity =
           restUtility.createHttpEntity(requestDTO);
 
-      log.debug("about to get to the Sample SVC with CollectionExerciseId: {}", exercise.getId());
+      log.with("collection_exercise_id", exercise.getId().toString())
+          .debug("Requesting sample unit for collection exercise");
       ResponseEntity<String> responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
 
@@ -113,7 +114,7 @@ public class SampleSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
-    log.debug("Getting sample summary sampleSummaryId={}", sampleSummaryId);
+    log.with("sample_summary_id").debug("Getting sample summary");
     UriComponents uri =
         restUtility.createUriComponents(
             "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);

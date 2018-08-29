@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.EventMessageDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -33,7 +34,7 @@ public class CollectionExerciseEventInboundReceiver {
   @ServiceActivator(inputChannel = "cemInMessage")
   public void handleEventMessage(final EventMessageDTO message) {
     EventDTO event = message.getEvent();
-    CollectionExerciseEventPublisher.MessageType messageType = message.getMessageType();
+    MessageType messageType = message.getMessageType();
     String tagString = event.getTag();
     EventService.Tag tag;
 
@@ -42,8 +43,7 @@ public class CollectionExerciseEventInboundReceiver {
 
       // If it's a go_live EventElapsed then attempt to transition the state of the collection
       // exercise to live
-      if (tag == EventService.Tag.go_live
-          && messageType == CollectionExerciseEventPublisher.MessageType.EventElapsed) {
+      if (tag == EventService.Tag.go_live && messageType == MessageType.EventElapsed) {
         UUID collexId = event.getCollectionExerciseId();
 
         transitionCollectionExerciseToLive(collexId);
@@ -66,12 +66,9 @@ public class CollectionExerciseEventInboundReceiver {
   private void logIgnoreMessage(final EventMessageDTO message) {
     EventDTO event = message.getEvent();
 
-    log.info(
-        "Ignoring event message {}/{} - not {}/{}",
-        event.getTag(),
-        message.getMessageType(),
-        EventService.Tag.go_live.name(),
-        CollectionExerciseEventPublisher.MessageType.EventElapsed.name());
+    log.with("tag", event.getTag())
+        .with("message_type", message.getMessageType())
+        .info("Ignoring event message");
   }
 
   /**
@@ -81,11 +78,12 @@ public class CollectionExerciseEventInboundReceiver {
    */
   private void transitionCollectionExerciseToLive(final UUID collexId) {
     try {
-      this.collectionExerciseService.transitionCollectionExercise(
+      collectionExerciseService.transitionCollectionExercise(
           collexId, CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-      log.info("Set collection exercise {} to LIVE state", collexId);
+      log.with("collection_exercise_id", collexId).info("Set collection exercise to LIVE state");
     } catch (CTPException e) {
-      log.error("Failed to set collection exercise {} to LIVE state - {}", collexId, e);
+      log.with("collection_exercise_id", collexId)
+          .error("Failed to set collection exercise to LIVE state", e);
     }
   }
 }

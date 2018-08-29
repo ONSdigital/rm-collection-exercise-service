@@ -73,7 +73,7 @@ public class SurveySvcClient {
 
     HttpEntity<List<SurveyClassifierDTO>> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug("about to get to the Survey SVC with surveyId {}", surveyId);
+    log.with("survey_id", surveyId).debug("Retrieving survey");
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
@@ -116,10 +116,9 @@ public class SurveySvcClient {
 
     HttpEntity<?> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug(
-        "about to get to the Survey SVC with surveyId {} and classifierType {}",
-        surveyId,
-        classifierType);
+    log.with("survey_id", surveyId.toString())
+        .with("classifier_type", classifierType.toString())
+        .debug("Requesting survey classifier type");
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
@@ -170,10 +169,7 @@ public class SurveySvcClient {
     ResponseEntity<String> responseEntity;
     SurveyDTO survey;
     try {
-      log.debug(
-          "about to get to the Survey SVC with surveyId {} from {}",
-          surveyId,
-          uriComponents.toUri());
+      log.with("survey_id", surveyId.toString()).debug("Retrieving survey");
       responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
       survey = getSurveyDtoFromResponseEntity(responseEntity);
@@ -181,7 +177,7 @@ public class SurveySvcClient {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
-      log.error("Client error with status code = {}", e.getStatusCode(), e);
+      log.error("Failed to retrieve survey", e);
       throw e;
     }
     return survey;
@@ -209,7 +205,7 @@ public class SurveySvcClient {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         return null;
       }
-      log.error("Client error with status code = {}", e.getStatusCode(), e);
+      log.error("Failed to retrieve survey", e);
       throw e;
     }
     return survey;

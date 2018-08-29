@@ -101,9 +101,8 @@ public class ActionSvcClient {
 
     ActionPlanDTO createdActionPlan =
         restTemplate.postForObject(uriComponents.toUri(), httpEntity, ActionPlanDTO.class);
-    log.debug(
-        "Successfully posted to action service to create action plan, ActionPlanId: {}",
-        createdActionPlan.getId());
+    log.with("action_plan_id", createdActionPlan.getId())
+        .debug("Successfully posted to action service to create action plan");
     return createdActionPlan;
   }
 
@@ -120,10 +119,9 @@ public class ActionSvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
       final String collectionExerciseId, final Boolean activeEnrolment) {
-    log.info(
-        "Retrieving action plan for selectors, " + "collectionExerciseId: {}, activeEnrolment: {}",
-        collectionExerciseId,
-        activeEnrolment);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .with("activeEnrolment", activeEnrolment)
+        .info("Retrieving action plan for selectors");
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
@@ -140,12 +138,9 @@ public class ActionSvcClient {
             httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
-    log.info(
-        "Successfully retrieved action plan for selectors, "
-            + "collectionExerciseId: {}, activeEnrolment: {}",
-        collectionExerciseId,
-        activeEnrolment);
-
+    log.with("collection_exercise_id", collectionExerciseId)
+        .with("activeEnrolment", activeEnrolment)
+        .info("Successfully retrieved action plans for selectors");
     return responseEntity.getBody();
   }
 
@@ -156,20 +151,18 @@ public class ActionSvcClient {
         getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
 
     if (actionPlans == null) {
-      log.error(
-          "Retrieved no action plans, collectionExerciseId: {}, activeEnrolment: {}",
-          collectionExerciseId,
-          activeEnrolment);
+      log.with("collection_exercise_id", collectionExerciseId)
+          .with("activeEnrolment", activeEnrolment)
+          .error("Retrieved no action plans");
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
           String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
     }
 
     if (actionPlans.size() != 1) {
-      log.error(
-          "Retrieved more than one action plan, collectionExerciseId: {}, activeEnrolment: {}",
-          collectionExerciseId,
-          activeEnrolment);
+      log.with("collection_exercise_id", collectionExerciseId)
+          .with("activeEnrolment", activeEnrolment)
+          .error("Retrieved more than one action plan");
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
           String.format(
@@ -193,8 +186,8 @@ public class ActionSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
-    log.info(
-        "Retrieving action plan for selectors, collectionExerciseId: {}", collectionExerciseId);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .info("Retrieving action plan for selectors");
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
@@ -211,9 +204,8 @@ public class ActionSvcClient {
             httpEntity,
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
-    log.info(
-        "Successfully retrieved action plan for selectors, collectionExerciseId: {}",
-        collectionExerciseId);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .info("Successfully retrieved action plan for selectors");
     return responseEntity.getBody();
   }
 
@@ -223,14 +215,14 @@ public class ActionSvcClient {
     final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
 
     if (actionPlans == null) {
-      log.error("Retrieved no action plans, collectionExerciseId: {}", collectionExerciseId);
+      log.with("collection_exercise_id", collectionExerciseId).error("Retrieved no action plans");
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
     }
 
     if (actionPlans.size() > 1) {
-      log.error(
-          "Retrieved more than one action plan, collectionExerciseId: {}", collectionExerciseId);
+      log.with("collection_exercise_id", collectionExerciseId)
+          .error("Retrieved more than one action plan");
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
           String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
@@ -275,11 +267,9 @@ public class ActionSvcClient {
         restUtility.createHttpEntity(actionRulePostRequestDTO);
     final ActionRuleDTO createdActionRule =
         restTemplate.postForObject(uriComponents.toUri(), httpEntity, ActionRuleDTO.class);
-    log.debug(
-        "Successfully posted to action service to create action rule,"
-            + "ActionPlanId: {}, ActionRuleId: {}",
-        actionPlanId,
-        createdActionRule.getId());
+    log.with("action_plan_id", actionPlanId)
+        .with("action_rule_id", createdActionRule.getId().toString())
+        .debug("Successfully posted to action service to create action rule");
     return createdActionRule;
   }
 

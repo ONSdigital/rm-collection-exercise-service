@@ -103,7 +103,7 @@ public class CollectionInstrumentSvcClient {
 
     String responseBody = responseEntity.getBody();
     int result = Integer.parseInt(responseBody);
-    log.debug("Got collection instrument count count={}", result);
+    log.with("count", result).debug("Got collection instrument count");
     return result;
   }
 }

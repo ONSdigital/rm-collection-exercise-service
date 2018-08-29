@@ -39,10 +39,11 @@ public class SampleUploadedInboundReceiver {
 
   private void transitionCollectionExercise(final UUID collectionExerciseId) {
     try {
-      this.collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
+      collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
           collectionExerciseId);
     } catch (CTPException e) {
-      log.error("Failed to transition collectionExerciseId={}", collectionExerciseId, e);
+      log.with("collection_exercise", collectionExerciseId)
+          .error("Failed to transition collectionExerciseId", e);
     }
   }
 }

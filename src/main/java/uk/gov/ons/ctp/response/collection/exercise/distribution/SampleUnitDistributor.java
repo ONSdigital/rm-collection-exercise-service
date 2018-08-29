@@ -118,13 +118,11 @@ public class SampleUnitDistributor {
     try {
       sampleUnitGroups = retrieveSampleUnitGroups(exercise);
     } catch (LockingException ex) {
-      log.error("Sample Unit Distribution failed, error: {}", ex.getMessage());
-      log.error(ex.toString());
+      log.error("Sample Unit Distribution failed", ex);
     }
     if (sampleUnitGroups.isEmpty()) {
-      log.debug(
-          "No sample unit groups to distribute for exercise, collectionExerciseId: {}",
-          exercise.getId());
+      log.with("collection_exercise_id", exercise.getId())
+          .debug("No sample unit groups to distribute for exercise");
       return;
     }
 
@@ -134,9 +132,8 @@ public class SampleUnitDistributor {
           try {
             distributeSampleUnitGroup(exercise, sampleUnitGroup);
           } catch (CTPException ex) {
-            log.error(
-                "Failed to distribute sample unit group, sampleUnitGroupPK: {}",
-                sampleUnitGroup.getSampleUnitGroupPK());
+            log.with("sampleUnitGroupPK", sampleUnitGroup.getSampleUnitGroupPK())
+                .error("Failed to distribute sample unit group", ex);
           }
         });
 
@@ -147,8 +144,7 @@ public class SampleUnitDistributor {
     try {
       sampleDistributionListManager.deleteList(DISTRIBUTION_LIST_ID, true);
     } catch (LockingException ex) {
-      log.error("Failed to release sampleDistributionListManager data, error: {}", ex.getMessage());
-      log.error(ex.toString());
+      log.error("Failed to release sampleDistributionListManager data", ex);
     }
   }
 
@@ -165,7 +161,7 @@ public class SampleUnitDistributor {
 
     List<Integer> excludedGroups =
         sampleDistributionListManager.findList(DISTRIBUTION_LIST_ID, false);
-    log.debug("DISTRIBUTION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+    log.with("excluded_groups", excludedGroups).debug("DISTRIBUTION - Retrieve sampleUnitGroups");
 
     excludedGroups.add(IMPOSSIBLE_ID);
     List<ExerciseSampleUnitGroup> sampleUnitGroups =
@@ -277,8 +273,7 @@ public class SampleUnitDistributor {
               sampleUnitGroupTransitionState(sampleUnitGroup);
               publisher.sendSampleUnit(sampleUnitMessage);
             } catch (CTPException ex) {
-              log.error("Sample Unit group state transition failed: {}", ex.getMessage());
-              log.error(ex.toString());
+              log.error("Sample Unit group state transition failed", ex);
             }
           }
         });
@@ -320,33 +315,28 @@ public class SampleUnitDistributor {
                 .getTimestamp()
                 .getTime())
             < System.currentTimeMillis()) {
-          log.debug(
-              "Attempting to transition collection exercise to Live, collectionExerciseId={}",
-              exercise.getId());
+          log.with("collection_exercise_id", exercise.getId())
+              .debug("Attempting to transition collection exercise to Live");
           // All sample units published and go live date in past, set exercise state to LIVE
           exercise.setState(
               collectionExerciseTransitionState.transition(
                   exercise.getState(), CollectionExerciseEvent.GO_LIVE));
         } else {
           // All sample units published, set exercise state to READY_FOR_LIVE
-          log.debug(
-              "Attempting to transition collection exercise to Ready for Live, "
-                  + "collectionExerciseId={}",
-              exercise.getId());
+          log.with("collection_exercise_id", exercise.getId())
+              .debug("Attempting to transition collection exercise to Ready for Live");
           exercise.setState(
               collectionExerciseTransitionState.transition(
                   exercise.getState(), CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH));
           exercise.setActualPublishDateTime(new Timestamp(new Date().getTime()));
         }
-        log.debug(
-            "Successfully set collection exercise state collectionExerciseId={}, state={}",
-            exercise.getId(),
-            exercise.getState());
+        log.with("collection_exercise_id", exercise.getId())
+            .with("state", exercise.getState())
+            .debug("Successfully set collection exercise state");
         collectionExerciseRepo.saveAndFlush(exercise);
       }
     } catch (CTPException ex) {
-      log.error("Collection Exercise state transition failed: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Collection Exercise state transition failed", ex);
     }
   }
 }

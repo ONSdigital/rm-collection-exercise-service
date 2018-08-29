@@ -95,7 +95,6 @@ public class ValidateSampleUnits {
     List<CollectionExercise> exercises =
         collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
     if (exercises.isEmpty()) {
-      log.debug("No exercises in EXECUTED state");
       return;
     }
 
@@ -120,16 +119,12 @@ public class ValidateSampleUnits {
           });
 
     } catch (LockingException ex) {
-      log.error("Validation failed due to {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Failed to get lock", ex.getMessage());
     } finally {
       try {
         sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
       } catch (LockingException ex) {
-        log.error(
-            "Failed to release sampleValidationListManager data - error msg is {}",
-            ex.getMessage());
-        log.error("Stack trace: " + ex);
+        log.error("Failed to delete lock list", ex);
       }
     }
   }
@@ -146,7 +141,8 @@ public class ValidateSampleUnits {
       throws LockingException {
 
     List<Integer> excludedGroups = sampleValidationListManager.findList(VALIDATION_LIST_ID, false);
-    log.debug("VALIDATION - Retrieve sampleUnitGroups excluding {}", excludedGroups);
+    log.with("excluded_groups", excludedGroups)
+        .debug("VALIDATION - Retrieve sampleUnitGroups excluding");
 
     excludedGroups.add(IMPOSSIBLE_ID);
     List<ExerciseSampleUnitGroup> sampleUnitGroups =
@@ -158,12 +154,13 @@ public class ValidateSampleUnits {
                 new PageRequest(0, appConfig.getSchedules().getValidationScheduleRetrievalMax()));
 
     if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
-      log.debug(
-          "VALIDATION retrieved sampleUnitGroup PKs {}",
+      String sampleGroupPks =
           sampleUnitGroups
               .stream()
               .map(group -> group.getSampleUnitGroupPK().toString())
-              .collect(Collectors.joining(",")));
+              .collect(Collectors.joining(","));
+      log.with("sample_unit_group_pks", sampleGroupPks)
+          .debug("VALIDATION retrieved sampleUnitGroup PKs");
       sampleValidationListManager.saveList(
           VALIDATION_LIST_ID,
           sampleUnitGroups
@@ -190,8 +187,8 @@ public class ValidateSampleUnits {
 
     List<String> classifierTypes = requestSurveyClassifiers(exercise);
     if (classifierTypes.isEmpty()) {
-      log.error(
-          "Failed to retrieve survey classifiers, surveyId: {}", exercise.getSurveyId().toString());
+      log.with("survey_id", exercise.getSurveyId().toString())
+          .error("Failed to retrieve survey classifiers");
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format(
@@ -214,11 +211,8 @@ public class ValidateSampleUnits {
             sampleUnit.setPartyId(UUID.fromString(party.getId()));
           }
         } catch (RestClientException ex) {
-          log.error(
-              "Error in validation for SampleUnitGroup PK: {} due to: {}",
-              sampleUnitGroup.getSampleUnitGroupPK(),
-              ex.getMessage());
-          log.error("Stack trace: " + ex);
+          log.with("sample_unit_group_PK", sampleUnitGroup.getSampleUnitGroupPK())
+              .error("Error in validation of SampleUnitGroup", ex);
         }
       }
       saveUpdatedSampleUnits(sampleUnitGroup, sampleUnits);
@@ -291,7 +285,7 @@ public class ValidateSampleUnits {
             CollectionInstrumentClassifierTypes.valueOf(classifier);
         classifiers.put(classifierType.name(), classifierType.apply(sampleUnit));
       } catch (IllegalArgumentException e) {
-        log.warn("Classifier not supported {}", classifier);
+        log.with("classifier", classifier).warn("Classifier not supported", e);
       }
     }
     String searchString = convertToJSON(classifiers);
@@ -299,13 +293,12 @@ public class ValidateSampleUnits {
         collectionInstrumentSvcClient.requestCollectionInstruments(searchString);
     UUID collectionInstrumentId;
     if (collectionInstruments.isEmpty()) {
-      log.error("No collection instruments found for: {}", searchString);
+      log.with("search_string", searchString).error("No collection instruments found");
       collectionInstrumentId = null;
     } else if (collectionInstruments.size() > 1) {
-      log.warn(
-          "Multiple collection instruments found selecting first, count: {}, selectors: {}",
-          collectionInstruments.size(),
-          searchString);
+      log.with("collection_instruments_found", collectionInstruments.size())
+          .with("search_string", searchString)
+          .warn("Multiple collection instruments found, taking most recent first");
       collectionInstrumentId = collectionInstruments.get(0).getId();
     } else {
       collectionInstrumentId = collectionInstruments.get(0).getId();
@@ -347,10 +340,12 @@ public class ValidateSampleUnits {
     if (validated == exercise.getSampleSize().longValue()) {
       // All sample units validated, set exercise state to VALIDATED
       event = CollectionExerciseEvent.VALIDATE;
-      log.info("State of collection exercise id: {} is now VALIDATE", exercise.getId());
+      log.with("collection_exercise_id", exercise.getId())
+          .debug("State of collection exercise is now VALIDATE");
     } else if (init < 1 && failed > 0) {
-      log.info("init: {}, failed: {}", Long.toString(init), Long.toString(failed));
       // None left to validate but some failed, set exercise to FAILEDVALIDATION
+      log.with("collection_exercise_id", exercise.getId())
+          .info("State of collection exercise is now INVALIDATED (FAILEDVALIDATION)");
       event = CollectionExerciseEvent.INVALIDATE;
     }
 
@@ -386,8 +381,7 @@ public class ValidateSampleUnits {
                 sampleUnitGroup.getStateFK(), SampleUnitGroupEvent.INVALIDATE));
       }
     } catch (CTPException ex) {
-      log.error("Sample Unit group state transition failed: {}", ex.getMessage());
-      log.error("Stack trace: " + ex);
+      log.error("Sample Unit group state transition failed", ex);
     }
     return sampleUnitGroup;
   }

@@ -48,20 +48,24 @@ public final class ScheduledStartDateHandler implements EventChangeHandler {
       if (collex != null) {
         switch (tag) {
           case mps:
-            log.info(
-                "Setting scheduledStartDate for {} to {}", collex.getId(), event.getTimestamp());
+            log.with("collection_exercise_id", collex.getId())
+                .with("event_time", event.getTimestamp())
+                .debug("Setting scheduledStartDate");
             collex.setScheduledStartDateTime(event.getTimestamp());
             collex.setScheduledExecutionDateTime(event.getTimestamp());
             collex.setPeriodStartDateTime(event.getTimestamp());
             break;
           case exercise_end:
-            log.info("Setting scheduledEndDate for {} to {}", collex.getId(), event.getTimestamp());
+            log.with("collection_exercise_id", collex.getId())
+                .with("event_time", event.getTimestamp())
+                .debug("Setting scheduledEndDate");
             collex.setScheduledEndDateTime(event.getTimestamp());
             collex.setPeriodEndDateTime(event.getTimestamp());
             break;
           case return_by:
-            log.info(
-                "Setting scheduledReturnDate for {} to {}", collex.getId(), event.getTimestamp());
+            log.with("collection_exercise_id", collex.getId())
+                .with("event_time", event.getTimestamp())
+                .debug("Setting scheduledReturnDate");
             collex.setScheduledReturnDateTime(event.getTimestamp());
             break;
           default:

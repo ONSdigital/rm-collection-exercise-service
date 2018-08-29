@@ -34,19 +34,19 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
     CollectionExerciseDTO.CollectionExerciseEvent ceEvent = null;
 
     try {
-      if (this.eventService.isScheduled(collectionExercise.getId())) {
+      if (eventService.isScheduled(collectionExercise.getId())) {
         ceEvent = CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_ADDED;
-        this.collectionExerciseService.transitionCollectionExercise(collectionExercise, ceEvent);
+        collectionExerciseService.transitionCollectionExercise(collectionExercise, ceEvent);
         // This is a bit of a kludge on account of SCHEDULED not being a proper state.  If the CI &
         // sample are
         // already loaded, loading the events may trigger a transition straight through to
         // READY_FOR_REVIEW
         // Performing this call here will force that
-        this.collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
+        collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
             collectionExercise);
       } else {
         ceEvent = CollectionExerciseDTO.CollectionExerciseEvent.EVENTS_DELETED;
-        this.collectionExerciseService.transitionCollectionExercise(collectionExercise, ceEvent);
+        collectionExerciseService.transitionCollectionExercise(collectionExercise, ceEvent);
       }
     } catch (CTPException e) {
       // As the events are deliberately fired indiscriminately (i.e. the collection exercise state
@@ -54,12 +54,9 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
       // checked first) there is a reasonable likelihood that the transition will fail harmlessly.
       // Hence this
       // exception is being logged as a warning minus the stack trace
-      log.warn(
-          "Collection exercise {} failed to handle state transition {} - {} ({})",
-          collectionExercise.getId(),
-          ceEvent,
-          e.getMessage(),
-          e.getFault());
+      log.with("collection_exercise", collectionExercise.getId())
+          .with("event", ceEvent)
+          .warn("Collection exercise failed to handle state transition", e);
     }
   }
 }

@@ -326,17 +326,15 @@ public class CollectionExerciseService {
   @Transactional
   public CollectionExercise createCollectionExercise(
       CollectionExerciseDTO collex, SurveyDTO survey) {
-    log.debug(
-        "Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
-        collex.getExerciseRef(),
-        survey.getSurveyRef());
+    log.with("survey_ref", survey.getSurveyRef())
+        .with("exercise_ref", collex.getExerciseRef())
+        .debug("Creating collection exercise");
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
     // Save collection exercise before creating action plans because we need the exercisepk
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
     createActionPlans(collectionExercise, survey);
-    log.debug(
-        "Successfully created collection exercise, CollectionExerciseId: {}",
-        collectionExercise.getId());
+    log.with("collection_exercise_id", collectionExercise.getId())
+        .debug("Successfully created collection exercise");
     return collectionExercise;
   }
 
@@ -353,9 +351,8 @@ public class CollectionExerciseService {
     collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
     collectionExercise.setCreated(new Timestamp(new Date().getTime()));
     collectionExercise.setId(UUID.randomUUID());
-    log.debug(
-        "Successfully created collection exercise from DTO, CollectionExerciseId: {}",
-        collectionExercise.getId());
+    log.with("collection_exercise_id", collectionExercise.getId())
+        .debug("Successfully created collection exercise from DTO");
     return collectionExercise;
   }
 
@@ -366,10 +363,9 @@ public class CollectionExerciseService {
    * @param survey SurveyDTO representing survey of collection exercise
    */
   private void createActionPlans(CollectionExercise collectionExercise, SurveyDTO survey) {
-    log.debug(
-        "Creating action plans for exercise, CollectionExerciseId: {}, SurveyId: {}",
-        collectionExercise.getId(),
-        survey.getId());
+    log.with("collection_exercise_id", collectionExercise.getId())
+        .with("survey_id", survey.getId())
+        .debug("Creating action plans for exercise");
 
     switch (survey.getSurveyType()) {
       case Business:
@@ -389,10 +385,9 @@ public class CollectionExerciseService {
         throw new RuntimeException("Census surveys not supported... yet!");
     }
 
-    log.debug(
-        "Successfully created action plans for exercise, CollectionExerciseId: {}, SurveyID: {}",
-        collectionExercise.getId(),
-        survey.getId());
+    log.with("collection_exercise_id", collectionExercise.getId())
+        .with("survey_id", survey.getId())
+        .debug("Successfully created action plans for exercise");
   }
 
   /**
@@ -402,20 +397,18 @@ public class CollectionExerciseService {
    * @param sampleUnitType Sample Unit Type i.e. (B, H, HI)
    */
   private void createDefaultActionPlan(SurveyDTO survey, String sampleUnitType) {
-    log.debug(
-        "Creating default action plan, SurveyId: {} , SampleUnitType: {}",
-        survey.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("survey_id", survey.getId())
+        .debug("Creating default action plan");
 
     // If a casetypedefault already exists for this survey/sampleUnitType do nothing
     CaseTypeDefault existingCaseTypeDefault =
         caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(
             UUID.fromString(survey.getId()), sampleUnitType);
     if (existingCaseTypeDefault != null) {
-      log.debug(
-          "Default action plan already exists, SurveyId: {} SampleUnitType: {}",
-          survey.getId(),
-          sampleUnitType);
+      log.with("sample_unit_type", sampleUnitType)
+          .with("survey_id", survey.getId())
+          .debug("Default action plan already exists");
       return;
     }
 
@@ -425,12 +418,10 @@ public class CollectionExerciseService {
     String description = String.format("%s %s Case", shortName, sampleUnitType);
     ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description, null);
     createCaseTypeDefault(survey, sampleUnitType, actionPlan);
-    log.debug(
-        "Successfully created default action plan,"
-            + "ActionPlanId: {}, SurveyId: {}, SampleUnitType: {}",
-        actionPlan.getId(),
-        survey.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("survey_id", survey.getId())
+        .with("action_plan_id", actionPlan.getId())
+        .debug("Successfully created default action plan");
   }
 
   /**
@@ -442,23 +433,20 @@ public class CollectionExerciseService {
    */
   private void createCaseTypeDefault(
       SurveyDTO survey, String sampleUnitType, ActionPlanDTO actionPlan) {
-    log.debug(
-        "Creating case type default, ActionPlanId: {}, SurveyId: {}, SampleUnitType: {}",
-        actionPlan.getId(),
-        survey.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("survey_id", survey.getId())
+        .with("action_plan_id", actionPlan.getId())
+        .debug("Creating case type default");
     CaseTypeDefault caseTypeDefault = new CaseTypeDefault();
     caseTypeDefault.setSurveyId(UUID.fromString(survey.getId()));
     caseTypeDefault.setSampleUnitTypeFK(sampleUnitType);
     caseTypeDefault.setActionPlanId(actionPlan.getId());
 
     this.caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
-    log.debug(
-        "Successfully created case type default,"
-            + "ActionPlanId: {}, SurveyId: {}, SampleUnitType: {}",
-        actionPlan.getId(),
-        survey.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("survey_id", survey.getId())
+        .with("action_plan_id", actionPlan.getId())
+        .debug("Successfully created case type default");
   }
 
   /**
@@ -470,20 +458,20 @@ public class CollectionExerciseService {
    */
   private void createOverrideActionPlan(
       CollectionExercise collectionExercise, SurveyDTO survey, String sampleUnitType) {
-    log.debug(
-        "Creating override action plan, CollectionExerciseId: {}, SampleUnitType: {}",
-        collectionExercise.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("survey_id", survey.getId())
+        .with("collection_exercise_id", collectionExercise.getId())
+        .debug("Creating override action plan");
 
     // If a casetypeoverride already exists for this exercise/sampleUnitType do nothing
     CaseTypeOverride existingCaseTypeOverride =
         caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
             collectionExercise.getExercisePK(), sampleUnitType);
     if (existingCaseTypeOverride != null) {
-      log.debug(
-          "Override action plan already exists, CollectionExerciseId: {}, SampleUnitType: {}",
-          collectionExercise.getId(),
-          sampleUnitType);
+      log.with("sample_unit_type", sampleUnitType)
+          .with("survey_id", survey.getId())
+          .with("collection_exercise_id", collectionExercise.getId())
+          .debug("Override action plan already exists");
       return;
     }
 
@@ -502,12 +490,10 @@ public class CollectionExerciseService {
 
     // Create casetypeoverride linking collection exercise and sample unit type to the action plan
     createCaseTypeOverride(collectionExercise, sampleUnitType, actionPlan);
-    log.debug(
-        "Successfully created override action plan, "
-            + "ActionPlanId: {}, CollectionExerciseId: {}, SampleUnitType: {}",
-        actionPlan.getId(),
-        collectionExercise.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("action_plan_id", actionPlan.getId())
+        .with("collection_exercise_id", collectionExercise.getId())
+        .debug("Successfully created override action plan");
   }
 
   /**
@@ -521,23 +507,19 @@ public class CollectionExerciseService {
   private void createCaseTypeOverride(
       CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan)
       throws DataAccessException {
-    log.debug(
-        "Creating case type override,"
-            + "ActionPlanId: {}, CollectionExerciseId: {}, SampleUnitType: {}",
-        actionPlan.getId(),
-        collectionExercise.getId(),
-        sampleUnitType);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("action_plan_id", actionPlan.getId())
+        .with("collection_exercise_id", collectionExercise.getId())
+        .debug("Creating case type override");
     CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
     caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
     caseTypeOverride.setSampleUnitTypeFK(sampleUnitType);
     caseTypeOverride.setActionPlanId(actionPlan.getId());
     this.caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
-    log.debug(
-        "Successfully created case type override, "
-            + "CollectionExerciseId: {}, SampleUnitType: {}, ActionPlanId: {}",
-        collectionExercise.getId(),
-        sampleUnitType,
-        actionPlan.getId());
+    log.with("sample_unit_type", sampleUnitType)
+        .with("action_plan_id", actionPlan.getId())
+        .with("collection_exercise_id", collectionExercise.getId())
+        .debug("Successfully created case type override");
   }
 
   /**
@@ -772,10 +754,6 @@ public class CollectionExerciseService {
     transitionCollectionExercise(collex, event);
   }
 
-  /**
-   * Transition scheduled collection exercises with collection instruments and samples to {@link
-   * CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
-   */
   public void transitionScheduleCollectionExerciseToReadyToReview(
       final CollectionExercise collectionExercise) throws CTPException {
     UUID collexId = collectionExercise.getId();
@@ -790,13 +768,10 @@ public class CollectionExerciseService {
         allSamplesActive
             && numberOfCollectionInstruments != null
             && numberOfCollectionInstruments > 0;
-    log.info(
-        "ready_for_review transition check:"
-            + "allSamplesActive: {}, numberOfCollectionInstruments: {},"
-            + " shouldTransition: {}",
-        allSamplesActive,
-        numberOfCollectionInstruments,
-        shouldTransition);
+    log.with("all_samples_active", allSamplesActive)
+        .with("number_of_collection_instruments", numberOfCollectionInstruments)
+        .with("should_transition", shouldTransition)
+        .info("ready for review transition check");
     if (shouldTransition) {
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);

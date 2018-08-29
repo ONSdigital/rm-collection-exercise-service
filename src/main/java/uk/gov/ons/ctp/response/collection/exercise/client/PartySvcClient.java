@@ -35,7 +35,9 @@ public class PartySvcClient {
   @Autowired
   private RestUtility restUtility;
 
-  @Autowired private ObjectMapper objectMapper;
+  @Qualifier("customObjectMapper")
+  @Autowired
+  private ObjectMapper objectMapper;
 
   /**
    * Request the delivery of party from the Party Service.
@@ -58,10 +60,9 @@ public class PartySvcClient {
 
     HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntity(null);
 
-    log.debug(
-        "about to get the Party with Sample Unit Type: {} and Sample Unit Ref: {}",
-        sampleUnitType,
-        sampleUnitRef);
+    log.with("sample_unit_type", sampleUnitType)
+        .with("sample_unit_ref", sampleUnitRef)
+        .debug("Retrieving Party");
 
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
@@ -98,11 +99,9 @@ public class PartySvcClient {
             uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
 
     if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      log.info(
-          "Created link Sample Summary Id: "
-              + sampleSummaryId
-              + " Collection exercise: "
-              + collectionExerciseId);
+      log.with("sample_summary_id", sampleSummaryId)
+          .with("collection_exercise_id", collectionExerciseId)
+          .info("Created sample summary link");
     } else {
       log.error(
           "Couldn't link Sample Summary Id: "

@@ -115,7 +115,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id) throws CTPException {
 
-    log.info("Retrieving collection exercises by surveyId={}", id);
+    log.with("survey_id", id).debug("Retrieving collection exercises by surveyId");
 
     SurveyDTO survey = surveyService.findSurvey(id);
 
@@ -125,7 +125,7 @@ public class CollectionExerciseEndpoint {
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND, String.format("%s %s", RETURN_SURVEYNOTFOUND, id));
     } else {
-      log.debug("Entering collection exercise fetch with surveyId={}", id);
+      log.with("survey_id", id).debug("Entering collection exercise fetch with surveyId");
       List<CollectionExercise> collectionExerciseList =
           collectionExerciseService.findCollectionExercisesForSurvey(survey);
       collectionExerciseSummaryDTOList =
@@ -138,7 +138,7 @@ public class CollectionExerciseEndpoint {
       }
     }
 
-    log.info("Sucessfully retrieved collection exercises for surveyId={}", id);
+    log.with("survey_id", id).debug("Sucessfully retrieved collection exercises for surveyId");
     return ResponseEntity.ok(collectionExerciseSummaryDTOList);
   }
 
@@ -156,8 +156,9 @@ public class CollectionExerciseEndpoint {
       @PathVariable("surveyRef") final String surveyRef)
       throws CTPException {
 
-    log.info(
-        "Retrieving collection exercise with surveyRef={} and period={}", surveyRef, exerciseRef);
+    log.with("survey_ref", surveyRef)
+        .with("period", exerciseRef)
+        .debug("Retrieving collection exercise with surveyRef and period");
 
     CollectionExercise collex =
         this.collectionExerciseService.findCollectionExercise(surveyRef, exerciseRef);
@@ -170,10 +171,9 @@ public class CollectionExerciseEndpoint {
               surveyRef,
               exerciseRef));
     } else {
-      log.info(
-          "Successfully retrieved collection exercise using surveyRef={} and period={}",
-          surveyRef,
-          exerciseRef);
+      log.with("survey_ref", surveyRef)
+          .with("period", exerciseRef)
+          .debug("Successfully retrieved collection exercise using surveyRef and period");
       return ResponseEntity.ok(getCollectionExerciseDTO(collex));
     }
   }
@@ -189,7 +189,8 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}", method = RequestMethod.GET)
   public ResponseEntity<CollectionExerciseDTO> getCollectionExercise(
       @PathVariable("id") final UUID id) throws CTPException {
-    log.debug("Entering collection exercise fetch with collectionExerciseId={}", id);
+    log.with("collection_exercise_id", id)
+        .debug("Entering collection exercise fetch with collectionExerciseId");
     CollectionExercise collectionExercise = collectionExerciseService.findCollectionExercise(id);
     if (collectionExercise == null) {
       throw new CTPException(
@@ -199,7 +200,8 @@ public class CollectionExerciseEndpoint {
 
     CollectionExerciseDTO collectionExerciseDTO = getCollectionExerciseDTO(collectionExercise);
 
-    log.info("Successfully retrieved collection exercise with collectionExerciseId={}", id);
+    log.with("collection_exercise_id", id)
+        .debug("Successfully retrieved collection exercise with collectionExerciseId");
     return ResponseEntity.ok(collectionExerciseDTO);
   }
 
@@ -237,11 +239,13 @@ public class CollectionExerciseEndpoint {
       final @Validated(CollectionExerciseDTO.PutValidation.class) @RequestBody CollectionExerciseDTO
               collexDto)
       throws CTPException {
-    log.info("Updating collection exercise with collectionExerciseId={}", id);
+    log.with("collection_exercise_id", id)
+        .debug("Updating collection exercise with collectionExerciseId");
 
-    this.collectionExerciseService.updateCollectionExercise(id, collexDto);
+    collectionExerciseService.updateCollectionExercise(id, collexDto);
 
-    log.info("Sucessfully updated collection exercise with collectionExerciseId={}", id);
+    log.with("collection_exercise_id", id)
+        .debug("Sucessfully updated collection exercise with collectionExerciseId");
     return ResponseEntity.ok().build();
   }
 
@@ -301,10 +305,9 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<?> patchCollectionExerciseScheduledStart(
       @PathVariable("id") final UUID id, final @RequestBody String scheduledStart)
       throws CTPException {
-    log.info(
-        "Updating collection exercise {}, setting scheduledStartDateTime to {}",
-        id,
-        scheduledStart);
+    log.with("collection_exercise_id", id)
+        .with("scheduledStartDateTime", scheduledStart)
+        .debug("Updating collection exercise, setting scheduledStartDateTime");
     CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
 
     try {
@@ -334,7 +337,9 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<?> patchCollectionExerciseExerciseRef(
       @PathVariable("id") final UUID id, final @RequestBody String exerciseRef)
       throws CTPException {
-    log.info("Updating collection exercise {}, setting exerciseRef to {}", id, exerciseRef);
+    log.with("collection_exercise_id", id)
+        .with("exercise_ref", exerciseRef)
+        .debug("Updating collection exercise, setting exerciseRef");
     CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
     collexDto.setExerciseRef(exerciseRef);
 
@@ -352,7 +357,9 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}/name", method = RequestMethod.PUT, consumes = "text/plain")
   public ResponseEntity<?> patchCollectionExerciseName(
       @PathVariable("id") final UUID id, final @RequestBody String name) throws CTPException {
-    log.info("Updating collection exercise {}, setting name to {}", id, name);
+    log.with("collection_exercise_id", id)
+        .with("name", name)
+        .debug("Updating collection exercise, setting name");
     CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
     collexDto.setName(name);
 
@@ -374,7 +381,9 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<?> patchCollectionExerciseUserDescription(
       @PathVariable("id") final UUID id, final @RequestBody String userDescription)
       throws CTPException {
-    log.info("Updating collection exercise {}, setting userDescription to {}", id, userDescription);
+    log.with("collection_exercise_id", id)
+        .with("user_description", userDescription)
+        .debug("Updating collection exercise, setting userDescription");
     CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
     collexDto.setUserDescription(userDescription);
 
@@ -392,7 +401,9 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}/surveyId", method = RequestMethod.PUT, consumes = "text/plain")
   public ResponseEntity<?> patchCollectionExerciseSurveyId(
       @PathVariable("id") final UUID id, final @RequestBody String surveyId) throws CTPException {
-    log.info("Updating collection exercise {}, setting surveyId to {}", id, surveyId);
+    log.with("collection_exercise_id", id)
+        .with("survey_id", surveyId)
+        .debug("Updating collection exercise, setting surveyId");
     try {
       UUID.fromString(surveyId);
     } catch (IllegalArgumentException e) {
@@ -418,10 +429,9 @@ public class CollectionExerciseEndpoint {
       final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody
           CollectionExerciseDTO collex)
       throws CTPException {
-    log.info(
-        "Creating collection exercise, ExerciseRef: {}, SurveyRef: {}",
-        collex.getExerciseRef(),
-        collex.getSurveyRef());
+    log.with("exercise_ref", collex.getExerciseRef())
+        .with("survey_ref", collex.getSurveyRef())
+        .debug("Creating collection exercise");
     SurveyDTO survey = getSurveyFromCollex(collex);
 
     if (survey == null) {
@@ -443,15 +453,15 @@ public class CollectionExerciseEndpoint {
     }
 
     CollectionExercise newCollex =
-        this.collectionExerciseService.createCollectionExercise(collex, survey);
+        collectionExerciseService.createCollectionExercise(collex, survey);
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
             .buildAndExpand(newCollex.getId())
             .toUri();
-    log.info(
-        "Successfully created collection exercise, CollectionExerciseId: {}", newCollex.getId());
+    log.with("collection_exercise_id", newCollex.getId())
+        .debug("Successfully created collection exercise");
     return ResponseEntity.created(location).build();
   }
 
@@ -483,8 +493,8 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   public ResponseEntity<CollectionExercise> deleteCollectionExercise(
       @PathVariable("id") final UUID id) throws CTPException {
-    log.info("Deleting collection exercise {}", id);
-    this.collectionExerciseService.deleteCollectionExercise(id);
+    log.with("collection_exercise_id", id).debug("Deleting collection exercise");
+    collectionExerciseService.deleteCollectionExercise(id);
 
     return ResponseEntity.accepted().build();
   }
@@ -510,7 +520,8 @@ public class CollectionExerciseEndpoint {
       @RequestBody(required = false) @Valid final LinkSampleSummaryDTO linkSampleSummaryDTO,
       BindingResult bindingResult)
       throws InvalidRequestException, CTPException {
-    log.debug("Entering linkSampleSummary with collectionExerciseID {}", collectionExerciseId);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .debug("Entering linkSampleSummary with collectionExerciseID");
 
     if (bindingResult.hasErrors()) {
       throw new InvalidRequestException("Binding errors for execute action plan: ", bindingResult);
@@ -554,9 +565,10 @@ public class CollectionExerciseEndpoint {
       produces = "application/vnd.ons.sdc.samplelink.v1+json")
   public ResponseEntity<List<SampleLinkDTO>> getSampleLinks(
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
-    log.debug("Getting linked sample summaries for {}", collectionExerciseId);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .debug("Getting linked sample summaries");
     List<SampleLink> sampleLinks =
-        this.collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
+        collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
     List<SampleLinkDTO> sampleLinkList = mapperFacade.mapAsList(sampleLinks, SampleLinkDTO.class);
 
     return ResponseEntity.ok(sampleLinkList);
@@ -577,10 +589,9 @@ public class CollectionExerciseEndpoint {
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId,
       @PathVariable("sampleSummaryId") final UUID sampleSummaryId)
       throws CTPException {
-    log.debug(
-        "Entering unlinkSampleSummary with collectionExerciseID {} and sampleSummaryId {}",
-        collectionExerciseId,
-        sampleSummaryId);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .with("sample_summary_id", sampleSummaryId)
+        .debug("Entering unlinkSampleSummary with collectionExerciseID and sampleSummaryId");
 
     CollectionExercise collectionExercise =
         collectionExerciseService.findCollectionExercise(collectionExerciseId);
@@ -606,7 +617,8 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "link/{collectionExerciseId}", method = RequestMethod.GET)
   public ResponseEntity<List<UUID>> requestLinkedSampleSummaries(
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId) throws CTPException {
-    log.debug("Getting sample summaries linked to collectionExerciseId {}", collectionExerciseId);
+    log.with("collection_exercise_id", collectionExerciseId)
+        .debug("Getting sample summaries linked to collectionExerciseId");
 
     CollectionExercise collectionExercise =
         collectionExerciseService.findCollectionExercise(collectionExerciseId);
@@ -639,7 +651,8 @@ public class CollectionExerciseEndpoint {
    */
   private CollectionExerciseDTO getCollectionExerciseDTO(
       final CollectionExercise collectionExercise) {
-    log.debug("Populating data for requested collection exercise {}", collectionExercise.getId());
+    log.with("collection_exercise_id", collectionExercise.getId())
+        .debug("Populating data for requested collection exercise");
     Collection<CaseType> caseTypeList =
         collectionExerciseService.getCaseTypesList(collectionExercise);
     List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
@@ -659,8 +672,7 @@ public class CollectionExerciseEndpoint {
     // (shouldn't happen but ...)
     if (collectionExercise.getState()
         == CollectionExerciseDTO.CollectionExerciseState.FAILEDVALIDATION) {
-      SampleUnitValidationErrorDTO[] errors =
-          this.sampleService.getValidationErrors(collectionExercise);
+      SampleUnitValidationErrorDTO[] errors = sampleService.getValidationErrors(collectionExercise);
 
       collectionExerciseDTO.setValidationErrors(errors);
     }
@@ -675,9 +687,8 @@ public class CollectionExerciseEndpoint {
 
       collectionExerciseDTO.setEvents(eventList);
     } catch (CTPException e) {
-      log.error(
-          "Error retrieving events for collection exercise Id {}",
-          collectionExercise.getId().toString());
+      log.with("collection_exercise_id", collectionExercise.getId())
+          .error("Error retrieving events for collection exercise Id", e);
     }
 
     return collectionExerciseDTO;
@@ -686,7 +697,9 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}/events", method = RequestMethod.POST)
   public ResponseEntity<?> createCollectionExerciseEvent(
       @PathVariable("id") final UUID id, final @RequestBody EventDTO eventDto) throws CTPException {
-    log.info("Creating event {} for collection exercise {}", eventDto.getTag(), id);
+    log.with("collection_exercise_id", id)
+        .with("event_tag", eventDto.getTag())
+        .debug("Creating event for collection exercise");
 
     eventDto.setCollectionExerciseId(id);
 
@@ -701,7 +714,7 @@ public class CollectionExerciseEndpoint {
     try {
       SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
     } catch (SchedulerException e) {
-      log.error("Failed to schedule event: " + newEvent);
+      log.with("event", newEvent).error("Failed to schedule event", e);
     }
 
     return ResponseEntity.created(location).build();
@@ -735,7 +748,9 @@ public class CollectionExerciseEndpoint {
       final @RequestBody String date)
       throws CTPException {
 
-    log.info("Adding collection exercise {}, setting date to {}", id, date);
+    log.with("collection_exercise_id", id)
+        .with("date", date)
+        .debug("Adding collection exercise, setting date to");
 
     try {
       MultiIsoDateFormat dateParser = new MultiIsoDateFormat();
@@ -760,7 +775,9 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<Event> getEvent(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
       throws CTPException {
-    log.debug("Entering Event fetch with event id {}, event tag {} ", id, tag);
+    log.with("event_id", id)
+        .with("tag", tag)
+        .debug("Entering Event fetch with event id, event tag");
 
     Event event = eventService.getEvent(id, tag);
 
@@ -779,7 +796,9 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<Event> deleteCollectionExerciseEvent(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
       throws CTPException {
-    log.info("Deleting collection exercise event id {}, event tag ", id, tag);
+    log.with("event_id", id)
+        .with("tag", tag)
+        .debug("Deleting collection exercise event id, event tag ");
 
     eventService.deleteEvent(id, tag);
 

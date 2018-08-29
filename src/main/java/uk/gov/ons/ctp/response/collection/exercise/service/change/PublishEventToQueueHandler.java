@@ -21,7 +21,7 @@ public final class PublishEventToQueueHandler implements EventChangeHandler {
   public void handleEventLifecycle(
       final CollectionExerciseEventPublisher.MessageType change, final Event event)
       throws CTPException {
-    log.debug("Publishing {} message for {}", change, event);
+    log.with("change", change).with("event", event).debug("Publishing message");
     eventPublisher.publishCollectionExerciseEvent(
         change, EventService.createEventDTOFromEvent(event));
   }
