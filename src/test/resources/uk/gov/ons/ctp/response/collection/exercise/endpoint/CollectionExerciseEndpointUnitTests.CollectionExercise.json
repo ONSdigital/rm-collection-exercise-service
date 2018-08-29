@@ -2,7 +2,6 @@
 	{
 		"exercisePK": 1,
 		"id": "3ec82e0e-18ff-4886-8703-5b83442041ba",
-		"name": "BRES_2016",
 		"scheduledExecutionDateTime": 1494846000000,
 		"state": "EXECUTED",
 		"exerciseRef": "2017",
@@ -11,7 +10,6 @@
 	{
 		"exercisePK": 2,
 		"id": "e653d1ce-551b-4b41-b05c-eec02f71891e",
-		"name": "BRES_2016",
 		"scheduledExecutionDateTime": 1494846000000,
 		"state": "EXECUTED",
 		"exerciseRef": "2017",

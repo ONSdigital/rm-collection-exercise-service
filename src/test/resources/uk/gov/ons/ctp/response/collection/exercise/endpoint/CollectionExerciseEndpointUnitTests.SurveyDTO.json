@@ -1,14 +1,10 @@
 [
 	{
 		"id": "31ec898e-f370-429a-bca4-eab1045aff4e",
-		"surveyRef": "221",
-		"longName": "Business Register and Employment Survey",
-		"shortName": "BRES"
+		"surveyRef": "221"
 	},
 	{
 		"id": "32ec898e-f370-429a-bca4-eab1045aff4e",
-		"surveyRef": "222",
-		"longName": "Personal Register and Employment Survey",
-		"shortName": "PRES"
+		"surveyRef": "222"
 	}
 ]

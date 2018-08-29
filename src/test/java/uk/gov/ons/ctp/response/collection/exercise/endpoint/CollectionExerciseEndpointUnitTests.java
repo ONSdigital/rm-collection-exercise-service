@@ -75,7 +75,6 @@ public class CollectionExerciseEndpointUnitTests {
       UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
   private static final UUID COLLECTIONEXERCISE_ID2 =
       UUID.fromString("e653d1ce-551b-4b41-b05c-eec02f71891e");
-  private static final String COLLECTIONEXERCISE_NAME = ("BRES_2016");
   private static final String COLLECTIONEXERCISE_DATE_OUTPUT = "2017-05-15T12:00:00.000+01:00";
 
   private static final String COLLECTIONEXERCISE_STATE = ("EXECUTED");
@@ -178,9 +177,6 @@ public class CollectionExerciseEndpointUnitTests {
                     COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
         .andExpect(
             jsonPath(
-                "$[*].name", containsInAnyOrder(COLLECTIONEXERCISE_NAME, COLLECTIONEXERCISE_NAME)))
-        .andExpect(
-            jsonPath(
                 "$[*].scheduledExecutionDateTime",
                 containsInAnyOrder(
                     new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
@@ -234,7 +230,6 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().methodName("getCollectionExercise"))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
-        .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
         .andExpect(jsonPath("$.caseTypes[*].*", hasSize(2)))
@@ -287,7 +282,6 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().methodName("getCollectionExercise"))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
-        .andExpect(jsonPath("$.name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
         .andExpect(jsonPath("$.caseTypes[*].*", hasSize(2)))
@@ -320,12 +314,10 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().methodName("getAllCollectionExercises"))
         .andExpect(jsonPath("$[0].id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$[0].surveyId", is(SURVEY_ID_1.toString())))
-        .andExpect(jsonPath("$[0].name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$[0].state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$[0].exerciseRef", is("2017")))
         .andExpect(jsonPath("$[1].id", is(COLLECTIONEXERCISE_ID2.toString())))
         .andExpect(jsonPath("$[1].surveyId", is(SURVEY_ID_2.toString())))
-        .andExpect(jsonPath("$[1].name", is(COLLECTIONEXERCISE_NAME)))
         .andExpect(jsonPath("$[1].state", is(COLLECTIONEXERCISE_STATE)))
         .andExpect(jsonPath("$[1].exerciseRef", is("2017")));
   }
@@ -538,7 +530,6 @@ public class CollectionExerciseEndpointUnitTests {
     assertEquals(uuid, uuidCaptor.getValue());
     CollectionExerciseDTO dtoArg = dtoCaptor.getValue();
     assertEquals("31ec898e-f370-429a-bca4-eab1045aff4e", dtoArg.getSurveyId());
-    assertEquals("Survey Name", dtoArg.getName());
     assertEquals("202103", dtoArg.getExerciseRef());
     assertEquals("March 2021", dtoArg.getUserDescription());
   }

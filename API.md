@@ -25,7 +25,6 @@ This page documents the Collection Exercise service API endpoints. Apart from th
   {
     "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
     "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
-    "name": "Monthly Survey of Building Materials Bricks",
     "actualExecutionDateTime": null,
     "scheduledExecutionDateTime": null,
     "scheduledStartDateTime": null,
@@ -47,7 +46,6 @@ This page documents the Collection Exercise service API endpoints. Apart from th
   {
     "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
     "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
-    "name": "Monthly Survey of Building materials Bricks",
     "actualExecutionDateTime": null,
     "scheduledExecutionDateTime": null,
     "scheduledStartDateTime": null,
@@ -80,7 +78,6 @@ This page documents the Collection Exercise service API endpoints. Apart from th
   {
     "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
     "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
-    "name": "Monthly Survey of Building materials Bricks",
     "actualExecutionDateTime": null,
     "scheduledExecutionDateTime": null,
     "scheduledStartDateTime": null,
@@ -146,7 +143,6 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     {
         "id": "88e18a80-bc77-48bf-8eff-db351024be2b",
         "surveyId": "75b19ea0-69a4-4c58-8d7f-4458c8f43f5c",
-        "name": "Monthly Business Sur",
         "actualExecutionDateTime": null,
         "scheduledExecutionDateTime": null,
         "scheduledStartDateTime": null,
@@ -168,7 +164,6 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
     {
         "id": "6af19036-f69b-4d2e-abf1-ce442debb51c",
         "surveyId": "75b19ea0-69a4-4c58-8d7f-4458c8f43f5c",
-        "name": "Monthly Business Sur",
         "actualExecutionDateTime": null,
         "scheduledExecutionDateTime": null,
         "scheduledStartDateTime": null,
@@ -297,7 +292,6 @@ In the event that errors have occurred validating the collection exercise, there
 ```json
 {
     "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef77",
-    "name": "SurveyName",
     "exerciseRef": "201715",
     "userDescription": "August 2017"
 }
@@ -313,7 +307,6 @@ In the event that errors have occurred validating the collection exercise, there
 
 ```json
 {
-    "name": "UpdatedSurveyName",
     "exerciseRef": "201715",
     "userDescription": "Updated August 2017",
     "surveyId": "cb0711c3-0ac8-41d3-ae0e-567e5ea1ef77"
@@ -341,12 +334,6 @@ In the event that errors have occurred validating the collection exercise, there
 ```text/plain
 August 2018
 ```
-
-## Update Collection Exercise exerciseRef (name)
-* `PUT /collectionexercises/{collection_exercise_id}/name` will update the name of collection exercise with given id.
-* Returns 200 OK if the resource is updated
-* Returns 400 Bad Request, resource not updated
-* Returns 409 Conflict, resource not updated
 
 ### Example Request Body
 ```text\plain
@@ -481,7 +468,6 @@ json
     "collectionExercise": {
         "id": "14fb3e68-4dca-46db-bf49-04b84e07e97c",
         "exercisePK": 3,
-        "name": "SOCIAL",
         "actualExecutionDateTime": null,
         "scheduledExecutionDateTime": null,
         "scheduledStartDateTime": "2001-12-31T12:00:00.000+0000",

@@ -1,5 +1,4 @@
-SELECT  c.name
-      , c.scheduledstartdatetime
+SELECT  c.scheduledstartdatetime
       , c.scheduledexecutiondatetime
       , c.scheduledreturndatetime
       , c.scheduledenddatetime
