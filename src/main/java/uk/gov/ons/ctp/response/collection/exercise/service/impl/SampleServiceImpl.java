@@ -135,7 +135,7 @@ public class SampleServiceImpl implements SampleService {
       timeout = TRANSACTION_TIMEOUT)
   @Override
   public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
-    log.debug("Processing sample unit: {}", sampleUnit);
+    log.with("sample_unit", sampleUnit).debug("Processing sample unit");
     ExerciseSampleUnit exerciseSampleUnit = null;
 
     CollectionExercise collectionExercise =
@@ -176,20 +176,17 @@ public class SampleServiceImpl implements SampleService {
         }
 
       } else {
-        log.warn(
-            "SampleUnitRef {} with"
-                + " setSampleUnitTypeFK {} already exists for CollectionExercise {}",
-            sampleUnit.getSampleUnitRef(),
-            sampleUnit.getSampleUnitType(),
-            sampleUnit.getCollectionExerciseId());
+        log.with("sample_unit_type_fk", sampleUnit.getSampleUnitType())
+            .with("sample_unit_ref", sampleUnit.getSampleUnitRef())
+            .with("collection_exercise_id", sampleUnit.getCollectionExerciseId())
+            .warn("SampleUnitRef with SampleUnitType already exists for CollectionExercise");
       }
     } else {
-      log.error(
-          "No CollectionExercise {} for SampleUnit Ref: {} Type: {}, FormType: {}",
-          sampleUnit.getCollectionExerciseId(),
-          sampleUnit.getSampleUnitRef(),
-          sampleUnit.getSampleUnitType(),
-          sampleUnit.getFormType());
+      log.with("sample_unit_type_fk", sampleUnit.getSampleUnitType())
+          .with("sample_unit_ref", sampleUnit.getSampleUnitRef())
+          .with("collection_exercise_id", sampleUnit.getCollectionExerciseId())
+          .with("form_type", sampleUnit.getFormType())
+          .error("No CollectionExercise");
     }
 
     return exerciseSampleUnit;

@@ -56,8 +56,8 @@ public class ExerciseSampleUnitGroupServiceImpl implements ExerciseSampleUnitGro
     ExerciseSampleUnitGroup savedExerciseSampleUnitGroup =
         sampleUnitGroupRepo.save(sampleUnitGroup);
     if (sampleUnits.isEmpty()) {
-      log.warn(
-          "No sampleUnits updated for SampleUnitGroup {}", sampleUnitGroup.getSampleUnitGroupPK());
+      log.with("sample_unit_group_pk", sampleUnitGroup.getSampleUnitGroupPK())
+          .warn("No sampleUnits updated for SampleUnitGroup");
     } else {
       sampleUnitRepo.save(sampleUnits);
     }

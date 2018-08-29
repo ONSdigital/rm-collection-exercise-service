@@ -35,7 +35,7 @@ public class CollectionExerciseExecutionEndpoint {
   @RequestMapping(value = "/{id}", method = RequestMethod.POST)
   public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
       throws CTPException {
-    log.debug("Entering collection exercise fetch with Id {}", id);
+    log.with("collection_exercise_id", id).debug("Entering collection exercise fetch");
     SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
     if (requestDTO == null) {
       throw new CTPException(

@@ -22,10 +22,9 @@ public class SampleUnitPublisherImpl implements SampleUnitPublisher {
 
   @Override
   public void sendSampleUnit(SampleUnitParent sampleUnit) {
-    log.debug(
-        "Entering sendSampleUnit for SampleUnitRef {}, SampleUnitType {} ",
-        sampleUnit.getSampleUnitRef(),
-        sampleUnit.getSampleUnitType());
+    log.with("sample_unit_ref", sampleUnit.getSampleUnitRef())
+        .with("sample_unit_type", sampleUnit.getSampleUnitType())
+        .debug("Entering sendSampleUnit");
     rabbitTemplate.convertAndSend(sampleUnit);
   }
 }

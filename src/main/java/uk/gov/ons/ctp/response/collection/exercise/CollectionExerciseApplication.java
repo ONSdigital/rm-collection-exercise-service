@@ -7,6 +7,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -46,7 +47,7 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EnableJpaRepositories(basePackages = {"uk.gov.ons.ctp.response"})
 @EntityScan("uk.gov.ons.ctp.response")
 @ImportResource("springintegration/main.xml")
-public class CollectionExerciseApplication {
+public class CollectionExerciseApplication implements CommandLineRunner {
 
   private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
   private static final String DISTRIBUTION_LIST = "collectionexercisesvc.sample.distribution";
@@ -226,8 +227,13 @@ public class CollectionExerciseApplication {
    * @param args These are the optional command line arguments
    */
   public static void main(String[] args) {
-    LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
-
     SpringApplication.run(CollectionExerciseApplication.class, args);
+  }
+
+  @Override
+  public void run(String... args) throws Exception {
+    if (appConfig.getLogging().isUseJson()) {
+      LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
+    }
   }
 }
