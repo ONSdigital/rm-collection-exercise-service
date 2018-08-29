@@ -249,7 +249,6 @@ public class CollectionExerciseServiceImplTest {
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
     verify(this.collexRepo).saveAndFlush(captor.capture());
     CollectionExercise collex = captor.getValue();
-    assertEquals(toCreate.getName(), collex.getName());
     assertEquals(toCreate.getUserDescription(), collex.getUserDescription());
     assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
     assertEquals(toCreate.getSurveyId(), collex.getSurveyId().toString());
@@ -389,7 +388,6 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise collex = captor.getValue();
     assertEquals(UUID.fromString(toUpdate.getSurveyId()), collex.getSurveyId());
     assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
-    assertEquals(toUpdate.getName(), collex.getName());
     assertEquals(toUpdate.getUserDescription(), collex.getUserDescription());
     assertNotNull(collex.getUpdated());
   }
@@ -565,7 +563,6 @@ public class CollectionExerciseServiceImplTest {
     CollectionExercise existing = setupCollectionExercise();
     CollectionExerciseDTO collex = new CollectionExerciseDTO();
     String name = "Not BRES";
-    collex.setName(name);
 
     this.collectionExerciseServiceImpl.patchCollectionExercise(existing.getId(), collex);
 
@@ -573,7 +570,6 @@ public class CollectionExerciseServiceImplTest {
     verify(this.collexRepo).saveAndFlush(captor.capture());
 
     CollectionExercise ce = captor.getValue();
-    assertEquals(name, ce.getName());
     assertNotNull(ce.getUpdated());
   }
 

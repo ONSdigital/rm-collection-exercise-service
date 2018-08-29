@@ -1,7 +1,5 @@
 [{
   "id": "2615bba1-8a04-4cca-b5a0-5a0823e1c38d",
-  "shortName": "TEST",
-  "longName": "Test Survey",
   "surveyRef": "999",
   "legalBasis": "Statistics of Trade Act",
   "legalBasisRef": "STA",

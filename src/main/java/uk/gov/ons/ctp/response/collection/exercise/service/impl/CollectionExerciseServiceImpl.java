@@ -246,7 +246,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    */
   private void setCollectionExerciseFromDto(
       CollectionExerciseDTO collex, CollectionExercise collectionExercise) {
-    collectionExercise.setName(collex.getName());
     collectionExercise.setUserDescription(collex.getUserDescription());
     collectionExercise.setExerciseRef(collex.getExerciseRef());
     collectionExercise.setSurveyId(UUID.fromString(collex.getSurveyId()));
@@ -536,9 +535,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
 
       if (!StringUtils.isBlank(patchData.getExerciseRef())) {
         collex.setExerciseRef(patchData.getExerciseRef());
-      }
-      if (!StringUtils.isBlank(patchData.getName())) {
-        collex.setName(patchData.getName());
       }
       if (!StringUtils.isBlank(patchData.getUserDescription())) {
         collex.setUserDescription(patchData.getUserDescription());

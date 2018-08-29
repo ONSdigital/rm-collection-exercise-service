@@ -39,8 +39,6 @@ public class CollectionExercise {
   @Column(name = "exercisepk")
   private Integer exercisePK;
 
-  private String name;
-
   @Column(name = "actualexecutiondatetime")
   private Timestamp actualExecutionDateTime;
 
