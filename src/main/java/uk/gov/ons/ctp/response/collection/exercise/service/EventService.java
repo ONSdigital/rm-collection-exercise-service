@@ -42,8 +42,9 @@ public class EventService {
     ref_period_end(false),
     employment(false);
 
-    public static final List<EventService.Tag> ORDERED_REMINDERS =
-        Arrays.asList(reminder, reminder2, reminder3);
+    public static final List<Tag> ORDERED_REMINDERS = Arrays.asList(reminder, reminder2, reminder3);
+    public static final List<Tag> ORDERED_MANDATORY_EVENTS =
+        Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end);
 
     Tag(final boolean mandatory) {
       this.mandatory = mandatory;
@@ -88,7 +89,7 @@ public class EventService {
 
   @Autowired private EventChangeHandler[] changeHandlers = {};
 
-  @Autowired private EventValidator eventValidator;
+  @Autowired List<EventValidator> eventValidators;
 
   @Autowired private SurveySvcClient surveySvcClient;
 
@@ -120,10 +121,7 @@ public class EventService {
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
 
-    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
-    if (!eventValidator.validateOnCreate(existingEvents, event, collex.getState())) {
-      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
-    }
+    validateSubmittedEvent(collex, event);
 
     createActionRulesForEvent(event);
     event = eventRepository.save(event);
@@ -159,7 +157,7 @@ public class EventService {
     final Event event = getEventByTagAndCollectionExerciseId(tag, collex);
 
     event.setTimestamp(new Timestamp(date.getTime()));
-    validateUpdatedEvents(collex, event);
+    validateSubmittedEvent(collex, event);
     updateActionRules(event);
 
     eventRepository.save(event);
@@ -176,12 +174,15 @@ public class EventService {
     }
   }
 
-  private void validateUpdatedEvents(final CollectionExercise collex, final Event event)
+  private void validateSubmittedEvent(final CollectionExercise collex, final Event event)
       throws CTPException {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
 
-    if (!eventValidator.validate(existingEvents, event, collex.getState())) {
-      throw new CTPException(Fault.BAD_REQUEST, "Invalid event update");
+    for (EventValidator validator : eventValidators) {
+      if (!validator.validate(existingEvents, event, collex.getState())) {
+        throw new CTPException(
+            CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
+      }
     }
   }
 

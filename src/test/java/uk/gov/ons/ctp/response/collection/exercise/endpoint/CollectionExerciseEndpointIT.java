@@ -25,10 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +41,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -197,7 +198,9 @@ public class CollectionExerciseEndpointIT {
 
     final EventDTO createdEvent = events.get(0);
     assertThat(createdEvent.getTag(), is(EventService.Tag.mps.name()));
-    assertThat(createdEvent.getTimestamp().getTime(), is(newDate.getTime()));
+    assertThat(
+        DateUtils.round(createdEvent.getTimestamp(), Calendar.MINUTE).getTime(),
+        is(DateUtils.round(newDate, Calendar.MINUTE).getTime()));
   }
 
   @Test
@@ -673,27 +676,22 @@ public class CollectionExerciseEndpointIT {
     String exerciseRef = getRandomRef();
     String userDescription = "Test Description";
     Pair<Integer, String> result =
-        this.client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
+        client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
     String collexId = StringUtils.substringAfterLast(result.getRight(), "/");
     UUID collectionExerciseId = UUID.fromString(collexId);
 
     setupStubsGetActionPlansBySelectors(collectionExerciseId);
 
-    List<EventService.Tag> tags =
-        Arrays.stream(EventService.Tag.values())
-            .filter(EventService.Tag::isMandatory)
-            .collect(Collectors.toList());
-
-    int days = 0;
-    for (EventService.Tag t : tags) {
-      EventDTO event = new EventDTO();
-      event.setCollectionExerciseId(collectionExerciseId);
-      event.setTag(t.name());
-      // mandatory dates must be minimum of 24 hours apart
-      event.setTimestamp(Timestamp.from(Instant.now().plus(days, ChronoUnit.DAYS)));
-      this.client.createCollectionExerciseEvent(event);
-      days += 2;
-    }
+    Arrays.stream(EventService.Tag.values())
+        .filter(EventService.Tag::isMandatory)
+        .forEach(
+            t -> {
+              EventDTO event = new EventDTO();
+              event.setCollectionExerciseId(collectionExerciseId);
+              event.setTag(t.name());
+              event.setTimestamp(new Date());
+              client.createCollectionExerciseEvent(event);
+            });
 
     return collectionExerciseId;
   }
