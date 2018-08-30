@@ -18,9 +18,11 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.validator.EventDateOrderChecker;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.validator.MandatoryEventValidator;
 
 @RunWith(Parameterized.class)
-public class MultipleBusinessEventsValidatorTest {
+public class MultipleMandatoryEventsValidatorTest {
 
   private EventValidator validator;
   private final Event mpsEvent;
@@ -28,7 +30,7 @@ public class MultipleBusinessEventsValidatorTest {
   private final Event returnByEvent;
   private final Event exerciseEndEvent;
 
-  public MultipleBusinessEventsValidatorTest(
+  public MultipleMandatoryEventsValidatorTest(
       Event mpsEvent, Event goLiveEvent, Event returnByEvent, Event exerciseEndEvent) {
     this.mpsEvent = mpsEvent;
     this.goLiveEvent = goLiveEvent;
@@ -38,7 +40,8 @@ public class MultipleBusinessEventsValidatorTest {
 
   @Before
   public void setUp() {
-    this.validator = new BusinessEventValidator();
+    final EventDateOrderChecker eventDateOrderChecker = new EventDateOrderChecker();
+    validator = new MandatoryEventValidator(eventDateOrderChecker);
   }
 
   @Parameters
@@ -76,7 +79,7 @@ public class MultipleBusinessEventsValidatorTest {
     newMpsEvent.setTag((EventService.Tag.mps.toString()));
     newMpsEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
-        this.validator.validateOnCreate(
+        validator.validate(
             events, newMpsEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
   }
 
@@ -88,7 +91,7 @@ public class MultipleBusinessEventsValidatorTest {
     newGoLiveEvent.setTag((EventService.Tag.go_live.toString()));
     newGoLiveEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
-        this.validator.validateOnCreate(
+        validator.validate(
             events, newGoLiveEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
   }
 
@@ -100,7 +103,7 @@ public class MultipleBusinessEventsValidatorTest {
     newReturnByEvent.setTag((EventService.Tag.return_by.toString()));
     newReturnByEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
-        this.validator.validateOnCreate(
+        validator.validate(
             events, newReturnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
   }
 
@@ -112,7 +115,7 @@ public class MultipleBusinessEventsValidatorTest {
     newExerciseEndEvent.setTag((EventService.Tag.exercise_end.toString()));
     newExerciseEndEvent.setTimestamp(Timestamp.from(timestamp));
     assertTrue(
-        this.validator.validateOnCreate(
+        validator.validate(
             events, newExerciseEndEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED));
   }
 

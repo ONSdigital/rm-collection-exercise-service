@@ -41,7 +41,7 @@ public class EventServiceImpl implements EventService {
 
   @Autowired private EventChangeHandler[] changeHandlers = {};
 
-  @Autowired private EventValidator eventValidator;
+  @Autowired List<EventValidator> eventValidators;
 
   @Autowired private SurveySvcClient surveySvcClient;
 
@@ -74,10 +74,7 @@ public class EventServiceImpl implements EventService {
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
 
-    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
-    if (!eventValidator.validateOnCreate(existingEvents, event, collex.getState())) {
-      throw new CTPException(CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
-    }
+    validateSubmittedEvent(collex, event);
 
     createActionRulesForEvent(event);
     event = eventRepository.save(event);
@@ -110,7 +107,7 @@ public class EventServiceImpl implements EventService {
     final Event event = getEventByTagAndCollectionExerciseId(tag, collex);
 
     event.setTimestamp(new Timestamp(date.getTime()));
-    validateUpdatedEvents(collex, event);
+    validateSubmittedEvent(collex, event);
     updateActionRules(event);
 
     eventRepository.save(event);
@@ -127,12 +124,15 @@ public class EventServiceImpl implements EventService {
     }
   }
 
-  private void validateUpdatedEvents(final CollectionExercise collex, final Event event)
+  private void validateSubmittedEvent(final CollectionExercise collex, final Event event)
       throws CTPException {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
 
-    if (!eventValidator.validate(existingEvents, event, collex.getState())) {
-      throw new CTPException(Fault.BAD_REQUEST, "Invalid event update");
+    for (EventValidator validator : eventValidators) {
+      if (!validator.validate(existingEvents, event, collex.getState())) {
+        throw new CTPException(
+            CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
+      }
     }
   }
 

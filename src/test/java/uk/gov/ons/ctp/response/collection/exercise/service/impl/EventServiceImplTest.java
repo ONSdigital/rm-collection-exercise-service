@@ -63,16 +63,17 @@ public class EventServiceImplTest {
 
   @Mock private ActionRuleUpdater actionRuleUpdater2;
 
+  @Mock private EventValidator eventValidator;
+
   @Mock private EventRepository eventRepository;
 
   @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
 
   @Spy private List<ActionRuleUpdater> actionRuleUpdaters = new ArrayList<>();
 
-  @InjectMocks private EventServiceImpl eventService;
+  @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
-  /* Given collection excercise does not exist When event is created Then exception is thrown */
-  @Mock private EventValidator eventValidator;
+  @InjectMocks private EventServiceImpl eventService;
 
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());
@@ -82,7 +83,6 @@ public class EventServiceImplTest {
 
     return event;
   }
-  /* Given event already exists When event is created Then exception is thrown */
 
   @Test
   public void givenCollectionExcerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown() {
@@ -229,8 +229,10 @@ public class EventServiceImplTest {
 
     final List<Event> existingEvents = new ArrayList<>();
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
+
     when(eventValidator.validate(existingEvents, existingEvent, collectionExerciseState))
         .thenReturn(false);
+    eventValidators.add(eventValidator);
 
     try {
       eventService.updateEvent(collexUuid, Tag.mps.name(), new Date());
@@ -264,6 +266,7 @@ public class EventServiceImplTest {
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     when(eventValidator.validate(existingEvents, existingEvent, collectionExerciseState))
         .thenReturn(true);
+    eventValidators.add(eventValidator);
 
     actionRuleUpdaters.add(actionRuleUpdater);
     actionRuleUpdaters.add(actionRuleUpdater2);
@@ -336,8 +339,9 @@ public class EventServiceImplTest {
     final Event event = new Event();
     existingEvents.add(event);
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
-    when(eventValidator.validateOnCreate(existingEvents, event, collex.getState()))
-        .thenReturn(false);
+    when(eventValidator.validate(existingEvents, event, collex.getState())).thenReturn(false);
+    eventValidators.add(eventValidator);
+
     try {
       eventService.createEvent(eventDto);
       fail("No exception thrown on bad event");
