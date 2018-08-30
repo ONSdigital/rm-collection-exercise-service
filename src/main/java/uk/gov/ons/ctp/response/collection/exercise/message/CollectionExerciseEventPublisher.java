@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.EventMessageDTO;
-import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
@@ -33,7 +32,6 @@ public class CollectionExerciseEventPublisher {
   @Qualifier("collexEventTemplate")
   private RabbitTemplate rabbitTemplate;
 
-  @Autowired private EventRepository eventRepository;
   @Autowired private EventService eventService;
 
   public void publishCollectionExerciseEvent(MessageType messageType, EventDTO eventDto)
