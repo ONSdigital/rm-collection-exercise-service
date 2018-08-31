@@ -1,13 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
 import com.godaddy.logging.LoggingConfigs;
+import javax.annotation.PostConstruct;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -45,7 +45,7 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EnableJpaRepositories(basePackages = {"uk.gov.ons.ctp.response"})
 @EntityScan("uk.gov.ons.ctp.response")
 @ImportResource("springintegration/main.xml")
-public class CollectionExerciseApplication implements CommandLineRunner {
+public class CollectionExerciseApplication {
 
   private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
   private static final String DISTRIBUTION_LIST = "collectionexercisesvc.sample.distribution";
@@ -223,8 +223,8 @@ public class CollectionExerciseApplication implements CommandLineRunner {
     SpringApplication.run(CollectionExerciseApplication.class, args);
   }
 
-  @Override
-  public void run(String... args) throws Exception {
+  @PostConstruct
+  public void initJsonLogging() {
     if (appConfig.getLogging().isUseJson()) {
       LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
     }
