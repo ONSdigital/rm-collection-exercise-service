@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.impl.validator;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,8 @@ public class ReminderEventValidator implements EventValidator {
       return false;
     }
 
-    if (isExsistingReminderInPast(submittedEvent, existingEventsMap)) {
+    if (isCollectionExerciseLockedState(collectionExerciseState)
+        && isExistingReminderInPast(submittedEvent, existingEventsMap)) {
       return false;
     }
 
@@ -55,7 +57,7 @@ public class ReminderEventValidator implements EventValidator {
     return eventDateOrderChecker.isEventDatesInOrder(reminders);
   }
 
-  private boolean isExsistingReminderInPast(
+  private boolean isExistingReminderInPast(
       Event submittedEvent, Map<String, Event> existingEventsMap) {
     final Event existingReminder = existingEventsMap.get(submittedEvent.getTag());
     if (existingReminder == null) {
@@ -63,6 +65,18 @@ public class ReminderEventValidator implements EventValidator {
     }
     final Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
     return existingReminder.getTimestamp().before(currentTimestamp);
+  }
+
+  private boolean isCollectionExerciseLockedState(CollectionExerciseState collectionExerciseState) {
+    final List<CollectionExerciseState> lockedStates =
+        Arrays.asList(
+            CollectionExerciseState.EXECUTION_STARTED,
+            CollectionExerciseState.VALIDATED,
+            CollectionExerciseState.EXECUTED,
+            CollectionExerciseState.READY_FOR_LIVE,
+            CollectionExerciseState.LIVE);
+
+    return lockedStates.contains(collectionExerciseState);
   }
 
   private boolean eventDuringExercise(Event goLive, Event event, Event exerciseEnd) {
