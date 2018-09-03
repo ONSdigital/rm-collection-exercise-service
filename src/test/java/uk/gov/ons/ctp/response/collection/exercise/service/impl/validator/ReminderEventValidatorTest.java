@@ -74,7 +74,7 @@ public class ReminderEventValidatorTest {
   }
 
   @Test
-  public void testCantUpdatePastReminder() {
+  public void testCantUpdateReminderThatHasPastAndCollectionExerciseInLockedState() {
     final Event reminder = new Event();
     reminder.setTag((Tag.reminder.toString()));
     reminder.setTimestamp(Timestamp.from(Instant.now().minus(2, ChronoUnit.DAYS)));
@@ -85,7 +85,22 @@ public class ReminderEventValidatorTest {
 
     final List<Event> events = Collections.singletonList(reminder);
 
-    assertFalse(reminderValidator.validate(events, newReminder, CollectionExerciseState.CREATED));
+    assertFalse(reminderValidator.validate(events, newReminder, CollectionExerciseState.LIVE));
+  }
+
+  @Test
+  public void testCanUpdateReminderThatHasPastAndCollectionExerciseNotInLockedState() {
+    final Event reminder = new Event();
+    reminder.setTag((Tag.reminder.toString()));
+    reminder.setTimestamp(Timestamp.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+
+    final Event newReminder = new Event();
+    newReminder.setTag((Tag.reminder.toString()));
+    newReminder.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
+
+    final List<Event> events = Collections.singletonList(reminder);
+
+    assertTrue(reminderValidator.validate(events, newReminder, CollectionExerciseState.SCHEDULED));
   }
 
   @Test
