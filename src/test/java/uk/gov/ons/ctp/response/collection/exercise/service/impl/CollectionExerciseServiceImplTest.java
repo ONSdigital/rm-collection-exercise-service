@@ -92,7 +92,7 @@ public class CollectionExerciseServiceImplTest {
                   .getStateTransitionManager(
                       CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
 
-  @InjectMocks @Spy private CollectionExerciseServiceImpl collectionExerciseServiceImpl;
+  @InjectMocks @Spy private CollectionExerciseService collectionExerciseServiceImpl;
 
   /** Tests that default and override are empty */
   @Test

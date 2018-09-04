@@ -51,10 +51,10 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSu
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** The REST endpoint controller for Collection Exercises. */

@@ -49,9 +49,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 import uk.gov.ons.ctp.response.party.representation.PartyDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;

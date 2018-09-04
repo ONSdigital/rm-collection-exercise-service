@@ -8,7 +8,7 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionInstrumentMessageDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 
 @MessageEndpoint
 public class CollectionInstrumentLoadedReceiver {

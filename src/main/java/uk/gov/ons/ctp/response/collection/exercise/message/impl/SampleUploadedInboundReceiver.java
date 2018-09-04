@@ -9,8 +9,8 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 
 /** Class to hold service activator method to handle incoming sample uploaded messages */

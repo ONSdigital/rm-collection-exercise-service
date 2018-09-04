@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 
 /**
  * EventChangeHandler to set the scheduledStartDate for a collection exercise when an mps event is
