@@ -9,9 +9,9 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 
 /**
  * This is an EventChangeHandler that will fire the relevant EVENTS_ADDED/EVENTS_DELETED event at

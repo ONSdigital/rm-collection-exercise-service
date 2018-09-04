@@ -37,7 +37,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 import uk.gov.ons.response.survey.representation.SurveyDTO;

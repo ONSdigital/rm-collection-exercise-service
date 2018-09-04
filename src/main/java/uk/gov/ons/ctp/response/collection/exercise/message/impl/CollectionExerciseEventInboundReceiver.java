@@ -11,8 +11,8 @@ import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEve
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.EventMessageDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.impl.CollectionExerciseService;
 
 /**
  * Class to hold service activator method to handle incoming collection exercise event lifecycle

@@ -35,7 +35,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
@@ -43,8 +42,8 @@ import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** The implementation of the SampleService */
 @Service
-public class CollectionExerciseServiceImpl implements CollectionExerciseService {
-  private static final Logger log = LoggerFactory.getLogger(CollectionExerciseServiceImpl.class);
+public class CollectionExerciseService {
+  private static final Logger log = LoggerFactory.getLogger(CollectionExerciseService.class);
 
   private CaseTypeDefaultRepository caseTypeDefaultRepo;
 
@@ -70,7 +69,7 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
       collectionExerciseTransitionState;
 
   @Autowired
-  public CollectionExerciseServiceImpl(
+  public CollectionExerciseService(
       CaseTypeDefaultRepository caseTypeDefaultRepo,
       CaseTypeOverrideRepository caseTypeOverrideRepo,
       CollectionExerciseRepository collectRepo,
@@ -97,28 +96,23 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     this.collectionExerciseTransitionState = collectionExerciseTransitionState;
   }
 
-  @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
     return this.collectRepo.findBySurveyId(UUID.fromString(survey.getId()));
   }
 
-  @Override
   public List<SampleLink> findLinkedSampleSummaries(UUID id) {
     return sampleLinkRepository.findByCollectionExerciseId(id);
   }
 
-  @Override
   public List<CollectionExercise> findAllCollectionExercise() {
     return collectRepo.findAll();
   }
 
-  @Override
   public CollectionExercise findCollectionExercise(UUID id) {
 
     return collectRepo.findOneById(id);
   }
 
-  @Override
   public CollectionExercise findCollectionExercise(String surveyRef, String exerciseRef) {
     CollectionExercise collex = null;
     SurveyDTO survey = this.surveyService.findSurveyByRef(surveyRef);
@@ -130,7 +124,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     return collex;
   }
 
-  @Override
   public CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) {
     List<CollectionExercise> existing =
         this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, UUID.fromString(survey.getId()));
@@ -143,7 +136,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  @Override
   public CollectionExercise findCollectionExercise(final String exerciseRef, final UUID surveyId) {
     List<CollectionExercise> existing =
         this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
@@ -156,7 +148,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  @Override
   public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
 
     List<CaseTypeDefault> caseTypeDefaultList =
@@ -200,7 +191,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    * @return linkedSummaries the list of CollectionExercises and the linked SampleSummaries
    */
   @Transactional
-  @Override
   public List<SampleLink> linkSampleSummaryToCollectionExercise(
       UUID collectionExerciseId, List<UUID> sampleSummaryIds) throws CTPException {
     sampleLinkRepository.deleteByCollectionExerciseId(collectionExerciseId);
@@ -221,7 +211,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    * @param collectionExerciseId a collection exercise uuid
    * @throws CTPException thrown if transition fails
    */
-  @Override
   @Transactional
   public void removeSampleSummaryLink(final UUID sampleSummaryId, final UUID collectionExerciseId)
       throws CTPException {
@@ -283,7 +272,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
    * @return created collection exercise
    */
   @Transactional
-  @Override
   public CollectionExercise createCollectionExercise(
       CollectionExerciseDTO collex, SurveyDTO survey) {
     log.with("survey_ref", survey.getSurveyRef())
@@ -482,7 +470,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
         .debug("Successfully created case type override");
   }
 
-  @Override
   public CollectionExercise patchCollectionExercise(UUID id, CollectionExerciseDTO patchData)
       throws CTPException {
     CollectionExercise collex = findCollectionExercise(id);
@@ -560,7 +547,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  @Override
   public CollectionExercise updateCollectionExercise(UUID id, CollectionExerciseDTO collexDto)
       throws CTPException {
     CollectionExercise existing = findCollectionExercise(id);
@@ -590,7 +576,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  @Override
   public CollectionExercise updateCollectionExercise(final CollectionExercise collex) {
     collex.setUpdated(new Timestamp(new Date().getTime()));
     return this.collectRepo.saveAndFlush(collex);
@@ -619,22 +604,18 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  @Override
   public CollectionExercise deleteCollectionExercise(UUID id) throws CTPException {
     return updateCollectionExerciseDeleted(id, true);
   }
 
-  @Override
   public CollectionExercise undeleteCollectionExercise(UUID id) throws CTPException {
     return updateCollectionExerciseDeleted(id, false);
   }
 
-  @Override
   public List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state) {
     return collectRepo.findByState(state);
   }
 
-  @Override
   public void transitionCollectionExercise(
       CollectionExercise collex, CollectionExerciseDTO.CollectionExerciseEvent event)
       throws CTPException {
@@ -651,7 +632,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
   }
 
-  @Override
   public void transitionCollectionExercise(
       final UUID collectionExerciseId, final CollectionExerciseDTO.CollectionExerciseEvent event)
       throws CTPException {
@@ -666,7 +646,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     transitionCollectionExercise(collex, event);
   }
 
-  @Override
   public void transitionScheduleCollectionExerciseToReadyToReview(
       final CollectionExercise collectionExercise) throws CTPException {
     UUID collexId = collectionExercise.getId();
@@ -694,7 +673,6 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
     }
   }
 
-  @Override
   public void transitionScheduleCollectionExerciseToReadyToReview(final UUID collectionExerciseId)
       throws CTPException {
     CollectionExercise collex = findCollectionExercise(collectionExerciseId);
