@@ -9,7 +9,6 @@ import org.springframework.integration.annotation.ServiceActivator;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitReceiver;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.collection.exercise.service.impl.SampleServiceImpl;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /**
@@ -31,8 +30,7 @@ public class SampleUnitReceiverImpl implements SampleUnitReceiver {
       sampleService.acceptSampleUnit(sampleUnit);
     } catch (Exception e) {
       // We are seeing messages from the sample service being DLQ'ed. This log should help diagnose
-      log.with("sample_unit", sampleUnit)
-        .error("Unexpected exception processing sample unit", e);
+      log.with("sample_unit", sampleUnit).error("Unexpected exception processing sample unit", e);
       throw e;
     }
   }
