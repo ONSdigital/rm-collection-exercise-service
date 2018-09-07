@@ -4,6 +4,7 @@ import java.util.UUID;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitSizeRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
 /** Service responsible for making client calls to the Sample service */
@@ -18,4 +19,6 @@ public interface SampleSvcClient {
   SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException;
 
   SampleSummaryDTO getSampleSummary(UUID sampleSummaryId);
+
+  SampleUnitsRequestDTO getSampleUnitSize(SampleUnitSizeRequestDTO sampleUnitSizeRequestDTO);
 }

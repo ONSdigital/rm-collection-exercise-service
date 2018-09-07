@@ -28,6 +28,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkReposito
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitSizeRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -121,5 +122,23 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
     SampleSummaryDTO sampleSummary = response.getBody();
     log.with("sample_summary", sampleSummary).debug("Got sample Summary");
     return sampleSummary;
+  }
+
+  @Override
+  public SampleUnitsRequestDTO getSampleUnitSize(
+      SampleUnitSizeRequestDTO sampleUnitSizeRequestDTO) {
+
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getRequestSampleUnitSizePath(), null);
+
+    HttpEntity<SampleUnitSizeRequestDTO> httpEntity =
+        restUtility.createHttpEntity(sampleUnitSizeRequestDTO);
+
+    ResponseEntity<SampleUnitsRequestDTO> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.POST, httpEntity, SampleUnitsRequestDTO.class);
+
+    return responseEntity.getBody();
   }
 }
