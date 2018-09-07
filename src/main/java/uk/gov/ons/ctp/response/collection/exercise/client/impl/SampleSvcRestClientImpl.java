@@ -3,7 +3,6 @@ package uk.gov.ons.ctp.response.collection.exercise.client.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -89,19 +88,10 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
           restUtility.createHttpEntity(requestDTO);
 
       log.with("collection_exercise_id", exercise.getId()).debug("about to get to the Sample SVC");
-      ResponseEntity<String> responseEntity =
-          restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
-
-      SampleUnitsRequestDTO result = null;
-      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-        String responseBody = responseEntity.getBody();
-        try {
-          result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
-        } catch (IOException e) {
-          log.error("Unable to read party response", e);
-        }
-      }
-      return result;
+      ResponseEntity<SampleUnitsRequestDTO> responseEntity =
+          restTemplate.exchange(
+              uriComponents.toUri(), HttpMethod.POST, httpEntity, SampleUnitsRequestDTO.class);
+      return responseEntity.getBody();
     }
   }
 
