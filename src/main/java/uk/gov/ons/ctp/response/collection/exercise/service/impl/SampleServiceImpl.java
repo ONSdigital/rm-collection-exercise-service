@@ -105,8 +105,8 @@ public class SampleServiceImpl implements SampleService {
     }
 
     List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(id);
-    List<UUID> sampleSummaryUUIDList = sampleLinks.stream().map(SampleLink::getSampleSummaryId)
-      .collect(Collectors.toList());
+    List<UUID> sampleSummaryUUIDList =
+        sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
 
     // Pre-grab and save the total number of sample units we expect to receive from the sample
     // service BEFORE it starts to send them, to ensure no race condition

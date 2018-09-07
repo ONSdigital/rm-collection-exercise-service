@@ -17,11 +17,9 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollexSampleCountUpdaterTest {
-  @Mock
-  private CollectionExerciseRepository collexRepo;
+  @Mock private CollectionExerciseRepository collexRepo;
 
-  @InjectMocks
-  private CollexSampleCountUpdater underTest;
+  @InjectMocks private CollexSampleCountUpdater underTest;
 
   @Test
   public void updateSampleSizeHappyPath() {

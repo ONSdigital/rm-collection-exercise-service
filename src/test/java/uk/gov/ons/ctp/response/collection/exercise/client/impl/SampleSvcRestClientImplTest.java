@@ -88,8 +88,8 @@ public class SampleSvcRestClientImplTest {
 
   @Test
   public void getSampleUnitSizeHappyPath() {
-    SampleUnitSizeRequestDTO request = new SampleUnitSizeRequestDTO(
-      Collections.singletonList(UUID.randomUUID()));
+    SampleUnitSizeRequestDTO request =
+        new SampleUnitSizeRequestDTO(Collections.singletonList(UUID.randomUUID()));
     SampleUnitsRequestDTO response = new SampleUnitsRequestDTO(666);
     SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
     ResponseEntity<SampleUnitsRequestDTO> responseEntity = Mockito.mock(ResponseEntity.class);
@@ -100,12 +100,12 @@ public class SampleSvcRestClientImplTest {
     given(responseEntity.getStatusCode()).willReturn(HttpStatus.OK);
     given(responseEntity.getBody()).willReturn(response);
     given(
-      restTemplate.exchange(
-        any(URI.class),
-        eq(HttpMethod.POST),
-        any(HttpEntity.class),
-        eq(SampleUnitsRequestDTO.class)))
-      .willReturn(responseEntity);
+            restTemplate.exchange(
+                any(URI.class),
+                eq(HttpMethod.POST),
+                any(HttpEntity.class),
+                eq(SampleUnitsRequestDTO.class)))
+        .willReturn(responseEntity);
 
     // When
     SampleUnitsRequestDTO actualResponse = sampleSvcRestClient.getSampleUnitSize(request);
