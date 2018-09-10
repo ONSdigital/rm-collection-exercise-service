@@ -27,7 +27,6 @@ import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.SampleSvc;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitSizeRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,8 +87,6 @@ public class SampleSvcRestClientImplTest {
 
   @Test
   public void getSampleUnitSizeHappyPath() {
-    SampleUnitSizeRequestDTO request =
-        new SampleUnitSizeRequestDTO(Collections.singletonList(UUID.randomUUID()));
     SampleUnitsRequestDTO response = new SampleUnitsRequestDTO(666);
     SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
     ResponseEntity<SampleUnitsRequestDTO> responseEntity = Mockito.mock(ResponseEntity.class);
@@ -108,7 +105,8 @@ public class SampleSvcRestClientImplTest {
         .willReturn(responseEntity);
 
     // When
-    SampleUnitsRequestDTO actualResponse = sampleSvcRestClient.getSampleUnitSize(request);
+    SampleUnitsRequestDTO actualResponse =
+        sampleSvcRestClient.getSampleUnitSize(Collections.singletonList(UUID.randomUUID()));
 
     // Then
     assertEquals(666, actualResponse.getSampleUnitsTotal().intValue());

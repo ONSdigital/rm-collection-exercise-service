@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -27,7 +29,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkReposito
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.ctp.response.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitSizeRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
@@ -115,15 +116,16 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   }
 
   @Override
-  public SampleUnitsRequestDTO getSampleUnitSize(
-      SampleUnitSizeRequestDTO sampleUnitSizeRequestDTO) {
+  public SampleUnitsRequestDTO getSampleUnitSize(List<UUID> sampleSummaryIdList) {
+
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    sampleSummaryIdList.forEach(id -> queryParams.add("sampleSummaryId", id.toString()));
 
     UriComponents uriComponents =
         restUtility.createUriComponents(
-            appConfig.getSampleSvc().getRequestSampleUnitSizePath(), null);
+            appConfig.getSampleSvc().getRequestSampleUnitSizePath(), queryParams);
 
-    HttpEntity<SampleUnitSizeRequestDTO> httpEntity =
-        restUtility.createHttpEntity(sampleUnitSizeRequestDTO);
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uriComponents);
 
     ResponseEntity<SampleUnitsRequestDTO> responseEntity =
         restTemplate.exchange(

@@ -36,7 +36,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitSizeRequestDTO;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
@@ -105,13 +104,12 @@ public class SampleServiceImpl implements SampleService {
     }
 
     List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(id);
-    List<UUID> sampleSummaryUUIDList =
+    List<UUID> sampleSummaryIdList =
         sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
 
     // Pre-grab and save the total number of sample units we expect to receive from the sample
     // service BEFORE it starts to send them, to ensure no race condition
-    SampleUnitSizeRequestDTO requestDTO = new SampleUnitSizeRequestDTO(sampleSummaryUUIDList);
-    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitSize(requestDTO);
+    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitSize(sampleSummaryIdList);
     collexSampleCountUpdater.updateSampleSize(id, responseDTO.getSampleUnitsTotal());
 
     // Request the sample units. They'll start arriving as soon as this line executes. Be ready!
