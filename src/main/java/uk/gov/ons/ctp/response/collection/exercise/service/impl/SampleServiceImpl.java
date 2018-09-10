@@ -109,7 +109,7 @@ public class SampleServiceImpl implements SampleService {
 
     // Pre-grab and save the total number of sample units we expect to receive from the sample
     // service BEFORE it starts to send them, to ensure no race condition
-    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitSize(sampleSummaryIdList);
+    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitCount(sampleSummaryIdList);
     collexSampleCountUpdater.updateSampleSize(id, responseDTO.getSampleUnitsTotal());
 
     // Request the sample units. They'll start arriving as soon as this line executes. Be ready!
@@ -176,8 +176,9 @@ public class SampleServiceImpl implements SampleService {
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
-            == collectionExercise.getSampleSize()) {
+        if (collectionExercise.getSampleSize() != null
+            && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
+                == collectionExercise.getSampleSize()) {
           collectionExercise.setState(
               collectionExerciseTransitionState.transition(
                   collectionExercise.getState(), CollectionExerciseEvent.EXECUTION_COMPLETE));

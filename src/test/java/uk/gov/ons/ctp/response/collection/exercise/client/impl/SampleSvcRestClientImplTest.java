@@ -93,7 +93,7 @@ public class SampleSvcRestClientImplTest {
 
     // Given
     given(appConfig.getSampleSvc()).willReturn(sampleSvc);
-    given(sampleSvc.getRequestSampleUnitSizePath()).willReturn("test/path");
+    given(sampleSvc.getRequestSampleUnitCountPath()).willReturn("test/path");
     given(responseEntity.getStatusCode()).willReturn(HttpStatus.OK);
     given(responseEntity.getBody()).willReturn(response);
     given(
@@ -106,7 +106,7 @@ public class SampleSvcRestClientImplTest {
 
     // When
     SampleUnitsRequestDTO actualResponse =
-        sampleSvcRestClient.getSampleUnitSize(Collections.singletonList(UUID.randomUUID()));
+        sampleSvcRestClient.getSampleUnitCount(Collections.singletonList(UUID.randomUUID()));
 
     // Then
     assertEquals(666, actualResponse.getSampleUnitsTotal().intValue());

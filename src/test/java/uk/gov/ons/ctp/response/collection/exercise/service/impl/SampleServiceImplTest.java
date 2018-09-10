@@ -143,7 +143,7 @@ public class SampleServiceImplTest {
     // Given
     when(collectRepo.findOneById(eq(collexId))).thenReturn(collectionExercise);
     when(sampleLinkRepo.findByCollectionExerciseId(any())).thenReturn(sampleLinks);
-    when(sampleSvcClient.getSampleUnitSize(any())).thenReturn(sampleUnitsRequestDTO);
+    when(sampleSvcClient.getSampleUnitCount(any())).thenReturn(sampleUnitsRequestDTO);
     when(sampleSvcClient.requestSampleUnits(any())).thenReturn(sampleUnitsRequestDTO);
 
     // When

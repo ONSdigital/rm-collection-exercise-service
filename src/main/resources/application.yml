@@ -83,7 +83,7 @@ spring:
 
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
-  request-sample-unit-size-path: /samples/samplecount
+  request-sample-unit-count-path: /samples/count
   connection-config:
     scheme: http
     host: localhost

@@ -10,5 +10,5 @@ import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 public class SampleSvc {
   private RestUtilityConfig connectionConfig;
   private String requestSampleUnitsPath;
-  private String requestSampleUnitSizePath;
+  private String requestSampleUnitCountPath;
 }

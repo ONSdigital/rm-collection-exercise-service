@@ -116,14 +116,14 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
   }
 
   @Override
-  public SampleUnitsRequestDTO getSampleUnitSize(List<UUID> sampleSummaryIdList) {
+  public SampleUnitsRequestDTO getSampleUnitCount(List<UUID> sampleSummaryIdList) {
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     sampleSummaryIdList.forEach(id -> queryParams.add("sampleSummaryId", id.toString()));
 
     UriComponents uriComponents =
         restUtility.createUriComponents(
-            appConfig.getSampleSvc().getRequestSampleUnitSizePath(), queryParams);
+            appConfig.getSampleSvc().getRequestSampleUnitCountPath(), queryParams);
 
     HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uriComponents);
 

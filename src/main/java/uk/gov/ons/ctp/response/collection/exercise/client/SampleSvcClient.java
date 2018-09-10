@@ -20,5 +20,5 @@ public interface SampleSvcClient {
 
   SampleSummaryDTO getSampleSummary(UUID sampleSummaryId);
 
-  SampleUnitsRequestDTO getSampleUnitSize(List<UUID> sampleSummaryIdList);
+  SampleUnitsRequestDTO getSampleUnitCount(List<UUID> sampleSummaryIdList);
 }
