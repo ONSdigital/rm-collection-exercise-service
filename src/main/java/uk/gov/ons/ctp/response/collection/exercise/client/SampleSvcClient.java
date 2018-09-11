@@ -1,9 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -43,8 +43,6 @@ public class SampleSvcClient {
   @Qualifier("sampleRestUtility")
   @Autowired
   private RestUtility restUtility;
-
-  @Autowired private ObjectMapper objectMapper;
 
   @Autowired private SurveySvcClient surveyService;
 
@@ -92,20 +90,10 @@ public class SampleSvcClient {
 
       log.with("collection_exercise_id", exercise.getId().toString())
           .debug("Requesting sample unit for collection exercise");
-      ResponseEntity<String> responseEntity =
-          restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, httpEntity, String.class);
-
-      SampleUnitsRequestDTO result = null;
-      if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-        String responseBody = responseEntity.getBody();
-        try {
-          result = objectMapper.readValue(responseBody, SampleUnitsRequestDTO.class);
-        } catch (IOException e) {
-          String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-          log.error(msg);
-        }
-      }
-      return result;
+      ResponseEntity<SampleUnitsRequestDTO> responseEntity =
+          restTemplate.exchange(
+              uriComponents.toUri(), HttpMethod.POST, httpEntity, SampleUnitsRequestDTO.class);
+      return responseEntity.getBody();
     }
   }
 
@@ -125,5 +113,23 @@ public class SampleSvcClient {
     SampleSummaryDTO sampleSummary = response.getBody();
     log.debug("Got sampleSummary={}", sampleSummary);
     return sampleSummary;
+  }
+
+  public SampleUnitsRequestDTO getSampleUnitCount(List<UUID> sampleSummaryIdList) {
+
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    sampleSummaryIdList.forEach(id -> queryParams.add("sampleSummaryId", id.toString()));
+
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getRequestSampleUnitCountPath(), queryParams);
+
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uriComponents);
+
+    ResponseEntity<SampleUnitsRequestDTO> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.GET, httpEntity, SampleUnitsRequestDTO.class);
+
+    return responseEntity.getBody();
   }
 }

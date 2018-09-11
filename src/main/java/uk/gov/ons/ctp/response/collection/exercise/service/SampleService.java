@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,8 @@ public class SampleService {
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
       collectionExerciseTransitionState;
 
+  @Autowired private CollexSampleCountUpdater collexSampleCountUpdater;
+
   @Autowired private ValidateSampleUnits validate;
 
   @Autowired private SampleUnitDistributor distributor;
@@ -98,31 +101,37 @@ public class SampleService {
    * @throws CTPException when collection exercise state transition error
    */
   public SampleUnitsRequestDTO requestSampleUnits(final UUID id) throws CTPException {
-
-    SampleUnitsRequestDTO replyDTO = null;
-
     CollectionExercise collectionExercise = collectRepo.findOneById(id);
 
-    // Check collection exercise exists
-    if (collectionExercise != null) {
-      replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
-
-      if (replyDTO != null && replyDTO.getSampleUnitsTotal() > 0) {
-
-        List<SampleLink> sampleLinks =
-            sampleLinkRepository.findByCollectionExerciseId(collectionExercise.getId());
-        for (SampleLink samplelink : sampleLinks) {
-          partySvcClient.linkSampleSummaryId(
-              samplelink.getSampleSummaryId().toString(), collectionExercise.getId().toString());
-        }
-
-        collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
-        collectionExercise.setState(
-            collectionExerciseTransitionState.transition(
-                collectionExercise.getState(), CollectionExerciseEvent.EXECUTE));
-        collectRepo.saveAndFlush(collectionExercise);
-      }
+    if (collectionExercise == null) {
+      throw new IllegalArgumentException(String.format("Collection exercise %s not found", id));
     }
+
+    List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(id);
+    List<UUID> sampleSummaryIdList =
+        sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
+
+    // Pre-grab and save the total number of sample units we expect to receive from the sample
+    // service BEFORE it starts to send them, to ensure no race condition
+    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitCount(sampleSummaryIdList);
+    collexSampleCountUpdater.updateSampleSize(id, responseDTO.getSampleUnitsTotal());
+
+    // Request the sample units. They'll start arriving as soon as this line executes. Be ready!
+    SampleUnitsRequestDTO replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
+
+    if (replyDTO != null && replyDTO.getSampleUnitsTotal() > 0) {
+      for (SampleLink samplelink : sampleLinks) {
+        partySvcClient.linkSampleSummaryId(
+            samplelink.getSampleSummaryId().toString(), collectionExercise.getId().toString());
+      }
+
+      collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
+      collectionExercise.setState(
+          collectionExerciseTransitionState.transition(
+              collectionExercise.getState(), CollectionExerciseEvent.EXECUTE));
+      collectRepo.saveAndFlush(collectionExercise);
+    }
+
     return replyDTO;
   }
 
