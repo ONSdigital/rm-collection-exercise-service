@@ -129,7 +129,7 @@ public class SampleSvcRestClientImpl implements SampleSvcClient {
 
     ResponseEntity<SampleUnitsRequestDTO> responseEntity =
         restTemplate.exchange(
-            uriComponents.toUri(), HttpMethod.POST, httpEntity, SampleUnitsRequestDTO.class);
+            uriComponents.toUri(), HttpMethod.GET, httpEntity, SampleUnitsRequestDTO.class);
 
     return responseEntity.getBody();
   }
