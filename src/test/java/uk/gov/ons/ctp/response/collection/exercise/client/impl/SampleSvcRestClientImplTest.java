@@ -99,7 +99,7 @@ public class SampleSvcRestClientImplTest {
     given(
             restTemplate.exchange(
                 any(URI.class),
-                eq(HttpMethod.POST),
+                eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(SampleUnitsRequestDTO.class)))
         .willReturn(responseEntity);
