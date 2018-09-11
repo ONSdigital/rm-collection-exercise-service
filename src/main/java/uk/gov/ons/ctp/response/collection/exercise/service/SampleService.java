@@ -170,8 +170,9 @@ public class SampleService {
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
 
-        if (sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
-            == collectionExercise.getSampleSize()) {
+        if (collectionExercise.getSampleSize() != null
+            && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
+                == collectionExercise.getSampleSize()) {
           collectionExercise.setState(
               collectionExerciseTransitionState.transition(
                   collectionExercise.getState(), CollectionExerciseEvent.EXECUTION_COMPLETE));
