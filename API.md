@@ -18,6 +18,7 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 
 ## Get Collection Exercises for Survey
 * `GET /collectionexercises/survey/{survey_id}` will return a list of known collection exercises for the survey id.
+* `GET /collectionexercises/survey/{survey_id}?liveOnly=true` will return a list of LIVE collection exercises for the survey id.
 
 ### Example JSON Response
 ```json
