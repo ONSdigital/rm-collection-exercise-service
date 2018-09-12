@@ -53,6 +53,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -164,6 +165,35 @@ public class CollectionExerciseEndpointUnitTests {
     ResultActions actions =
         mockCollectionExerciseMvc.perform(
             getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID_1)));
+
+    actions
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(
+            jsonPath(
+                "$[*].id",
+                containsInAnyOrder(
+                    COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
+        .andExpect(
+            jsonPath(
+                "$[*].scheduledExecutionDateTime",
+                containsInAnyOrder(
+                    new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
+                    new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
+  }
+
+  @Test
+  public void findCollectionExercisesForSurveyOnlyLive() throws Exception {
+    when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
+    when(collectionExerciseService.findCollectionExercisesBySurveyIdAndState(
+            SURVEY_ID_1, CollectionExerciseState.LIVE))
+        .thenReturn(collectionExerciseResults);
+
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            getJson(String.format("/collectionexercises/survey/%s?liveOnly=true", SURVEY_ID_1)));
 
     actions
         .andExpect(status().isOk())

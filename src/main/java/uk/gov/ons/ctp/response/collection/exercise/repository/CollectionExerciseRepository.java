@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 
 /** Spring JPA Repository for Collection Exercise */
 public interface CollectionExerciseRepository extends JpaRepository<CollectionExercise, Integer> {
@@ -27,6 +28,8 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
   List<CollectionExercise> findByExerciseRefAndSurveyId(String exerciseRef, UUID surveyUuid);
 
   List<CollectionExercise> findBySurveyId(UUID surveyUuid);
+
+  List<CollectionExercise> findBySurveyIdAndState(UUID surveyUuid, CollectionExerciseState state);
 
   /**
    * Query repository for list of collection exercises associated with a certain state.
