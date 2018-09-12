@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import java.util.List;
 import java.util.UUID;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -18,4 +19,6 @@ public interface SampleSvcClient {
   SampleUnitsRequestDTO requestSampleUnits(CollectionExercise exercise) throws CTPException;
 
   SampleSummaryDTO getSampleSummary(UUID sampleSummaryId);
+
+  SampleUnitsRequestDTO getSampleUnitCount(List<UUID> sampleSummaryIdList);
 }

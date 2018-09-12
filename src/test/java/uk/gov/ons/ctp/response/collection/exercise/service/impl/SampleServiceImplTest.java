@@ -4,10 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,16 +20,22 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollexSampleCountUpdater;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
+import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
 
 /** Unit tests */
@@ -39,7 +48,15 @@ public class SampleServiceImplTest {
 
   @Mock private SampleUnitGroupRepository sampleUnitGroupRepo;
 
+  @Mock private SampleLinkRepository sampleLinkRepo;
+
   @Mock private CollectionExerciseRepository collectRepo;
+
+  @Mock private SampleSvcClient sampleSvcClient;
+
+  @Mock private CollexSampleCountUpdater collexSampleCountUpdater;
+
+  @Mock private PartySvcClient partySvcClient;
 
   @Mock
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
@@ -109,6 +126,34 @@ public class SampleServiceImplTest {
     verify(sampleUnitGroupRepo, never()).saveAndFlush(any());
     verify(sampleUnitRepo, never()).saveAndFlush(any());
     verify(collectRepo, never()).saveAndFlush(any());
+  }
+
+  @Test
+  public void requestSampleUnitsHappyPath() throws CTPException {
+    UUID collexId = UUID.randomUUID();
+    UUID sampleSummaryId = UUID.randomUUID();
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(collexId);
+    SampleLink sampleLink = new SampleLink();
+    sampleLink.setSampleSummaryId(sampleSummaryId);
+    List<SampleLink> sampleLinks = Collections.singletonList(sampleLink);
+    SampleUnitsRequestDTO sampleUnitsRequestDTO = new SampleUnitsRequestDTO();
+    sampleUnitsRequestDTO.setSampleUnitsTotal(666);
+
+    // Given
+    when(collectRepo.findOneById(eq(collexId))).thenReturn(collectionExercise);
+    when(sampleLinkRepo.findByCollectionExerciseId(any())).thenReturn(sampleLinks);
+    when(sampleSvcClient.getSampleUnitCount(any())).thenReturn(sampleUnitsRequestDTO);
+    when(sampleSvcClient.requestSampleUnits(any())).thenReturn(sampleUnitsRequestDTO);
+
+    // When
+    underTest.requestSampleUnits(collexId);
+
+    // Then
+    verify(collexSampleCountUpdater).updateSampleSize(eq(collexId), eq(666));
+    verify(partySvcClient).linkSampleSummaryId(any(), any());
+    verify(collectionExerciseTransitionState).transition(any(), any());
+    verify(collectRepo).saveAndFlush(any());
   }
 
   private void acceptSampleUnitWithCollex(CollectionExercise collex) throws CTPException {
