@@ -119,7 +119,7 @@ public class ValidateSampleUnits {
           });
 
     } catch (LockingException ex) {
-      log.error("Failed to get lock", ex.getMessage());
+      log.error("Failed to get lock", ex);
     } finally {
       try {
         sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);

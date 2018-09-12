@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.CTPException.Fault;
-import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher.MessageType;
@@ -89,9 +88,7 @@ public class EventService {
 
   @Autowired private EventChangeHandler[] changeHandlers = {};
 
-  @Autowired List<EventValidator> eventValidators;
-
-  @Autowired private SurveySvcClient surveySvcClient;
+  @Autowired private List<EventValidator> eventValidators;
 
   @Autowired private Scheduler scheduler;
 
