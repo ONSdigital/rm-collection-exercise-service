@@ -8,6 +8,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Service responsible for dealing with collection exercises */
@@ -20,6 +21,9 @@ public interface CollectionExerciseService {
    * @return the associated collection exercises.
    */
   List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey);
+
+  List<CollectionExercise> findCollectionExercisesBySurveyIdAndState(
+      UUID surveyId, CollectionExerciseState state);
 
   /**
    * Find a collection exercise associated to a collection exercise Id from the Collection Exercise

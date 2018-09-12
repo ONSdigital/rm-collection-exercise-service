@@ -35,6 +35,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRe
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
@@ -100,6 +101,12 @@ public class CollectionExerciseServiceImpl implements CollectionExerciseService 
   @Override
   public List<CollectionExercise> findCollectionExercisesForSurvey(SurveyDTO survey) {
     return this.collectRepo.findBySurveyId(UUID.fromString(survey.getId()));
+  }
+
+  @Override
+  public List<CollectionExercise> findCollectionExercisesBySurveyIdAndState(
+      UUID surveyId, CollectionExerciseState state) {
+    return collectRepo.findBySurveyIdAndState(surveyId, state);
   }
 
   @Override

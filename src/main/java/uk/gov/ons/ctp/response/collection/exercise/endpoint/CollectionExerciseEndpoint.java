@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
@@ -45,6 +47,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
@@ -116,7 +119,8 @@ public class CollectionExerciseEndpoint {
    */
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
   public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForSurvey(
-      @PathVariable("id") final UUID id) throws CTPException {
+      @PathVariable("id") final UUID id, @RequestParam("liveOnly") Optional<Boolean> liveOnly)
+      throws CTPException {
 
     log.with("survey_id", id).debug("Retrieving collection exercises by surveyId");
 
@@ -129,8 +133,16 @@ public class CollectionExerciseEndpoint {
           CTPException.Fault.RESOURCE_NOT_FOUND, String.format("%s %s", RETURN_SURVEYNOTFOUND, id));
     } else {
       log.with("survey_id", id).debug("Entering collection exercise fetch with surveyId");
-      List<CollectionExercise> collectionExerciseList =
-          collectionExerciseService.findCollectionExercisesForSurvey(survey);
+      List<CollectionExercise> collectionExerciseList = null;
+
+      if (liveOnly.isPresent() && liveOnly.get().booleanValue() == true) {
+        collectionExerciseList =
+            collectionExerciseService.findCollectionExercisesBySurveyIdAndState(
+                id, CollectionExerciseState.LIVE);
+      } else {
+        collectionExerciseList = collectionExerciseService.findCollectionExercisesForSurvey(survey);
+      }
+
       collectionExerciseSummaryDTOList =
           collectionExerciseList
               .stream()
