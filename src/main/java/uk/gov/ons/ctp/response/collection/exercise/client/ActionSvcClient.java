@@ -51,18 +51,9 @@ public class ActionSvcClient {
   public static final String SELECTOR_ACTIVE_ENROLMENT = "activeEnrolment";
 
   private AppConfig appConfig;
-
   private RestTemplate restTemplate;
-
   private RestUtility restUtility;
 
-  /**
-   * Implementation for request to action service to create action plan
-   *
-   * @param restTemplate Spring frameworks rest template
-   * @param restUtility for creating URI's and HTTPEntities
-   * @param appConfig application config object
-   */
   @Autowired
   public ActionSvcClient(
       final RestTemplate restTemplate,
@@ -120,7 +111,7 @@ public class ActionSvcClient {
   public List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
       final String collectionExerciseId, final Boolean activeEnrolment) {
     log.with("collection_exercise_id", collectionExerciseId)
-        .with("activeEnrolment", activeEnrolment)
+        .with("active_enrolment", activeEnrolment)
         .info("Retrieving action plan for selectors");
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
@@ -139,7 +130,7 @@ public class ActionSvcClient {
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.with("collection_exercise_id", collectionExerciseId)
-        .with("activeEnrolment", activeEnrolment)
+        .with("active_enrolment", activeEnrolment)
         .info("Successfully retrieved action plans for selectors");
     return responseEntity.getBody();
   }
@@ -152,7 +143,7 @@ public class ActionSvcClient {
 
     if (actionPlans == null) {
       log.with("collection_exercise_id", collectionExerciseId)
-          .with("activeEnrolment", activeEnrolment)
+          .with("active_enrolment", activeEnrolment)
           .error("Retrieved no action plans");
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
@@ -161,7 +152,7 @@ public class ActionSvcClient {
 
     if (actionPlans.size() != 1) {
       log.with("collection_exercise_id", collectionExerciseId)
-          .with("activeEnrolment", activeEnrolment)
+          .with("active_enrolment", activeEnrolment)
           .error("Retrieved more than one action plan");
       throw new CTPException(
           Fault.RESOURCE_NOT_FOUND,
