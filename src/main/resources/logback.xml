@@ -25,7 +25,6 @@
             "trace" : "%X{X-B3-TraceId:-}",
             "span" : "%X{X-B3-SpanId:-}",
             "parent" : "%X{X-B3-ParentSpanId:-}",
-            "exportable" : "%X{X-Span-Export:-}"
             }
           </Pattern>
         </Pattern>
