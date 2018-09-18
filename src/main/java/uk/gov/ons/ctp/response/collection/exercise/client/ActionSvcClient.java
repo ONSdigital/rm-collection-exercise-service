@@ -89,31 +89,31 @@ public class ActionSvcClient {
   }
 
   public ActionPlanDTO getActionPlanBySelectorsBusiness(
-    String collectionExerciseId, boolean activeEnrolment) throws CTPException {
+      String collectionExerciseId, boolean activeEnrolment) throws CTPException {
 
     final List<ActionPlanDTO> actionPlans =
-      getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
+        getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
 
     if (actionPlans == null) {
       log.with("collection_exercise_id", collectionExerciseId)
-        .with("active_enrolment", activeEnrolment)
-        .error("Retrieved no action plans");
+          .with("active_enrolment", activeEnrolment)
+          .error("Retrieved no action plans");
       throw new CTPException(
-        Fault.RESOURCE_NOT_FOUND,
-        String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
     }
 
     if (actionPlans.size() != 1) {
       log.with("collection_exercise_id", collectionExerciseId)
-        .with("active_enrolment", activeEnrolment)
-        .error("Retrieved more than one action plan");
+          .with("active_enrolment", activeEnrolment)
+          .error("Retrieved more than one action plan");
       throw new CTPException(
-        Fault.RESOURCE_NOT_FOUND,
-        String.format(
-          MULTIPLE_ACTION_PLANS_FOUND,
-          collectionExerciseId,
-          activeEnrolment,
-          actionPlans.size()));
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              MULTIPLE_ACTION_PLANS_FOUND,
+              collectionExerciseId,
+              activeEnrolment,
+              actionPlans.size()));
     }
 
     return actionPlans.get(0);
@@ -147,22 +147,22 @@ public class ActionSvcClient {
   }
 
   public ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId)
-    throws CTPException {
+      throws CTPException {
 
     final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
 
     if (actionPlans == null) {
       log.with("collection_exercise_id", collectionExerciseId).error("Retrieved no action plans");
       throw new CTPException(
-        Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
+          Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
     }
 
     if (actionPlans.size() > 1) {
       log.with("collection_exercise_id", collectionExerciseId)
-        .error("Retrieved more than one action plan");
+          .error("Retrieved more than one action plan");
       throw new CTPException(
-        Fault.RESOURCE_NOT_FOUND,
-        String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
     }
 
     return actionPlans.iterator().next();
