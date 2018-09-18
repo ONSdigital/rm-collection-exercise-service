@@ -123,7 +123,7 @@ public class ActionSvcClient {
       final String collectionExerciseId, final Boolean activeEnrolment) {
     log.with("collection_exercise_id", collectionExerciseId)
         .with("active_enrolment", activeEnrolment)
-        .info("Retrieving action plan for selectors");
+        .debug("Retrieving action plan for selectors");
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
@@ -142,7 +142,7 @@ public class ActionSvcClient {
 
     log.with("collection_exercise_id", collectionExerciseId)
         .with("active_enrolment", activeEnrolment)
-        .info("Successfully retrieved action plans for selectors");
+        .debug("Successfully retrieved action plans for selectors");
     return responseEntity.getBody();
   }
 
@@ -170,7 +170,7 @@ public class ActionSvcClient {
 
   private List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
     log.with("collection_exercise_id", collectionExerciseId)
-        .info("Retrieving action plan for selectors");
+        .debug("Retrieving action plan for selectors");
 
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
@@ -188,7 +188,7 @@ public class ActionSvcClient {
             new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
 
     log.with("collection_exercise_id", collectionExerciseId)
-        .info("Successfully retrieved action plan for selectors");
+        .debug("Successfully retrieved action plan for selectors");
     return responseEntity.getBody();
   }
 
