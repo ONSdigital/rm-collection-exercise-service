@@ -37,30 +37,29 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 public class ActionSvcClient {
   private static final Logger log = LoggerFactory.getLogger(ActionSvcClient.class);
 
-  public static final String FOUND_NO_ACTION_PLANS =
+  private static final String FOUND_NO_ACTION_PLANS =
       "Expected one action plan for selectors,"
           + " collectionExerciseId: %s, activeEnrolment: %b But None Found";
-  public static final String FOUND_NO_ACTION_PLANS_2 =
+  private static final String FOUND_NO_ACTION_PLANS_2 =
       "Expected one action plan for selectors," + " collectionExerciseId: %s, But None Found";
-  public static final String MULTIPLE_ACTION_PLANS_FOUND =
+  private static final String MULTIPLE_ACTION_PLANS_FOUND =
       "Expected one action plan for selectors,"
           + " collectionExerciseId: %s, activeEnrolment: %b But %d Found";
-  public static final String MULTIPLE_ACTION_PLANS_FOUND_2 =
+  private static final String MULTIPLE_ACTION_PLANS_FOUND_2 =
       "Expected one action plan for selectors," + " collectionExerciseId: %s, But %d Found";
-  public static final String SELECTOR_COLLECTION_EXERCISE_ID = "collectionExerciseId";
-  public static final String SELECTOR_ACTIVE_ENROLMENT = "activeEnrolment";
+  private static final String SELECTOR_COLLECTION_EXERCISE_ID = "collectionExerciseId";
+  private static final String SELECTOR_ACTIVE_ENROLMENT = "activeEnrolment";
 
   private AppConfig appConfig;
   private RestTemplate restTemplate;
   private RestUtility restUtility;
 
-  @Autowired
   public ActionSvcClient(
+      AppConfig appConfig,
       final RestTemplate restTemplate,
-      final @Qualifier("actionRestUtility") RestUtility restUtility,
-      AppConfig appConfig) {
-    this.restTemplate = restTemplate;
+      final @Qualifier("actionRestUtility") RestUtility restUtility) {
     this.appConfig = appConfig;
+    this.restTemplate = restTemplate;
     this.restUtility = restUtility;
   }
 
@@ -71,12 +70,7 @@ public class ActionSvcClient {
    * @param description description of action plan
    * @param selectors Map of selectors for actionplans as key value pairs
    * @return ActionPlanDTO representation of the created action plan
-   * @throws RestClientException for failed connection to action service
    */
-  @Retryable(
-      value = {RestClientException.class},
-      maxAttemptsExpression = "#{${retries.maxAttempts}}",
-      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public ActionPlanDTO createActionPlan(
       final String name, final String description, final HashMap<String, String> selectors) {
     log.debug("Posting to action service to create action plan");
@@ -97,18 +91,38 @@ public class ActionSvcClient {
     return createdActionPlan;
   }
 
-  /**
-   * Request list of business action plans with given selectors
-   *
-   * @param collectionExerciseId collectionExerciseId to find action plans for
-   * @param activeEnrolment boolean for if sample unit has an active enrolment associated with it
-   * @return List<ActionPlanDTO> representation of the created action plan
-   */
-  @Retryable(
-      value = {RestClientException.class},
-      maxAttemptsExpression = "#{${retries.maxAttempts}}",
-      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-  public List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
+  public ActionPlanDTO getActionPlanBySelectorsBusiness(
+    String collectionExerciseId, boolean activeEnrolment) throws CTPException {
+
+    final List<ActionPlanDTO> actionPlans =
+      getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
+
+    if (actionPlans == null) {
+      log.with("collection_exercise_id", collectionExerciseId)
+        .with("active_enrolment", activeEnrolment)
+        .error("Retrieved no action plans");
+      throw new CTPException(
+        Fault.RESOURCE_NOT_FOUND,
+        String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
+    }
+
+    if (actionPlans.size() != 1) {
+      log.with("collection_exercise_id", collectionExerciseId)
+        .with("active_enrolment", activeEnrolment)
+        .error("Retrieved more than one action plan");
+      throw new CTPException(
+        Fault.RESOURCE_NOT_FOUND,
+        String.format(
+          MULTIPLE_ACTION_PLANS_FOUND,
+          collectionExerciseId,
+          activeEnrolment,
+          actionPlans.size()));
+    }
+
+    return actionPlans.get(0);
+  }
+
+  private List<ActionPlanDTO> getActionPlansBySelectorsBusiness(
       final String collectionExerciseId, final Boolean activeEnrolment) {
     log.with("collection_exercise_id", collectionExerciseId)
         .with("active_enrolment", activeEnrolment)
@@ -135,48 +149,29 @@ public class ActionSvcClient {
     return responseEntity.getBody();
   }
 
-  public ActionPlanDTO getActionPlanBySelectorsBusiness(
-      String collectionExerciseId, boolean activeEnrolment) throws CTPException {
+  public ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId)
+    throws CTPException {
 
-    final List<ActionPlanDTO> actionPlans =
-        getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);
+    final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
 
     if (actionPlans == null) {
-      log.with("collection_exercise_id", collectionExerciseId)
-          .with("active_enrolment", activeEnrolment)
-          .error("Retrieved no action plans");
+      log.with("collection_exercise_id", collectionExerciseId).error("Retrieved no action plans");
       throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND,
-          String.format(FOUND_NO_ACTION_PLANS, collectionExerciseId, activeEnrolment));
+        Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
     }
 
-    if (actionPlans.size() != 1) {
+    if (actionPlans.size() > 1) {
       log.with("collection_exercise_id", collectionExerciseId)
-          .with("active_enrolment", activeEnrolment)
-          .error("Retrieved more than one action plan");
+        .error("Retrieved more than one action plan");
       throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND,
-          String.format(
-              MULTIPLE_ACTION_PLANS_FOUND,
-              collectionExerciseId,
-              activeEnrolment,
-              actionPlans.size()));
+        Fault.RESOURCE_NOT_FOUND,
+        String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
     }
 
-    return actionPlans.get(0);
+    return actionPlans.iterator().next();
   }
 
-  /**
-   * Request list of social action plans with given selectors
-   *
-   * @param collectionExerciseId collectionExerciseId to find action plans for
-   * @return List<ActionPlanDTO> representation of the created action plan
-   */
-  @Retryable(
-      value = {RestClientException.class},
-      maxAttemptsExpression = "#{${retries.maxAttempts}}",
-      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-  public List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
+  private List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
     log.with("collection_exercise_id", collectionExerciseId)
         .info("Retrieving action plan for selectors");
 
@@ -198,28 +193,6 @@ public class ActionSvcClient {
     log.with("collection_exercise_id", collectionExerciseId)
         .info("Successfully retrieved action plan for selectors");
     return responseEntity.getBody();
-  }
-
-  public ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId)
-      throws CTPException {
-
-    final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
-
-    if (actionPlans == null) {
-      log.with("collection_exercise_id", collectionExerciseId).error("Retrieved no action plans");
-      throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
-    }
-
-    if (actionPlans.size() > 1) {
-      log.with("collection_exercise_id", collectionExerciseId)
-          .error("Retrieved more than one action plan");
-      throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND,
-          String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
-    }
-
-    return actionPlans.iterator().next();
   }
 
   /**
