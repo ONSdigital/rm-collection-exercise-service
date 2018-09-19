@@ -125,7 +125,7 @@ public class ActionSvcClient {
         .with("active_enrolment", activeEnrolment)
         .debug("Retrieving action plan for selectors");
 
-    final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
     queryParams.add(SELECTOR_ACTIVE_ENROLMENT, Boolean.toString(activeEnrolment));
     final UriComponents uriComponents =
