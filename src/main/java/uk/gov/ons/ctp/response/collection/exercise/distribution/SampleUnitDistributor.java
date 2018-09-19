@@ -16,7 +16,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
 import uk.gov.ons.ctp.common.error.CTPException;
@@ -217,16 +216,9 @@ public class SampleUnitDistributor {
   private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
       throws CTPException {
     boolean activeEnrolment;
-    try {
-      PartyDTO businessParty =
-          partySvcClient.requestParty(
-              sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-      activeEnrolment =
-          surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-    } catch (RestClientException ex) {
-      throw new CTPException(
-          CTPException.Fault.VALIDATION_FAILED, "Failed to retrieve party for sample unit");
-    }
+    PartyDTO businessParty =
+        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    activeEnrolment = surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
     return actionSvcClient
         .getActionPlanBySelectorsBusiness(exercise.getId().toString(), activeEnrolment)
         .getId();

@@ -26,7 +26,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.client.RestClientException;
 import uk.gov.ons.ctp.common.FixtureHelper;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.common.distributed.LockingException;
@@ -293,25 +292,6 @@ public class SampleUnitDistributorTest {
     // Given we fail to retrieve the sampleDistributionList
     when(sampleDistributionListManager.findList(any(String.class), any(boolean.class)))
         .thenThrow(LockingException.class);
-
-    // When
-    sampleUnitDistributor.distributeSampleUnits(collectionExercise);
-
-    // Then we save no sample units and don't transition the collection exercise
-    verify(publisher, never()).sendSampleUnit(any());
-    verify(sampleUnitGroupRepo, never()).saveAndFlush(any());
-    verify(collectionExerciseRepo, never()).saveAndFlush(any());
-  }
-
-  /** Test no sample units published when we fail to retrieve the business pastry */
-  @Test
-  public void testPartySvcRestClientException() {
-
-    // Given we fail to retrieve the business party
-    when(partySvcClient.requestParty(any(), any())).thenThrow(RestClientException.class);
-    when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
-            eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
-        .thenReturn(0L);
 
     // When
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
