@@ -1,13 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.io.IOException;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -28,56 +25,45 @@ import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionIn
 public class CollectionInstrumentSvcClient {
   private static final Logger log = LoggerFactory.getLogger(CollectionInstrumentSvcClient.class);
 
-  @Autowired private AppConfig appConfig;
-
-  @Autowired private RestTemplate restTemplate;
-
-  @Qualifier("collectionInstrumentRestUtility")
-  @Autowired
+  private AppConfig appConfig;
+  private RestTemplate restTemplate;
   private RestUtility restUtility;
 
-  @Autowired private ObjectMapper objectMapper;
+  public CollectionInstrumentSvcClient(
+    AppConfig appConfig,
+    RestTemplate restTemplate,
+    @Qualifier("collectionInstrumentRestUtility") RestUtility restUtility) {
+    this.appConfig = appConfig;
+    this.restTemplate = restTemplate;
+    this.restUtility = restUtility;
+  }
 
   /**
    * Request the existing collection instruments
    *
    * @param searchString search string for looking up collection instruments based on classifiers
    * @return list of collection instruments matching the search string
-   * @throws RestClientException something went wrong making http call
    */
   @Retryable(
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-  public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString)
-      throws RestClientException {
-
+  public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) {
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add("searchString", searchString);
-
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getCollectionInstrumentSvc().getRequestCollectionInstruments(), queryParams);
 
-    HttpEntity<List<CollectionInstrumentDTO>> httpEntity = restUtility.createHttpEntity(null);
+    HttpEntity httpEntity = restUtility.createHttpEntityWithAuthHeader();
+    ResponseEntity<List<CollectionInstrumentDTO>> response =
+        restTemplate.exchange(
+          uriComponents.toUri(),
+          HttpMethod.GET,
+          httpEntity,
+          new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {});
 
-    ResponseEntity<String> responseEntity =
-        restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
-
-    List<CollectionInstrumentDTO> result = null;
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody();
-      try {
-        result =
-            objectMapper.readValue(
-                responseBody, new TypeReference<List<CollectionInstrumentDTO>>() {});
-      } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
-      }
-    }
-
-    return result;
+    return response.getBody();
   }
 
   /**
@@ -85,25 +71,19 @@ public class CollectionInstrumentSvcClient {
    *
    * @param searchString search string for looking up collection instruments based on classifiers
    * @return count of collection instruments matching the search string
-   * @throws RestClientException something went wrong making http call
    */
-  public Integer countCollectionInstruments(String searchString) throws RestClientException {
+  public Integer countCollectionInstruments(String searchString) {
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add("searchString", searchString);
-
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getCollectionInstrumentSvc().getRequestCollectionInstrumentsCount(),
             queryParams);
 
-    HttpEntity<List<CollectionInstrumentDTO>> httpEntity = restUtility.createHttpEntity(null);
-
+    HttpEntity httpEntity = restUtility.createHttpEntityWithAuthHeader();
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
 
-    String responseBody = responseEntity.getBody();
-    int result = Integer.parseInt(responseBody);
-    log.with("count", result).debug("Got collection instrument count");
-    return result;
+    return Integer.parseInt(responseEntity.getBody());
   }
 }

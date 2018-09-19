@@ -61,7 +61,7 @@ public class PartySvcClient {
     return responseEntity.getBody();
   }
 
-  public SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) {
+  public void linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) {
     log.with("sample_summary_id", sampleSummaryId)
         .with("collection_exercise_id", collectionExerciseId)
         .debug("Linking sample summary to collection exercise");
@@ -72,9 +72,6 @@ public class PartySvcClient {
     sampleLinkCreationRequestDTO.setCollectionExerciseId(collectionExerciseId);
     HttpEntity<SampleLinkCreationRequestDTO> httpEntity =
         restUtility.createHttpEntity(sampleLinkCreationRequestDTO);
-    ResponseEntity<SampleLinkDTO> responseEntity =
-        restTemplate.exchange(
-            uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
-    return responseEntity.getBody();
+    restTemplate.exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
   }
 }
