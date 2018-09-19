@@ -33,7 +33,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitReposito
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollexSampleCountUpdater;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollexSampleUnitReceiptPreparer;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
@@ -54,7 +54,7 @@ public class SampleServiceImplTest {
 
   @Mock private SampleSvcClient sampleSvcClient;
 
-  @Mock private CollexSampleCountUpdater collexSampleCountUpdater;
+  @Mock private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
 
   @Mock private PartySvcClient partySvcClient;
 
@@ -150,10 +150,8 @@ public class SampleServiceImplTest {
     underTest.requestSampleUnits(collexId);
 
     // Then
-    verify(collexSampleCountUpdater).updateSampleSize(eq(collexId), eq(666));
+    verify(collexSampleUnitReceiptPreparer).prepareCollexToAcceptSampleUnits(eq(collexId), eq(666));
     verify(partySvcClient).linkSampleSummaryId(any(), any());
-    verify(collectionExerciseTransitionState).transition(any(), any());
-    verify(collectRepo).saveAndFlush(any());
   }
 
   private void acceptSampleUnitWithCollex(CollectionExercise collex) throws CTPException {
