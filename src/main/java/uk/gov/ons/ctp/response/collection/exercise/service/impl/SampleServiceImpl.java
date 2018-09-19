@@ -31,7 +31,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollexSampleCountUpdater;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollexSampleUnitReceiptPreparer;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
@@ -58,7 +58,7 @@ public class SampleServiceImpl implements SampleService {
 
   @Autowired private SampleSvcClient sampleSvcClient;
 
-  @Autowired private CollexSampleCountUpdater collexSampleCountUpdater;
+  @Autowired private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
 
   @Autowired
   @Qualifier("collectionExercise")
@@ -108,9 +108,16 @@ public class SampleServiceImpl implements SampleService {
         sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
 
     // Pre-grab and save the total number of sample units we expect to receive from the sample
-    // service BEFORE it starts to send them, to ensure no race condition
+    // service BEFORE it starts to send them, to ensure no race condition.
+    // Also set the state of the collex to EXECUTION_STARTED so that it's in the right state
+    // if the samples get processed really quickly and the state needs to be transitioned to
+    // EXECUTION_COMPLETED.
+    // All these steps are about readiness, so that we avoid race conditions because we are using
+    // mix-and-match of synchronous (i.e. RESTful) and asynchrnous (i.e. message-driven) design
+    // which ain't good and we need to overhaul the whole way that the system hangs together.
     SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitCount(sampleSummaryIdList);
-    collexSampleCountUpdater.updateSampleSize(id, responseDTO.getSampleUnitsTotal());
+    collexSampleUnitReceiptPreparer.prepareCollexToAcceptSampleUnits(
+        id, responseDTO.getSampleUnitsTotal());
 
     // Request the sample units. They'll start arriving as soon as this line executes. Be ready!
     SampleUnitsRequestDTO replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
@@ -120,12 +127,6 @@ public class SampleServiceImpl implements SampleService {
         partySvcClient.linkSampleSummaryId(
             samplelink.getSampleSummaryId().toString(), collectionExercise.getId().toString());
       }
-
-      collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
-      collectionExercise.setState(
-          collectionExerciseTransitionState.transition(
-              collectionExercise.getState(), CollectionExerciseEvent.EXECUTE));
-      collectRepo.saveAndFlush(collectionExercise);
     }
 
     return replyDTO;
