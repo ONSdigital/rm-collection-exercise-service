@@ -49,7 +49,7 @@ public class CollectionInstrumentSvcClientTest {
   @Before
   public void setUp() {
     collectionInstruments =
-      Arrays.asList(new CollectionInstrumentDTO(), new CollectionInstrumentDTO());
+        Arrays.asList(new CollectionInstrumentDTO(), new CollectionInstrumentDTO());
 
     MockitoAnnotations.initMocks(this);
     CollectionInstrumentSvc collectionInstrumentSvc = new CollectionInstrumentSvc();
@@ -60,68 +60,61 @@ public class CollectionInstrumentSvcClientTest {
   public void createActionPlan_201Response() {
     // Given
     ResponseEntity<List<CollectionInstrumentDTO>> responseEntity =
-      new ResponseEntity<>(collectionInstruments, HttpStatus.CREATED);
+        new ResponseEntity<>(collectionInstruments, HttpStatus.CREATED);
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {})))
-      .thenReturn(responseEntity);
+            any(URI.class),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {})))
+        .thenReturn(responseEntity);
 
     // When
     collectionInstrumentSvcClient.requestCollectionInstruments(SEARCH_STRING);
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(
-        any(URI.class),
-        eq(HttpMethod.GET),
-        any(HttpEntity.class),
-        eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {}));
+        .exchange(
+            any(URI.class),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {}));
   }
 
   @Test(expected = HttpClientErrorException.class)
   public void createActionPlan_500Response() {
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {})))
-      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+            any(URI.class),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {})))
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     // When
     collectionInstrumentSvcClient.requestCollectionInstruments(SEARCH_STRING);
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(
-        any(URI.class),
-        eq(HttpMethod.GET),
-        any(HttpEntity.class),
-        eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {}));
+        .exchange(
+            any(URI.class),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {}));
   }
 
   @Test
   public void countCollectionInstruments_200Response() {
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(String.class)))
-      .thenReturn(new ResponseEntity<>(TEN, HttpStatus.OK));
+            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .thenReturn(new ResponseEntity<>(TEN, HttpStatus.OK));
 
     // When
     Integer count = collectionInstrumentSvcClient.countCollectionInstruments(SEARCH_STRING);
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(
-        any(URI.class),
-        eq(HttpMethod.GET),
-        any(HttpEntity.class),
-        eq(String.class));
+        .exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class));
     assertEquals(TEN_INT, count);
   }
 
@@ -129,21 +122,14 @@ public class CollectionInstrumentSvcClientTest {
   public void countCollectionInstruments_500Response() {
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(String.class)))
-      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     // When
     collectionInstrumentSvcClient.countCollectionInstruments(SEARCH_STRING);
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(
-        any(URI.class),
-        eq(HttpMethod.GET),
-        any(HttpEntity.class),
-        eq(String.class));
+        .exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class));
   }
 }

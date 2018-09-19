@@ -39,10 +39,10 @@ public class CollectionExerciseEventPublisher {
     EventMessageDTO messageDto = new EventMessageDTO(messageType, eventDto);
 
     try {
-      String message = this.objectMapper.writeValueAsString(messageDto);
-      this.rabbitTemplate.convertAndSend(message);
+      String message = objectMapper.writeValueAsString(messageDto);
+      rabbitTemplate.convertAndSend(message);
       if (messageType == MessageType.EventElapsed) {
-        this.eventService.setEventMessageSent(eventDto.getId());
+        eventService.setEventMessageSent(eventDto.getId());
       }
     } catch (CTPException e) {
       String message = String.format("Failed to set event %s as message sent", eventDto.getId());

@@ -30,9 +30,9 @@ public class CollectionInstrumentSvcClient {
   private RestUtility restUtility;
 
   public CollectionInstrumentSvcClient(
-    AppConfig appConfig,
-    RestTemplate restTemplate,
-    @Qualifier("collectionInstrumentRestUtility") RestUtility restUtility) {
+      AppConfig appConfig,
+      RestTemplate restTemplate,
+      @Qualifier("collectionInstrumentRestUtility") RestUtility restUtility) {
     this.appConfig = appConfig;
     this.restTemplate = restTemplate;
     this.restUtility = restUtility;
@@ -58,10 +58,10 @@ public class CollectionInstrumentSvcClient {
     HttpEntity httpEntity = restUtility.createHttpEntityWithAuthHeader();
     ResponseEntity<List<CollectionInstrumentDTO>> response =
         restTemplate.exchange(
-          uriComponents.toUri(),
-          HttpMethod.GET,
-          httpEntity,
-          new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {});
+            uriComponents.toUri(),
+            HttpMethod.GET,
+            httpEntity,
+            new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {});
 
     return response.getBody();
   }
