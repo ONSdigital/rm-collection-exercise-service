@@ -61,7 +61,7 @@ public class SampleService {
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
       collectionExerciseTransitionState;
 
-  @Autowired private CollexSampleCountUpdater collexSampleCountUpdater;
+  @Autowired private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
 
   @Autowired private ValidateSampleUnits validate;
 
@@ -112,9 +112,16 @@ public class SampleService {
         sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
 
     // Pre-grab and save the total number of sample units we expect to receive from the sample
-    // service BEFORE it starts to send them, to ensure no race condition
+    // service BEFORE it starts to send them, to ensure no race condition.
+    // Also set the state of the collex to EXECUTION_STARTED so that it's in the right state
+    // if the samples get processed really quickly and the state needs to be transitioned to
+    // EXECUTION_COMPLETED.
+    // All these steps are about readiness, so that we avoid race conditions because we are using
+    // mix-and-match of synchronous (i.e. RESTful) and asynchrnous (i.e. message-driven) design
+    // which ain't good and we need to overhaul the whole way that the system hangs together.
     SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitCount(sampleSummaryIdList);
-    collexSampleCountUpdater.updateSampleSize(id, responseDTO.getSampleUnitsTotal());
+    collexSampleUnitReceiptPreparer.prepareCollexToAcceptSampleUnits(
+        id, responseDTO.getSampleUnitsTotal());
 
     // Request the sample units. They'll start arriving as soon as this line executes. Be ready!
     SampleUnitsRequestDTO replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
@@ -124,12 +131,6 @@ public class SampleService {
         partySvcClient.linkSampleSummaryId(
             samplelink.getSampleSummaryId().toString(), collectionExercise.getId().toString());
       }
-
-      collectionExercise.setSampleSize(replyDTO.getSampleUnitsTotal());
-      collectionExercise.setState(
-          collectionExerciseTransitionState.transition(
-              collectionExercise.getState(), CollectionExerciseEvent.EXECUTE));
-      collectRepo.saveAndFlush(collectionExercise);
     }
 
     return replyDTO;

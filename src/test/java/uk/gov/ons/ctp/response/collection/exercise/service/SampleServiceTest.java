@@ -53,7 +53,7 @@ public class SampleServiceTest {
 
   @Mock private SampleSvcClient sampleSvcClient;
 
-  @Mock private CollexSampleCountUpdater collexSampleCountUpdater;
+  @Mock private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
 
   @Mock private PartySvcClient partySvcClient;
 
@@ -149,10 +149,8 @@ public class SampleServiceTest {
     underTest.requestSampleUnits(collexId);
 
     // Then
-    verify(collexSampleCountUpdater).updateSampleSize(eq(collexId), eq(666));
+    verify(collexSampleUnitReceiptPreparer).prepareCollexToAcceptSampleUnits(eq(collexId), eq(666));
     verify(partySvcClient).linkSampleSummaryId(any(), any());
-    verify(collectionExerciseTransitionState).transition(any(), any());
-    verify(collectRepo).saveAndFlush(any());
   }
 
   private void acceptSampleUnitWithCollex(CollectionExercise collex) throws CTPException {
