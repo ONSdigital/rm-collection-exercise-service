@@ -1,10 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -27,66 +24,47 @@ import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 public class PartySvcClient {
   private static final Logger log = LoggerFactory.getLogger(PartySvcClient.class);
 
-  @Autowired private AppConfig appConfig;
-
-  @Autowired private RestTemplate restTemplate;
-
-  @Qualifier("partyRestUtility")
-  @Autowired
+  private AppConfig appConfig;
+  private RestTemplate restTemplate;
   private RestUtility restUtility;
 
-  @Qualifier("customObjectMapper")
-  @Autowired
-  private ObjectMapper objectMapper;
+  public PartySvcClient(
+      AppConfig appConfig,
+      RestTemplate restTemplate,
+      @Qualifier("partyRestUtility") RestUtility restUtility) {
+    this.appConfig = appConfig;
+    this.restTemplate = restTemplate;
+    this.restUtility = restUtility;
+  }
 
   /**
-   * Request the delivery of party from the Party Service.
+   * Request party from the Party Service
    *
-   * @param sampleUnitType the sample unit type for which to request party.
-   * @param sampleUnitRef the sample unit ref for which to request party.
+   * @param sampleUnitType the sample unit type for which to request party
+   * @param sampleUnitRef the sample unit ref for which to request party
    * @return the party object
-   * @throws RestClientException something went wrong making http call
    */
   @Retryable(
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-  public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef)
-      throws RestClientException {
-
+  public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef) {
+    log.with("sample_unit_type", sampleUnitType)
+        .with("sample_unit_ref", sampleUnitRef)
+        .debug("Retrieving party");
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitType, sampleUnitRef);
-
-    HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntity(null);
-
-    log.with("sample_unit_type", sampleUnitType)
-        .with("sample_unit_ref", sampleUnitRef)
-        .debug("Retrieving Party");
-
-    ResponseEntity<String> responseEntity =
-        restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, String.class);
-
-    if (responseEntity != null) {
-      System.out.println(responseEntity.getStatusCodeValue());
-    }
-
-    PartyDTO result = null;
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      String responseBody = responseEntity.getBody();
-      try {
-        result = objectMapper.readValue(responseBody, PartyDTO.class);
-      } catch (IOException e) {
-        String msg = String.format("cause = %s - message = %s", e.getCause(), e.getMessage());
-        log.error(msg);
-      }
-    }
-
-    return result;
+    HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntityWithAuthHeader();
+    ResponseEntity<PartyDTO> responseEntity =
+        restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, PartyDTO.class);
+    return responseEntity.getBody();
   }
 
-  public SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId)
-      throws RestClientException {
+  public SampleLinkDTO linkSampleSummaryId(String sampleSummaryId, String collectionExerciseId) {
+    log.with("sample_summary_id", sampleSummaryId)
+        .with("collection_exercise_id", collectionExerciseId)
+        .debug("Linking sample summary to collection exercise");
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getPartySvc().getSampleLinkPath(), null, sampleSummaryId);
@@ -97,20 +75,6 @@ public class PartySvcClient {
     ResponseEntity<SampleLinkDTO> responseEntity =
         restTemplate.exchange(
             uriComponents.toUri(), HttpMethod.PUT, httpEntity, SampleLinkDTO.class);
-
-    if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-      log.with("sample_summary_id", sampleSummaryId)
-          .with("collection_exercise_id", collectionExerciseId)
-          .info("Created sample summary link");
-    } else {
-      log.error(
-          "Couldn't link Sample Summary Id: "
-              + sampleSummaryId
-              + " Collection exercise: "
-              + collectionExerciseId
-              + " Status code: "
-              + responseEntity.getStatusCode());
-    }
     return responseEntity.getBody();
   }
 }
