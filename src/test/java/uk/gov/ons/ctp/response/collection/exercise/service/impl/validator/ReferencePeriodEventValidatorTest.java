@@ -101,4 +101,9 @@ public class ReferencePeriodEventValidatorTest {
     assertFalse(
         referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED));
   }
+
+  @Test
+  public void failingTestTest() {
+    assertTrue(2 == 1);
+  }
 }
