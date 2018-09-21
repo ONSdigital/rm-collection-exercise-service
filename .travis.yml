@@ -11,7 +11,7 @@ before_install:
 - mvn fmt:check
 
 install: mvn install -DskipTests -DskipITs -Ddocker.skip -Ddockerfile.skip -Dmaven.javadoc.skip=true -Dhttp.wait.skip -B -V
-script: mvn cobertura:cobertura-integration-test
+script: mvn verify cobertura:cobertura-integration-test
 
 after_success:
 - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
