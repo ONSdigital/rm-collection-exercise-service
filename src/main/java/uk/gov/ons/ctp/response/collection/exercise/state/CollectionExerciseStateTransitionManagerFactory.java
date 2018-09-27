@@ -119,10 +119,7 @@ public class CollectionExerciseStateTransitionManagerFactory
     transitionForReadyForLive.put(CollectionExerciseEvent.GO_LIVE, CollectionExerciseState.LIVE);
     transitions.put(CollectionExerciseState.READY_FOR_LIVE, transitionForReadyForLive);
 
-    StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-        collectionExerciseTransitionManager = new BasicStateTransitionManager<>(transitions);
-
-    return collectionExerciseTransitionManager;
+    return new BasicStateTransitionManager<>(transitions);
   }
 
   /**

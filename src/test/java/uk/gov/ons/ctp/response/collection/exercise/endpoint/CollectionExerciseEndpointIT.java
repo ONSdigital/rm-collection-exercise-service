@@ -123,7 +123,7 @@ public class CollectionExerciseEndpointIT {
 
   /** Method to set up integration test */
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     wireMockRule.resetAll();
 
     sampleUnitRepository.deleteAllInBatch();
@@ -180,10 +180,9 @@ public class CollectionExerciseEndpointIT {
     setupStubsGetActionPlansBySelectors(collectionExercise.getId());
 
     final EventDTO mps = createEventDTO(collectionExercise, EventService.Tag.mps, 2);
-    final EventDTO goLive = createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
-    final EventDTO returnBy = createEventDTO(collectionExercise, EventService.Tag.return_by, 4);
-    final EventDTO exerciseEnd =
-        createEventDTO(collectionExercise, EventService.Tag.exercise_end, 5);
+    createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
+    createEventDTO(collectionExercise, EventService.Tag.return_by, 4);
+    createEventDTO(collectionExercise, EventService.Tag.exercise_end, 5);
 
     Date newDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
 
@@ -212,6 +211,7 @@ public class CollectionExerciseEndpointIT {
     stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
+    stubGetPartyBySampleUnitRef();
     SampleSummaryDTO sampleSummary = stubSampleSummary();
     UUID collectionExerciseId = createScheduledCollectionExercise();
 
@@ -246,6 +246,7 @@ public class CollectionExerciseEndpointIT {
     stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
+    stubGetPartyBySampleUnitRef();
     SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
     UUID collectionExerciseId = createScheduledCollectionExercise();
 
@@ -257,7 +258,7 @@ public class CollectionExerciseEndpointIT {
                 "collex-transition-exchange",
                 "Collex.Transition.binding");
 
-    // This will cause an exception to be thrown as there is no collection instrument service but
+    // This will cause an exception to be thrown as there is no collection instrument service
     // this is harmless to our purpose
     // When
     getMessageSender()
@@ -282,7 +283,8 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void ensureSampleUnitIdIsPropagatedHereSocial() throws Exception {
     stubCreateActionPlan();
-    createSurveyServiceSocialStub();
+    stubGetSurvey();
+    stubGetActionPlansBySelectors();
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("H");
 
     assertNull("Party id must be null", sampleUnit.getPartyId());
@@ -292,8 +294,10 @@ public class CollectionExerciseEndpointIT {
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
     stubCreateActionPlan();
     stubSurveyServiceBusiness();
-    createPartyServiceNoAssociationsStub();
+    stubGetPartyNoAssociations();
     stubCollectionInstrumentCount();
+    stubGetActionPlansBySelectors();
+
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
@@ -303,8 +307,9 @@ public class CollectionExerciseEndpointIT {
   public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
     stubCreateActionPlan();
     stubSurveyServiceBusiness();
-    createPartyServicesWithAssociationsStub();
+    stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
+    stubGetActionPlansBySelectors();
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
@@ -423,7 +428,7 @@ public class CollectionExerciseEndpointIT {
     return this.client.getCollectionExercise(result.getRight());
   }
 
-  private void setSampleSize(CollectionExerciseDTO collex, int sampleSize) throws Exception {
+  private void setSampleSize(CollectionExerciseDTO collex, int sampleSize) {
     CollectionExercise c = collexRepository.findOneById(collex.getId());
     c.setSampleSize(sampleSize);
     collexRepository.saveAndFlush(c);
@@ -435,8 +440,7 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void setState(
-      CollectionExerciseDTO collex, CollectionExerciseDTO.CollectionExerciseState state)
-      throws Exception {
+      CollectionExerciseDTO collex, CollectionExerciseDTO.CollectionExerciseState state) {
     CollectionExercise c = collexRepository.findOneById(collex.getId());
     c.setState(state);
     collexRepository.saveAndFlush(c);
@@ -468,6 +472,18 @@ public class CollectionExerciseEndpointIT {
                 aResponse()
                     .withHeader("Content-Type", "application/json")
                     .withBody(mapper.writeValueAsString(actionPlanDTO))));
+  }
+
+  private void stubGetActionPlansBySelectors() throws IOException {
+    ActionPlanDTO actionPlan = new ActionPlanDTO();
+    actionPlan.setId(UUID.randomUUID());
+
+    wireMockRule.stubFor(
+        get(urlPathMatching("/actionplans?(.*)"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(Collections.singletonList(actionPlan)))));
   }
 
   private void stubGetActionPlansBySelectors(
@@ -578,7 +594,17 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withBody("1")));
   }
 
-  private void createPartyServiceNoAssociationsStub() throws IOException {
+  private void stubGetPartyBySampleUnitRef() throws IOException {
+    String json =
+        loadResourceAsString(
+            CollectionExerciseEndpointIT.class,
+            "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
+    this.wireMockRule.stubFor(
+        get(urlPathMatching("/party-api/v1/parties/type/(.*)/ref/(.*)"))
+            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+  }
+
+  private void stubGetPartyNoAssociations() throws IOException {
     String json =
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
@@ -588,7 +614,7 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createPartyServicesWithAssociationsStub() throws IOException {
+  private void stubGetPartyWithAssociations() throws IOException {
     String json =
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
@@ -620,7 +646,7 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void createSurveyServiceSocialStub() throws IOException {
+  private void stubGetSurvey() throws IOException {
     createSurveyServiceClassifierStubs();
 
     String json =

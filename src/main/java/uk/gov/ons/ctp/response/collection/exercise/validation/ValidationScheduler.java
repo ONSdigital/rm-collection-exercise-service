@@ -12,7 +12,12 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 @Component
 public class ValidationScheduler {
 
-  @Autowired private SampleService sampleService;
+  private SampleService sampleService;
+
+  @Autowired
+  public ValidationScheduler(SampleService sampleService) {
+    this.sampleService = sampleService;
+  }
 
   /** Carry out scheduled validation according to configured fixed delay. */
   @Scheduled(fixedDelayString = "#{appConfig.schedules.validationScheduleDelayMilliSeconds}")

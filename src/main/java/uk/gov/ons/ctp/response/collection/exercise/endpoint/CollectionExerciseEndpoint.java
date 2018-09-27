@@ -41,6 +41,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
+import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -57,7 +58,6 @@ import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfigurati
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SurveyService;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** The REST endpoint controller for Collection Exercises. */
@@ -73,12 +73,9 @@ public class CollectionExerciseEndpoint {
       Validation.buildDefaultValidatorFactory();
 
   private CollectionExerciseService collectionExerciseService;
-
-  private SurveyService surveyService;
-
-  private SampleService sampleService;
-
   private EventService eventService;
+  private SampleService sampleService;
+  private SurveySvcClient surveyService;
 
   private MapperFacade mapperFacade;
 
@@ -87,7 +84,7 @@ public class CollectionExerciseEndpoint {
   @Autowired
   public CollectionExerciseEndpoint(
       CollectionExerciseService collectionExerciseService,
-      SurveyService surveyService,
+      SurveySvcClient surveyService,
       SampleService sampleService,
       EventService eventService,
       @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade,
@@ -146,7 +143,7 @@ public class CollectionExerciseEndpoint {
       collectionExerciseSummaryDTOList =
           collectionExerciseList
               .stream()
-              .map(collex -> getCollectionExerciseDTO(collex))
+              .map(this::getCollectionExerciseDTO)
               .collect(Collectors.toList());
       if (collectionExerciseList.isEmpty()) {
         return ResponseEntity.noContent().build();
