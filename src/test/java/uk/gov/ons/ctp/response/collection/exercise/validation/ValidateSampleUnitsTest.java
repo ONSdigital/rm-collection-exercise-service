@@ -29,6 +29,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -49,8 +50,6 @@ public class ValidateSampleUnitsTest {
 
   @Mock private DistributedListManager<Integer> sampleValidationListManager;
 
-  @Mock private CollectionExerciseRepository collectRepo;
-
   @Mock private ExerciseSampleUnitGroupService sampleUnitGroupSvc;
 
   @Mock private ExerciseSampleUnitService sampleUnitSvc;
@@ -59,11 +58,9 @@ public class ValidateSampleUnitsTest {
 
   @Mock private PartySvcClient partySvcClient;
 
-  @Mock private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
+  @Mock private SampleUnitRepository sampleUnitRepo;
 
-  @Mock
-  private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-      collectionExerciseTransitionState;
+  @Mock private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   @Mock
   @Qualifier("sampleUnitGroup")
@@ -440,5 +437,42 @@ public class ValidateSampleUnitsTest {
     verify(collexService, times(2))
         .transitionCollectionExercise(
             isA(CollectionExercise.class), isA(CollectionExerciseEvent.class));
+  }
+
+  @Test
+  public void testTransitionExecutionStartedCollex() throws CTPException {
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSampleSize(99);
+
+    // Given
+    when(collexService.findByState(CollectionExerciseState.EXECUTION_STARTED))
+        .thenReturn(Collections.singletonList(collex));
+    when(sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex)).thenReturn(99);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(collexService)
+        .transitionCollectionExercise(eq(collex), eq(CollectionExerciseEvent.EXECUTION_COMPLETE));
+  }
+
+  @Test
+  public void testShouldNotTransitionExecutionStartedUnfinishedCollex() throws CTPException {
+    CollectionExercise collex = new CollectionExercise();
+    collex.setSampleSize(66);
+
+    // Given
+    when(collexService.findByState(CollectionExerciseState.EXECUTION_STARTED))
+        .thenReturn(Collections.singletonList(collex));
+    when(sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex)).thenReturn(33);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    verify(collexService, never())
+        .transitionCollectionExercise(
+            any(CollectionExercise.class), eq(CollectionExerciseEvent.EXECUTION_COMPLETE));
   }
 }
