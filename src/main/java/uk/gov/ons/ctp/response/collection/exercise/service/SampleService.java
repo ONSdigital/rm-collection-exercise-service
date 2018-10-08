@@ -10,12 +10,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.distribution.SampleUnitDistributor;
@@ -27,8 +24,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
@@ -55,11 +50,6 @@ public class SampleService {
   @Autowired private CollectionExerciseRepository collectRepo;
 
   @Autowired private SampleSvcClient sampleSvcClient;
-
-  @Autowired
-  @Qualifier("collectionExercise")
-  private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
-      collectionExerciseTransitionState;
 
   @Autowired private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
 
@@ -144,11 +134,8 @@ public class SampleService {
    * @param sampleUnit the sample unit from the message.
    * @return the saved sample unit.
    */
-  @Transactional(
-      propagation = Propagation.REQUIRED,
-      readOnly = false,
-      timeout = TRANSACTION_TIMEOUT)
-  public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
+  @Transactional
+  public ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit) {
     log.with("sample_unit", sampleUnit).debug("Processing sample unit");
     ExerciseSampleUnit exerciseSampleUnit = null;
 
@@ -179,17 +166,6 @@ public class SampleService {
             SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
 
         sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
-
-        if (collectionExercise.getSampleSize() != null
-            && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collectionExercise)
-                == collectionExercise.getSampleSize()) {
-          collectionExercise.setState(
-              collectionExerciseTransitionState.transition(
-                  collectionExercise.getState(), CollectionExerciseEvent.EXECUTION_COMPLETE));
-          collectionExercise.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
-          collectRepo.saveAndFlush(collectionExercise);
-        }
-
       } else {
         log.with("sample_unit_type_fk", sampleUnit.getSampleUnitType())
             .with("sample_unit_ref", sampleUnit.getSampleUnitRef())

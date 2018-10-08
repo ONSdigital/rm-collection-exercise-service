@@ -27,8 +27,10 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -62,6 +64,8 @@ public class ValidateSampleUnits {
   private PartySvcClient partySvcClient;
   private SurveySvcClient surveySvcClient;
 
+  private SampleUnitRepository sampleUnitRepo;
+
   private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitGroupState;
 
   private DistributedListManager<Integer> sampleValidationListManager;
@@ -74,6 +78,7 @@ public class ValidateSampleUnits {
       final CollectionInstrumentSvcClient collectionInstrumentSvcClient,
       final PartySvcClient partySvcClient,
       final SurveySvcClient surveySvcClient,
+      final SampleUnitRepository sampleUnitRepo,
       final @Qualifier("sampleUnitGroup") StateTransitionManager<
                   SampleUnitGroupState, SampleUnitGroupEvent>
               sampleUnitGroupState,
@@ -85,12 +90,17 @@ public class ValidateSampleUnits {
     this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
     this.partySvcClient = partySvcClient;
     this.surveySvcClient = surveySvcClient;
+    this.sampleUnitRepo = sampleUnitRepo;
     this.sampleUnitGroupState = sampleUnitGroupState;
     this.sampleValidationListManager = sampleValidationListManager;
   }
 
   /** Validate SampleUnits */
   public void validateSampleUnits() {
+
+    // Make sure that any collection exercises which were having their sample units sent from
+    // the sample service are state transitioned once they've got all their sample units.
+    updateExecutingCollectionExercises();
 
     List<CollectionExercise> exercises =
         collexService.findByState(CollectionExerciseDTO.CollectionExerciseState.EXECUTED);
@@ -125,6 +135,27 @@ public class ValidateSampleUnits {
         sampleValidationListManager.deleteList(VALIDATION_LIST_ID, true);
       } catch (LockingException ex) {
         log.error("Failed to delete lock list", ex);
+      }
+    }
+  }
+
+  private void updateExecutingCollectionExercises() {
+    List<CollectionExercise> exercises =
+        collexService.findByState(CollectionExerciseState.EXECUTION_STARTED);
+
+    for (CollectionExercise collex : exercises) {
+      if (collex.getSampleSize() != null
+          && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex)
+              == collex.getSampleSize()) {
+
+        collex.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
+
+        try {
+          collexService.transitionCollectionExercise(
+              collex, CollectionExerciseEvent.EXECUTION_COMPLETE);
+        } catch (CTPException e) {
+          throw new IllegalStateException(); // Never thrown because we already checked the state
+        }
       }
     }
   }
