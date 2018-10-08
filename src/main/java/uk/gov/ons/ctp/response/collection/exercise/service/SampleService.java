@@ -135,11 +135,8 @@ public class SampleService {
    * @param sampleUnit the sample unit from the message.
    * @return the saved sample unit.
    */
-  @Transactional(
-      propagation = Propagation.REQUIRED,
-      readOnly = false,
-      timeout = TRANSACTION_TIMEOUT)
-  public ExerciseSampleUnit acceptSampleUnit(SampleUnit sampleUnit) {
+  @Transactional
+  public ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit) {
     log.with("sample_unit", sampleUnit).debug("Processing sample unit");
     ExerciseSampleUnit exerciseSampleUnit = null;
 

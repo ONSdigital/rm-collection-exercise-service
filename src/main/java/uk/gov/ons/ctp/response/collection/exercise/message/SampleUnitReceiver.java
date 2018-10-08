@@ -25,7 +25,7 @@ public class SampleUnitReceiver {
    * @throws CTPException when collection exercise state transition error
    */
   @ServiceActivator(inputChannel = "sampleUnitTransformed", adviceChain = "sampleUnitRetryAdvice")
-  public void acceptSampleUnit(SampleUnit sampleUnit) throws CTPException {
+  public void acceptSampleUnit(final SampleUnit sampleUnit) throws CTPException {
     sampleService.acceptSampleUnit(sampleUnit);
   }
 }
