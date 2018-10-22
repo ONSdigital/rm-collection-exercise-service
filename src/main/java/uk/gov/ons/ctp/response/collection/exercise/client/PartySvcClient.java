@@ -54,7 +54,7 @@ public class PartySvcClient {
         .debug("Retrieving party");
     UriComponents uriComponents =
         restUtility.createUriComponents(
-            appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitType, sampleUnitRef);
+            appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitRef);
     HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntityWithAuthHeader();
     ResponseEntity<PartyDTO> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, PartyDTO.class);
