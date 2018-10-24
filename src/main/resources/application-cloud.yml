@@ -67,7 +67,7 @@ spring:
     url: ${cloud.services.postgresql.connection.jdbcurl}
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     show-sql: false
     properties:
       hibernate:
