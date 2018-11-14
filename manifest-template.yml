@@ -3,7 +3,7 @@ applications:
   instances: INSTANCES
   timeout: 180
   host: collectionexercisesvc-SPACE
-  memory: 1024M
+  memory: 2048M
   path: target/collectionexercisesvc.jar
   services:
     - DATABASE
