@@ -19,7 +19,7 @@ install: mvn install -DskipTests -DskipITs -Ddocker.skip -Ddockerfile.skip -Dmav
 script: mvn verify cobertura:cobertura-integration-test
 
 after_success:
-- if ([ "$TRAVIS_BRANCH" == "rm-census" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]) || ([ "$TRAVIS_BRANCH" == "automate-census-docker-build" ]); then
+- if [ "$TRAVIS_BRANCH" == "rm-census" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   docker login -u "${DOCKER_GCP_USERNAME}" -p "${DOCKER_GCP_PASSWORD}" "${DOCKER_GCP_REGISTRY}";
   docker tag "$SOURCE_IMAGE_NAME" "$DESTINATION_IMAGE_NAME";
   docker push "$DESTINATION_IMAGE_NAME";
@@ -32,4 +32,4 @@ cache:
 
 branches:
   only:
-    - automate-census-docker-build
+    - rm-census
