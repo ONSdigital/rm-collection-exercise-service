@@ -4,6 +4,7 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -48,8 +49,10 @@ public class CollectionInstrumentSvcClient {
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  @Cacheable("collectioninstruments")
   public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) {
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    log.warn("IN COLLECTION INSTRUMENT");
     queryParams.add("searchString", searchString);
     UriComponents uriComponents =
         restUtility.createUriComponents(
