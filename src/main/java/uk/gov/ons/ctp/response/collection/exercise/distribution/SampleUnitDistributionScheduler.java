@@ -36,7 +36,6 @@ public class SampleUnitDistributionScheduler {
   /** Carry out publish according to configured fixed delay. */
   @Scheduled(fixedDelayString = "#{appConfig.schedules.distributionScheduleDelayMilliSeconds}")
   public void scheduleDistribution() {
-    log.warn(appConfig.getSchedules().getDistributionScheduleDelayMilliSeconds());
     List<CollectionExercise> exercises =
         collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.VALIDATED);
 

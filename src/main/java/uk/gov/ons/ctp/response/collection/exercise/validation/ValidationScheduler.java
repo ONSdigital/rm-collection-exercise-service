@@ -28,7 +28,6 @@ public class ValidationScheduler {
   /** Carry out scheduled validation according to configured fixed delay. */
   @Scheduled(fixedDelayString = "#{appConfig.schedules.validationScheduleDelayMilliSeconds}")
   public void scheduleValidation() {
-    log.warn(appConfig.getSchedules().getDistributionScheduleDelayMilliSeconds());
     sampleService.validateSampleUnits();
   }
 }
