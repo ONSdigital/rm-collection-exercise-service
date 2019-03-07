@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
@@ -23,13 +24,14 @@ public class ReminderEventValidator implements EventValidator {
     this.eventDateOrderChecker = eventDateOrderChecker;
   }
 
-  public boolean validate(
+  public void validate(
       List<Event> existingEvents,
       Event submittedEvent,
-      CollectionExerciseState collectionExerciseState) {
+      CollectionExerciseState collectionExerciseState)
+      throws CTPException {
 
     if (!isReminder(submittedEvent)) {
-      return true;
+      return;
     }
 
     final Map<String, Event> existingEventsMap =
@@ -39,12 +41,16 @@ public class ReminderEventValidator implements EventValidator {
     final Event exerciseEnd = existingEventsMap.get(Tag.exercise_end.toString());
 
     if (!eventDuringExercise(goLive, submittedEvent, exerciseEnd)) {
-      return false;
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST,
+          "Reminder must take place during collection exercise period");
     }
 
     if (isCollectionExerciseLockedState(collectionExerciseState)
         && isExistingReminderInPast(submittedEvent, existingEventsMap)) {
-      return false;
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST,
+          "Reminder cannot be set in the past");
     }
 
     final List<Event> reminders =
@@ -53,7 +59,10 @@ public class ReminderEventValidator implements EventValidator {
             .map(tag -> getEventByTag(tag, submittedEvent, existingEventsMap))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    return eventDateOrderChecker.isEventDatesInOrder(reminders);
+    if (!eventDateOrderChecker.isEventDatesInOrder(reminders)) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST, "Collection exercise events must be set sequentially");
+    }
   }
 
   private boolean isExistingReminderInPast(

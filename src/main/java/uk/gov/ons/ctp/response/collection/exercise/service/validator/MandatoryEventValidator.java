@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -20,16 +21,19 @@ public class MandatoryEventValidator implements EventValidator {
     this.eventDateOrderChecker = eventDateOrderChecker;
   }
 
-  public boolean validate(
+  public void validate(
       List<Event> existingEvents,
       Event submittedEvent,
-      CollectionExerciseState collectionExerciseState) {
+      CollectionExerciseState collectionExerciseState)
+      throws CTPException {
     if (!isMandatory(submittedEvent)) {
-      return true;
+      return;
     }
 
     if (isCollectionExerciseLockedState(collectionExerciseState)) {
-      return false;
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST,
+          "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked");
     }
 
     final Map<String, Event> existingEventsMap =
@@ -42,7 +46,10 @@ public class MandatoryEventValidator implements EventValidator {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    return eventDateOrderChecker.isEventDatesInOrder(mandatoryEvents);
+    if (!eventDateOrderChecker.isEventDatesInOrder(mandatoryEvents)) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST, "Collection exercise events must be set sequentially");
+    }
   }
 
   private boolean isCollectionExerciseLockedState(CollectionExerciseState collectionExerciseState) {

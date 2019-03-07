@@ -1,31 +1,32 @@
-package uk.gov.ons.ctp.response.collection.exercise.service.validator;
+ package uk.gov.ons.ctp.response.collection.exercise.service.validator;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+ import static org.hamcrest.CoreMatchers.instanceOf;
+ import static org.junit.Assert.*;
+ import static org.junit.Assert.assertEquals;
+ import static org.mockito.Matchers.anyList;
+ import static org.mockito.Mockito.never;
+ import static org.mockito.Mockito.verify;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
-import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
+ import java.sql.Timestamp;
+ import java.time.Instant;
+ import java.time.temporal.ChronoUnit;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.List;
+ import org.junit.Test;
+ import org.junit.runner.RunWith;
+ import org.mockito.InjectMocks;
+ import org.mockito.Spy;
+ import org.mockito.runners.MockitoJUnitRunner;
+ import uk.gov.ons.ctp.common.error.CTPException;
+ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+ import
+ uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+ import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+ import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MandatoryEventValidatorTest {
+ @RunWith(MockitoJUnitRunner.class)
+ public class MandatoryEventValidatorTest {
 
   @Spy private EventDateOrderChecker eventDateOrderChecker;
 
@@ -37,27 +38,27 @@ public class MandatoryEventValidatorTest {
   }
 
   @Test
-  public void returnTrueAndDoNothingIfNotReminder() {
+  public void returnTrueAndDoNothingIfNotReminder() throws CTPException {
     final Event mpsEvent = new Event();
     mpsEvent.setTag((Tag.reminder.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now()));
     final List<Event> events = new ArrayList<>();
-    assertTrue(mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED));
+    mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED);
 
     verify(eventDateOrderChecker, never()).isEventDatesInOrder(anyList());
   }
 
   @Test
-  public void testValidMpsEventCreation() {
+  public void testValidMpsEventCreation() throws CTPException {
     final Event mpsEvent = new Event();
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     final List<Event> events = new ArrayList<>();
-    assertTrue(mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED));
+    mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED);
   }
 
   @Test
-  public void testValidGoLiveEventCreation() {
+  public void testValidGoLiveEventCreation() throws CTPException {
     final Event mpsEvent = new Event();
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
@@ -68,11 +69,11 @@ public class MandatoryEventValidatorTest {
 
     final List<Event> events = Arrays.asList(mpsEvent);
 
-    assertTrue(mandatoryValidator.validate(events, goLiveEvent, CollectionExerciseState.CREATED));
+    mandatoryValidator.validate(events, goLiveEvent, CollectionExerciseState.CREATED);
   }
 
   @Test
-  public void testValidReturnByEventCreation() {
+  public void testValidReturnByEventCreation() throws CTPException {
     final Event mpsEvent = new Event();
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
@@ -87,7 +88,7 @@ public class MandatoryEventValidatorTest {
     returnByEvent.setTag((Tag.return_by.toString()));
     returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(6, ChronoUnit.DAYS)));
 
-    assertTrue(mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.CREATED));
+    mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.CREATED);
   }
 
   @Test
@@ -102,7 +103,14 @@ public class MandatoryEventValidatorTest {
 
     final List<Event> events = Arrays.asList(mpsEvent);
 
-    assertFalse(mandatoryValidator.validate(events, goLive, CollectionExerciseState.CREATED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, goLive, CollectionExerciseState.CREATED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -121,8 +129,14 @@ public class MandatoryEventValidatorTest {
     returnByEvent.setTag((Tag.return_by.toString()));
     returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
 
-    assertFalse(
-        mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.CREATED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.CREATED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -133,7 +147,14 @@ public class MandatoryEventValidatorTest {
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
 
-    assertFalse(mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.LIVE));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.LIVE);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Mandatory events cannot be changed if collection exercise is set to live (or locked)", actualException.getMessage());
   }
 
   @Test
@@ -144,7 +165,14 @@ public class MandatoryEventValidatorTest {
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
 
-    assertFalse(mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.VALIDATED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.VALIDATED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, validated or locked)", actualException.getMessage());
   }
 
   @Test
@@ -155,8 +183,14 @@ public class MandatoryEventValidatorTest {
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
 
-    assertFalse(
-        mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.EXECUTION_STARTED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.EXECUTION_STARTED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked", actualException.getMessage());
   }
 
   @Test
@@ -167,8 +201,14 @@ public class MandatoryEventValidatorTest {
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
 
-    assertFalse(
-        mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.READY_FOR_LIVE));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.READY_FOR_LIVE);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked", actualException.getMessage());
   }
 
   @Test
@@ -179,31 +219,37 @@ public class MandatoryEventValidatorTest {
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
 
-    assertFalse(mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.EXECUTED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.EXECUTED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked", actualException.getMessage());
+
   }
 
   @Test
-  public void testValidReturnByEventUpdate() {
+  public void testValidReturnByEventUpdate() throws CTPException {
     final List<Event> events = createMandatoryEvents();
 
     final Event returnByEvent = new Event();
     returnByEvent.setTag(Tag.return_by.toString());
     returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(5, ChronoUnit.DAYS)));
 
-    assertTrue(
-        mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED));
+        mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED);
   }
 
   @Test
-  public void testValidExerciseEndEventUpdate() {
+  public void testValidExerciseEndEventUpdate() throws CTPException {
     final List<Event> events = createMandatoryEvents();
 
     final Event exerciseEndEvent = new Event();
     exerciseEndEvent.setTag(Tag.exercise_end.toString());
     exerciseEndEvent.setTimestamp(Timestamp.from(Instant.now().plus(10, ChronoUnit.DAYS)));
 
-    assertTrue(
-        mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED));
+        mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED);
   }
 
   @Test
@@ -214,7 +260,14 @@ public class MandatoryEventValidatorTest {
     mpsEvent.setTag(Tag.mps.toString());
     mpsEvent.setTimestamp(Timestamp.from(Instant.now().plus(6, ChronoUnit.DAYS)));
 
-    assertFalse(mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.SCHEDULED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.SCHEDULED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -225,8 +278,14 @@ public class MandatoryEventValidatorTest {
     goLiveEvent.setTag(Tag.go_live.toString());
     goLiveEvent.setTimestamp(Timestamp.from(Instant.now().plus(8, ChronoUnit.DAYS)));
 
-    assertFalse(
-        mandatoryValidator.validate(events, goLiveEvent, CollectionExerciseState.SCHEDULED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, goLiveEvent, CollectionExerciseState.SCHEDULED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -237,8 +296,14 @@ public class MandatoryEventValidatorTest {
     returnByEvent.setTag(Tag.return_by.toString());
     returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 
-    assertFalse(
-        mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -249,8 +314,14 @@ public class MandatoryEventValidatorTest {
     exerciseEndEvent.setTag(Tag.exercise_end.toString());
     exerciseEndEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 
-    assertFalse(
-        mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED));
+    CTPException actualException = null;
+    try {
+      mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED);
+    } catch (CTPException expectedException){
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   private List<Event> createMandatoryEvents() {
@@ -278,4 +349,4 @@ public class MandatoryEventValidatorTest {
 
     return eventList;
   }
-}
+ }
