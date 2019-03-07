@@ -30,6 +30,8 @@ import uk.gov.ons.ctp.response.action.representation.ActionRulePutRequestDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 
+import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.ACTION_PLAN_CACHE;
+
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component
 public class ActionSvcClient {
@@ -89,10 +91,9 @@ public class ActionSvcClient {
     return createdActionPlan;
   }
 
-  @Cacheable("actionplans")
+  @Cacheable(ACTION_PLAN_CACHE)
   public ActionPlanDTO getActionPlanBySelectorsBusiness(
       String collectionExerciseId, boolean activeEnrolment) throws CTPException {
-    log.warn("IN ACTION PLANS");
 
     final List<ActionPlanDTO> actionPlans =
         getActionPlansBySelectorsBusiness(collectionExerciseId, activeEnrolment);

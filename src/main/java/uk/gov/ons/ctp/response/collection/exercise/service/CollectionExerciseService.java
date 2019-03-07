@@ -735,7 +735,7 @@ public class CollectionExerciseService {
 
     collex.setState(newState);
     updateCollectionExercise(collex);
-    log.with("COLLEX_STATE", collex.getState()).warn("COLLEX");
+
     rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
   }
 

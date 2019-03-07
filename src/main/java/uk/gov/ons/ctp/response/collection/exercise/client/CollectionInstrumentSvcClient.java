@@ -21,6 +21,8 @@ import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
 
+import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.COLLECTION_INSTRUMENT_CACHE;
+
 /** HTTP RestClient implementation for calls to the Collection Instrument service. */
 @Component
 public class CollectionInstrumentSvcClient {
@@ -49,10 +51,9 @@ public class CollectionInstrumentSvcClient {
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-  @Cacheable("collectioninstruments")
+  @Cacheable(COLLECTION_INSTRUMENT_CACHE)
   public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) {
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    log.warn("IN COLLECTION INSTRUMENT");
     queryParams.add("searchString", searchString);
     UriComponents uriComponents =
         restUtility.createUriComponents(

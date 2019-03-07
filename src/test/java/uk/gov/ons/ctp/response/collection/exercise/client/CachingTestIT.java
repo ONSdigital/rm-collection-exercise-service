@@ -45,7 +45,6 @@ public class CachingTestIT {
 
   @Test
   public void testCache() throws Exception {
-    log.warn("In testCache");
     StubMapping stubMapping =
         createCollectionInstrumentStub("CachingTestIT.CollectionInstrumentDTO.json");
 
@@ -64,7 +63,6 @@ public class CachingTestIT {
 
   @Test
   public void testCacheEvict() throws Exception {
-    log.warn("In testCacheEvict");
 
     StubMapping stubMapping =
         createCollectionInstrumentStub("CachingTestIT.CollectionInstrumentDTO.json");
