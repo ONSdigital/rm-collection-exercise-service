@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.ACTION_PLAN_CACHE;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
@@ -29,8 +31,6 @@ import uk.gov.ons.ctp.response.action.representation.ActionRulePostRequestDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionRulePutRequestDTO;
 import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-
-import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.ACTION_PLAN_CACHE;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component

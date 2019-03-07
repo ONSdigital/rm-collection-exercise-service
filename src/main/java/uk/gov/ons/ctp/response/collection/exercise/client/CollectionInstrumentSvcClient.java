@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.COLLECTION_INSTRUMENT_CACHE;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.List;
@@ -20,8 +22,6 @@ import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
-
-import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.COLLECTION_INSTRUMENT_CACHE;
 
 /** HTTP RestClient implementation for calls to the Collection Instrument service. */
 @Component

@@ -239,8 +239,8 @@ public class CollectionExerciseApplication {
   public void cacheEvict() {
     /* This is getting rid of the cached entries in case anything's been changed. We imagine
     that
-        * the maximum of a 1 minute delay to seeing changes reflected in the collection exercise service will not
-        * cause any issues*/
+        * the maximum of a 1 minute delay to seeing changes reflected in the collection
+        * exercise service will not cause any issues*/
   }
 
   /**
