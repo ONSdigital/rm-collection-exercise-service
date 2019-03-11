@@ -21,7 +21,6 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -53,7 +52,6 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EntityScan("uk.gov.ons.ctp.response")
 @EnableScheduling
 @EnableCaching
-@EnableAsync
 @ImportResource("springintegration/main.xml")
 public class CollectionExerciseApplication {
 
