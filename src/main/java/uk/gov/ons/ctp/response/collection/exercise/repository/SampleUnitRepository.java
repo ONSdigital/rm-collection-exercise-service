@@ -54,7 +54,14 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
   List<ExerciseSampleUnit> findBySampleUnitGroupCollectionExerciseAndSampleUnitGroupStateFK(
       CollectionExercise collectionExercise, SampleUnitGroupState sampleUnitGroupState);
 
+  /**
+   * Find sample units with collection exercise and group in a particular state
+   *
+   * @param collexState a collection exercise state
+   * @param sampleUnitGroupState a group state
+   * @return a stream of sample units with collection exercise and group in a particular state
+   */
   Stream<ExerciseSampleUnit> findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
-      CollectionExerciseDTO.CollectionExerciseState state,
+      CollectionExerciseDTO.CollectionExerciseState collexState,
       SampleUnitGroupState sampleUnitGroupState);
 }

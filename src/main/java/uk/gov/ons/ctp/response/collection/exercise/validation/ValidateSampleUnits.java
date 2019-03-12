@@ -42,7 +42,6 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 /** Class responsible for business logic to validate SampleUnits. */
 @Component
 public class ValidateSampleUnits {
-
   private static final Logger log = LoggerFactory.getLogger(ValidateSampleUnits.class);
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
@@ -147,7 +146,7 @@ public class ValidateSampleUnits {
                   sampleUnitGroupState.transition(
                       sampleUnit.getSampleUnitGroup().getStateFK(), event));
             } catch (CTPException e) {
-              // Ignored because this should never happen - we know the transition is valid
+              throw new IllegalStateException(); // Not thrown because we already checked the state
             }
 
             sampleUnitRepo.save(sampleUnit);
@@ -159,7 +158,7 @@ public class ValidateSampleUnits {
           try {
             transitionCollectionExercise(exercise);
           } catch (CTPException e) {
-            // Ignored because this should never happen - we know the transition is valid
+            throw new IllegalStateException(); // Not thrown because we already checked the state
           }
         });
   }
