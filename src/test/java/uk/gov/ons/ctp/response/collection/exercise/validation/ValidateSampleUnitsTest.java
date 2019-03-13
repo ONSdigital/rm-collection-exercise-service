@@ -151,7 +151,7 @@ public class ValidateSampleUnitsTest {
         .transitionCollectionExercise(any(CollectionExercise.class), any());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = HttpClientErrorException.class)
   public void testValidateSampleUnitsRequestPartyFail() {
     // Given
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -186,7 +186,7 @@ public class ValidateSampleUnitsTest {
         .thenReturn(collectionInstruments);
 
     when(partySvcClient.requestParty(any(), any()))
-        .thenThrow(new RuntimeException("Disaster happened"));
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error"));
 
     // When
     validateSampleUnits.validateSampleUnits();
@@ -259,6 +259,47 @@ public class ValidateSampleUnitsTest {
     assertNull(exerciseSampleUnitArgCapt.getValue().getCollectionInstrumentId());
     verify(collexService)
         .transitionCollectionExercise(collectionExercise, CollectionExerciseEvent.INVALIDATE);
+  }
+
+
+  @Test(expected = HttpClientErrorException.class)
+  public void testValidateSampleUnitsCollectionInstrumentFail() {
+    // Given
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSurveyId(UUID.fromString(COLLECTION_EXERCISE_ID_1));
+    collectionExercise.setSampleSize(1);
+    ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
+    sampleUnitGroup.setCollectionExercise(collectionExercise);
+    ExerciseSampleUnit sampleUnit = new ExerciseSampleUnit();
+    sampleUnit.setSampleUnitGroup(sampleUnitGroup);
+    sampleUnit.setSampleUnitType(SampleUnitDTO.SampleUnitType.B);
+    List<ExerciseSampleUnit> sampleUnits = Collections.singletonList(sampleUnit);
+    PartyDTO party = new PartyDTO();
+    party.setId(PARTY_ID_1);
+    SurveyClassifierDTO surveyClassifier = new SurveyClassifierDTO();
+    surveyClassifier.setName("COLLECTION_INSTRUMENT");
+    surveyClassifier.setId(UUID.randomUUID().toString());
+    List<SurveyClassifierDTO> classifierTypeSelectors = Collections.singletonList(surveyClassifier);
+    SurveyClassifierTypeDTO classifierTypeSelector = new SurveyClassifierTypeDTO();
+    classifierTypeSelector.setClassifierTypes(Collections.emptyList());
+
+    when(sampleUnitRepo.findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
+      any(), any()))
+      .thenReturn(sampleUnits.stream());
+
+    when(surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(classifierTypeSelectors);
+
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
+      .thenReturn(classifierTypeSelector);
+
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(any()))
+      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error"));
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    // ... exception happens, transaction rolled back
   }
 
   @Test
@@ -335,7 +376,7 @@ public class ValidateSampleUnitsTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testValidateSampleUnitsSurveyTypeSelectorsBlowsUp() throws CTPException {
+  public void testValidateSampleUnitsSurveyTypeSelectorsBlowsUp() {
     // Given
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setSurveyId(UUID.fromString(COLLECTION_EXERCISE_ID_1));
@@ -362,7 +403,7 @@ public class ValidateSampleUnitsTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testValidateSampleUnitsSurveyTypeSelectorBlowsUp() throws CTPException {
+  public void testValidateSampleUnitsSurveyTypeSelectorBlowsUp() {
     // Given
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setSurveyId(UUID.fromString(COLLECTION_EXERCISE_ID_1));
