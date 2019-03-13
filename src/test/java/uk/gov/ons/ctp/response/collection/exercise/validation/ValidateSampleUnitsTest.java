@@ -261,7 +261,6 @@ public class ValidateSampleUnitsTest {
         .transitionCollectionExercise(collectionExercise, CollectionExerciseEvent.INVALIDATE);
   }
 
-
   @Test(expected = HttpClientErrorException.class)
   public void testValidateSampleUnitsCollectionInstrumentFail() {
     // Given
@@ -284,16 +283,16 @@ public class ValidateSampleUnitsTest {
     classifierTypeSelector.setClassifierTypes(Collections.emptyList());
 
     when(sampleUnitRepo.findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
-      any(), any()))
-      .thenReturn(sampleUnits.stream());
+            any(), any()))
+        .thenReturn(sampleUnits.stream());
 
     when(surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(classifierTypeSelectors);
 
     when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
-      .thenReturn(classifierTypeSelector);
+        .thenReturn(classifierTypeSelector);
 
     when(collectionInstrumentSvcClient.requestCollectionInstruments(any()))
-      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error"));
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error"));
 
     // When
     validateSampleUnits.validateSampleUnits();
