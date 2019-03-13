@@ -5,10 +5,9 @@ import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.json.JSONObject;
@@ -42,6 +41,7 @@ import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 /** Class responsible for business logic to validate SampleUnits. */
 @Component
 public class ValidateSampleUnits {
+
   private static final Logger log = LoggerFactory.getLogger(ValidateSampleUnits.class);
 
   private static final String CASE_TYPE_SELECTOR = "COLLECTION_INSTRUMENT";
@@ -84,7 +84,7 @@ public class ValidateSampleUnits {
     // the sample service are state transitioned once they've got all their sample units.
     updateExecutingCollectionExercises();
 
-    Set<CollectionExercise> collectionExerciseSet = new HashSet<>();
+    Map<CollectionExercise, Optional<UUID>> collectionInstrumentMap = new HashMap<>();
 
     try (Stream<ExerciseSampleUnit> sampleUnits =
         sampleUnitRepo.findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
@@ -92,29 +92,31 @@ public class ValidateSampleUnits {
 
       sampleUnits.forEach(
           (sampleUnit) -> {
-            collectionExerciseSet.add(sampleUnit.getSampleUnitGroup().getCollectionExercise());
+            CollectionExercise collex = sampleUnit.getSampleUnitGroup().getCollectionExercise();
+            Optional<UUID> collectionInstrumentId =
+                collectionInstrumentMap.computeIfAbsent(
+                    collex,
+                    key -> {
+                      UUID returnValue = null;
+                      List<String> classifierTypes = requestSurveyClassifiers(key);
+                      try {
+                        returnValue =
+                            requestCollectionInstrumentId(
+                                classifierTypes, sampleUnit, key.getSurveyId().toString());
+                      } catch (HttpClientErrorException e) {
+                        if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
+                          log.with("sample_unit", sampleUnit)
+                              .with("status_code", e.getStatusCode())
+                              .error("Unexpected HTTP response code from collection instrument");
+                          throw e; // Re-throw anything that's not a 404 so that we retry
+                        }
+                      }
 
-            List<String> classifierTypes =
-                requestSurveyClassifiers(sampleUnit.getSampleUnitGroup().getCollectionExercise());
+                      return Optional.ofNullable(returnValue);
+                    });
 
-            try {
-              UUID collectionInstrumentId =
-                  requestCollectionInstrumentId(
-                      classifierTypes,
-                      sampleUnit,
-                      sampleUnit
-                          .getSampleUnitGroup()
-                          .getCollectionExercise()
-                          .getSurveyId()
-                          .toString());
-              sampleUnit.setCollectionInstrumentId(collectionInstrumentId);
-            } catch (HttpClientErrorException e) {
-              if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
-                log.with("sample_unit", sampleUnit)
-                    .with("status_code", e.getStatusCode())
-                    .error("Unexpected HTTP response code from collection instrument service");
-                throw e; // Re-throw anything that's not a 404 so that we retry
-              }
+            if (collectionInstrumentId.isPresent()) {
+              sampleUnit.setCollectionInstrumentId(collectionInstrumentId.get());
             }
 
             if (sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.B) {
@@ -153,14 +155,17 @@ public class ValidateSampleUnits {
           });
     }
 
-    collectionExerciseSet.forEach(
-        (exercise) -> {
-          try {
-            transitionCollectionExercise(exercise);
-          } catch (CTPException e) {
-            throw new IllegalStateException(); // Not thrown because we already checked the state
-          }
-        });
+    collectionInstrumentMap
+        .keySet()
+        .forEach(
+            (exercise) -> {
+              try {
+                transitionCollectionExercise(exercise);
+              } catch (CTPException e) {
+                throw new IllegalStateException(); // Not thrown because we already checked the
+                // state
+              }
+            });
   }
 
   private void updateExecutingCollectionExercises() {
