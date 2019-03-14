@@ -11,12 +11,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.common.distributed.DistributedListManager;
@@ -44,6 +50,8 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @ComponentScan(basePackages = {"uk.gov.ons.ctp.response"})
 @EnableJpaRepositories(basePackages = {"uk.gov.ons.ctp.response"})
 @EntityScan("uk.gov.ons.ctp.response")
+@EnableScheduling
+@EnableCaching
 @ImportResource("springintegration/main.xml")
 public class CollectionExerciseApplication {
 
@@ -212,6 +220,25 @@ public class CollectionExerciseApplication {
     CustomObjectMapper mapper = new CustomObjectMapper();
 
     return mapper;
+  }
+
+  public static final String COLLECTION_INSTRUMENT_CACHE = "collectioninstruments";
+  public static final String ACTION_PLAN_CACHE = "actionplans";
+
+  @Bean
+  public CacheManager cacheManager() {
+    return new ConcurrentMapCacheManager(COLLECTION_INSTRUMENT_CACHE, ACTION_PLAN_CACHE);
+  }
+
+  @CacheEvict(
+      allEntries = true,
+      cacheNames = {COLLECTION_INSTRUMENT_CACHE, ACTION_PLAN_CACHE})
+  @Scheduled(fixedDelay = 60000)
+  public void cacheEvict() {
+    /* This is getting rid of the cached entries in case anything's been changed. We imagine
+    that
+        * the maximum of a 1 minute delay to seeing changes reflected in the collection
+        * exercise service will not cause any issues*/
   }
 
   /**
