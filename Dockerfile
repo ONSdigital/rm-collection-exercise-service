@@ -5,8 +5,8 @@ ARG JAR_FILE=collectionexercisesvc*.jar
 RUN apt-get update
 RUN apt-get -yq clean
 
-RUN groupadd -g 991 collectionexercisesvc && \
-    useradd -r -u 991 -g collectionexercisesvc collectionexercisesvc
+RUN groupadd --gid 991 collectionexercisesvc && \
+    useradd --create-home --system --uid 991 --gid collectionexercisesvc collectionexercisesvc
 USER collectionexercisesvc
 
 COPY target/$JAR_FILE /opt/collectionexercisesvc.jar
