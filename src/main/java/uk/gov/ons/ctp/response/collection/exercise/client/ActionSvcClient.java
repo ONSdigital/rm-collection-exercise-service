@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.ACTION_PLAN_CACHE;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
@@ -7,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -88,6 +91,7 @@ public class ActionSvcClient {
     return createdActionPlan;
   }
 
+  @Cacheable(ACTION_PLAN_CACHE)
   public ActionPlanDTO getActionPlanBySelectorsBusiness(
       String collectionExerciseId, boolean activeEnrolment) throws CTPException {
 
