@@ -48,9 +48,7 @@ public class ReminderEventValidator implements EventValidator {
 
     if (isCollectionExerciseLockedState(collectionExerciseState)
         && isExistingReminderInPast(submittedEvent, existingEventsMap)) {
-      throw new CTPException(
-          CTPException.Fault.BAD_REQUEST,
-          "Reminder cannot be set in the past");
+      throw new CTPException(CTPException.Fault.BAD_REQUEST, "Reminder cannot be set in the past");
     }
 
     final List<Event> reminders =

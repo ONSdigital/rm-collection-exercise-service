@@ -33,7 +33,8 @@ public class MandatoryEventValidator implements EventValidator {
     if (isCollectionExerciseLockedState(collectionExerciseState)) {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST,
-          "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked");
+          "Mandatory events cannot be changed if collection exercise "
+              + "is set to live, executed, validated or locked");
     }
 
     final Map<String, Event> existingEventsMap =

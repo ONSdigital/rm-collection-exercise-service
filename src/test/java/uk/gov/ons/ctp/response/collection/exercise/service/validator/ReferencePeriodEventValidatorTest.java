@@ -1,24 +1,23 @@
- package uk.gov.ons.ctp.response.collection.exercise.service.validator;
+package uk.gov.ons.ctp.response.collection.exercise.service.validator;
 
- import static org.hamcrest.Matchers.instanceOf;
- import static org.junit.Assert.*;
- import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
- import java.sql.Timestamp;
- import java.time.Instant;
- import java.time.temporal.ChronoUnit;
- import java.util.ArrayList;
- import java.util.List;
- import org.junit.Before;
- import org.junit.Test;
- import uk.gov.ons.ctp.common.error.CTPException;
- import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
- import
- uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
- import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
- import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
- public class ReferencePeriodEventValidatorTest {
+public class ReferencePeriodEventValidatorTest {
 
   ReferencePeriodEventValidator referencePeriodValidator;
 
@@ -27,10 +26,10 @@
     referencePeriodValidator = new ReferencePeriodEventValidator();
   }
 
-   @Test
-   public void isEventValidator() {
-     assertThat(referencePeriodValidator, instanceOf(EventValidator.class));
-   }
+  @Test
+  public void isEventValidator() {
+    assertThat(referencePeriodValidator, instanceOf(EventValidator.class));
+  }
 
   @Test
   public void returnTrueAndDoNothingIfNotReferencePeriodEvent() throws CTPException {
@@ -38,7 +37,7 @@
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now()));
     final List<Event> events = new ArrayList<>();
-        referencePeriodValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED);
+    referencePeriodValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED);
   }
 
   @Test
@@ -49,8 +48,8 @@
 
     final List<Event> events = new ArrayList<>();
 
-        referencePeriodValidator.validate(
-            events, referencePeriodStart, CollectionExerciseState.READY_FOR_LIVE);
+    referencePeriodValidator.validate(
+        events, referencePeriodStart, CollectionExerciseState.READY_FOR_LIVE);
   }
 
   @Test
@@ -61,8 +60,7 @@
 
     final List<Event> events = new ArrayList<>();
 
-        referencePeriodValidator.validate(
-            events, referencePeriodStart, CollectionExerciseState.LIVE);
+    referencePeriodValidator.validate(events, referencePeriodStart, CollectionExerciseState.LIVE);
   }
 
   @Test
@@ -72,7 +70,7 @@
     refStart.setTimestamp(Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS)));
 
     final List<Event> events = new ArrayList<>();
-        referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED);
+    referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED);
   }
 
   @Test
@@ -82,7 +80,7 @@
     refEnd.setTimestamp(Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS)));
 
     final List<Event> events = new ArrayList<>();
-        referencePeriodValidator.validate(events, refEnd, CollectionExerciseState.CREATED);
+    referencePeriodValidator.validate(events, refEnd, CollectionExerciseState.CREATED);
   }
 
   @Test
@@ -98,10 +96,11 @@
     CTPException actualException = null;
     try {
       referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Reference period end date must be after start date", actualException.getMessage());
+    assertEquals(
+        "Reference period end date must be after start date", actualException.getMessage());
   }
- }
+}

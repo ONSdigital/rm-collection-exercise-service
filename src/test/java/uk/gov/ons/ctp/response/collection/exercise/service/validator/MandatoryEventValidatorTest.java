@@ -1,32 +1,31 @@
- package uk.gov.ons.ctp.response.collection.exercise.service.validator;
+package uk.gov.ons.ctp.response.collection.exercise.service.validator;
 
- import static org.hamcrest.CoreMatchers.instanceOf;
- import static org.junit.Assert.*;
- import static org.junit.Assert.assertEquals;
- import static org.mockito.Matchers.anyList;
- import static org.mockito.Mockito.never;
- import static org.mockito.Mockito.verify;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
- import java.sql.Timestamp;
- import java.time.Instant;
- import java.time.temporal.ChronoUnit;
- import java.util.ArrayList;
- import java.util.Arrays;
- import java.util.List;
- import org.junit.Test;
- import org.junit.runner.RunWith;
- import org.mockito.InjectMocks;
- import org.mockito.Spy;
- import org.mockito.runners.MockitoJUnitRunner;
- import uk.gov.ons.ctp.common.error.CTPException;
- import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
- import
- uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
- import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
- import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
- @RunWith(MockitoJUnitRunner.class)
- public class MandatoryEventValidatorTest {
+@RunWith(MockitoJUnitRunner.class)
+public class MandatoryEventValidatorTest {
 
   @Spy private EventDateOrderChecker eventDateOrderChecker;
 
@@ -106,11 +105,12 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, goLive, CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -132,11 +132,12 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -150,11 +151,13 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.LIVE);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Mandatory events cannot be changed if collection exercise is set to live (or locked)", actualException.getMessage());
+    assertEquals(
+        "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked",
+        actualException.getMessage());
   }
 
   @Test
@@ -168,11 +171,13 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.VALIDATED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, validated or locked)", actualException.getMessage());
+    assertEquals(
+        "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked",
+        actualException.getMessage());
   }
 
   @Test
@@ -186,11 +191,13 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.EXECUTION_STARTED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked", actualException.getMessage());
+    assertEquals(
+        "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked",
+        actualException.getMessage());
   }
 
   @Test
@@ -204,11 +211,13 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.READY_FOR_LIVE);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked", actualException.getMessage());
+    assertEquals(
+        "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked",
+        actualException.getMessage());
   }
 
   @Test
@@ -222,12 +231,13 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.EXECUTED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked", actualException.getMessage());
-
+    assertEquals(
+        "Mandatory events cannot be changed if collection exercise is set to live, executed, validated or locked",
+        actualException.getMessage());
   }
 
   @Test
@@ -238,7 +248,7 @@
     returnByEvent.setTag(Tag.return_by.toString());
     returnByEvent.setTimestamp(Timestamp.from(Instant.now().plus(5, ChronoUnit.DAYS)));
 
-        mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED);
+    mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED);
   }
 
   @Test
@@ -249,7 +259,7 @@
     exerciseEndEvent.setTag(Tag.exercise_end.toString());
     exerciseEndEvent.setTimestamp(Timestamp.from(Instant.now().plus(10, ChronoUnit.DAYS)));
 
-        mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED);
+    mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED);
   }
 
   @Test
@@ -263,11 +273,12 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, mpsEvent, CollectionExerciseState.SCHEDULED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -281,11 +292,12 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, goLiveEvent, CollectionExerciseState.SCHEDULED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -299,11 +311,12 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, returnByEvent, CollectionExerciseState.SCHEDULED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -317,11 +330,12 @@
     CTPException actualException = null;
     try {
       mandatoryValidator.validate(events, exerciseEndEvent, CollectionExerciseState.SCHEDULED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   private List<Event> createMandatoryEvents() {
@@ -349,4 +363,4 @@
 
     return eventList;
   }
- }
+}

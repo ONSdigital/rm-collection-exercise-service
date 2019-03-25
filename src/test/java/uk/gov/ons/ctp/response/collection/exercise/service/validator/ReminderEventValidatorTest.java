@@ -1,33 +1,32 @@
- package uk.gov.ons.ctp.response.collection.exercise.service.validator;
+package uk.gov.ons.ctp.response.collection.exercise.service.validator;
 
- import static org.hamcrest.CoreMatchers.instanceOf;
- import static org.junit.Assert.*;
- import static org.mockito.Matchers.anyList;
- import static org.mockito.Mockito.never;
- import static org.mockito.Mockito.verify;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
- import java.sql.Timestamp;
- import java.time.Instant;
- import java.time.temporal.ChronoUnit;
- import java.util.ArrayList;
- import java.util.Arrays;
- import java.util.Collections;
- import java.util.List;
- import org.junit.Before;
- import org.junit.Test;
- import org.junit.runner.RunWith;
- import org.mockito.InjectMocks;
- import org.mockito.Spy;
- import org.mockito.runners.MockitoJUnitRunner;
- import uk.gov.ons.ctp.common.error.CTPException;
- import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
- import
- uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
- import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
- import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
- @RunWith(MockitoJUnitRunner.class)
- public class ReminderEventValidatorTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ReminderEventValidatorTest {
 
   @Spy private EventDateOrderChecker eventDateOrderChecker;
 
@@ -59,8 +58,7 @@
     reminderEvent.setTimestamp(Timestamp.from(Instant.now()));
 
     final List<Event> events = new ArrayList<>();
-        reminderValidator.validate(events, reminderEvent,
- CollectionExerciseState.READY_FOR_LIVE);
+    reminderValidator.validate(events, reminderEvent, CollectionExerciseState.READY_FOR_LIVE);
   }
 
   @Test
@@ -71,8 +69,7 @@
 
     final List<Event> events = new ArrayList<>();
 
-      reminderValidator.validate(events, reminderEvent, CollectionExerciseState.LIVE);
-
+    reminderValidator.validate(events, reminderEvent, CollectionExerciseState.LIVE);
   }
 
   @Test
@@ -89,16 +86,16 @@
     CTPException actualException = null;
     try {
       reminderValidator.validate(events, newReminder, CollectionExerciseState.LIVE);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
     assertEquals("Reminder cannot be set in the past", actualException.getMessage());
   }
 
-
   @Test
-  public void testCanUpdateReminderThatHasPastAndCollectionExerciseNotInLockedState() throws CTPException {
+  public void testCanUpdateReminderThatHasPastAndCollectionExerciseNotInLockedState()
+      throws CTPException {
     final Event reminder = new Event();
     reminder.setTag((Tag.reminder.toString()));
     reminder.setTimestamp(Timestamp.from(Instant.now().minus(2, ChronoUnit.DAYS)));
@@ -109,8 +106,7 @@
 
     final List<Event> events = Collections.singletonList(reminder);
 
-    reminderValidator.validate(events, newReminder,
- CollectionExerciseState.SCHEDULED);
+    reminderValidator.validate(events, newReminder, CollectionExerciseState.SCHEDULED);
   }
 
   @Test
@@ -145,12 +141,13 @@
     final List<Event> events = Collections.singletonList(exerciseEnd);
     CTPException actualException = null;
     try {
-        reminderValidator.validate(events, reminderEvent, CollectionExerciseState.SCHEDULED);
-    } catch (CTPException expectedException){
+      reminderValidator.validate(events, reminderEvent, CollectionExerciseState.SCHEDULED);
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Reminder must take place during collection exercise period", actualException.getMessage());
+    assertEquals(
+        "Reminder must take place during collection exercise period", actualException.getMessage());
   }
 
   @Test
@@ -167,11 +164,12 @@
     CTPException actualException = null;
     try {
       reminderValidator.validate(events, reminderEvent, CollectionExerciseState.SCHEDULED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Reminder must take place during collection exercise period", actualException.getMessage());
+    assertEquals(
+        "Reminder must take place during collection exercise period", actualException.getMessage());
   }
 
   @Test
@@ -187,11 +185,12 @@
     CTPException actualException = null;
     try {
       reminderValidator.validate(events, reminder2, CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
 
   @Test
@@ -207,10 +206,11 @@
     CTPException actualException = null;
     try {
       reminderValidator.validate(events, reminder3, CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException){
+    } catch (CTPException expectedException) {
       actualException = expectedException;
     }
     assertNotNull(actualException);
-    assertEquals("Collection exercise events must be set sequentially", actualException.getMessage());
+    assertEquals(
+        "Collection exercise events must be set sequentially", actualException.getMessage());
   }
- }
+}

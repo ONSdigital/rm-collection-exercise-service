@@ -1,27 +1,25 @@
- package uk.gov.ons.ctp.response.collection.exercise.service;
+package uk.gov.ons.ctp.response.collection.exercise.service;
 
- import static org.junit.Assert.assertTrue;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.validator.EventDateOrderChecker;
+import uk.gov.ons.ctp.response.collection.exercise.service.validator.MandatoryEventValidator;
 
- import java.sql.Timestamp;
- import java.time.Instant;
- import java.time.temporal.ChronoUnit;
- import java.util.ArrayList;
- import java.util.Arrays;
- import java.util.Collection;
- import java.util.List;
- import org.junit.Before;
- import org.junit.Test;
- import org.junit.runner.RunWith;
- import org.junit.runners.Parameterized;
- import org.junit.runners.Parameterized.Parameters;
- import uk.gov.ons.ctp.common.error.CTPException;
- import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
- import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
- import uk.gov.ons.ctp.response.collection.exercise.service.validator.EventDateOrderChecker;
- import uk.gov.ons.ctp.response.collection.exercise.service.validator.MandatoryEventValidator;
-
- @RunWith(Parameterized.class)
- public class MultipleMandatoryEventsValidatorTest {
+@RunWith(Parameterized.class)
+public class MultipleMandatoryEventsValidatorTest {
 
   private EventValidator validator;
   private final Event mpsEvent;
@@ -77,20 +75,19 @@
     Event newMpsEvent = new Event();
     newMpsEvent.setTag((EventService.Tag.mps.toString()));
     newMpsEvent.setTimestamp(Timestamp.from(timestamp));
-        validator.validate(
-            events, newMpsEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
+    validator.validate(events, newMpsEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
   }
 
-   @Test
-   public void testValidGoLiveEventCreation() throws CTPException {
-     List<Event> events = getExistingEvents();
-     Instant timestamp = Instant.now().plus(4, ChronoUnit.DAYS);
-     Event newGoLiveEvent = new Event();
-     newGoLiveEvent.setTag((EventService.Tag.go_live.toString()));
-     newGoLiveEvent.setTimestamp(Timestamp.from(timestamp));
-       validator.validate(
-         events, newGoLiveEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
-   }
+  @Test
+  public void testValidGoLiveEventCreation() throws CTPException {
+    List<Event> events = getExistingEvents();
+    Instant timestamp = Instant.now().plus(4, ChronoUnit.DAYS);
+    Event newGoLiveEvent = new Event();
+    newGoLiveEvent.setTag((EventService.Tag.go_live.toString()));
+    newGoLiveEvent.setTimestamp(Timestamp.from(timestamp));
+    validator.validate(
+        events, newGoLiveEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
+  }
 
   @Test
   public void testValidReturnByEventCreation() throws CTPException {
@@ -99,8 +96,8 @@
     Event newReturnByEvent = new Event();
     newReturnByEvent.setTag((EventService.Tag.return_by.toString()));
     newReturnByEvent.setTimestamp(Timestamp.from(timestamp));
-        validator.validate(
-            events, newReturnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
+    validator.validate(
+        events, newReturnByEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
   }
 
   @Test
@@ -110,8 +107,8 @@
     Event newExerciseEndEvent = new Event();
     newExerciseEndEvent.setTag((EventService.Tag.exercise_end.toString()));
     newExerciseEndEvent.setTimestamp(Timestamp.from(timestamp));
-        validator.validate(
-            events, newExerciseEndEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
+    validator.validate(
+        events, newExerciseEndEvent, CollectionExerciseDTO.CollectionExerciseState.CREATED);
   }
 
   private List<Event> getExistingEvents() {
@@ -162,4 +159,4 @@
     event.setTimestamp(Timestamp.from(timestamp));
     return event;
   }
- }
+}
