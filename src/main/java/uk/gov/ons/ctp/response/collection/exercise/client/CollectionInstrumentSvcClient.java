@@ -1,9 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.COLLECTION_INSTRUMENT_CACHE;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -48,6 +51,7 @@ public class CollectionInstrumentSvcClient {
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  @Cacheable(COLLECTION_INSTRUMENT_CACHE)
   public List<CollectionInstrumentDTO> requestCollectionInstruments(String searchString) {
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.add("searchString", searchString);

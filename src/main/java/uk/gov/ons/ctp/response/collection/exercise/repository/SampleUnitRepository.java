@@ -1,11 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
@@ -51,4 +53,15 @@ public interface SampleUnitRepository extends JpaRepository<ExerciseSampleUnit, 
    */
   List<ExerciseSampleUnit> findBySampleUnitGroupCollectionExerciseAndSampleUnitGroupStateFK(
       CollectionExercise collectionExercise, SampleUnitGroupState sampleUnitGroupState);
+
+  /**
+   * Find sample units with collection exercise and group in a particular state
+   *
+   * @param collexState a collection exercise state
+   * @param sampleUnitGroupState a group state
+   * @return a stream of sample units with collection exercise and group in a particular state
+   */
+  Stream<ExerciseSampleUnit> findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
+      CollectionExerciseDTO.CollectionExerciseState collexState,
+      SampleUnitGroupState sampleUnitGroupState);
 }
