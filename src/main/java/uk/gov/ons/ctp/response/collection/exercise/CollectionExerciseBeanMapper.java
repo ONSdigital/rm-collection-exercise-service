@@ -1,8 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
 import ma.glasnost.orika.impl.ConfigurableMapper;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.springframework.stereotype.Component;
 
@@ -11,10 +9,4 @@ import org.springframework.stereotype.Component;
  */
 @CoverageIgnore
 @Component
-public class CollectionExerciseBeanMapper extends ConfigurableMapper {
-
-  @Override
-  public void configureFactoryBuilder(DefaultMapperFactory.Builder builder) {
-    builder.compilerStrategy(new EclipseJdtCompilerStrategy());
-  }
-}
+public class CollectionExerciseBeanMapper extends ConfigurableMapper {}
