@@ -39,7 +39,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.response.survey.representation.SurveyDTO;
 
-// ** Class containing tests for EventServiceImpl */
+/** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceTest {
   private static final UUID SURVEY_ID = UUID.fromString("4ca97b1b-de9c-4fed-9898-fac594d1565f");
