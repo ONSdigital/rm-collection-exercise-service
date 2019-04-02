@@ -176,10 +176,7 @@ public class EventService {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
 
     for (EventValidator validator : eventValidators) {
-      if (!validator.validate(existingEvents, event, collex.getState())) {
-        throw new CTPException(
-            CTPException.Fault.BAD_REQUEST, String.format("Invalid event update"));
-      }
+      validator.validate(existingEvents, event, collex.getState());
     }
   }
 

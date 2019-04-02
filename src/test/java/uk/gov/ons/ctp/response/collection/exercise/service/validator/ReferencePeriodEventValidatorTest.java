@@ -1,9 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.validator;
 
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -12,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
@@ -32,60 +32,55 @@ public class ReferencePeriodEventValidatorTest {
   }
 
   @Test
-  public void returnTrueAndDoNothingIfNotReferencePeriodEvent() {
+  public void returnTrueAndDoNothingIfNotReferencePeriodEvent() throws CTPException {
     final Event mpsEvent = new Event();
     mpsEvent.setTag((Tag.mps.toString()));
     mpsEvent.setTimestamp(Timestamp.from(Instant.now()));
     final List<Event> events = new ArrayList<>();
-    assertTrue(
-        referencePeriodValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED));
+    referencePeriodValidator.validate(events, mpsEvent, CollectionExerciseState.CREATED);
   }
 
   @Test
-  public void canUpdateReferencePeriodWhenCollectionExerciseReadyForLive() {
+  public void canUpdateReferencePeriodWhenCollectionExerciseReadyForLive() throws CTPException {
     final Event referencePeriodStart = new Event();
     referencePeriodStart.setTag(Tag.ref_period_end.toString());
     referencePeriodStart.setTimestamp(Timestamp.from(Instant.now()));
 
     final List<Event> events = new ArrayList<>();
 
-    assertTrue(
-        referencePeriodValidator.validate(
-            events, referencePeriodStart, CollectionExerciseState.READY_FOR_LIVE));
+    referencePeriodValidator.validate(
+        events, referencePeriodStart, CollectionExerciseState.READY_FOR_LIVE);
   }
 
   @Test
-  public void canUpdateReferencePeriodWhenCollectionExerciseLive() {
+  public void canUpdateReferencePeriodWhenCollectionExerciseLive() throws CTPException {
     final Event referencePeriodStart = new Event();
     referencePeriodStart.setTag(Tag.ref_period_start.toString());
     referencePeriodStart.setTimestamp(Timestamp.from(Instant.now()));
 
     final List<Event> events = new ArrayList<>();
 
-    assertTrue(
-        referencePeriodValidator.validate(
-            events, referencePeriodStart, CollectionExerciseState.LIVE));
+    referencePeriodValidator.validate(events, referencePeriodStart, CollectionExerciseState.LIVE);
   }
 
   @Test
-  public void testReferenceStartCanBeSetInThePast() {
+  public void testReferenceStartCanBeSetInThePast() throws CTPException {
     final Event refStart = new Event();
     refStart.setTag((Tag.ref_period_start.toString()));
     refStart.setTimestamp(Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS)));
 
     final List<Event> events = new ArrayList<>();
-    assertTrue(
-        referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED));
+    referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED);
   }
 
   @Test
-  public void testReferenceEndCanBeSetInThePast() {
+  public void testReferenceEndCanBeSetInThePast() throws CTPException {
     final Event refEnd = new Event();
     refEnd.setTag((Tag.ref_period_end.toString()));
     refEnd.setTimestamp(Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS)));
 
     final List<Event> events = new ArrayList<>();
-    assertTrue(referencePeriodValidator.validate(events, refEnd, CollectionExerciseState.CREATED));
+    referencePeriodValidator.validate(events, refEnd, CollectionExerciseState.CREATED);
   }
 
   @Test
@@ -98,7 +93,14 @@ public class ReferencePeriodEventValidatorTest {
     refStart.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
     final List<Event> events = new ArrayList<>();
     events.add(refEnd);
-    assertFalse(
-        referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED));
+    CTPException actualException = null;
+    try {
+      referencePeriodValidator.validate(events, refStart, CollectionExerciseState.CREATED);
+    } catch (CTPException expectedException) {
+      actualException = expectedException;
+    }
+    assertNotNull(actualException);
+    assertEquals(
+        "Reference period end date must be after start date", actualException.getMessage());
   }
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
@@ -14,15 +15,15 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 @Component
 public class ReferencePeriodEventValidator implements EventValidator {
 
-  public boolean validate(
+  public void validate(
       List<Event> existingEvents,
       Event submittedEvent,
-      CollectionExerciseState collectionExerciseState) {
+      CollectionExerciseState collectionExerciseState)
+      throws CTPException {
     if (!isReferencePeriod(submittedEvent)) {
-      return true;
+      return;
     }
 
-    boolean isValid = true;
     final String tagName = submittedEvent.getTag();
     final String refPeriodStart = Tag.ref_period_start.toString();
     final String refPeriodEnd = Tag.ref_period_end.toString();
@@ -40,9 +41,11 @@ public class ReferencePeriodEventValidator implements EventValidator {
             : existingEventsMap.get(refPeriodEnd);
 
     if (referencePeriodStart != null && referencePeriodEnd != null) {
-      isValid = referencePeriodStart.getTimestamp().before(referencePeriodEnd.getTimestamp());
+      if (referencePeriodStart.getTimestamp().after(referencePeriodEnd.getTimestamp())) {
+        throw new CTPException(
+            CTPException.Fault.BAD_REQUEST, "Reference period end date must be after start date");
+      }
     }
-    return isValid;
   }
 
   private boolean isReferencePeriod(final Event event) {

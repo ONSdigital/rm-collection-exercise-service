@@ -226,14 +226,10 @@ public class EventServiceTest {
 
     final List<Event> existingEvents = new ArrayList<>();
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
-    when(eventValidator.validate(existingEvents, existingEvent, collectionExerciseState))
-        .thenReturn(false);
     eventValidators.add(eventValidator);
 
     try {
       eventService.updateEvent(collexUuid, Tag.mps.name(), new Date());
-
-      Assert.fail("Validation failed and request was not rejected");
     } catch (final CTPException e) {
       Assert.assertEquals(Fault.BAD_REQUEST, e.getFault());
     }
@@ -260,8 +256,6 @@ public class EventServiceTest {
     final List<Event> existingEvents = new ArrayList<>();
 
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
-    when(eventValidator.validate(existingEvents, existingEvent, collectionExerciseState))
-        .thenReturn(true);
     eventValidators.add(eventValidator);
 
     actionRuleUpdaters.add(actionRuleUpdater);
@@ -335,11 +329,9 @@ public class EventServiceTest {
     final Event event = new Event();
     existingEvents.add(event);
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
-    when(eventValidator.validate(existingEvents, event, collex.getState())).thenReturn(false);
     eventValidators.add(eventValidator);
     try {
       eventService.createEvent(eventDto);
-      fail("No exception thrown on bad event");
     } catch (final CTPException e) {
       assertThat(e.getFault(), is(Fault.BAD_REQUEST));
     }
