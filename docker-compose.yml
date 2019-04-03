@@ -22,7 +22,7 @@ services:
     - "46672:15672"
  survey:
    container_name: survey-it
-   image: sdcplatform/surveysvc
+   image: eu.gcr.io/census-rm-ci/rm/census-rm-surveysvc
    ports:
     - "18080:8080"
    external_links:
@@ -33,7 +33,7 @@ services:
     - security_user_password=secret
  action:
    container_name: action-it
-   image: sdcplatform/actionsvc
+   image: eu.gcr.io/census-rm-ci/rm/census-rm-actionsvc
    ports:
     - "38151:8151"
    external_links:

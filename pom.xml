@@ -328,7 +328,7 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <repository>${project.artifactId}</repository>
+                            <repository>eu.gcr.io/census-rm-ci/rm/census-rm-${project.artifactId}</repository>
                             <buildArgs>
                                 <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
                             </buildArgs>
