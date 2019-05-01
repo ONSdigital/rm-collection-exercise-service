@@ -84,7 +84,11 @@ public class ValidateSampleUnits {
     // the sample service are state transitioned once they've got all their sample units.
     updateExecutingCollectionExercises();
 
-    Map<CollectionExercise, Optional<UUID>> collectionInstrumentMap = new HashMap<>();
+    // This is a hand-rolled cache which stores all the collection instruments which are needed
+    // to be added onto the samples which are being 'validated'. The map allows a collection
+    // exercise and a sample form type to be mapped to the correct collection instrument. It
+    // provides a very significant performance boost when 'validating' large samples (e.g. 100k+)
+    Map<CollectionExercise, Map<String, Optional<UUID>>> collectionInstrumentMap = new HashMap<>();
 
     try (Stream<ExerciseSampleUnit> sampleUnits =
         sampleUnitRepo.findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
@@ -92,17 +96,24 @@ public class ValidateSampleUnits {
 
       sampleUnits.forEach(
           (sampleUnit) -> {
-            CollectionExercise collex = sampleUnit.getSampleUnitGroup().getCollectionExercise();
+            final CollectionExercise collex =
+                sampleUnit.getSampleUnitGroup().getCollectionExercise();
+
+            // If we haven't seen this collex before, create a map to store the CI
+            Map<String, Optional<UUID>> formTypeMap =
+                collectionInstrumentMap.computeIfAbsent(collex, key -> new HashMap<>());
+
+            // If we haven't seen this form type before, add the CI to the cache if we can find it
             Optional<UUID> collectionInstrumentId =
-                collectionInstrumentMap.computeIfAbsent(
-                    collex,
+                formTypeMap.computeIfAbsent(
+                    sampleUnit.getSampleUnitGroup().getFormType(),
                     key -> {
                       UUID returnValue = null;
-                      List<String> classifierTypes = requestSurveyClassifiers(key);
+                      List<String> classifierTypes = requestSurveyClassifiers(collex);
                       try {
                         returnValue =
                             requestCollectionInstrumentId(
-                                classifierTypes, sampleUnit, key.getSurveyId().toString());
+                                classifierTypes, sampleUnit, collex.getSurveyId().toString());
                       } catch (HttpClientErrorException e) {
                         if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
                           log.with("sample_unit", sampleUnit)
@@ -115,6 +126,7 @@ public class ValidateSampleUnits {
                       return Optional.ofNullable(returnValue);
                     });
 
+            // If we could find the CI, then set it on the sample (or it will fail validation)
             if (collectionInstrumentId.isPresent()) {
               sampleUnit.setCollectionInstrumentId(collectionInstrumentId.get());
             }
