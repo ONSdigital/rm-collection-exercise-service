@@ -139,6 +139,13 @@ public class ValidateSampleUnitsTest {
         .transitionCollectionExercise(collectionExercise, CollectionExerciseEvent.VALIDATE);
   }
 
+  /*
+   * This test covers the scenario where a collection exercise has multiple collection instruments associated
+   * with it. Usually (virtually 100% of the time) a single sample will be uploaded and processed in isolation
+   * (i.e. it would be very rare to have 2 or more samples validating at the same time) and we are mainly interested
+   * in the collection instruments which relate to the form types contained in the sample which was uploaded.
+   * An MBS sample, for example, may contain as many as 20 different collection instruments.
+   */
   @Test
   public void testValidateSampleUnitsMultipleCollectionInstruments() throws CTPException {
     // Given
