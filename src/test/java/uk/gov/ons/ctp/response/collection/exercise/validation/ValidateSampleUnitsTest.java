@@ -1,7 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.validation;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -61,6 +65,8 @@ public class ValidateSampleUnitsTest {
   private static final String COLLECTION_EXERCISE_ID_1 = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
   private static final String PARTY_ID_1 = "628ed030-19f3-406d-8c1c-b3dc2f4793a0";
   private static final String COLLECTION_INSTRUMENT_ID_1 = "2a6edbe3-0849-48ae-95de-091eb5a08587";
+  private static final String COLLECTION_INSTRUMENT_ID_2 = "e9679672-1680-4bd7-bf38-ee9ce44ffdf0";
+  private static final String SURVEY_ID = "d943344b-1ef4-4c24-b59b-23e3a0350158";
 
   @Test
   public void testValidateSampleUnits() throws CTPException {
@@ -131,6 +137,107 @@ public class ValidateSampleUnitsTest {
         exerciseSampleUnitArgCapt.getValue().getCollectionInstrumentId().toString());
     verify(collexService)
         .transitionCollectionExercise(collectionExercise, CollectionExerciseEvent.VALIDATE);
+  }
+
+  /*
+   * This test covers the scenario where a collection exercise has multiple collection instruments associated
+   * with it. Usually (virtually 100% of the time) a single sample will be uploaded and processed in isolation
+   * (i.e. it would be very rare to have 2 or more samples validating at the same time) and we are mainly interested
+   * in the collection instruments which relate to the form types contained in the sample which was uploaded.
+   * An MBS sample, for example, may contain as many as 20 different collection instruments.
+   */
+  @Test
+  public void testValidateSampleUnitsMultipleCollectionInstruments() throws CTPException {
+    // Given
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSurveyId(UUID.fromString(SURVEY_ID));
+    collectionExercise.setSampleSize(2);
+
+    List<ExerciseSampleUnit> sampleUnits = new LinkedList<>();
+
+    ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
+    sampleUnitGroup.setCollectionExercise(collectionExercise);
+    sampleUnitGroup.setFormType("0101");
+    ExerciseSampleUnit sampleUnit = new ExerciseSampleUnit();
+    sampleUnit.setSampleUnitGroup(sampleUnitGroup);
+    sampleUnit.setSampleUnitType(SampleUnitDTO.SampleUnitType.B);
+    sampleUnits.add(sampleUnit); // Add the first sample
+
+    sampleUnitGroup = new ExerciseSampleUnitGroup();
+    sampleUnitGroup.setCollectionExercise(collectionExercise);
+    sampleUnitGroup.setFormType("0666");
+    sampleUnit = new ExerciseSampleUnit();
+    sampleUnit.setSampleUnitGroup(sampleUnitGroup);
+    sampleUnit.setSampleUnitType(SampleUnitDTO.SampleUnitType.B);
+    sampleUnits.add(sampleUnit); // Add the second sample
+
+    CollectionInstrumentDTO collectionInstrument = new CollectionInstrumentDTO();
+    collectionInstrument.setId(UUID.fromString(COLLECTION_INSTRUMENT_ID_1));
+    List<CollectionInstrumentDTO> collectionInstrumentsOne =
+        Collections.singletonList(collectionInstrument);
+
+    collectionInstrument = new CollectionInstrumentDTO();
+    collectionInstrument.setId(UUID.fromString(COLLECTION_INSTRUMENT_ID_2));
+    List<CollectionInstrumentDTO> collectionInstrumentsTwo =
+        Collections.singletonList(collectionInstrument);
+
+    PartyDTO party = new PartyDTO();
+    party.setId(PARTY_ID_1);
+    SurveyClassifierDTO surveyClassifier = new SurveyClassifierDTO();
+    surveyClassifier.setName("COLLECTION_INSTRUMENT");
+    surveyClassifier.setId(UUID.randomUUID().toString());
+    List<SurveyClassifierDTO> classifierTypeSelectors = Collections.singletonList(surveyClassifier);
+    SurveyClassifierTypeDTO classifierTypeSelector = new SurveyClassifierTypeDTO();
+    classifierTypeSelector.setClassifierTypes(Collections.singletonList("FORM_TYPE"));
+
+    when(sampleUnitRepo.findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
+            any(), any()))
+        .thenReturn(sampleUnits.stream());
+
+    when(surveySvcClient.requestClassifierTypeSelectors(any())).thenReturn(classifierTypeSelectors);
+
+    when(surveySvcClient.requestClassifierTypeSelector(any(), any()))
+        .thenReturn(classifierTypeSelector);
+
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+            eq("{\"SURVEY_ID\":\"d943344b-1ef4-4c24-b59b-23e3a0350158\",\"FORM_TYPE\":\"0101\"}")))
+        .thenReturn(collectionInstrumentsOne);
+
+    when(collectionInstrumentSvcClient.requestCollectionInstruments(
+            eq("{\"SURVEY_ID\":\"d943344b-1ef4-4c24-b59b-23e3a0350158\",\"FORM_TYPE\":\"0666\"}")))
+        .thenReturn(collectionInstrumentsTwo);
+
+    when(partySvcClient.requestParty(any(), any())).thenReturn(party);
+
+    when(sampleUnitGroupState.transition(any(), any())).thenReturn(SampleUnitGroupState.VALIDATED);
+
+    when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
+            eq(SampleUnitGroupState.INIT), any(CollectionExercise.class)))
+        .thenReturn(0L);
+
+    when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
+            eq(SampleUnitGroupState.VALIDATED), any(CollectionExercise.class)))
+        .thenReturn(1L);
+
+    when(sampleUnitGroupSvc.countByStateFKAndCollectionExercise(
+            eq(SampleUnitGroupState.FAILEDVALIDATION), any(CollectionExercise.class)))
+        .thenReturn(0L);
+
+    // When
+    validateSampleUnits.validateSampleUnits();
+
+    // Then
+    ArgumentCaptor<ExerciseSampleUnit> exerciseSampleUnitArgCapt =
+        ArgumentCaptor.forClass(ExerciseSampleUnit.class);
+    verify(sampleUnitRepo, times(2)).save(exerciseSampleUnitArgCapt.capture());
+    List<ExerciseSampleUnit> exerciseSampleUnits = exerciseSampleUnitArgCapt.getAllValues();
+
+    assertThat(
+        exerciseSampleUnits,
+        containsInAnyOrder(
+            hasProperty("collectionInstrumentId", is(UUID.fromString(COLLECTION_INSTRUMENT_ID_1))),
+            hasProperty(
+                "collectionInstrumentId", is(UUID.fromString(COLLECTION_INSTRUMENT_ID_2)))));
   }
 
   @Test
