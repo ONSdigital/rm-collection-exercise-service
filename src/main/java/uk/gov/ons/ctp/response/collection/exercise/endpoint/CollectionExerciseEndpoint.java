@@ -28,7 +28,6 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -616,41 +615,6 @@ public class CollectionExerciseEndpoint {
     collectionExerciseService.removeSampleSummaryLink(sampleSummaryId, collectionExerciseId);
 
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * return a list of UUIDs for the sample summaries linked to a specific collection exercise
-   *
-   * @param collectionExerciseId the id of the collection exercise to get linked sample summaries
-   *     for
-   * @return list of UUIDs of linked sample summaries
-   * @throws CTPException if no collection exercise found for UUID
-   */
-  @RequestMapping(value = "link/{collectionExerciseId}", method = RequestMethod.GET)
-  public ResponseEntity<List<UUID>> requestLinkedSampleSummaries(
-      @PathVariable("collectionExerciseId") final UUID collectionExerciseId) throws CTPException {
-    log.with("collection_exercise_id", collectionExerciseId)
-        .debug("Getting sample summaries linked to collectionExerciseId");
-
-    CollectionExercise collectionExercise =
-        collectionExerciseService.findCollectionExercise(collectionExerciseId);
-    if (collectionExercise == null) {
-      throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format("%s %s", RETURN_COLLECTIONEXERCISENOTFOUND, collectionExerciseId));
-    }
-
-    List<SampleLink> result =
-        collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
-    if (CollectionUtils.isEmpty(result)) {
-      return ResponseEntity.noContent().build();
-    }
-
-    List<UUID> output = new ArrayList<UUID>();
-    for (SampleLink link : result) {
-      output.add(link.getSampleSummaryId());
-    }
-    return ResponseEntity.ok(output);
   }
 
   /**
