@@ -441,6 +441,30 @@ public class CollectionExerciseEndpointUnitTests {
         .removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
   }
 
+  /**
+   * Tests to get a list of UUIDs linked to a collection exercise
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void getLinkedSampleSummaries() throws Exception {
+    when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
+        .thenReturn(collectionExerciseResults.get(0));
+    when(collectionExerciseService.findLinkedSampleSummaries(COLLECTIONEXERCISE_ID1))
+        .thenReturn(sampleLink);
+
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            getJson(String.format("/collectionexercises/link/%s", COLLECTIONEXERCISE_ID1)));
+
+    actions
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("requestLinkedSampleSummaries"))
+        .andExpect(jsonPath("$[0]", is(SAMPLE_SUMMARY_ID1.toString())))
+        .andExpect(jsonPath("$[1]", is(SAMPLE_SUMMARY_ID2.toString())));
+  }
+
   private String getResourceAsString(String resourceName) throws IOException {
     return new String(
         Files.readAllBytes(Paths.get(getClass().getResource(resourceName).getFile())));
