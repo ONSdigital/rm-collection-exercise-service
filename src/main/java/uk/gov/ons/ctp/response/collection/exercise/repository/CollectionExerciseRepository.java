@@ -29,7 +29,24 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
 
   List<CollectionExercise> findBySurveyId(UUID surveyUuid);
 
+  /**
+   * Query repository for collection exercises in a list of survey ids
+   *
+   * @param surveyIds the surveys to select by
+   * @return List of collection exercises, ordered by survey id
+   */
+  List<CollectionExercise> findBySurveyIdInOrderBySurveyId(List<UUID> surveyIds);
+
   List<CollectionExercise> findBySurveyIdAndState(UUID surveyUuid, CollectionExerciseState state);
+
+  /**
+   * Query repository for collection exercises in a list of survey ids
+   *
+   * @param surveyIds the surveys to select by
+   * @param state the state of the survey to limit by
+   * @return List of collection exercises, ordered by survey id
+   */
+  List<CollectionExercise> findBySurveyIdInAndStateOrderBySurveyId(List<UUID> surveyIds, CollectionExerciseState state);
 
   /**
    * Query repository for list of collection exercises associated with a certain state.

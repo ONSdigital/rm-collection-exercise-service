@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -152,6 +153,33 @@ public class CollectionExerciseEndpoint {
 
     log.with("survey_id", id).debug("Sucessfully retrieved collection exercises for surveyId");
     return ResponseEntity.ok(collectionExerciseSummaryDTOList);
+  }
+
+  /**
+   * GET to find collection exercises for the surveys in the given list of survey ids.
+   *
+   * @param surveyIds survey Ids for which to get collection exercises
+   * @param liveOnly Boolean , if set only returns live collection exercises
+   * @return json dictionary or collection exercises per survey
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(value = "/surveys", method = RequestMethod.GET, produces = "application/json")
+  public ResponseEntity<HashMap> getCollectionExercisesForSurveys(
+    final @RequestParam List<UUID> surveyIds,
+    @RequestParam("liveOnly") Optional<Boolean> liveOnly){
+
+      HashMap<UUID, List<CollectionExercise>> surveyCollexDict = null;
+
+      if (liveOnly.isPresent() && liveOnly.get().booleanValue()) {
+        surveyCollexDict =
+          collectionExerciseService.findCollectionExercisesForSurveysByState(surveyIds,
+            CollectionExerciseState.LIVE);
+      } else {
+        surveyCollexDict = collectionExerciseService.findCollectionExercisesForSurveys(surveyIds);
+      }
+
+    return ResponseEntity.ok(surveyCollexDict);
+
   }
 
   /**
