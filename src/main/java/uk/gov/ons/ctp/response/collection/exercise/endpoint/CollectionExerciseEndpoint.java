@@ -192,7 +192,8 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * GET to find collection exercises for the surveys in the given list of survey ids.
+   * Return collection exercises for each of the the surveys
+   * in the given list of survey ids. Return data as a Json dictionary.
    *
    * @param surveyIds survey Ids for which to get collection exercises
    * @param liveOnly Boolean , if set only returns live collection exercises

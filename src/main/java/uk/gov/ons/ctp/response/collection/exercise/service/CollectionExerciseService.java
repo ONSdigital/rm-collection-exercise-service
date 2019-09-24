@@ -123,7 +123,7 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Walks a list of collection exercises and splits them into a dictionary with key of survey id
+   * Walks a list of collection exercises and splits them into a HashMap with key of survey id
    * and value of list of collection exercises
    *
    * @param collexList list of collection exercises to split
@@ -174,7 +174,7 @@ public class CollectionExerciseService {
    *
    * @param surveyIds the survey UUIDS for which to find collection exercises
    * @param state Only return collection exercises in this state
-   * @return the associated collection exercises as a dictionary , key is survey id , value is List
+   * @return the associated collection exercises as a HashMap, key is survey id , value is List
    *     of collex
    */
   public HashMap<UUID, List<CollectionExercise>> findCollectionExercisesForSurveysByState(
