@@ -46,7 +46,8 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
    * @param state the state of the survey to limit by
    * @return List of collection exercises, ordered by survey id
    */
-  List<CollectionExercise> findBySurveyIdInAndStateOrderBySurveyId(List<UUID> surveyIds, CollectionExerciseState state);
+  List<CollectionExercise> findBySurveyIdInAndStateOrderBySurveyId(
+      List<UUID> surveyIds, CollectionExerciseState state);
 
   /**
    * Query repository for list of collection exercises associated with a certain state.

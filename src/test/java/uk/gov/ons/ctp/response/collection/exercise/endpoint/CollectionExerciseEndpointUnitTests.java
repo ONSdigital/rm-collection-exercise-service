@@ -53,10 +53,10 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
@@ -171,34 +171,32 @@ public class CollectionExerciseEndpointUnitTests {
   public void findCollectionExercisesForSurvey() throws Exception {
     when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
     when(collectionExerciseService.findCollectionExercisesForSurvey(surveyDtoResults.get(0)))
-      .thenReturn(collectionExerciseResults);
+        .thenReturn(collectionExerciseResults);
 
     ResultActions actions =
-      mockCollectionExerciseMvc.perform(
-        getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID_1)));
+        mockCollectionExerciseMvc.perform(
+            getJson(String.format("/collectionexercises/survey/%s", SURVEY_ID_1)));
 
     actions
-      .andExpect(status().isOk())
-      .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-      .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
-      .andExpect(jsonPath("$", hasSize(2)))
-      .andExpect(
-        jsonPath(
-          "$[*].id",
-          containsInAnyOrder(
-            COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
-      .andExpect(
-        jsonPath(
-          "$[*].scheduledExecutionDateTime",
-          containsInAnyOrder(
-            new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
-            new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(
+            jsonPath(
+                "$[*].id",
+                containsInAnyOrder(
+                    COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())))
+        .andExpect(
+            jsonPath(
+                "$[*].scheduledExecutionDateTime",
+                containsInAnyOrder(
+                    new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
+                    new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
   }
 
-
   /**
-   * Tests if collection exercises found for list of surveys.
-   * Returned in a Json dictionary
+   * Tests if collection exercises found for list of surveys. Returned in a Json dictionary
    *
    * @throws Exception
    */
@@ -207,30 +205,34 @@ public class CollectionExerciseEndpointUnitTests {
 
     List<UUID> surveys = Arrays.asList(SURVEY_ID_1, SURVEY_ID_2);
 
-    HashMap<UUID, List<CollectionExercise>> serviceReturn= new HashMap<>();
+    HashMap<UUID, List<CollectionExercise>> serviceReturn = new HashMap<>();
     serviceReturn.put(SURVEY_ID_1, this.collectionExerciseResultsSurvey1);
     serviceReturn.put(SURVEY_ID_2, this.collectionExerciseResultsSurvey2);
 
-
     when(collectionExerciseService.findCollectionExercisesForSurveys(surveys))
-      .thenReturn(serviceReturn);
+        .thenReturn(serviceReturn);
 
     ResultActions actions =
-      mockCollectionExerciseMvc.perform(
-        getJson(String.format("/collectionexercises/surveys?surveyIds=%s,%s", SURVEY_ID_1, SURVEY_ID_2)));
+        mockCollectionExerciseMvc.perform(
+            getJson(
+                String.format(
+                    "/collectionexercises/surveys?surveyIds=%s,%s", SURVEY_ID_1, SURVEY_ID_2)));
 
     actions
-      .andExpect(status().isOk())
-      .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-      .andExpect(handler().methodName("getCollectionExercisesForSurveys"))
-      .andExpect(jsonPath(String.format("$.%s", SURVEY_ID_1.toString()), hasSize(1)))
-      .andExpect(jsonPath(String.format("$.%s.[0].id", SURVEY_ID_1.toString()),
-                          containsString(COLLECTIONEXERCISE_ID1.toString())))
-      .andExpect(jsonPath(String.format("$.%s", SURVEY_ID_2.toString()), hasSize(1)))
-      .andExpect(jsonPath(String.format("$.%s.[0].id", SURVEY_ID_2.toString()),
-        containsString(COLLECTIONEXERCISE_ID2.toString())));
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercisesForSurveys"))
+        .andExpect(jsonPath(String.format("$.%s", SURVEY_ID_1.toString()), hasSize(1)))
+        .andExpect(
+            jsonPath(
+                String.format("$.%s.[0].id", SURVEY_ID_1.toString()),
+                containsString(COLLECTIONEXERCISE_ID1.toString())))
+        .andExpect(jsonPath(String.format("$.%s", SURVEY_ID_2.toString()), hasSize(1)))
+        .andExpect(
+            jsonPath(
+                String.format("$.%s.[0].id", SURVEY_ID_2.toString()),
+                containsString(COLLECTIONEXERCISE_ID2.toString())));
   }
-
 
   @Test
   public void findCollectionExercisesForSurveyOnlyLive() throws Exception {

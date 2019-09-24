@@ -12,8 +12,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED;
-import java.util.Arrays;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -758,16 +759,14 @@ public class CollectionExerciseServiceTest {
 
     List<UUID> surveys = Arrays.asList(SURVEY_ID_1);
 
-    List<CollectionExercise> existing = FixtureHelper
-      .loadClassFixtures(CollectionExercise[].class);
+    List<CollectionExercise> existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
 
     given(collexRepo.findBySurveyIdInOrderBySurveyId(surveys)).willReturn(existing);
 
     HashMap<UUID, List<CollectionExercise>> result =
-      this.collectionExerciseService.findCollectionExercisesForSurveys(surveys);
+        this.collectionExerciseService.findCollectionExercisesForSurveys(surveys);
 
     assertEquals(result.get(SURVEY_ID_1).size(), 2);
-
   }
 
   /**
@@ -780,20 +779,19 @@ public class CollectionExerciseServiceTest {
 
     List<UUID> surveys = Arrays.asList(SURVEY_ID_1);
 
-    List<CollectionExercise> existing = FixtureHelper
-      .loadClassFixtures(CollectionExercise[].class);
+    List<CollectionExercise> existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
 
-    given(collexRepo.findBySurveyIdInAndStateOrderBySurveyId(
-      surveys, CollectionExerciseDTO.CollectionExerciseState.LIVE)).willReturn(existing);
+    given(
+            collexRepo.findBySurveyIdInAndStateOrderBySurveyId(
+                surveys, CollectionExerciseDTO.CollectionExerciseState.LIVE))
+        .willReturn(existing);
 
     HashMap<UUID, List<CollectionExercise>> result =
-      this.collectionExerciseService.findCollectionExercisesForSurveysByState(surveys,
-        CollectionExerciseDTO.CollectionExerciseState.LIVE );
+        this.collectionExerciseService.findCollectionExercisesForSurveysByState(
+            surveys, CollectionExerciseDTO.CollectionExerciseState.LIVE);
 
     assertEquals(result.get(SURVEY_ID_1).size(), 2);
-
   }
-
 
   public void testRemoveSampleSummaryLink() throws Exception {
     // Given
