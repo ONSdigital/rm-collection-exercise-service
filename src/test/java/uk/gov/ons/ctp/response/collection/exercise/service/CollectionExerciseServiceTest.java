@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -750,6 +751,46 @@ public class CollectionExerciseServiceTest {
         .transition(
             CollectionExerciseDTO.CollectionExerciseState.CREATED,
             CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);
+  }
+
+  @Test
+  public void testFindCollectionExercisesForSurveys() throws Exception {
+    final UUID SURVEY_ID_1 = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
+
+    List<UUID> surveys = Arrays.asList(SURVEY_ID_1);
+
+    List<CollectionExercise> existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
+
+    given(collexRepo.findBySurveyIdInOrderBySurveyId(surveys)).willReturn(existing);
+
+    HashMap<UUID, List<CollectionExercise>> result =
+        this.collectionExerciseService.findCollectionExercisesForSurveys(surveys);
+
+    assertEquals(result.get(SURVEY_ID_1).size(), 2);
+  }
+
+  /**
+   * Tests that returns collexes in a dictionary (key of survey) when repo returns a list of
+   * specific collexes.
+   */
+  @Test
+  public void testFindCollectionExercisesForSurveysByState() throws Exception {
+    final UUID SURVEY_ID_1 = UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e");
+
+    List<UUID> surveys = Arrays.asList(SURVEY_ID_1);
+
+    List<CollectionExercise> existing = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
+
+    given(
+            collexRepo.findBySurveyIdInAndStateOrderBySurveyId(
+                surveys, CollectionExerciseDTO.CollectionExerciseState.LIVE))
+        .willReturn(existing);
+
+    HashMap<UUID, List<CollectionExercise>> result =
+        this.collectionExerciseService.findCollectionExercisesForSurveysByState(
+            surveys, CollectionExerciseDTO.CollectionExerciseState.LIVE);
+
+    assertEquals(result.get(SURVEY_ID_1).size(), 2);
   }
 
   public void testRemoveSampleSummaryLink() throws Exception {

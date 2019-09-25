@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -52,6 +53,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
@@ -101,6 +103,8 @@ public class CollectionExerciseEndpointUnitTests {
 
   @Mock private PartySvcClient partySvcClient;
 
+  @Mock private CollectionExerciseRepository collectionExerciseRepository;
+
   @Mock private CollectionExerciseService collectionExerciseService;
 
   @Mock private SurveySvcClient surveyService;
@@ -113,6 +117,8 @@ public class CollectionExerciseEndpointUnitTests {
   private MockMvc textPlainMock;
   private List<SurveyDTO> surveyDtoResults;
   private List<CollectionExercise> collectionExerciseResults;
+  private List<CollectionExercise> collectionExerciseResultsSurvey1;
+  private List<CollectionExercise> collectionExerciseResultsSurvey2;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
   private Collection<CaseType> caseTypeDefaultResults;
   private List<LinkedSampleSummariesDTO> linkedSampleSummaries;
@@ -140,6 +146,11 @@ public class CollectionExerciseEndpointUnitTests {
 
     this.surveyDtoResults = FixtureHelper.loadClassFixtures(SurveyDTO[].class);
     this.collectionExerciseResults = FixtureHelper.loadClassFixtures(CollectionExercise[].class);
+    this.collectionExerciseResultsSurvey1 = new ArrayList<CollectionExercise>();
+    this.collectionExerciseResultsSurvey2 = new ArrayList<CollectionExercise>();
+
+    this.collectionExerciseResultsSurvey1.add(this.collectionExerciseResults.get(0));
+    this.collectionExerciseResultsSurvey2.add(this.collectionExerciseResults.get(1));
     this.sampleUnitsRequestDTOResults =
         FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
     this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
@@ -182,6 +193,45 @@ public class CollectionExerciseEndpointUnitTests {
                 containsInAnyOrder(
                     new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT),
                     new DateMatcher(COLLECTIONEXERCISE_DATE_OUTPUT))));
+  }
+
+  /**
+   * Tests if collection exercises found for list of surveys. Returned in a Json dictionary
+   *
+   * @throws Exception
+   */
+  @Test
+  public void findCollectionExercisesForSurveys() throws Exception {
+
+    List<UUID> surveys = Arrays.asList(SURVEY_ID_1, SURVEY_ID_2);
+
+    HashMap<UUID, List<CollectionExercise>> serviceReturn = new HashMap<>();
+    serviceReturn.put(SURVEY_ID_1, this.collectionExerciseResultsSurvey1);
+    serviceReturn.put(SURVEY_ID_2, this.collectionExerciseResultsSurvey2);
+
+    when(collectionExerciseService.findCollectionExercisesForSurveys(surveys))
+        .thenReturn(serviceReturn);
+
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            getJson(
+                String.format(
+                    "/collectionexercises/surveys?surveyIds=%s,%s", SURVEY_ID_1, SURVEY_ID_2)));
+
+    actions
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercisesForSurveys"))
+        .andExpect(jsonPath(String.format("$.%s", SURVEY_ID_1.toString()), hasSize(1)))
+        .andExpect(
+            jsonPath(
+                String.format("$.%s.[0].id", SURVEY_ID_1.toString()),
+                containsString(COLLECTIONEXERCISE_ID1.toString())))
+        .andExpect(jsonPath(String.format("$.%s", SURVEY_ID_2.toString()), hasSize(1)))
+        .andExpect(
+            jsonPath(
+                String.format("$.%s.[0].id", SURVEY_ID_2.toString()),
+                containsString(COLLECTIONEXERCISE_ID2.toString())));
   }
 
   @Test

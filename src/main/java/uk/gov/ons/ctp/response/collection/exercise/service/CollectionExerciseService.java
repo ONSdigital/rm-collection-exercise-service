@@ -107,6 +107,44 @@ public class CollectionExerciseService {
   }
 
   /**
+   * Find a list of collection exercises associated with a list of surveys from the Collection
+   * Exercise Service
+   *
+   * @param surveyIds the survey UUIDS for which to find collection exercises
+   * @return the associated collection exercises.
+   */
+  public HashMap<UUID, List<CollectionExercise>> findCollectionExercisesForSurveys(
+      List<UUID> surveyIds) {
+
+    List<CollectionExercise> collexList =
+        this.collectRepo.findBySurveyIdInOrderBySurveyId(surveyIds);
+
+    return this.collexListToMap(collexList);
+  }
+
+  /**
+   * Walks a list of collection exercises and splits them into a HashMap with key of survey id and
+   * value of list of collection exercises
+   *
+   * @param collexList list of collection exercises to split
+   * @return the associated collection exercises.
+   */
+  private HashMap<UUID, List<CollectionExercise>> collexListToMap(
+      List<CollectionExercise> collexList) {
+    HashMap<UUID, List<CollectionExercise>> collexMap = new HashMap<>();
+
+    for (CollectionExercise current : collexList) {
+      UUID surveyId = current.getSurveyId();
+
+      if (!collexMap.containsKey(surveyId)) {
+        collexMap.put(surveyId, new ArrayList<CollectionExercise>());
+      }
+      collexMap.get(surveyId).add(current);
+    }
+    return collexMap;
+  }
+
+  /**
    * find a list of all sample summary linked to a collection exercise
    *
    * @param id the collection exercise Id to find the linked sample summaries for
@@ -128,6 +166,23 @@ public class CollectionExerciseService {
   public List<CollectionExercise> findCollectionExercisesBySurveyIdAndState(
       UUID surveyId, CollectionExerciseState state) {
     return collectRepo.findBySurveyIdAndState(surveyId, state);
+  }
+
+  /**
+   * Find a list of collection exercises associated with a list of surveys from the Collection
+   * Exercise Service
+   *
+   * @param surveyIds the survey UUIDS for which to find collection exercises
+   * @param state Only return collection exercises in this state
+   * @return the associated collection exercises as a HashMap, key is survey id , value is List of
+   *     collex
+   */
+  public HashMap<UUID, List<CollectionExercise>> findCollectionExercisesForSurveysByState(
+      List<UUID> surveyIds, CollectionExerciseState state) {
+    List<CollectionExercise> collexList =
+        this.collectRepo.findBySurveyIdInAndStateOrderBySurveyId(surveyIds, state);
+
+    return this.collexListToMap(collexList);
   }
 
   /**

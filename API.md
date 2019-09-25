@@ -16,6 +16,63 @@ This page documents the Collection Exercise service API endpoints. Apart from th
 }
 ```
 
+## Get Collection Exercises for Surveys
+* `GET /collectionexercises/surveys?surveyIds=cb8accda-6118-4d3b-85a3-149e28960c54,b447e134-5e5d-46fb-b4fc-15efdcbe5ca7` 
+Will return a dictionary of collection exercises for each survey id in the supplied list of survey ids. In the form of a dictionary with a key of survey id, and value of a list of Collection Exercises.
+* `GET /collectionexercises/survey?surveyIds=cb8accda-6118-4d3b-85a3-149e28960c54,b447e134-5e5d-46fb-b4fc-15efdcbe5ca7&liveOnly=true` 
+As above , but only LIVE collexes returned
+
+### Example JSON Response
+```json
+{
+  "cb8accda-6118-4d3b-85a3-149e28960c54": 
+  [
+      {
+        "id": "c6467711-21eb-4e78-804c-1db8392f93fb",
+        "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
+        "actualExecutionDateTime": null,
+        "scheduledExecutionDateTime": null,
+        "scheduledStartDateTime": null,
+        "actualPublishDateTime": null,
+        "periodStartDateTime": null,
+        "periodEndDateTime": null,
+        "scheduledReturnDateTime": null,
+        "scheduledEndDateTime": null,
+        "executedBy": null,
+        "state": "LIVE",
+        "caseTypes": null,
+        "exerciseRef": "201801",
+        "userDescription": "January 2018",
+        "created": "2018-01-09T12:56:09.652Z",
+        "updated": null,
+        "deleted": null,
+        "validationErrors": []
+      },
+      {
+        "id": "b447e134-5e5d-46fb-b4fc-15efdcbe5ca7",
+        "surveyId": "cb8accda-6118-4d3b-85a3-149e28960c54",
+        "actualExecutionDateTime": null,
+        "scheduledExecutionDateTime": null,
+        "scheduledStartDateTime": null,
+        "actualPublishDateTime": null,
+        "periodStartDateTime": null,
+        "periodEndDateTime": null,
+        "scheduledReturnDateTime": null,
+        "scheduledEndDateTime": null,
+        "executedBy": null,
+        "state": "LIVE",
+        "caseTypes": null,
+        "exerciseRef": "201802",
+        "userDescription": "February 2018",
+        "created": "2018-01-09T12:56:09.709Z",
+        "updated": null,
+        "deleted": null,
+        "validationErrors": []
+      }
+    ]
+}
+```
+
 ## Get Collection Exercises for Survey
 * `GET /collectionexercises/survey/{survey_id}` will return a list of known collection exercises for the survey id.
 * `GET /collectionexercises/survey/{survey_id}?liveOnly=true` will return a list of LIVE collection exercises for the survey id.
@@ -67,8 +124,6 @@ This page documents the Collection Exercise service API endpoints. Apart from th
   }
 ]
 ```
-
-
 
 ## Get Collection Exercises for Survey and Exercise
 * `GET /collectionexercises/{exerciseRef}/survey/{survey_id}` will return a list of known collection exercises for the survey id and exerciseRef.
