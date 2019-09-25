@@ -192,8 +192,8 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * Return collection exercises for each of the the surveys
-   * in the given list of survey ids. Return data as a Json dictionary.
+   * Return collection exercises for each of the the surveys in the given list of survey ids. Return
+   * data as a Json dictionary.
    *
    * @param surveyIds survey Ids for which to get collection exercises
    * @param liveOnly Boolean , if set only returns live collection exercises
@@ -205,17 +205,17 @@ public class CollectionExerciseEndpoint {
       final @RequestParam List<UUID> surveyIds,
       @RequestParam("liveOnly") Optional<Boolean> liveOnly) {
 
-    HashMap<UUID, List<CollectionExercise>> surveyCollexDict = null;
+    HashMap<UUID, List<CollectionExercise>> surveyCollexMap;
 
     if (liveOnly.isPresent() && liveOnly.get().booleanValue()) {
-      surveyCollexDict =
+      surveyCollexMap =
           collectionExerciseService.findCollectionExercisesForSurveysByState(
               surveyIds, CollectionExerciseState.LIVE);
     } else {
-      surveyCollexDict = collectionExerciseService.findCollectionExercisesForSurveys(surveyIds);
+      surveyCollexMap = collectionExerciseService.findCollectionExercisesForSurveys(surveyIds);
     }
 
-    return ResponseEntity.ok(surveyCollexDict);
+    return ResponseEntity.ok(surveyCollexMap);
   }
 
   /**
