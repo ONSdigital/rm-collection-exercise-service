@@ -775,7 +775,7 @@ public class CollectionExerciseEndpoint {
 
   @RequestMapping(value = "/events", method = RequestMethod.GET)
   public ResponseEntity<HashMap<UUID, List<EventDTO>>> getMultipleCollectionExerciseEvents(
-      @PathVariable("ids") final List<UUID> ids) throws CTPException {
+      @RequestParam("ids") final List<UUID> ids) throws CTPException {
     List<EventDTO> result =
         this.eventService
             .getEvents(ids)
