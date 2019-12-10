@@ -773,6 +773,31 @@ public class CollectionExerciseEndpoint {
     return ResponseEntity.ok(result);
   }
 
+  @RequestMapping(value = "/events/{ids}", method = RequestMethod.GET)
+  public ResponseEntity<HashMap<UUID, List<EventDTO>>> getMultipleCollectionExerciseEvents(
+      @PathVariable("ids") final List<UUID> ids) throws CTPException {
+    List<EventDTO> result =
+        this.eventService
+            .getEvents(ids)
+            .stream()
+            .map(EventService::createEventDTOFromEvent)
+            .collect(Collectors.toList());
+
+    HashMap<UUID, List<EventDTO>> response = new HashMap<>();
+    for (EventDTO event : result) {
+      UUID collexID = event.getCollectionExerciseId();
+      if (response.containsKey(collexID)) {
+        response.get(collexID).add(event);
+      } else {
+        ArrayList<EventDTO> list = new ArrayList<>();
+        list.add(event);
+        response.put(collexID, list);
+      }
+    }
+
+    return ResponseEntity.ok(response);
+  }
+
   /**
    * PUT request to update a collection event date
    *

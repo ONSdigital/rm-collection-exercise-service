@@ -629,3 +629,6 @@ json
 ```
 
 An `HTTP 404 Not Found` status code is returned if an event could not be found.
+
+## Get Events linked to list of Collection Exercises
+* `GET /collectionexercises/events?ids={a,b}` will return the events linked to the specified collection exercise IDs.
