@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -769,6 +770,19 @@ public class CollectionExerciseEndpoint {
             .stream()
             .map(EventService::createEventDTOFromEvent)
             .collect(Collectors.toList());
+
+    return ResponseEntity.ok(result);
+  }
+
+  @RequestMapping(value = "/events", method = RequestMethod.GET)
+  public ResponseEntity<Map<UUID, List<EventDTO>>> getMultipleCollectionExerciseEvents(
+      @RequestParam("ids") final List<UUID> ids) throws CTPException {
+    Map<UUID, List<EventDTO>> result =
+        this.eventService
+            .getEvents(ids)
+            .stream()
+            .map(EventService::createEventDTOFromEvent)
+            .collect(Collectors.groupingBy(EventDTO::getCollectionExerciseId, Collectors.toList()));
 
     return ResponseEntity.ok(result);
   }

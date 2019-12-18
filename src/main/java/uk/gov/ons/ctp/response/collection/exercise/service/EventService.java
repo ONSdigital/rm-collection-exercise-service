@@ -148,6 +148,10 @@ public class EventService {
     return this.eventRepository.findByCollectionExerciseId(collexId);
   }
 
+  public List<Event> getEvents(List<UUID> collexIds) throws CTPException {
+    return this.eventRepository.findByCollectionExerciseId(collexIds);
+  }
+
   public Event updateEvent(final UUID collexUuid, final String tag, final Date date)
       throws CTPException {
     final CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);

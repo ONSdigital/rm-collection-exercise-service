@@ -818,4 +818,20 @@ public class CollectionExerciseEndpointUnitTests {
     assertEquals(uuid, uuidCaptor.getValue());
     assertEquals("End", tagCaptor.getValue());
   }
+
+  /**
+   * Test to get events linked to multiple collection exercises
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testGetEvents() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    UUID uuid2 = UUID.randomUUID(); // UUID2 doesn't matter, it won't be found
+    MockHttpServletRequestBuilder builder =
+        MockMvcRequestBuilders.get(
+            "/collectionexercises/events?ids=" + uuid.toString() + "," + uuid2.toString());
+    ResultActions actions = mockCollectionExerciseMvc.perform(builder);
+    actions.andExpect(status().isOk());
+  }
 }
