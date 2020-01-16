@@ -1,0 +1,7 @@
+configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collectionexercisesvc-config
+data:
+  .env: |-
