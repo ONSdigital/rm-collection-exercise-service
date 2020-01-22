@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
-  labels:
-    run: {{ .Chart.Name }}
-    helm.release: RELEASE-NAME
 spec:
   replicas: 1
   strategy:
@@ -20,9 +17,6 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
-        env: {{ .Values.env }}"
-        version: "v1.2"
     spec:
       containers:
         - name: {{ .Chart.Name }}
