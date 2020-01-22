@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    run: {{ .Chart.Name }}
+    helm.release: RELEASE-NAME
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge:
+      maxUnavailable:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      env: "{{ .Values.env }}"
+      version: "v1.2"
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        env: {{ .Values.env }}"
+        version: "v1.2"
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "eu.gcr.io/rm-ras-sandbox/{{ .Values.image.repositoryName }}:{{ .Values.image.tag}}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http-server
+              containerPort: 8084
+          readinessProbe:
+            httpGet:
+              path: /info
+              port: 8084
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /info
+              port: 8084
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          env:
+          - name: DB_HOST
+            value: $(POSTGRES_SERVICE_HOST)
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: db-config
+                key: db-port
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: db-config
+                key: db-name
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: password
+          - name: SECURITY_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                name: security-credentials
+                key: security-user
+          - name: SECURITY_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: security-credentials
+                key: security-password
+          - name: RABBITMQ_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: rabbitmq
+                key: rabbitmq-username
+          - name: RABBITMQ_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: rabbitmq
+                key: rabbitmq-password
+          - name: SERVER_PORT
+            value: "8084"
+          - name: SECURITY_BASIC_ENABLED
+            value: "true"
+          - name: SPRING_DATASOURCE_URL
+            value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable"
+          - name: LIQUIBASE_URL
+            value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
+          - name: RABBITMQ_HOST
+            value: "$(RABBITMQ_SERVICE_HOST)"
+          - name: RABBITMQ_PORT
+            value: "5672"
+          - name: REDISSON_CONFIG_ADDRESS
+            value: "$(REDIS_MASTER_SERVICE_HOST):$(REDIS_MASTER_SERVICE_PORT)"
+          - name: DATA_GRID_ADDRESS
+            value: "$(REDIS_MASTER_SERVICE_HOST):$(REDIS_MASTER_SERVICE_PORT)"
+          - name: ACTION_SVC_CONNECTION_CONFIG_HOST
+            value: "$(ACTIONSVC_SERVICE_HOST)"
+          - name: ACTION_SVC_CONNECTION_CONFIG_PORT
+            value: "$(ACTIONSVC_SERVICE_PORT)"
+          - name: SAMPLE_SVC_CONNECTION_CONFIG_HOST
+            value: "$(SAMPLESVC_SERVICE_HOST)"
+          - name: SAMPLE_SVC_CONNECTION_CONFIG_PORT
+            value: "$(SAMPLESVC_SERVICE_PORT)"
+          - name: SURVEY_SVC_CONNECTION_CONFIG_HOST
+            value: "$(SURVEYSVC_SERVICE_HOST)"
+          - name: SURVEY_SVC_CONNECTION_CONFIG_PORT
+            value: "$(SURVEYSVC_SERVICE_PORT)"
+          - name: PARTY_SVC_CONNECTION_CONFIG_HOST
+            value: "$(RAS_PARTY_SERVICE_HOST)"
+          - name: PARTY_SVC_CONNECTION_CONFIG_PORT
+            value: "$(RAS_PARTY_SERVICE_PORT)"
+          - name: PARTY_SVC_CONNECTION_CONFIG_USERNAME
+            value: "$(SECURITY_USER_NAME)"
+          - name: PARTY_SVC_CONNECTION_CONFIG_PASSWORD
+            value: "$(SECURITY_USER_PASSWORD)"
+          - name: COLLECTION_INSTRUMENT_SVC_CONNECTION_CONFIG_HOST
+            value: "$(RAS_COLLECTION_INSTRUMENT_SERVICE_HOST)"
+          - name: COLLECTION_INSTRUMENT_SVC_CONNECTION_CONFIG_PORT
+            value: "$(RAS_COLLECTION_INSTRUMENT_SERVICE_PORT)"
+          - name: COLLECTION_INSTRUMENT_SVC_CONNECTION_CONFIG_USERNAME
+            value: "$(SECURITY_USER_NAME)"
+          - name: COLLECTION_INSTRUMENT_SVC_CONNECTION_CONFIG_PASSWORD
+            value: "$(SECURITY_USER_PASSWORD)"
+          - name: SCHEDULES_VALIDATION_SCHEDULE_DELAY_MILLI_SECONDS
+            value: "1000"
+          - name: SCHEDULES_DISTRIBUTION_SCHEDULE_DELAY_MILLI_SECONDS
+            value: "1000"
+          - name: LIQUIBASE_USER
+            value: "$(DB_USERNAME)"
+          - name: LIQUIBASE_PASSWORD
+            value: "$(DB_PASSWORD)"
+          - name: SPRING_DATASOURCE_USERNAME
+            value: "$(DB_USERNAME)"
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: "$(DB_PASSWORD)"
+          - name: SPRING_ZIPKIN_ENABLED
+            value: "true"
+          - name: SPRING_ZIPKIN_BASEURL
+            value: "http://$(ZIPKIN_SERVICE_HOST):$(ZIPKIN_SERVICE_PORT)/"
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2056Mi
+            requests:
+              cpu: 500m
+              memory: 1028Mi
