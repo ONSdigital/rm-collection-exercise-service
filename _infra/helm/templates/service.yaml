@@ -1,11 +1,9 @@
-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Chart.Name }}
   labels:
     run: {{ .Chart.Name }}
-    helm.release: RELEASE-NAME
 spec:
   type: ClusterIP
   ports:

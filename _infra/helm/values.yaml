@@ -1,11 +1,6 @@
 replicaCount: 1
 
 env: "dev"
-version: "v1.2"
-
-image:
-  tag: migration-sandbox
-  repository: eu.gcr.io/rm-ras-sandbox
 
 service:
   port: 8084
