@@ -4,7 +4,7 @@ RUN groupadd --gid 999 collectionexercisesvc && \
     useradd --create-home --system --uid 999 --gid collectionexercisesvc collectionexercisesvc
 USER collectionexercisesvc
 
-COPY collectionexercisesvc /opt/collectionexercisesvc.jar
+COPY collectionexercisesvc.jar /opt/collectionexercisesvc.jar
 
 ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar /opt/collectionexercisesvc.jar" ]
 
