@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    run: {{ .Chart.Name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8084
+    protocol: TCP
+  selector:
+    app: {{ .Chart.Name }}
