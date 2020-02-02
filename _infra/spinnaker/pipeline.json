@@ -1,0 +1,21 @@
+{
+  "schema": "v2",
+  "application": "collection-exercise",
+  "name": "collection-exercise",
+  "template": {
+    "artifactAccount": "front50ArtifactCredentials",
+    "reference": "spinnaker://rasrmApplicationTemplate",
+    "type": "front50/pipelineTemplate"
+  },
+  "variables": {
+    "name": "collection-exercise",
+    "defaultHelmChart": "collection-exercise-0.1.0.tgz",
+    "helmChartMatcher": "collection-exercise-.*\\.tgz"
+  },
+  "exclude": [],
+  "triggers": [],
+  "parameters": [],
+  "notifications": [],
+  "description": "",
+  "stages": []
+}
