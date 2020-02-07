@@ -7,8 +7,4 @@ service:
 
 resources:
   requests:
-    cpu: "500m"
-    memory: "1028Mi"
-  limits:
-    cpu: "1000m"
-    memory: "2056Mi"
+    memory: "512Mi"
