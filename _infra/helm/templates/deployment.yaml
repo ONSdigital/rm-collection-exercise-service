@@ -20,7 +20,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "eu.gcr.io/ons-rasrmbs-management/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http-server
               containerPort: 8084
