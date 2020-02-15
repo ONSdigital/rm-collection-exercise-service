@@ -12,7 +12,6 @@ spec:
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
-      env: "{{ .Values.env }}"
   template:
     metadata:
       labels:
