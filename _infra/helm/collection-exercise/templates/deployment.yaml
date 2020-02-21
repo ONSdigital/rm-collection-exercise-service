@@ -6,8 +6,8 @@ spec:
   replicas: {{ .Values.replicas }}
   strategy:
     rollingUpdate:
-      maxSurge: {{ .Values.maxSurge }}
-      maxUnavailable: {{ .Values.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
     type: RollingUpdate
   selector:
     matchLabels:
@@ -23,15 +23,15 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "eu.gcr.io/ons-rasrmbs-management/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: Always
+          image: "{{ .Values.image.name }}/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http-server
-              containerPort: {{ .Values.containerPort }}
+              containerPort: {{ .Values.container.port }}
           readinessProbe:
             httpGet:
               path: /info
-              port: {{ .Values.containerPort }}
+              port: {{ .Values.container.port }}
             initialDelaySeconds: 120
             periodSeconds: 20
             failureThreshold: 5
@@ -40,7 +40,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /info
-              port: {{ .Values.containerPort }}
+              port: {{ .Values.container.port }}
             initialDelaySeconds: 120
             periodSeconds: 20
             failureThreshold: 5
@@ -69,7 +69,7 @@ spec:
                 name: rabbitmq
                 key: rabbitmq-password
           - name: SERVER_PORT
-            value: "8084"
+            value: "{{ .Valeus.container.port }}"
           - name: SECURITY_BASIC_ENABLED
             value: "true"
           - name: SPRING_DATASOURCE_URL
