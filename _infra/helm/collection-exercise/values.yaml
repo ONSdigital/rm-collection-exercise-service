@@ -36,7 +36,8 @@ databaseConfig: |
 service:
   port: 80
   type: ClusterIP
-containerPort: 80
+container:
+ port: 80
 
 resources:
   requests:

@@ -69,7 +69,7 @@ spec:
                 name: rabbitmq
                 key: rabbitmq-password
           - name: SERVER_PORT
-            value: "{{ .Valeus.container.port }}"
+            value: "{{ .Values.container.port }}"
           - name: SECURITY_BASIC_ENABLED
             value: "true"
           - name: SPRING_DATASOURCE_URL
