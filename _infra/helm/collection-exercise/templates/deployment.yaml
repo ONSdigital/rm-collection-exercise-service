@@ -108,10 +108,28 @@ spec:
             value: "$(RABBITMQ_SERVICE_HOST)"
           - name: RABBITMQ_PORT
             value: "5672"
+          - name: REDIS_HOST
+            {{- if .Values.database.managedRedis }}
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: redis-host
+            {{- else }}
+            value: "$(REDIS_MASTER_SERVICE_HOST)"
+            {{- end }}
+          - name: REDIS_PORT
+            {{- if .Values.database.managedRedis }}
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: redis-port
+            {{- else }}
+            value: "$(REDIS_MASTER_SERVICE_PORT)"
+            {{- end}}
           - name: REDISSON_CONFIG_ADDRESS
-            value: "$(REDIS_MASTER_SERVICE_HOST):$(REDIS_MASTER_SERVICE_PORT)"
+            value: "$(REDIS_HOST):$(REDIS_PORT)"
           - name: DATA_GRID_ADDRESS
-            value: "$(REDIS_MASTER_SERVICE_HOST):$(REDIS_MASTER_SERVICE_PORT)"
+            value: "$(REDIS_HOST):$(REDIS_PORT)"
           - name: ACTION_SVC_CONNECTION_CONFIG_HOST
             value: "$(ACTION_SERVICE_HOST)"
           - name: ACTION_SVC_CONNECTION_CONFIG_PORT
