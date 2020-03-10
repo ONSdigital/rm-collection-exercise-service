@@ -68,16 +68,15 @@ spec:
             httpGet:
               path: /info
               port: {{ .Values.container.port }}
-            initialDelaySeconds: 120
-            periodSeconds: 20
-            failureThreshold: 5
+            periodSeconds: 5
+            failureThreshold: 3
             successThreshold: 1
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /info
               port: {{ .Values.container.port }}
-            initialDelaySeconds: 120
+            initialDelaySeconds: 300
             periodSeconds: 20
             failureThreshold: 5
             successThreshold: 1
