@@ -209,9 +209,11 @@ spec:
             value: "$(DB_USERNAME)"
           - name: SPRING_DATASOURCE_PASSWORD
             value: "$(DB_PASSWORD)"
+          {{ if .Values.zipkin.enabled }}
           - name: SPRING_ZIPKIN_ENABLED
-            value: "true"
+            value: {{ .Values.zipkin.enabled }}
           - name: SPRING_ZIPKIN_BASEURL
             value: "http://$(ZIPKIN_SERVICE_HOST):$(ZIPKIN_SERVICE_PORT)/"
+          {{- end }}
           resources:
             {{ toYaml .Values.resources | nindent 12 }}
