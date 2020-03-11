@@ -19,6 +19,9 @@ database:
     nameKey: db-name
   managedRedis: false
 
+zipkin:
+  enabled: false
+
 container:
   port: 8080
 service:
