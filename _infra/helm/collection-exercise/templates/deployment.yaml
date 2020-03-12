@@ -161,10 +161,6 @@ spec:
             {{- end }}
           - name: LIQUIBASE_URL
             value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
-          - name: RABBITMQ_HOST
-            value: "$(RABBITMQ_SERVICE_HOST)"
-          - name: RABBITMQ_PORT
-            value: "5672"
           - name: REDIS_HOST
             {{- if .Values.database.managedRedis }}
             valueFrom:
