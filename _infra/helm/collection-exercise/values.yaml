@@ -30,3 +30,6 @@ service:
 resources:
   requests:
     memory: "512Mi"
+
+managedRabbitMQ:
+  enabled: false
