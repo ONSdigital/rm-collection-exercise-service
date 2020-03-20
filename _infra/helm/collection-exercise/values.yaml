@@ -39,3 +39,7 @@ tomcat:
   maxActive: 10
   maxIdle: 5
   minIdle: 3
+
+dns:
+  enabled: false
+  wellKnownPort: 8080
