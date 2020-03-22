@@ -1,16 +1,16 @@
 {
   "schema": "v2",
   "application": "collection-exercise",
-  "name": "collection-exercise",
+  "name": "deploy preprod",
   "template": {
     "artifactAccount": "front50ArtifactCredentials",
-    "reference": "spinnaker://rasrmApplicationTemplate",
+    "reference": "spinnaker://individualDeploymentTemplate",
     "type": "front50/pipelineTemplate"
   },
   "variables": {
-    "name": "collection-exercise",
-    "defaultHelmChart": "collection-exercise-0.1.0.tgz",
-    "helmChartMatcher": "collection-exercise-.*\\.tgz"
+    "namespace": "preprod",
+    "environment": "preprod",
+    "service": "collection-exercise"
   },
   "exclude": [],
   "triggers": [],
