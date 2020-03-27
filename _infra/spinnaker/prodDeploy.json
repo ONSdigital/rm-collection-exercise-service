@@ -1,17 +1,17 @@
 {
   "schema": "v2",
   "application": "collection-exercise",
-  "name": "deploy preprod",
+  "name": "deploy prod",
   "template": {
     "artifactAccount": "front50ArtifactCredentials",
     "reference": "spinnaker://individualDeploymentTemplate",
     "type": "front50/pipelineTemplate"
   },
   "variables": {
-    "namespace": "preprod",
-    "environment": "preprod",
-    "service": "collection-exercise",
-    "bucket": "ras-rm-preprod-configuration"
+    "namespace": "prod",
+    "environment": "prod",
+    "service": "action",
+    "bucket": "ras-rm-prod-configuration"
   },
   "exclude": [],
   "triggers": [],
