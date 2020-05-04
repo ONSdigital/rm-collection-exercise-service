@@ -55,13 +55,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionType;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
+import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageBase;
+import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageListener;
+import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageSender;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -73,12 +79,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
-import uk.gov.ons.ctp.response.sample.representation.SampleSummaryDTO;
-import uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit;
-import uk.gov.ons.tools.rabbit.Rabbitmq;
-import uk.gov.ons.tools.rabbit.SimpleMessageBase;
-import uk.gov.ons.tools.rabbit.SimpleMessageListener;
-import uk.gov.ons.tools.rabbit.SimpleMessageSender;
 
 /** A class to contain integration tests for the collection exercise service */
 @ContextConfiguration

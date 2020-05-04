@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://ons.gov.uk/ctp/response/sampleunit/definition"
+  targetNamespace="http://ons.gov.uk/ctp/response/sampleunit/definition">
+
+
+  <xsd:element name="sampleUnit" type="SampleUnit"/>
+
+  <xsd:complexType name="SampleUnit">
+    <xsd:sequence>
+      <xsd:element name="id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="sampleUnitRef" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="sampleUnitType" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="formType" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="collectionExerciseId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="sampleAttributes" minOccurs="0" maxOccurs="1">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="entry" minOccurs="0" maxOccurs="unbounded">
+              <xsd:complexType>
+                <xsd:sequence>
+                  <xsd:element name="key" minOccurs="0" type="xsd:string"/>
+                  <xsd:element name="value" minOccurs="0" type="xsd:string"/>
+                </xsd:sequence>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+</xsd:schema>

@@ -30,16 +30,16 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRulePostRequestDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRulePutRequestDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePostRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePutRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ActionSvcClientTest {

@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.ons.ctp.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
 
 /** The REST endpoint controller for Collection Exercises. */
 @RestController

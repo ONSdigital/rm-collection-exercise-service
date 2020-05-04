@@ -26,13 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
-import uk.gov.ons.ctp.common.FixtureHelper;
-import uk.gov.ons.ctp.common.distributed.DistributedListManager;
-import uk.gov.ons.ctp.common.distributed.LockingException;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.state.StateTransitionManager;
-import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
+import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
@@ -42,6 +36,14 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.DistributedListManager;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.LockingException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -54,8 +56,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-import uk.gov.ons.ctp.response.party.representation.PartyDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Tests for the SampleUnitDistributor */
 @RunWith(MockitoJUnitRunner.class)

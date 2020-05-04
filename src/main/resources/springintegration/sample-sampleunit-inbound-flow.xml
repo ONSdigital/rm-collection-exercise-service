@@ -38,14 +38,14 @@
 
 	<!-- Validated xml is transformed into the jaxb generated object model -->
 	<int:channel id="sampleUnitTransformed"
-		datatype="uk.gov.ons.ctp.response.sampleunit.definition.SampleUnit" />
+		datatype="uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit" />
 	<int-xml:unmarshalling-transformer
 		input-channel="sampleUnitXmlValid" output-channel="sampleUnitTransformed"
 		unmarshaller="sampleUnitMarshaller" />
 
 	<bean id="sampleUnitMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
 		<property name="contextPath"
-			value="uk.gov.ons.ctp.response.sampleunit.definition" />
+			value="uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition" />
 	</bean>
 
 	<!-- Finally see the @ServiceActivator(inputChannel = "sampleUnitTransformed", 
@@ -76,7 +76,7 @@
 			</bean>
 		</property>
 		<property name="retryPolicy">
-			<bean class="uk.gov.ons.ctp.common.retry.CTPRetryPolicy">
+			<bean class="uk.gov.ons.ctp.response.collection.exercise.lib.common.retry.CTPRetryPolicy">
 				<constructor-arg type="int">
 					<value>${messaging.conMaxAttempts}</value>
 				</constructor-arg>

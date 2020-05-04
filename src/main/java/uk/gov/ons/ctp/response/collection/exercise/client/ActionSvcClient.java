@@ -22,15 +22,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.error.CTPException.Fault;
-import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRulePostRequestDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRulePutRequestDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePostRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePutRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component

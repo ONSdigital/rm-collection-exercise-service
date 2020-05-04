@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
 
 /** JPA repository for SampleUnit entities */
 @Repository

@@ -13,10 +13,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.ons.ctp.common.MvcHelper.getJson;
-import static uk.gov.ons.ctp.common.MvcHelper.postJson;
-import static uk.gov.ons.ctp.common.MvcHelper.putJson;
-import static uk.gov.ons.ctp.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
+import static uk.gov.ons.ctp.lib.common.MvcHelper.getJson;
+import static uk.gov.ons.ctp.lib.common.MvcHelper.postJson;
+import static uk.gov.ons.ctp.lib.common.MvcHelper.putJson;
+import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -40,12 +40,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import uk.gov.ons.ctp.common.FixtureHelper;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.error.RestExceptionHandler;
-import uk.gov.ons.ctp.common.jackson.CustomObjectMapper;
-import uk.gov.ons.ctp.common.matcher.DateMatcher;
-import uk.gov.ons.ctp.common.util.MultiIsoDateFormat;
+import uk.gov.ons.ctp.lib.common.FixtureHelper;
+import uk.gov.ons.ctp.lib.common.matcher.DateMatcher;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
@@ -53,6 +49,13 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.RestExceptionHandler;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObjectMapper;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateFormat;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.SampleLinkDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -60,9 +63,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSu
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitsRequestDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
 
 /** Collection Exercise Endpoint Unit tests */
 public class CollectionExerciseEndpointUnitTests {

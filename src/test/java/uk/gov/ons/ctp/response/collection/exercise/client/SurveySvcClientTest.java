@@ -25,13 +25,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.SurveySvc;
-import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
-import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyClassifierDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyClassifierTypeDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SurveySvcClientTest {

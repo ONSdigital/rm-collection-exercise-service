@@ -21,13 +21,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.PartySvc;
-import uk.gov.ons.ctp.response.party.representation.PartyDTO;
-import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.SampleLinkDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartySvcClientTest {

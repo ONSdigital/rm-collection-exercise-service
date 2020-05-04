@@ -19,14 +19,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
+import uk.gov.ons.ctp.response.collection.exercise.lib.collection.instrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyClassifierDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyClassifierTypeDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -34,11 +39,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.ExerciseSampleUnitGroupService;
-import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
-import uk.gov.ons.ctp.response.party.representation.PartyDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
-import uk.gov.ons.response.survey.representation.SurveyClassifierDTO;
-import uk.gov.ons.response.survey.representation.SurveyClassifierTypeDTO;
 
 /** Tests for the ValidatesSampleTest */
 @RunWith(MockitoJUnitRunner.class)

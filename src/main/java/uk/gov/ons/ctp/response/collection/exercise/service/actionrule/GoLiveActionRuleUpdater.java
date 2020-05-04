@@ -4,18 +4,18 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.response.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO.SurveyType;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleUpdater;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
-import uk.gov.ons.response.survey.representation.SurveyDTO;
-import uk.gov.ons.response.survey.representation.SurveyDTO.SurveyType;
 
 @Component
 public final class GoLiveActionRuleUpdater implements ActionRuleUpdater {
