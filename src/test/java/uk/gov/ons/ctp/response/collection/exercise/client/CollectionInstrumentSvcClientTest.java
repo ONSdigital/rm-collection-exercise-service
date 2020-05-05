@@ -25,11 +25,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.ctp.common.rest.RestUtility;
-import uk.gov.ons.ctp.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.CollectionInstrumentSvc;
-import uk.gov.ons.ctp.response.collection.instrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.collection.instrument.representation.CollectionInstrumentDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollectionInstrumentSvcClientTest {

@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.common.error.CTPException;
-import uk.gov.ons.ctp.response.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 
 @Component
 public class ActionRulesFilter {

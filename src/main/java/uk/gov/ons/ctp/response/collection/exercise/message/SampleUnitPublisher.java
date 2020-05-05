@@ -6,7 +6,7 @@ import net.sourceforge.cobertura.CoverageIgnore;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.annotation.MessageEndpoint;
-import uk.gov.ons.ctp.response.casesvc.message.sampleunitnotification.SampleUnitParent;
+import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 
 /** Service implementation responsible for publishing a sampleUnit message to the case service. */
 @CoverageIgnore

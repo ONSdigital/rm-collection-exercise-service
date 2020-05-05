@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
-import uk.gov.ons.ctp.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.party.definition.SampleLinkCreationRequestDTO;
-import uk.gov.ons.ctp.response.party.representation.PartyDTO;
-import uk.gov.ons.ctp.response.party.representation.SampleLinkDTO;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.definition.SampleLinkCreationRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.SampleLinkDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 
 /** HTTP RestClient implementation for calls to the Party service */
 @Component

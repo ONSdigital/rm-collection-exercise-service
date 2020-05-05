@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.UUID;
 import org.junit.Test;
-import uk.gov.ons.ctp.response.sample.representation.SampleUnitDTO.SampleUnitType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO.SampleUnitType;
 
 public class ExerciseSampleUnitTest {
 
