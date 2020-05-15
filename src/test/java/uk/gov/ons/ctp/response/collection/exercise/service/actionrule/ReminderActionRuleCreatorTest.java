@@ -129,7 +129,7 @@ public class ReminderActionRuleCreatorTest {
         createCollectionExerciseEvent(tag, eventTriggerDate, collectionExercise);
 
     OffsetDateTime eventTriggerOffsetDateTime =
-        OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault());
+        OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault());
 
     final HashMap<String, String> inactiveEnrolmentSelector = new HashMap<>();
     inactiveEnrolmentSelector.put("activeEnrolment", "false");

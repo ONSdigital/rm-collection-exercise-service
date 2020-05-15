@@ -159,14 +159,14 @@ public class ReminderActionRuleUpdaterTest {
             actionRuleId1,
             actionRuleDTO1.getName(),
             actionRuleDTO1.getDescription(),
-            OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault()),
+            OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault()),
             actionRuleDTO1.getPriority());
     verify(actionSvcClient, atLeastOnce())
         .updateActionRule(
             actionRuleId2,
             actionRuleDTO2.getName(),
             actionRuleDTO2.getDescription(),
-            OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault()),
+            OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault()),
             actionRuleDTO2.getPriority());
   }
 
@@ -234,7 +234,7 @@ public class ReminderActionRuleUpdaterTest {
             actionRuleId1,
             actionRuleDTO1.getName(),
             actionRuleDTO1.getDescription(),
-            OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault()),
+            OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault()),
             actionRuleDTO1.getPriority());
 
     verify(actionSvcClient, times(0))
@@ -245,7 +245,7 @@ public class ReminderActionRuleUpdaterTest {
             actionRuleId3,
             actionRuleDTO3.getName(),
             actionRuleDTO3.getDescription(),
-            OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault()),
+            OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault()),
             actionRuleDTO3.getPriority());
 
     verify(actionSvcClient, never())

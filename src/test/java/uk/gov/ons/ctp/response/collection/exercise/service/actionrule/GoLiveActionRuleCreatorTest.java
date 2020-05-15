@@ -97,7 +97,7 @@ public class GoLiveActionRuleCreatorTest {
         .thenReturn(actionPlan);
 
     OffsetDateTime eventTriggerOffsetDateTime =
-        OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault());
+        OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault());
     when(actionSvcClient.createActionRule(
             anyString(),
             anyString(),
