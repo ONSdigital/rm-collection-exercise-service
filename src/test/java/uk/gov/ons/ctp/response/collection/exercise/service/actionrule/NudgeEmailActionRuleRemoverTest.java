@@ -1,5 +1,17 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.actionrule;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -18,19 +30,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleRemover;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NudgeEmailActionRuleRemoverTest {
@@ -150,7 +149,7 @@ public class NudgeEmailActionRuleRemoverTest {
   }
 
   private ActionRuleDTO createActionRuleDTO(
-          final UUID actionRuleId, final ActionType actionRuleType, final String actionRuleName) {
+      final UUID actionRuleId, final ActionType actionRuleType, final String actionRuleName) {
     final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
     actionRuleDTO.setId(actionRuleId);
     actionRuleDTO.setActionTypeName(actionRuleType);

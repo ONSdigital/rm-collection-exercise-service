@@ -49,9 +49,9 @@ public class EventService {
 
     public static final List<Tag> ORDERED_REMINDERS = Arrays.asList(reminder, reminder2, reminder3);
     public static final List<Tag> ORDERED_NUDGE_EMAIL =
-      Arrays.asList(nudge_email_0, nudge_email_1, nudge_email_2, nudge_email_3, nudge_email_4);
+        Arrays.asList(nudge_email_0, nudge_email_1, nudge_email_2, nudge_email_3, nudge_email_4);
     public static final List<Tag> ORDERED_MANDATORY_EVENTS =
-      Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end);
+        Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end);
 
     Tag(final boolean mandatory) {
       this.mandatory = mandatory;
@@ -65,17 +65,17 @@ public class EventService {
 
     public boolean isActionable() {
       List<EventService.Tag> actionableEvents =
-        Arrays.asList(
-          mps,
-          go_live,
-          reminder,
-          reminder2,
-          reminder3,
-          nudge_email_0,
-          nudge_email_1,
-          nudge_email_2,
-          nudge_email_3,
-          nudge_email_4);
+          Arrays.asList(
+              mps,
+              go_live,
+              reminder,
+              reminder2,
+              reminder3,
+              nudge_email_0,
+              nudge_email_1,
+              nudge_email_2,
+              nudge_email_3,
+              nudge_email_4);
 
       return actionableEvents.contains(this);
     }
@@ -126,14 +126,14 @@ public class EventService {
     UUID collexId = eventDto.getCollectionExerciseId();
     CollectionExercise collex = getCollectionExercise(collexId, Fault.RESOURCE_NOT_FOUND);
     Event existing =
-      this.eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
+        this.eventRepository.findOneByCollectionExerciseAndTag(collex, eventDto.getTag());
 
     if (existing != null) {
       throw new CTPException(
-        Fault.RESOURCE_VERSION_CONFLICT,
-        String.format(
-          "Event %s already exists for collection exercise %s",
-          eventDto.getTag(), collex.getId()));
+          Fault.RESOURCE_VERSION_CONFLICT,
+          String.format(
+              "Event %s already exists for collection exercise %s",
+              eventDto.getTag(), collex.getId()));
     }
 
     Event event = new Event();
@@ -195,7 +195,7 @@ public class EventService {
   }
 
   public Event updateEvent(final UUID collexUuid, final String tag, final Date date)
-    throws CTPException {
+      throws CTPException {
     final CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
     final Event event = getEventByTagAndCollectionExerciseId(tag, collex);
 
@@ -221,10 +221,10 @@ public class EventService {
   }
 
   private void deleteNudgeEmail(final CollectionExercise collex, final Event event)
-    throws CTPException {
+      throws CTPException {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
     final List<Event> existingNudgeEmails =
-      validateExistingNudgeEmail.validate(existingEvents, event, collex.getState());
+        validateExistingNudgeEmail.validate(existingEvents, event, collex.getState());
     for (Event nudgeEmail : existingNudgeEmails) {
       deleteActionRulesForEvent(nudgeEmail);
       nudgeEmail.setDeleted(true);
@@ -233,7 +233,7 @@ public class EventService {
   }
 
   private void validateSubmittedEvent(final CollectionExercise collex, final Event event)
-    throws CTPException {
+      throws CTPException {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
 
     for (EventValidator validator : eventValidators) {
@@ -242,24 +242,24 @@ public class EventService {
   }
 
   private Event getEventByTagAndCollectionExerciseId(
-    final String tag, final CollectionExercise collex) throws CTPException {
+      final String tag, final CollectionExercise collex) throws CTPException {
     final Event event = eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
     if (event == null) {
       throw new CTPException(
-        Fault.RESOURCE_NOT_FOUND,
-        String.format(
-          "Event with tag %s for Collection Exercise %s does not exist", tag, collex.getId()));
+          Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "Event with tag %s for Collection Exercise %s does not exist", tag, collex.getId()));
     }
     return event;
   }
 
   private CollectionExercise getCollectionExercise(final UUID collexUuid, final Fault fault)
-    throws CTPException {
+      throws CTPException {
     final CollectionExercise collex = collectionExerciseService.findCollectionExercise(collexUuid);
 
     if (collex == null) {
       throw new CTPException(
-        fault, String.format("Collection exercise %s does not exist", collexUuid));
+          fault, String.format("Collection exercise %s does not exist", collexUuid));
     }
     return collex;
   }
@@ -272,13 +272,13 @@ public class EventService {
         return event;
       } else {
         throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event.getId()));
+            Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event.getId()));
       }
 
     } else {
       throw new CTPException(
-        Fault.BAD_REQUEST,
-        String.format("Collection exercise %s does not exist", collex.getId()));
+          Fault.BAD_REQUEST,
+          String.format("Collection exercise %s does not exist", collex.getId()));
     }
   }
 
@@ -287,7 +287,7 @@ public class EventService {
 
     if (event == null) {
       throw new CTPException(
-        Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event));
+          Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", event));
     } else {
       return event;
     }
@@ -307,13 +307,13 @@ public class EventService {
         return event;
       } else {
         throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
+            Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
       }
 
     } else {
       throw new CTPException(
-        Fault.BAD_REQUEST,
-        String.format("Collection exercise %s does not exist", collex.getId()));
+          Fault.BAD_REQUEST,
+          String.format("Collection exercise %s does not exist", collex.getId()));
     }
   }
 
@@ -326,16 +326,16 @@ public class EventService {
   private void fireEventChangeHandlers(final MessageType messageType, final Event event) {
 
     Arrays.stream(changeHandlers)
-      .forEach(
-        handler -> {
-          try {
-            handler.handleEventLifecycle(messageType, event);
-          } catch (CTPException e) {
-            log.with("message_type", messageType)
-              .with("event_id", event.getId())
-              .error("Failed to handle event change", e);
-          }
-        });
+        .forEach(
+            handler -> {
+              try {
+                handler.handleEventLifecycle(messageType, event);
+              } catch (CTPException e) {
+                log.with("message_type", messageType)
+                    .with("event_id", event.getId())
+                    .error("Failed to handle event change", e);
+              }
+            });
   }
 
   public List<Event> getOutstandingEvents() {
@@ -367,20 +367,20 @@ public class EventService {
    */
   public boolean isScheduled(UUID collexUuid) throws CTPException {
     Map<String, Event> events =
-      getEvents(collexUuid)
-        .stream()
-        .collect(Collectors.toMap(Event::getTag, Function.identity()));
+        getEvents(collexUuid)
+            .stream()
+            .collect(Collectors.toMap(Event::getTag, Function.identity()));
 
     int numberOfMandatoryEvents =
-      Arrays.stream(Tag.values()).filter(Tag::isMandatory).collect(Collectors.toList()).size();
+        Arrays.stream(Tag.values()).filter(Tag::isMandatory).collect(Collectors.toList()).size();
 
     return Arrays.stream(Tag.values())
-      .filter(Tag::isMandatory)
-      .map(t -> events.get(t.name()))
-      .filter(Objects::nonNull)
-      .collect(Collectors.toList())
-      .size()
-      >= numberOfMandatoryEvents;
+            .filter(Tag::isMandatory)
+            .map(t -> events.get(t.name()))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList())
+            .size()
+        >= numberOfMandatoryEvents;
   }
 
   /**
@@ -394,7 +394,7 @@ public class EventService {
       SchedulerConfiguration.unscheduleEvent(this.scheduler, event);
     } catch (SchedulerException e) {
       throw new CTPException(
-        Fault.SYSTEM_ERROR, String.format("Error unscheduling event %s", event.getId()), e);
+          Fault.SYSTEM_ERROR, String.format("Error unscheduling event %s", event.getId()), e);
     }
   }
 
@@ -409,7 +409,7 @@ public class EventService {
       SchedulerConfiguration.scheduleEvent(this.scheduler, event);
     } catch (SchedulerException e) {
       throw new CTPException(
-        Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
+          Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
     }
   }
 }

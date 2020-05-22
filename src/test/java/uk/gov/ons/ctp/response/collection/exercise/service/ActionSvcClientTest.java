@@ -54,11 +54,11 @@ public class ActionSvcClientTest {
   private static final String ACTION_RULE_NAME = "BSREM+45";
   private static final String ACTION_RULE_DESCRIPTION = "Enrolment Reminder Letter(+45 days)";
   private static final UUID ACTION_RULE_ID =
-    UUID.fromString("714356ba-7236-4179-8007-f09190eed323");
+      UUID.fromString("714356ba-7236-4179-8007-f09190eed323");
   private static final int ACTION_RULE_PRIORITY = 3;
   private static final OffsetDateTime ACTION_RULE_TRIGGER_DATE_TIME = OffsetDateTime.now();
   private static final UUID ACTION_PLAN_ID =
-    UUID.fromString("003e587a-843f-11e8-adc0-fa7ae01bbebc");
+      UUID.fromString("003e587a-843f-11e8-adc0-fa7ae01bbebc");
 
   @Mock private AppConfig appConfig;
 
@@ -77,14 +77,14 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_PATH)
+            .build();
     when(restUtility.createUriComponents(any(String.class), any(MultiValueMap.class)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
     actionPlanDTO.setName(ACTION_PLAN_NAME);
@@ -97,16 +97,16 @@ public class ActionSvcClientTest {
     HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
     when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
     when(restTemplate.postForObject(
-      eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class)))
-      .thenReturn(actionPlanDTO);
+            eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class)))
+        .thenReturn(actionPlanDTO);
 
     // When
     ActionPlanDTO createdActionPlanDTO =
-      actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION, selectors);
+        actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION, selectors);
 
     // Then
     verify(restTemplate)
-      .postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class));
+        .postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class));
     assertEquals(createdActionPlanDTO.getName(), ACTION_PLAN_NAME);
     assertEquals(createdActionPlanDTO.getDescription(), ACTION_PLAN_DESCRIPTION);
     assertEquals(createdActionPlanDTO.getCreatedBy(), "SYSTEM");
@@ -124,14 +124,14 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_PATH)
+            .build();
     when(restUtility.createUriComponents(any(String.class), any(MultiValueMap.class)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
     actionPlanDTO.setName(ACTION_PLAN_NAME);
@@ -143,8 +143,8 @@ public class ActionSvcClientTest {
     HttpEntity httpEntity = new HttpEntity<>(actionPlanDTO, null);
     when(restUtility.createHttpEntity(any(ActionPlanDTO.class))).thenReturn(httpEntity);
     when(restTemplate.postForObject(
-      eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class)))
-      .thenThrow(RestClientException.class);
+            eq(uriComponents.toUri()), eq(httpEntity), eq(ActionPlanDTO.class)))
+        .thenThrow(RestClientException.class);
 
     // When
     actionSvcClient.createActionPlan(ACTION_PLAN_NAME, ACTION_PLAN_DESCRIPTION, selectors);
@@ -161,14 +161,14 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_PATH)
+            .build();
     when(restUtility.createUriComponents(any(String.class), any(MultiValueMap.class)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     ActionRulePostRequestDTO actionRulePostRequestDTO = getActionRulePostRequestDTO();
     ActionRuleDTO actionRuleDTO = getActionRuleDTO();
@@ -176,22 +176,22 @@ public class ActionSvcClientTest {
     HttpEntity httpEntity = new HttpEntity<>(actionRulePostRequestDTO, null);
     when(restUtility.createHttpEntity(any(ActionRulePostRequestDTO.class))).thenReturn(httpEntity);
     when(restTemplate.postForObject(
-      eq(uriComponents.toUri()), eq(httpEntity), eq(ActionRuleDTO.class)))
-      .thenReturn(actionRuleDTO);
+            eq(uriComponents.toUri()), eq(httpEntity), eq(ActionRuleDTO.class)))
+        .thenReturn(actionRuleDTO);
 
     // When
     ActionRuleDTO createdActionRuleDTO =
-      actionSvcClient.createActionRule(
-        actionRulePostRequestDTO.getName(),
-        actionRulePostRequestDTO.getDescription(),
-        actionRulePostRequestDTO.getActionTypeName(),
-        actionRulePostRequestDTO.getTriggerDateTime(),
-        actionRulePostRequestDTO.getPriority(),
-        actionRulePostRequestDTO.getActionPlanId());
+        actionSvcClient.createActionRule(
+            actionRulePostRequestDTO.getName(),
+            actionRulePostRequestDTO.getDescription(),
+            actionRulePostRequestDTO.getActionTypeName(),
+            actionRulePostRequestDTO.getTriggerDateTime(),
+            actionRulePostRequestDTO.getPriority(),
+            actionRulePostRequestDTO.getActionPlanId());
 
     // Then
     verify(restTemplate)
-      .postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionRuleDTO.class));
+        .postForObject(eq(uriComponents.toUri()), eq(httpEntity), eq(ActionRuleDTO.class));
     verify(restUtility).createHttpEntity(eq(actionRulePostRequestDTO));
     assertEquals(createdActionRuleDTO.getName(), actionRuleDTO.getName());
     assertEquals(createdActionRuleDTO.getDescription(), actionRuleDTO.getDescription());
@@ -211,18 +211,18 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     when(restUtility.createUriComponents(any(String.class), any(MultiValueMap.class)))
-      .thenReturn(UriComponentsBuilder.newInstance().build());
+        .thenReturn(UriComponentsBuilder.newInstance().build());
 
     when(restTemplate.postForObject(any(), any(), any())).thenThrow(RestClientException.class);
 
     // When
     actionSvcClient.createActionRule(
-      ACTION_RULE_NAME,
-      ACTION_RULE_DESCRIPTION,
-      ActionType.BSREM,
-      OffsetDateTime.now().plusDays(45),
-      ACTION_RULE_PRIORITY,
-      ACTION_RULE_ID);
+        ACTION_RULE_NAME,
+        ACTION_RULE_DESCRIPTION,
+        ActionType.BSREM,
+        OffsetDateTime.now().plusDays(45),
+        ACTION_RULE_PRIORITY,
+        ACTION_RULE_ID);
 
     // Then RestClientException is thrown
   }
@@ -236,14 +236,14 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     final UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_RULE_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULE_PATH)
+            .build();
     when(restUtility.createUriComponents(eq(ACTION_RULE_PATH), eq(null), eq(ACTION_RULE_ID)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     final ActionRulePutRequestDTO actionRulePutRequestDTO = getActionRulePutRequestDTO();
     final ActionRuleDTO actionRuleDTO = getActionRuleDTO();
@@ -251,17 +251,17 @@ public class ActionSvcClientTest {
     final HttpEntity httpEntity = new HttpEntity<>(actionRulePutRequestDTO, null);
     when(restUtility.createHttpEntity(any(ActionRulePutRequestDTO.class))).thenReturn(httpEntity);
     when(restTemplate.exchange(
-      eq(uriComponents.toUri()), eq(HttpMethod.PUT), eq(httpEntity), eq(ActionRuleDTO.class)))
-      .thenReturn(new ResponseEntity<>(actionRuleDTO, HttpStatus.OK));
+            eq(uriComponents.toUri()), eq(HttpMethod.PUT), eq(httpEntity), eq(ActionRuleDTO.class)))
+        .thenReturn(new ResponseEntity<>(actionRuleDTO, HttpStatus.OK));
 
     // When
     final ActionRuleDTO updateActionRule =
-      actionSvcClient.updateActionRule(
-        ACTION_RULE_ID,
-        ACTION_RULE_NAME,
-        ACTION_RULE_DESCRIPTION,
-        ACTION_RULE_TRIGGER_DATE_TIME,
-        ACTION_RULE_PRIORITY);
+        actionSvcClient.updateActionRule(
+            ACTION_RULE_ID,
+            ACTION_RULE_NAME,
+            ACTION_RULE_DESCRIPTION,
+            ACTION_RULE_TRIGGER_DATE_TIME,
+            ACTION_RULE_PRIORITY);
 
     // Then
     assertThat(actionRuleDTO.getName(), is(updateActionRule.getName()));
@@ -282,30 +282,30 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     final UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_RULE_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULE_PATH)
+            .build();
     when(restUtility.createUriComponents(eq(ACTION_RULE_PATH), eq(null), eq(ACTION_RULE_ID)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     final ActionRulePutRequestDTO actionRulePutRequestDTO = getActionRulePutRequestDTO();
 
     final HttpEntity httpEntity = new HttpEntity<>(actionRulePutRequestDTO, null);
     when(restUtility.createHttpEntity(any(ActionRulePutRequestDTO.class))).thenReturn(httpEntity);
     when(restTemplate.exchange(
-      eq(uriComponents.toUri()), eq(HttpMethod.PUT), eq(httpEntity), eq(ActionRuleDTO.class)))
-      .thenThrow(new RestClientException("Err"));
+            eq(uriComponents.toUri()), eq(HttpMethod.PUT), eq(httpEntity), eq(ActionRuleDTO.class)))
+        .thenThrow(new RestClientException("Err"));
 
     // When
     actionSvcClient.updateActionRule(
-      ACTION_RULE_ID,
-      ACTION_RULE_NAME,
-      ACTION_RULE_DESCRIPTION,
-      ACTION_RULE_TRIGGER_DATE_TIME,
-      ACTION_RULE_PRIORITY);
+        ACTION_RULE_ID,
+        ACTION_RULE_NAME,
+        ACTION_RULE_DESCRIPTION,
+        ACTION_RULE_TRIGGER_DATE_TIME,
+        ACTION_RULE_PRIORITY);
     // Then RestClientException is thrown
   }
 
@@ -317,31 +317,31 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     final UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_RULES_FOR_PLAN_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULES_FOR_PLAN_PATH)
+            .build();
     final UUID actionPlanId = UUID.randomUUID();
     when(restUtility.createUriComponents(
-      endsWith(ACTION_RULES_FOR_PLAN_PATH), eq(null), eq(actionPlanId)))
-      .thenReturn(uriComponents);
+            endsWith(ACTION_RULES_FOR_PLAN_PATH), eq(null), eq(actionPlanId)))
+        .thenReturn(uriComponents);
 
     final HttpEntity httpEntity = new HttpEntity(null, null);
     when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
 
     final List<ActionRuleDTO> actionRuleDTOs = new ArrayList<>();
     when(restTemplate.exchange(
-      eq(uriComponents.toUri()),
-      eq(HttpMethod.GET),
-      eq(httpEntity),
-      eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
-      .thenReturn(new ResponseEntity<>(actionRuleDTOs, HttpStatus.OK));
+            eq(uriComponents.toUri()),
+            eq(HttpMethod.GET),
+            eq(httpEntity),
+            eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
+        .thenReturn(new ResponseEntity<>(actionRuleDTOs, HttpStatus.OK));
 
     // When
     final List<ActionRuleDTO> returnedActionRuleDTOs =
-      actionSvcClient.getActionRulesForActionPlan(actionPlanId);
+        actionSvcClient.getActionRulesForActionPlan(actionPlanId);
 
     // Then
     assertThat(returnedActionRuleDTOs, is(actionRuleDTOs));
@@ -355,25 +355,25 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     final UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_RULES_FOR_PLAN_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULES_FOR_PLAN_PATH)
+            .build();
     final UUID actionPlanId = UUID.randomUUID();
     when(restUtility.createUriComponents(any(String.class), eq(null), eq(actionPlanId)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     final HttpEntity httpEntity = new HttpEntity(null, null);
     when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
 
     when(restTemplate.exchange(
-      eq(uriComponents.toUri()),
-      eq(HttpMethod.GET),
-      eq(httpEntity),
-      eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
-      .thenThrow(new RestClientException("Error"));
+            eq(uriComponents.toUri()),
+            eq(HttpMethod.GET),
+            eq(httpEntity),
+            eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
+        .thenThrow(new RestClientException("Error"));
 
     // When
     actionSvcClient.getActionRulesForActionPlan(actionPlanId);
@@ -387,25 +387,25 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     final UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_RULES_FOR_PLAN_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULES_FOR_PLAN_PATH)
+            .build();
     final UUID actionPlanId = UUID.randomUUID();
     when(restUtility.createUriComponents(any(String.class), eq(null), eq(actionPlanId)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     final HttpEntity httpEntity = new HttpEntity(null, null);
     when(restUtility.createHttpEntity(any())).thenReturn(httpEntity);
 
     when(restTemplate.exchange(
-      eq(uriComponents.toUri()),
-      eq(HttpMethod.GET),
-      eq(httpEntity),
-      eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
-      .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+            eq(uriComponents.toUri()),
+            eq(HttpMethod.GET),
+            eq(httpEntity),
+            eq(new ParameterizedTypeReference<List<ActionRuleDTO>>() {})))
+        .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
     actionSvcClient.getActionRulesForActionPlan(actionPlanId);
   }
@@ -419,14 +419,14 @@ public class ActionSvcClientTest {
     when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
 
     final UriComponents uriComponents =
-      UriComponentsBuilder.newInstance()
-        .scheme(HTTP)
-        .host(LOCALHOST)
-        .port(80)
-        .path(ACTION_RULE_PATH)
-        .build();
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULE_PATH)
+            .build();
     when(restUtility.createUriComponents(eq(ACTION_RULE_PATH), eq(null), eq(ACTION_RULE_ID)))
-      .thenReturn(uriComponents);
+        .thenReturn(uriComponents);
 
     final ActionRulePostRequestDTO actionRulePostRequestDTO = getActionRulePostRequestDTO();
     final ActionRuleDTO actionRuleDTO = getActionRuleDTO();
@@ -434,20 +434,20 @@ public class ActionSvcClientTest {
     final HttpEntity httpEntity = new HttpEntity<>(actionRulePostRequestDTO, null);
     when(restUtility.createHttpEntity(any(ActionRulePutRequestDTO.class))).thenReturn(httpEntity);
     when(restTemplate.exchange(
-      eq(uriComponents.toUri()),
-      eq(HttpMethod.DELETE),
-      eq(httpEntity),
-      eq(ActionRuleDTO.class)))
-      .thenReturn(new ResponseEntity<>(actionRuleDTO, HttpStatus.ACCEPTED));
+            eq(uriComponents.toUri()),
+            eq(HttpMethod.DELETE),
+            eq(httpEntity),
+            eq(ActionRuleDTO.class)))
+        .thenReturn(new ResponseEntity<>(actionRuleDTO, HttpStatus.ACCEPTED));
 
     // When
     final HttpStatus deleteActionRule =
-      actionSvcClient.deleteActionRule(
-        ACTION_RULE_ID,
-        ACTION_RULE_NAME,
-        ACTION_RULE_DESCRIPTION,
-        ACTION_RULE_TRIGGER_DATE_TIME,
-        ACTION_RULE_PRIORITY);
+        actionSvcClient.deleteActionRule(
+            ACTION_RULE_ID,
+            ACTION_RULE_NAME,
+            ACTION_RULE_DESCRIPTION,
+            ACTION_RULE_TRIGGER_DATE_TIME,
+            ACTION_RULE_PRIORITY);
 
     // Then
     assertTrue(deleteActionRule.is2xxSuccessful());

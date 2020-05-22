@@ -1,5 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.actionrule;
 
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,18 +28,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.Act
 import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NudgeEmailActionTypeRuleGeneratorTest {
@@ -142,7 +141,7 @@ public class NudgeEmailActionTypeRuleGeneratorTest {
   }
 
   private ActionPlanDTO getActionPlanDTO(
-          UUID inactiveActionPlanId, HashMap<String, String> inactiveEnrolmentSelector) {
+      UUID inactiveActionPlanId, HashMap<String, String> inactiveEnrolmentSelector) {
     final ActionPlanDTO inactiveActionPlanDTO = new ActionPlanDTO();
     inactiveActionPlanDTO.setSelectors(inactiveEnrolmentSelector);
     inactiveActionPlanDTO.setId(inactiveActionPlanId);
@@ -150,7 +149,7 @@ public class NudgeEmailActionTypeRuleGeneratorTest {
   }
 
   private ActionRuleDTO createActionRuleDTO(
-          final UUID actionRuleId, final ActionType actionRuleType, final String actionRuleName) {
+      final UUID actionRuleId, final ActionType actionRuleType, final String actionRuleName) {
     final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
     actionRuleDTO.setId(actionRuleId);
     actionRuleDTO.setActionTypeName(actionRuleType);

@@ -1,5 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.actionrule;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,18 +28,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleCreator;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.UUID;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NudgeEmailActionRuleCreaterTest {
@@ -105,7 +104,7 @@ public class NudgeEmailActionRuleCreaterTest {
   }
 
   private Event createCollectionExerciseEvent(
-          final String tag, final Timestamp eventTriggerDate, final CollectionExercise collex) {
+      final String tag, final Timestamp eventTriggerDate, final CollectionExercise collex) {
     Event collectionExerciseEvent = new Event();
     UUID collectionExerciseEventId = UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
     collectionExerciseEvent.setCollectionExercise(collex);

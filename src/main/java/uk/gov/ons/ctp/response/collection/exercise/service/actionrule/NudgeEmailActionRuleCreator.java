@@ -22,9 +22,9 @@ public class NudgeEmailActionRuleCreator implements ActionRuleCreator {
   private final SurveySvcClient surveySvcClient;
 
   public NudgeEmailActionRuleCreator(
-    final ActionSvcClient actionSvcClient,
-    final NudgeEmailSuffixGenerator nudgeEmailSuffixGenerator,
-    final SurveySvcClient surveySvcClient) {
+      final ActionSvcClient actionSvcClient,
+      final NudgeEmailSuffixGenerator nudgeEmailSuffixGenerator,
+      final SurveySvcClient surveySvcClient) {
     this.actionSvcClient = actionSvcClient;
     this.nudgeEmailSuffixGenerator = nudgeEmailSuffixGenerator;
     this.surveySvcClient = surveySvcClient;
@@ -44,26 +44,26 @@ public class NudgeEmailActionRuleCreator implements ActionRuleCreator {
     final OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
     final String CollectionExerciseId = collectionExercise.getId().toString();
     final ActionPlanDTO activeActionPlan =
-      actionSvcClient.getActionPlanBySelectorsBusiness(CollectionExerciseId, true);
+        actionSvcClient.getActionPlanBySelectorsBusiness(CollectionExerciseId, true);
     final ActionPlanDTO inactiveActionPlan =
-      actionSvcClient.getActionPlanBySelectorsBusiness(CollectionExerciseId, false);
+        actionSvcClient.getActionPlanBySelectorsBusiness(CollectionExerciseId, false);
     final String nudgeEmailIndex =
-      nudgeEmailSuffixGenerator.getNudgeEmailNumber(collectionExerciseEvent.getTag());
+        nudgeEmailSuffixGenerator.getNudgeEmailNumber(collectionExerciseEvent.getTag());
 
     actionSvcClient.createActionRule(
-      survey.getShortName() + "NUDGE" + nudgeEmailIndex,
-      survey.getShortName() + " Nudge Email " + collectionExercise.getExerciseRef(),
-      ActionType.BSNUE,
-      offsetDateTime,
-      3,
-      activeActionPlan.getId());
+        survey.getShortName() + "NUDGE" + nudgeEmailIndex,
+        survey.getShortName() + " Nudge Email " + collectionExercise.getExerciseRef(),
+        ActionType.BSNUE,
+        offsetDateTime,
+        3,
+        activeActionPlan.getId());
 
     actionSvcClient.createActionRule(
-      survey.getShortName() + "NUDGE" + nudgeEmailIndex,
-      survey.getShortName() + " Nudge File " + collectionExercise.getExerciseRef(),
-      ActionType.BSNUL,
-      offsetDateTime,
-      3,
-      inactiveActionPlan.getId());
+        survey.getShortName() + "NUDGE" + nudgeEmailIndex,
+        survey.getShortName() + " Nudge File " + collectionExercise.getExerciseRef(),
+        ActionType.BSNUL,
+        offsetDateTime,
+        3,
+        inactiveActionPlan.getId());
   }
 }
