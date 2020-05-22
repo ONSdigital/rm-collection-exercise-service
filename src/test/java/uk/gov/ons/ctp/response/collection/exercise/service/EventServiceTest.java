@@ -44,7 +44,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 public class EventServiceTest {
   private static final UUID SURVEY_ID = UUID.fromString("4ca97b1b-de9c-4fed-9898-fac594d1565f");
   private static final UUID COLLECTION_EXERCISE_EVENT_ID =
-      UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
+    UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
   private static final UUID COLLEX_UUID = UUID.fromString("f03206ee-137d-41e3-af5c-2dea393bb360");
   private static final int EXERCISE_PK = 6433;
 
@@ -58,6 +58,8 @@ public class EventServiceTest {
 
   @Mock private ActionRuleUpdater actionRuleUpdater;
 
+  @Mock private ActionRuleRemover actionRuleRemover;
+
   @Mock private ActionRuleUpdater actionRuleUpdater2;
 
   @Mock private EventValidator eventValidator;
@@ -67,6 +69,8 @@ public class EventServiceTest {
   @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
 
   @Spy private List<ActionRuleUpdater> actionRuleUpdaters = new ArrayList<>();
+
+  @Spy private List<ActionRuleRemover> actionRuleRemovers = new ArrayList<>();
 
   @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
@@ -190,6 +194,21 @@ public class EventServiceTest {
   }
 
   @Test
+  public void givenCollectionExcerciseDoesNotExistWhenEventIsDeletedThenExceptionIsThrown() {
+    final UUID collexUuid = UUID.randomUUID();
+
+    when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(null);
+
+    try {
+      eventService.deleteEvent(collexUuid, Tag.mps.name());
+
+      Assert.fail("Deleted event with non-existent collection exercise");
+    } catch (final CTPException e) {
+      assertThat(e.getFault(), is(Fault.BAD_REQUEST));
+    }
+  }
+
+  @Test
   public void givenEventDoesNotExistWhenEventIsUpdatedThenExceptionIsThrown() {
     final UUID collexUuid = UUID.randomUUID();
 
@@ -198,7 +217,7 @@ public class EventServiceTest {
 
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
-        .thenReturn(null);
+      .thenReturn(null);
 
     try {
       eventService.updateEvent(collexUuid, Tag.mps.name(), new Date());
@@ -210,8 +229,28 @@ public class EventServiceTest {
   }
 
   @Test
+  public void givenEventDoesNotExistWhenEventIsDeletedThenExceptionIsThrown() {
+    final UUID collexUuid = UUID.randomUUID();
+
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(collexUuid);
+
+    when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
+      .thenReturn(null);
+
+    try {
+      eventService.deleteEvent(collexUuid, Tag.mps.name());
+
+      Assert.fail("Deleted non-existent event");
+    } catch (final CTPException e) {
+      assertThat(e.getFault(), is(Fault.RESOURCE_NOT_FOUND));
+    }
+  }
+
+  @Test
   public void
-      givenEventsForCollectionExerciseDoNotValidateWhenEventIsUpdatedThenExceptionIsThrown() {
+  givenEventsForCollectionExerciseDoNotValidateWhenEventIsUpdatedThenExceptionIsThrown() {
     final UUID collexUuid = UUID.randomUUID();
 
     final CollectionExercise collex = new CollectionExercise();
@@ -222,7 +261,7 @@ public class EventServiceTest {
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     final Event existingEvent = new Event();
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
-        .thenReturn(existingEvent);
+      .thenReturn(existingEvent);
 
     final List<Event> existingEvents = new ArrayList<>();
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
@@ -237,7 +276,7 @@ public class EventServiceTest {
 
   @Test
   public void givenEventsForCollectionExerciseValidateWhenEventIsUpdatedItIsSaved()
-      throws CTPException {
+    throws CTPException {
 
     final CollectionExercise collex = new CollectionExercise();
     collex.setId(COLLEX_UUID);
@@ -251,7 +290,7 @@ public class EventServiceTest {
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     final Event existingEvent = new Event();
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
-        .thenReturn(existingEvent);
+      .thenReturn(existingEvent);
 
     final List<Event> existingEvents = new ArrayList<>();
 
@@ -266,6 +305,39 @@ public class EventServiceTest {
     verify(eventRepository, atLeastOnce()).save(eq(existingEvent));
     verify(actionRuleUpdater, atLeastOnce()).execute(existingEvent);
     verify(actionRuleUpdater2, atLeastOnce()).execute(existingEvent);
+  }
+
+  @Test
+  public void givenEventsForCollectionExerciseValidateWhenEventIsDeletedItIsSaved()
+    throws CTPException {
+
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_UUID);
+    collex.setExercisePK(EXERCISE_PK);
+    final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
+    collex.setState(collectionExerciseState);
+
+    final SurveyDTO survey = new SurveyDTO();
+    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    final Event existingEvent = new Event();
+    existingEvent.setTag(Tag.nudge_email_4.toString());
+    existingEvent.setId(UUID.randomUUID());
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.nudge_email_4.name()))
+      .thenReturn(existingEvent);
+
+    final List<Event> existingEvents = new ArrayList<>();
+
+    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
+    eventValidators.add(eventValidator);
+
+    actionRuleRemovers.add(actionRuleRemover);
+
+    eventService.deleteEvent(COLLEX_UUID, Tag.nudge_email_4.name());
+
+    verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
+    verify(actionRuleRemover, atLeastOnce()).execute(existingEvent);
   }
 
   @Test
@@ -324,7 +396,7 @@ public class EventServiceTest {
     collex.setId(collexUuid);
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
-        .thenReturn(null);
+      .thenReturn(null);
     final List<Event> existingEvents = new ArrayList<>();
     final Event event = new Event();
     existingEvents.add(event);
@@ -365,6 +437,31 @@ public class EventServiceTest {
   @Test
   public void testTagShouldHaveReminder3AsAnActionableTag() {
     assertThat(Tag.reminder3.isActionable(), Matchers.is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveNudge0AsAnActionableTag() {
+    assertThat(Tag.nudge_email_0.isActionable(), Matchers.is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveNudge1AsAnActionableTag() {
+    assertThat(Tag.nudge_email_1.isActionable(), Matchers.is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveNudge2AsAnActionableTag() {
+    assertThat(Tag.nudge_email_2.isActionable(), Matchers.is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveNudge3AsAnActionableTag() {
+    assertThat(Tag.nudge_email_3.isActionable(), Matchers.is(true));
+  }
+
+  @Test
+  public void testTagShouldHaveNudge4AsAnActionableTag() {
+    assertThat(Tag.nudge_email_4.isActionable(), Matchers.is(true));
   }
 
   @Test
