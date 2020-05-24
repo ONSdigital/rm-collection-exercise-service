@@ -3,7 +3,7 @@
 
     <artifactId>collectionexercisesvc</artifactId>
     <groupId>uk.gov.ons.ctp.product</groupId>
-    <version>10.49.33-SNAPSHOT</version>
+    <version>UNVERSIONED</version>
     <packaging>jar</packaging>
 
     <name>CTP : CollectionExerciseService</name>
@@ -548,4 +548,16 @@
             </resource>
         </resources>
     </build>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>spring-plugins</id>
+            <name>Spring plugins</name>
+            <url>https://repo.spring.io/plugins-release/</url>
+        </repository>
+    </repositories>
 </project>
