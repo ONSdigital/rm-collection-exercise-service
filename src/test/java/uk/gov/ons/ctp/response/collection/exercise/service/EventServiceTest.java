@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -338,6 +339,54 @@ public class EventServiceTest {
 
     verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
     verify(actionRuleRemover, atLeastOnce()).execute(existingEvent);
+  }
+
+  @Test
+  public void
+      givenScheduledExistingNudgeEmailsBeforeReturnByDateNudgeEmailsAreDeletedAndReturnByIsUpdated()
+          throws CTPException {
+
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_UUID);
+    collex.setExercisePK(EXERCISE_PK);
+    final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
+    collex.setState(collectionExerciseState);
+
+    final SurveyDTO survey = new SurveyDTO();
+    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    final Event nudgeEvent = new Event();
+    final Instant now = Instant.now();
+    nudgeEvent.setTag(Tag.nudge_email_4.toString());
+    nudgeEvent.setId(UUID.randomUUID());
+    nudgeEvent.setTimestamp(new Timestamp(now.toEpochMilli()));
+
+    final Event returnByEvent = new Event();
+    returnByEvent.setTag(Tag.return_by.toString());
+    returnByEvent.setId(UUID.randomUUID());
+    returnByEvent.setTimestamp(new Timestamp(now.toEpochMilli()));
+
+    Date newDate = new Date();
+    newDate.setTime(now.minus(1, ChronoUnit.DAYS).toEpochMilli());
+
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.return_by.name()))
+        .thenReturn(returnByEvent);
+
+    final List<Event> existingEvents = new ArrayList<>();
+    existingEvents.add(nudgeEvent);
+    existingEvents.add(returnByEvent);
+
+    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
+    eventValidators.add(eventValidator);
+
+    actionRuleUpdaters.add(actionRuleUpdater);
+
+    eventService.updateEvent(COLLEX_UUID, Tag.return_by.name(), newDate);
+
+    verify(eventRepository, atLeastOnce()).save(returnByEvent);
+    verify(eventRepository, atLeastOnce()).delete(eq(nudgeEvent));
+    verify(actionRuleUpdater, atLeastOnce()).execute(returnByEvent);
   }
 
   @Test

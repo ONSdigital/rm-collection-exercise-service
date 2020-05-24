@@ -21,9 +21,9 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
-import uk.gov.ons.ctp.response.collection.exercise.service.validator.ValidateExistingNudgeEmail;
 
 @Service
 public class EventService {
@@ -119,8 +119,6 @@ public class EventService {
   @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
 
   @Autowired private List<ActionRuleRemover> actionRuleRemovers;
-
-  @Autowired private ValidateExistingNudgeEmail validateExistingNudgeEmail;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -224,7 +222,7 @@ public class EventService {
       throws CTPException {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
     final List<Event> existingNudgeEmails =
-        validateExistingNudgeEmail.validate(existingEvents, event, collex.getState());
+        filterExistingNudgeEmails(existingEvents, event, collex.getState());
     for (Event nudgeEmail : existingNudgeEmails) {
       deleteActionRulesForEvent(nudgeEmail);
       nudgeEmail.setDeleted(true);
@@ -411,5 +409,28 @@ public class EventService {
       throw new CTPException(
           Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
     }
+  }
+
+  private List<Event> filterExistingNudgeEmails(
+      List<Event> existingEvents,
+      Event submittedEvent,
+      CollectionExerciseDTO.CollectionExerciseState collectionExerciseState)
+      throws CTPException {
+    final Map<String, Event> existingEventsMap =
+        existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
+    return EventService.Tag.ORDERED_NUDGE_EMAIL
+        .stream()
+        .map(tag -> getEventByTag(tag, existingEventsMap))
+        .filter(Objects::nonNull)
+        .filter(event -> isEventAfterReturnBy(event, submittedEvent))
+        .collect(Collectors.toList());
+  }
+
+  private boolean isEventAfterReturnBy(Event nudgeEvent, Event submittedEvent) {
+    return nudgeEvent.getTimestamp().after(submittedEvent.getTimestamp());
+  }
+
+  private Event getEventByTag(EventService.Tag tag, Map<String, Event> existingEvents) {
+    return existingEvents.get(tag.toString());
   }
 }
