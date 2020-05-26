@@ -39,7 +39,7 @@ jobs:
         # Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build -f _infra/docker/Dockerfile -t "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":latest .
+          docker build -t "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":latest .
       - name: Publish Docker Image
         if: github.ref == 'refs/heads/master'
         run: |
