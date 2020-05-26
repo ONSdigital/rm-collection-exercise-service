@@ -3,7 +3,7 @@
 
     <artifactId>collectionexercisesvc</artifactId>
     <groupId>uk.gov.ons.ctp.product</groupId>
-    <version>10.49.33-SNAPSHOT</version>
+    <version>UNVERSIONED</version>
     <packaging>jar</packaging>
 
     <name>CTP : CollectionExerciseService</name>
