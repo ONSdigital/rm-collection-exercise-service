@@ -46,12 +46,12 @@ jobs:
           docker push "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":latest
       - name: package helm
         run: |
-          helm dep up _infra/helm/collection-excercise
-          helm package _infra/helm/collection-excercise
+          helm dep up _infra/helm/collection-exercise
+          helm package _infra/helm/collection-exercise
       - name: Publish Charts
         if: github.ref == 'refs/heads/master'
         run: |
-          gsutil cp collection-excercise-*.tgz gs://ras-rm-artifacts/act/
+          gsutil cp collection-exercise-*.tgz gs://ras-rm-artifacts/act/
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
