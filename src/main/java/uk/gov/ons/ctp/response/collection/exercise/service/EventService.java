@@ -200,7 +200,6 @@ public class EventService {
     event.setTimestamp(new Timestamp(date.getTime()));
     validateSubmittedEvent(collex, event);
     updateActionRules(event);
-    // perform Additional task to delete nudge email for return_by
     if (tag.equals("return_by")) {
       deleteNudgeEmail(collex, event);
     }

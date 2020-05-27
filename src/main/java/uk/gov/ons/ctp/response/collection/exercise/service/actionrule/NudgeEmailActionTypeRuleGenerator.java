@@ -57,12 +57,12 @@ public class NudgeEmailActionTypeRuleGenerator {
   private ActionRuleDTO getActionRuleDTO(
       ActionPlanDTO activeActionPlan, String nudgeEmailIndex, ActionType actionType)
       throws CTPException {
-    final UUID biActionPlanId = activeActionPlan.getId();
-    final List<ActionRuleDTO> biActionRules =
-        actionSvcClient.getActionRulesForActionPlan(biActionPlanId);
-    final List<ActionRuleDTO> biActionRulesMatchingSuffix =
-        filterRulesMatchingSuffix(nudgeEmailIndex, biActionRules);
+    final UUID actionPlanId = activeActionPlan.getId();
+    final List<ActionRuleDTO> actionRules =
+        actionSvcClient.getActionRulesForActionPlan(actionPlanId);
+    final List<ActionRuleDTO> actionRulesMatchingSuffix =
+        filterRulesMatchingSuffix(nudgeEmailIndex, actionRules);
     return actionRulesFilter.getActionRuleByType(
-        biActionRulesMatchingSuffix, actionType, biActionPlanId);
+        actionRulesMatchingSuffix, actionType, actionPlanId);
   }
 }

@@ -279,7 +279,7 @@ public class ActionSvcClient {
     actionRuleDeleteRequestDTO.setDescription(description);
     actionRuleDeleteRequestDTO.setTriggerDateTime(triggerDateTime);
     actionRuleDeleteRequestDTO.setPriority(priority);
-
+    log.with("actionRuleId", actionRuleId).info("About to delete action rule");
     final HttpEntity<ActionRulePostRequestDTO> httpEntity =
         restUtility.createHttpEntity(actionRuleDeleteRequestDTO);
     return restTemplate

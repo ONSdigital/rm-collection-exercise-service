@@ -36,7 +36,7 @@ public class NudgeEmailValidator implements EventValidator {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST, "Nudge email cannot be set in the past");
     }
-    if (!eventBetweenGoLiveAndReturnBy(goLive, submittedEvent, returnBy)) {
+    if (!isEventBetweenGoLiveAndReturnBy(goLive, submittedEvent, returnBy)) {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST,
           "Nudge email must be set after the Go Live date ("
@@ -62,7 +62,7 @@ public class NudgeEmailValidator implements EventValidator {
     return Tag.valueOf(event.getTag()).isNudgeEmail();
   }
 
-  private boolean eventBetweenGoLiveAndReturnBy(Event goLive, Event event, Event returnBy) {
+  private boolean isEventBetweenGoLiveAndReturnBy(Event goLive, Event event, Event returnBy) {
     boolean isAfterGoLive = true;
     boolean isBeforeReturnEnd = true;
 

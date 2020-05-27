@@ -852,7 +852,7 @@ public class CollectionExerciseEndpoint {
       throws CTPException {
     log.with("event_id", id)
         .with("tag", tag)
-        .debug("Deleting collection exercise event id, event tag ");
+        .info("Deleting collection exercise event id, event tag ");
 
     eventService.deleteEvent(id, tag);
 
