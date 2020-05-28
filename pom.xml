@@ -3,7 +3,7 @@
 
     <artifactId>collectionexercisesvc</artifactId>
     <groupId>uk.gov.ons.ctp.product</groupId>
-    <version>10.49.33-SNAPSHOT</version>
+    <version>UNVERSIONED</version>
     <packaging>jar</packaging>
 
     <name>CTP : CollectionExerciseService</name>
@@ -303,7 +303,7 @@
 
     <build>
         <defaultGoal>clean install</defaultGoal>
-
+        <finalName>collectionexercisesvc</finalName>
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
                 <plugin>
