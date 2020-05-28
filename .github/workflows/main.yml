@@ -42,8 +42,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          mkdir -p ~/Documents/sftp
-          chmod 777 ~/Documents/sftp
           mvn fmt:check
           mvn clean verify
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
