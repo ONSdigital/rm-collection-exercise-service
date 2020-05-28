@@ -262,6 +262,31 @@ public class ActionSvcClient {
         .getBody();
   }
 
+  public HttpStatus deleteActionRule(
+      final UUID actionRuleId,
+      final String name,
+      final String description,
+      final OffsetDateTime triggerDateTime,
+      final int priority)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getActionSvc().getActionRulePath(), null, actionRuleId);
+
+    final ActionRulePostRequestDTO actionRuleDeleteRequestDTO = new ActionRulePostRequestDTO();
+    actionRuleDeleteRequestDTO.setActionPlanId(actionRuleId);
+    actionRuleDeleteRequestDTO.setName(name);
+    actionRuleDeleteRequestDTO.setDescription(description);
+    actionRuleDeleteRequestDTO.setTriggerDateTime(triggerDateTime);
+    actionRuleDeleteRequestDTO.setPriority(priority);
+    log.with("actionRuleId", actionRuleId).info("About to delete action rule");
+    final HttpEntity<ActionRulePostRequestDTO> httpEntity =
+        restUtility.createHttpEntity(actionRuleDeleteRequestDTO);
+    return restTemplate
+        .exchange(uriComponents.toUri(), HttpMethod.DELETE, httpEntity, ActionRuleDTO.class)
+        .getStatusCode();
+  }
+
   public List<ActionRuleDTO> getActionRulesForActionPlan(final UUID actionPlanId)
       throws CTPException {
     final UriComponents uriComponents =

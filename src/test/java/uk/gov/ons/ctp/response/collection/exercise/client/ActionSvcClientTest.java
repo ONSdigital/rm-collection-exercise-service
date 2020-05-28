@@ -68,7 +68,7 @@ public class ActionSvcClientTest {
     actionPlans = new ArrayList<>();
     actionPlans.add(actionPlan);
 
-    responseEntity = new ResponseEntity(actionPlans, HttpStatus.OK);
+    responseEntity = new ResponseEntity<>(actionPlans, HttpStatus.OK);
 
     MockitoAnnotations.initMocks(this);
 

@@ -187,7 +187,7 @@ public class GoLiveActionRuleUpdaterTest {
             ACTION_RULE_ID,
             actionRuleDTO.getName(),
             actionRuleDTO.getDescription(),
-            OffsetDateTime.ofInstant(eventTriggerInstant, ZoneId.systemDefault()),
+            OffsetDateTime.ofInstant(eventTriggerDate.toInstant(), ZoneId.systemDefault()),
             actionRuleDTO.getPriority());
   }
 }

@@ -1,8 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.endsWith;
 import static org.mockito.Matchers.eq;
@@ -409,6 +408,49 @@ public class ActionSvcClientTest {
         .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
     actionSvcClient.getActionRulesForActionPlan(actionPlanId);
+  }
+
+  /** Test that the action service is called with the correct details when creating action rules. */
+  @Test
+  public void testDeleteActionRule() {
+    // Given
+    final ActionSvc actionSvcConfig = new ActionSvc();
+    actionSvcConfig.setActionRulePath(ACTION_RULE_PATH);
+    when(appConfig.getActionSvc()).thenReturn(actionSvcConfig);
+
+    final UriComponents uriComponents =
+        UriComponentsBuilder.newInstance()
+            .scheme(HTTP)
+            .host(LOCALHOST)
+            .port(80)
+            .path(ACTION_RULE_PATH)
+            .build();
+    when(restUtility.createUriComponents(eq(ACTION_RULE_PATH), eq(null), eq(ACTION_RULE_ID)))
+        .thenReturn(uriComponents);
+
+    final ActionRulePostRequestDTO actionRulePostRequestDTO = getActionRulePostRequestDTO();
+    final ActionRuleDTO actionRuleDTO = getActionRuleDTO();
+
+    final HttpEntity httpEntity = new HttpEntity<>(actionRulePostRequestDTO, null);
+    when(restUtility.createHttpEntity(any(ActionRulePutRequestDTO.class))).thenReturn(httpEntity);
+    when(restTemplate.exchange(
+            eq(uriComponents.toUri()),
+            eq(HttpMethod.DELETE),
+            eq(httpEntity),
+            eq(ActionRuleDTO.class)))
+        .thenReturn(new ResponseEntity<>(actionRuleDTO, HttpStatus.ACCEPTED));
+
+    // When
+    final HttpStatus deleteActionRule =
+        actionSvcClient.deleteActionRule(
+            ACTION_RULE_ID,
+            ACTION_RULE_NAME,
+            ACTION_RULE_DESCRIPTION,
+            ACTION_RULE_TRIGGER_DATE_TIME,
+            ACTION_RULE_PRIORITY);
+
+    // Then
+    assertTrue(deleteActionRule.is2xxSuccessful());
   }
 
   private ActionRulePutRequestDTO getActionRulePutRequestDTO() {

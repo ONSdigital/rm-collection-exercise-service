@@ -21,6 +21,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 
@@ -39,9 +40,16 @@ public class EventService {
     reminder3(false),
     ref_period_start(false),
     ref_period_end(false),
-    employment(false);
+    employment(false),
+    nudge_email_0(false),
+    nudge_email_1(false),
+    nudge_email_2(false),
+    nudge_email_3(false),
+    nudge_email_4(false);
 
     public static final List<Tag> ORDERED_REMINDERS = Arrays.asList(reminder, reminder2, reminder3);
+    public static final List<Tag> ORDERED_NUDGE_EMAIL =
+        Arrays.asList(nudge_email_0, nudge_email_1, nudge_email_2, nudge_email_3, nudge_email_4);
     public static final List<Tag> ORDERED_MANDATORY_EVENTS =
         Arrays.asList(Tag.mps, Tag.go_live, Tag.return_by, Tag.exercise_end);
 
@@ -57,7 +65,17 @@ public class EventService {
 
     public boolean isActionable() {
       List<EventService.Tag> actionableEvents =
-          Arrays.asList(mps, go_live, reminder, reminder2, reminder3);
+          Arrays.asList(
+              mps,
+              go_live,
+              reminder,
+              reminder2,
+              reminder3,
+              nudge_email_0,
+              nudge_email_1,
+              nudge_email_2,
+              nudge_email_3,
+              nudge_email_4);
 
       return actionableEvents.contains(this);
     }
@@ -68,6 +86,10 @@ public class EventService {
 
     public boolean isReminder() {
       return ORDERED_REMINDERS.contains(this);
+    }
+
+    public boolean isNudgeEmail() {
+      return ORDERED_NUDGE_EMAIL.contains(this);
     }
   }
 
@@ -95,6 +117,8 @@ public class EventService {
   @Autowired private List<ActionRuleCreator> actionRuleCreators;
 
   @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
+
+  @Autowired private List<ActionRuleRemover> actionRuleRemovers;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -144,6 +168,22 @@ public class EventService {
     }
   }
 
+  /**
+   * Delete action rules for collection exercise event
+   *
+   * @param collectionExerciseEvent the event to create action rules for
+   * @throws CTPException on error
+   */
+  public void deleteActionRulesForEvent(final Event collectionExerciseEvent) throws CTPException {
+    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isActionable()) {
+      return;
+    }
+
+    for (ActionRuleRemover arc : actionRuleRemovers) {
+      arc.execute(collectionExerciseEvent);
+    }
+  }
+
   public List<Event> getEvents(UUID collexId) throws CTPException {
     return this.eventRepository.findByCollectionExerciseId(collexId);
   }
@@ -160,7 +200,9 @@ public class EventService {
     event.setTimestamp(new Timestamp(date.getTime()));
     validateSubmittedEvent(collex, event);
     updateActionRules(event);
-
+    if (tag.equals("return_by")) {
+      deleteNudgeEmail(collex, event);
+    }
     eventRepository.save(event);
 
     fireEventChangeHandlers(MessageType.EventUpdated, event);
@@ -172,6 +214,18 @@ public class EventService {
 
     for (final ActionRuleUpdater aru : actionRuleUpdaters) {
       aru.execute(event);
+    }
+  }
+
+  private void deleteNudgeEmail(final CollectionExercise collex, final Event event)
+      throws CTPException {
+    final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
+    final List<Event> existingNudgeEmails =
+        filterExistingNudgeEmails(existingEvents, event, collex.getState());
+    for (Event nudgeEmail : existingNudgeEmails) {
+      deleteActionRulesForEvent(nudgeEmail);
+      nudgeEmail.setDeleted(true);
+      this.eventRepository.delete(nudgeEmail);
     }
   }
 
@@ -238,10 +292,11 @@ public class EventService {
 
   public Event deleteEvent(UUID collexUuid, String tag) throws CTPException {
 
-    CollectionExercise collex = this.collectionExerciseService.findCollectionExercise(collexUuid);
+    CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
     if (collex != null) {
       Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
       if (event != null) {
+        deleteActionRulesForEvent(event);
         event.setDeleted(true);
         this.eventRepository.delete(event);
 
@@ -353,5 +408,28 @@ public class EventService {
       throw new CTPException(
           Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
     }
+  }
+
+  private List<Event> filterExistingNudgeEmails(
+      List<Event> existingEvents,
+      Event submittedEvent,
+      CollectionExerciseDTO.CollectionExerciseState collectionExerciseState)
+      throws CTPException {
+    final Map<String, Event> existingEventsMap =
+        existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
+    return EventService.Tag.ORDERED_NUDGE_EMAIL
+        .stream()
+        .map(tag -> getEventByTag(tag, existingEventsMap))
+        .filter(Objects::nonNull)
+        .filter(event -> isEventAfterReturnBy(event, submittedEvent))
+        .collect(Collectors.toList());
+  }
+
+  private boolean isEventAfterReturnBy(Event nudgeEvent, Event submittedEvent) {
+    return nudgeEvent.getTimestamp().after(submittedEvent.getTimestamp());
+  }
+
+  private Event getEventByTag(EventService.Tag tag, Map<String, Event> existingEvents) {
+    return existingEvents.get(tag.toString());
   }
 }
