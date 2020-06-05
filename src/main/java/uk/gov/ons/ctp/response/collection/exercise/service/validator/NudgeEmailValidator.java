@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventValidator;
 
@@ -46,15 +47,27 @@ public class NudgeEmailValidator implements EventValidator {
               + returnBy.getTimestamp()
               + ")");
     }
-    final List<Event> reminders =
+    final List<Event> nudge =
         Tag.ORDERED_NUDGE_EMAIL
             .stream()
             .map(tag -> getEventByTag(tag, submittedEvent, existingEventsMap))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    if (!eventDateOrderChecker.isEventDatesInOrder(reminders)) {
+    if (!eventDateOrderChecker.isEventDatesInOrder(nudge)) {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST, "Nudge Email must be set sequentially");
+    }
+    List<Event> existingEvent =
+        EventService.Tag.ORDERED_NUDGE_EMAIL
+            .stream()
+            .map(tag -> getExistingNudgeEmails(tag, existingEventsMap))
+            .filter(Objects::nonNull)
+            .filter(event -> isEventSameAsExisting(event, submittedEvent))
+            .collect(Collectors.toList());
+    if (existingEvent.size() > 0) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST,
+          "A nudge email has already been scheduled for this date and time. Choose a different date or time.");
     }
   }
 
@@ -108,5 +121,13 @@ public class NudgeEmailValidator implements EventValidator {
     return submittedEvent.getTag().equals(tag.toString())
         ? submittedEvent
         : existingEvents.get(tag.toString());
+  }
+
+  private Event getExistingNudgeEmails(EventService.Tag tag, Map<String, Event> existingEvents) {
+    return existingEvents.get(tag.toString());
+  }
+
+  private boolean isEventSameAsExisting(Event nudgeEvent, Event submittedEvent) {
+    return nudgeEvent.getTimestamp().equals(submittedEvent.getTimestamp());
   }
 }
