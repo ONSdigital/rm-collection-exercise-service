@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -112,7 +113,7 @@ public class EventService {
 
   @Autowired private List<EventValidator> eventValidators;
 
-  @Autowired private Scheduler scheduler;
+  @Autowired @Lazy private Scheduler scheduler;
 
   @Autowired private List<ActionRuleCreator> actionRuleCreators;
 

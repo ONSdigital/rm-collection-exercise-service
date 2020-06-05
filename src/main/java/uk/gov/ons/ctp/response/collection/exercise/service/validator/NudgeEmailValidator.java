@@ -47,16 +47,6 @@ public class NudgeEmailValidator implements EventValidator {
               + returnBy.getTimestamp()
               + ")");
     }
-    final List<Event> nudge =
-        Tag.ORDERED_NUDGE_EMAIL
-            .stream()
-            .map(tag -> getEventByTag(tag, submittedEvent, existingEventsMap))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    if (!eventDateOrderChecker.isEventDatesInOrder(nudge)) {
-      throw new CTPException(
-          CTPException.Fault.BAD_REQUEST, "Nudge Email must be set sequentially");
-    }
     List<Event> existingEvent =
         EventService.Tag.ORDERED_NUDGE_EMAIL
             .stream()
