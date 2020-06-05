@@ -200,48 +200,6 @@ public class NudgeEmailValidatorTest {
   }
 
   @Test
-  public void testNudge2WrongOrderEventCreation() {
-    final Event nudge = new Event();
-    nudge.setTag((EventService.Tag.nudge_email_0.toString()));
-    nudge.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
-    final Event nudge2 = new Event();
-    nudge2.setTag((EventService.Tag.nudge_email_1.toString()));
-    nudge2.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
-    final List<Event> events = new ArrayList<>();
-    events.add(nudge);
-    CTPException actualException = null;
-    try {
-      nudgeEmailValidator.validate(
-          events, nudge2, CollectionExerciseDTO.CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException) {
-      actualException = expectedException;
-    }
-    assertNotNull(actualException);
-    assertEquals("Nudge Email must be set sequentially", actualException.getMessage());
-  }
-
-  @Test
-  public void testNudge3WrongOrderEventCreation() {
-    final Event nudge2 = new Event();
-    nudge2.setTag((EventService.Tag.nudge_email_1.toString()));
-    nudge2.setTimestamp(Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS)));
-    final Event nudge3 = new Event();
-    nudge3.setTag((EventService.Tag.nudge_email_2.toString()));
-    nudge3.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
-    final List<Event> events = new ArrayList<>();
-    events.add(nudge2);
-    CTPException actualException = null;
-    try {
-      nudgeEmailValidator.validate(
-          events, nudge3, CollectionExerciseDTO.CollectionExerciseState.CREATED);
-    } catch (CTPException expectedException) {
-      actualException = expectedException;
-    }
-    assertNotNull(actualException);
-    assertEquals("Nudge Email must be set sequentially", actualException.getMessage());
-  }
-
-  @Test
   public void testNudgeWithSameDateAndTimeEventCreation() {
     final Instant now = Instant.now();
     final Long nudgeTime = now.plus(2, ChronoUnit.DAYS).toEpochMilli();
