@@ -92,7 +92,7 @@ class CollectionExerciseClient {
               event.getCollectionExerciseId(), event.getTag()),
           e);
     }
-    if (response.getStatus() != HttpStatus.NO_CONTENT.value() && response.getStatus() != 409) {
+    if (response.getStatus() != HttpStatus.OK.value() && response.getStatus() != 409) {
       throw new RuntimeException(
           String.format(
               "Could not update collection exercise events colletionExerciseId=%s tag=%s status=%s",
