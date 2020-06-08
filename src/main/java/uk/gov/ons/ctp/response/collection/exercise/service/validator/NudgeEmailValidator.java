@@ -107,17 +107,12 @@ public class NudgeEmailValidator implements EventValidator {
     return existingReminder.getTimestamp().before(currentTimestamp);
   }
 
-  private Event getEventByTag(Tag tag, Event submittedEvent, Map<String, Event> existingEvents) {
-    return submittedEvent.getTag().equals(tag.toString())
-        ? submittedEvent
-        : existingEvents.get(tag.toString());
-  }
-
   private Event getExistingNudgeEmails(EventService.Tag tag, Map<String, Event> existingEvents) {
     return existingEvents.get(tag.toString());
   }
 
   private boolean isEventSameAsExisting(Event nudgeEvent, Event submittedEvent) {
-    return nudgeEvent.getTimestamp().equals(submittedEvent.getTimestamp());
+    return !(nudgeEvent.equals(submittedEvent))
+        && nudgeEvent.getTimestamp().equals(submittedEvent.getTimestamp());
   }
 }

@@ -23,6 +23,7 @@ import uk.gov.ons.ctp.lib.common.UnirestInitialiser;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 
 /** A class to wrap the collection exercise REST API in Java using Unirest */
@@ -69,12 +70,12 @@ class CollectionExerciseClient {
     }
   }
 
-  void updateEvent(final EventDTO event) {
+  HttpResponse updateEvent(final EventDTO event) {
     final OffsetDateTime offsetDateTime =
         OffsetDateTime.ofInstant(event.getTimestamp().toInstant(), ZoneOffset.systemDefault());
     final String date = DateTimeFormatter.ISO_DATE_TIME.format(offsetDateTime);
 
-    HttpResponse<String> response = null;
+    HttpResponse response = null;
     try {
       response =
           Unirest.put("http://localhost:" + this.port + "/collectionexercises/{id}/events/{tag}")
@@ -84,7 +85,7 @@ class CollectionExerciseClient {
               .header("accept", "application/json")
               .header("Content-Type", "text/plain")
               .body(date)
-              .asString();
+              .asObject(ResponseEventDTO.class);
     } catch (UnirestException e) {
       throw new RuntimeException(
           String.format(
@@ -92,12 +93,13 @@ class CollectionExerciseClient {
               event.getCollectionExerciseId(), event.getTag()),
           e);
     }
-    if (response.getStatus() != HttpStatus.NO_CONTENT.value() && response.getStatus() != 409) {
+    if (response.getStatus() != HttpStatus.OK.value() && response.getStatus() != 409) {
       throw new RuntimeException(
           String.format(
               "Could not update collection exercise events colletionExerciseId=%s tag=%s status=%s",
               event.getCollectionExerciseId(), event.getTag(), response.getStatus()));
     }
+    return response;
   }
 
   /**

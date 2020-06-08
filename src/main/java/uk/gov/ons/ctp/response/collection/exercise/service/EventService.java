@@ -24,6 +24,7 @@ import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEve
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 
 @Service
@@ -193,22 +194,23 @@ public class EventService {
     return this.eventRepository.findByCollectionExerciseId(collexIds);
   }
 
-  public Event updateEvent(final UUID collexUuid, final String tag, final Date date)
+  public ResponseEventDTO updateEvent(final UUID collexUuid, final String tag, final Date date)
       throws CTPException {
     final CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
     final Event event = getEventByTagAndCollectionExerciseId(tag, collex);
 
+    ResponseEventDTO updatedEvent = new ResponseEventDTO();
     event.setTimestamp(new Timestamp(date.getTime()));
     validateSubmittedEvent(collex, event);
     updateActionRules(event);
     if (tag.equals("return_by")) {
-      deleteNudgeEmail(collex, event);
+      deleteNudgeEmail(collex, event, updatedEvent);
     }
     eventRepository.save(event);
 
     fireEventChangeHandlers(MessageType.EventUpdated, event);
-
-    return event;
+    updatedEvent.setEvent(event);
+    return updatedEvent;
   }
 
   private void updateActionRules(final Event event) throws CTPException {
@@ -218,11 +220,18 @@ public class EventService {
     }
   }
 
-  private void deleteNudgeEmail(final CollectionExercise collex, final Event event)
+  private void deleteNudgeEmail(
+      final CollectionExercise collex, final Event event, final ResponseEventDTO updateDTO)
       throws CTPException {
     final List<Event> existingEvents = eventRepository.findByCollectionExercise(collex);
     final List<Event> existingNudgeEmails =
         filterExistingNudgeEmails(existingEvents, event, collex.getState());
+    if (existingNudgeEmails.size() > 0) {
+      updateDTO.setInfo(
+          String.format(
+              "%s nudge email scheduled after the return by date was removed.",
+              existingNudgeEmails.size()));
+    }
     for (Event nudgeEmail : existingNudgeEmails) {
       deleteActionRulesForEvent(nudgeEmail);
       nudgeEmail.setDeleted(true);
