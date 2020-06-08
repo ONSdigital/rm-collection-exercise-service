@@ -9,16 +9,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import com.mashape.unirest.http.HttpResponse;
 import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -76,6 +74,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRep
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
@@ -189,7 +188,8 @@ public class CollectionExerciseEndpointIT {
     Date newDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
 
     mps.setTimestamp(newDate);
-    client.updateEvent(mps);
+    HttpResponse res = client.updateEvent(mps);
+    ResponseEventDTO responseEventDTO = (ResponseEventDTO) res.getBody();
 
     final List<EventDTO> events =
         client
@@ -203,6 +203,7 @@ public class CollectionExerciseEndpointIT {
     assertThat(
         DateUtils.round(createdEvent.getTimestamp(), Calendar.MINUTE).getTime(),
         is(DateUtils.round(newDate, Calendar.MINUTE).getTime()));
+    assertTrue(responseEventDTO.getInfo() == null);
   }
 
   @Test

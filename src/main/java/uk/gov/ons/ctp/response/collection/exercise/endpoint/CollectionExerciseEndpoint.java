@@ -49,14 +49,8 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CaseTypeDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkSampleSummaryDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -808,8 +802,8 @@ public class CollectionExerciseEndpoint {
 
     try {
       MultiIsoDateFormat dateParser = new MultiIsoDateFormat();
-      eventService.updateEvent(id, tag, dateParser.parse(date));
-      return ResponseEntity.noContent().build();
+      ResponseEventDTO responseEventDTO = eventService.updateEvent(id, tag, dateParser.parse(date));
+      return ResponseEntity.ok().body(responseEventDTO);
     } catch (ParseException e) {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST,
