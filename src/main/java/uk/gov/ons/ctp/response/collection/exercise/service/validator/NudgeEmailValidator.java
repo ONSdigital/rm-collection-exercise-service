@@ -118,6 +118,7 @@ public class NudgeEmailValidator implements EventValidator {
   }
 
   private boolean isEventSameAsExisting(Event nudgeEvent, Event submittedEvent) {
-    return nudgeEvent.getTimestamp().equals(submittedEvent.getTimestamp());
+    return !(nudgeEvent.equals(submittedEvent))
+        && nudgeEvent.getTimestamp().equals(submittedEvent.getTimestamp());
   }
 }
