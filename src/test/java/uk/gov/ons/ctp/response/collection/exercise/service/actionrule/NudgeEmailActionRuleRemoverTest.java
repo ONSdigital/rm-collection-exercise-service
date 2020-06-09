@@ -57,7 +57,7 @@ public class NudgeEmailActionRuleRemoverTest {
     remover.execute(event);
 
     verify(actionSvcClient, never())
-        .updateActionRule(
+        .deleteActionRule(
             any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
   }
 
@@ -74,7 +74,8 @@ public class NudgeEmailActionRuleRemoverTest {
 
     remover.execute(event);
     verify(actionSvcClient, times(0))
-        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+        .deleteActionRule(
+            any(UUID.class), anyString(), anyString(), any(OffsetDateTime.class), anyInt());
   }
 
   @Test
