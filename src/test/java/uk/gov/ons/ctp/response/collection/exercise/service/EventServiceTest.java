@@ -6,11 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -39,6 +35,8 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.actionrule.NudgeEmailActionRuleRemover;
+import uk.gov.ons.ctp.response.collection.exercise.service.actionrule.ReminderActionRuleRemover;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
@@ -59,7 +57,9 @@ public class EventServiceTest {
 
   @Mock private ActionRuleUpdater actionRuleUpdater;
 
-  @Mock private ActionRuleRemover actionRuleRemover;
+  @Mock private NudgeEmailActionRuleRemover actionRuleRemover;
+
+  @Mock private ReminderActionRuleRemover actionRuleRemover2;
 
   @Mock private ActionRuleUpdater actionRuleUpdater2;
 
@@ -338,7 +338,41 @@ public class EventServiceTest {
     eventService.deleteEvent(COLLEX_UUID, Tag.nudge_email_4.name());
 
     verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
-    verify(actionRuleRemover, atLeastOnce()).execute(existingEvent);
+    verify(actionRuleRemover, atMost(1)).execute(existingEvent);
+    verify(actionRuleRemover2, atMost(0)).execute(existingEvent);
+  }
+
+  @Test
+  public void givenReminderEmailIsDeletedItGetsPropagatedToActionSVC() throws CTPException {
+
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_UUID);
+    collex.setExercisePK(EXERCISE_PK);
+    final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
+    collex.setState(collectionExerciseState);
+
+    final SurveyDTO survey = new SurveyDTO();
+    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    final Event existingEvent = new Event();
+    existingEvent.setTag(Tag.reminder.toString());
+    existingEvent.setId(UUID.randomUUID());
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.reminder.name()))
+        .thenReturn(existingEvent);
+
+    final List<Event> existingEvents = new ArrayList<>();
+
+    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
+    eventValidators.add(eventValidator);
+
+    actionRuleRemovers.add(actionRuleRemover2);
+
+    eventService.deleteEvent(COLLEX_UUID, Tag.reminder.name());
+
+    verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
+    verify(actionRuleRemover2, atMost(1)).execute(existingEvent);
+    verify(actionRuleRemover, atMost(0)).execute(existingEvent);
   }
 
   @Test

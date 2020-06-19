@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -18,6 +19,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.Sur
 import uk.gov.ons.ctp.response.collection.exercise.service.ActionRuleRemover;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
+@Component
 public class ReminderActionRuleRemover implements ActionRuleRemover {
   private final ReminderSuffixGenerator reminderSuffixGenerator;
   private final SurveySvcClient surveyService;
