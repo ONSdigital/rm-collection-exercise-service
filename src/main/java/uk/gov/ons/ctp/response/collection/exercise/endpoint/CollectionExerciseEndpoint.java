@@ -4,6 +4,10 @@ import static java.util.stream.Collectors.joining;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -110,6 +114,21 @@ public class CollectionExerciseEndpoint {
    * @return list of collection exercises associated to survey
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "GET request to find collection exercises for the given survey Id.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of collection exercises for surveyId"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
   public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id, @RequestParam("liveOnly") Optional<Boolean> liveOnly)
@@ -158,6 +177,25 @@ public class CollectionExerciseEndpoint {
    * @return 200 with collection exercise body if found, otherwise 404
    * @throws CTPException
    */
+  @Operation(
+      summary =
+          "GET request to retrieve a collection exercise by exercise reference and survey reference")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "Successful retrieval of collection exercise by exercise "
+                    + "reference and survey reference"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{exerciseRef}/survey/{surveyRef}", method = RequestMethod.GET)
   public ResponseEntity<CollectionExerciseDTO> getCollectionExercisesForSurvey(
       @PathVariable("exerciseRef") final String exerciseRef,
@@ -195,6 +233,21 @@ public class CollectionExerciseEndpoint {
    * @return json dictionary or collection exercises per survey
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "GET request to retrieve collection exercises for given list of survey ids")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of collection exercise"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/surveys", method = RequestMethod.GET, produces = "application/json")
   public ResponseEntity<HashMap> getCollectionExercisesForSurveys(
       final @RequestParam List<UUID> surveyIds,
@@ -221,6 +274,22 @@ public class CollectionExerciseEndpoint {
    * @return collection exercise associated to collection exercise id
    * @throws CTPException on resource not found
    */
+  @Operation(
+      summary = "GET request to retrieve collection exercise for given collection exercise id")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of collection exercise"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}", method = RequestMethod.GET)
   public ResponseEntity<CollectionExerciseDTO> getCollectionExercise(
       @PathVariable("id") final UUID id) throws CTPException {
@@ -245,6 +314,17 @@ public class CollectionExerciseEndpoint {
    *
    * @return a list of all Collection Exercises
    */
+  @Operation(summary = "GET request to retrieve all collection exercises")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of collection exercises"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(method = RequestMethod.GET)
   public ResponseEntity<List<CollectionExerciseDTO>> getAllCollectionExercises() {
     log.debug("Entering fetch all collection exercises");
@@ -268,6 +348,23 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request to update a collection exercise")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
   public ResponseEntity<?> updateCollectionExercise(
       @PathVariable("id") final UUID id,
@@ -333,6 +430,23 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request to update a collection exercise scheduledStartDateTime")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(
       value = "/{id}/scheduledStart",
       method = RequestMethod.PUT,
@@ -368,6 +482,23 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request to update a collection exercise exerciseRef")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/exerciseRef", method = RequestMethod.PUT, consumes = "text/plain")
   public ResponseEntity<?> patchCollectionExerciseExerciseRef(
       @PathVariable("id") final UUID id, final @RequestBody String exerciseRef)
@@ -389,6 +520,23 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request to update a collection exercise name")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/name", method = RequestMethod.PUT, consumes = "text/plain")
   public ResponseEntity<?> patchCollectionExerciseName(
       @PathVariable("id") final UUID id, final @RequestBody String name) throws CTPException {
@@ -409,6 +557,23 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request to update a collection exercise userDescription")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(
       value = "/{id}/userDescription",
       method = RequestMethod.PUT,
@@ -426,13 +591,30 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * PUT request to update a collection exercise userDescription
+   * PUT request to update a collection exercise surveyId
    *
    * @param id Collection exercise Id to update
    * @param surveyId The new survey to associate with this collection exercise
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request to update a collection exercise surveyId")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/surveyId", method = RequestMethod.PUT, consumes = "text/plain")
   public ResponseEntity<?> patchCollectionExerciseSurveyId(
       @PathVariable("id") final UUID id, final @RequestBody String surveyId) throws CTPException {
@@ -459,6 +641,25 @@ public class CollectionExerciseEndpoint {
    * @return 201 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(
+      summary =
+          "POST request to create a collection exercise associated action plans and casetype overrides.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successful creation"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(method = RequestMethod.POST)
   public ResponseEntity<?> createCollectionExercise(
       final @Validated(CollectionExerciseDTO.PostValidation.class) @RequestBody
@@ -525,6 +726,23 @@ public class CollectionExerciseEndpoint {
    * @return the collection exercise that was to be deleted
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "DELETE request which deletes a collection exercise.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successful Deletion"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   public ResponseEntity<CollectionExercise> deleteCollectionExercise(
       @PathVariable("id") final UUID id) throws CTPException {
@@ -546,6 +764,24 @@ public class CollectionExerciseEndpoint {
    * @throws InvalidRequestException if binding errors
    * @throws CTPException on resource not found
    */
+  @Operation(
+      summary = "PUT request for linking an array of sample summaries to a collection exercise.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful Update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(
       value = "/link/{collectionExerciseId}",
       method = RequestMethod.PUT,
@@ -594,6 +830,21 @@ public class CollectionExerciseEndpoint {
    * @param collectionExerciseId the collection exercise for which the links are required
    * @return a list of sample summaries linked to the collection exercise
    */
+  @Operation(summary = "GET request to retrieve list of samples linked to a collection exercise")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of samples linked to a collection exercise"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(
       value = "/link/{collectionExerciseId}",
       method = RequestMethod.GET,
@@ -617,6 +868,23 @@ public class CollectionExerciseEndpoint {
    * @return noContent response
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "DELETE request for unlinking sample summary from a collection exercise.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successful Deletion"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(
       value = "/unlink/{collectionExerciseId}/sample/{sampleSummaryId}",
       method = RequestMethod.DELETE)
@@ -649,6 +917,21 @@ public class CollectionExerciseEndpoint {
    * @return list of UUIDs of linked sample summaries
    * @throws CTPException if no collection exercise found for UUID
    */
+  @Operation(
+      summary =
+          "GET request to retrieve list of UUIDs for the sample summaries linked to a specific collection exercise")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful Operation"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "link/{collectionExerciseId}", method = RequestMethod.GET)
   public ResponseEntity<List<UUID>> requestLinkedSampleSummaries(
       @PathVariable("collectionExerciseId") final UUID collectionExerciseId) throws CTPException {
@@ -729,6 +1012,23 @@ public class CollectionExerciseEndpoint {
     return collectionExerciseDTO;
   }
 
+  @Operation(summary = "POST request to create a collection exercise event.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successful creation"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/events", method = RequestMethod.POST)
   public ResponseEntity<?> createCollectionExerciseEvent(
       @PathVariable("id") final UUID id, final @RequestBody EventDTO eventDto) throws CTPException {
@@ -755,6 +1055,21 @@ public class CollectionExerciseEndpoint {
     return ResponseEntity.created(location).build();
   }
 
+  @Operation(summary = "GET request to retrieve events for collection exercise")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of events for collection exercise"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/events", method = RequestMethod.GET)
   public ResponseEntity<List<EventDTO>> getCollectionExerciseEvents(
       @PathVariable("id") final UUID id) throws CTPException {
@@ -768,6 +1083,21 @@ public class CollectionExerciseEndpoint {
     return ResponseEntity.ok(result);
   }
 
+  @Operation(summary = "GET request to retrieve collection exercise events")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful retrieval of collection exercise events"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/events", method = RequestMethod.GET)
   public ResponseEntity<Map<UUID, List<EventDTO>>> getMultipleCollectionExerciseEvents(
       @RequestParam("ids") final List<UUID> ids) throws CTPException {
@@ -789,6 +1119,23 @@ public class CollectionExerciseEndpoint {
    * @return 200 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "PUT request for updating collection event date for a given event tag.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful Update"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Conflict",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.PUT, consumes = "text/plain")
   public ResponseEntity<?> updateEventDate(
       @PathVariable("id") final UUID id,
@@ -819,6 +1166,19 @@ public class CollectionExerciseEndpoint {
    * @return event associated to collection exercise
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "GET request to retrieve specified tag event against collection exercise id")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful retrieval"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.GET)
   public ResponseEntity<Event> getEvent(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
@@ -840,6 +1200,19 @@ public class CollectionExerciseEndpoint {
    * @return the collection exercise event that was to be deleted
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "POST request to remove tag event against collection exercise id.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successful deletion"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.POST)
   public ResponseEntity<Event> deleteCollectionExerciseEventTag(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
@@ -861,6 +1234,19 @@ public class CollectionExerciseEndpoint {
    * @return the collection exercise event that was to be deleted
    * @throws CTPException on resource not found
    */
+  @Operation(summary = "DELETE request to remove tag event against collection exercise id.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successful deletion"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/{id}/events/{tag}", method = RequestMethod.DELETE)
   public ResponseEntity<Event> deleteCollectionExerciseEvent(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
@@ -881,6 +1267,19 @@ public class CollectionExerciseEndpoint {
    * @return the list of events derived from quartz jobs
    * @throws SchedulerException thrown if issues getting data from quartz
    */
+  @Operation(summary = "GET request to retrieve all scheduled events from quartz")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successful Operation"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(examples = {})),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource Not Found",
+            content = @Content(examples = {}))
+      })
   @RequestMapping(value = "/events/scheduled", method = RequestMethod.GET)
   public ResponseEntity<List<EventDTO>> getAllScheduledEvents() throws SchedulerException {
     List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);

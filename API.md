@@ -151,7 +151,7 @@ As above , but only LIVE collexes returned
     "updated": null,
     "deleted": null,
     "validationErrors": []
-  },
+  }
 ]
 ```
 
@@ -237,7 +237,7 @@ An `HTTP 404 Not Found` status code is returned if the survey with the specified
         "updated": null,
         "deleted": null,
         "validationErrors": []
-    },
+    }
 ]
 ```
 

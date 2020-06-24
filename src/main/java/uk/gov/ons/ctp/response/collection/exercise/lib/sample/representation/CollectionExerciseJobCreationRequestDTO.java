@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -17,18 +17,18 @@ import lombok.NoArgsConstructor;
 public class CollectionExerciseJobCreationRequestDTO {
 
   @NotNull
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private UUID collectionExerciseId;
 
   @NotNull
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private String surveyRef;
 
   @NotNull
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private Date exerciseDateTime;
 
   @NotNull
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private List<UUID> sampleSummaryUUIDList;
 }
