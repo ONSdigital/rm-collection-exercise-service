@@ -196,3 +196,12 @@ swagger-settings:
   title: Collection Exercise Service API
   description: API for ${project.artifactId}
   version: ${project.version}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: false
+  swagger-ui:
+    path: /api-doc.html
+    operationsSorter: method
+    enabled: false

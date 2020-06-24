@@ -1,0 +1,976 @@
+openapi: 3.0.1
+info:
+  title: rm-collection-exercise-service
+  version: UNVERSIONED
+servers:
+  - url: http://localhost:8145/api-docs.yaml
+    description: Generated server url
+paths:
+  /collectionexerciseexecution/{id}:
+    post:
+      tags:
+        - collection-exercise-execution-endpoint
+      summary: POST request to manually trigger the request of the sample units for the collection exercise Id.
+      operationId: requestSampleUnits
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        400:
+          description: Bad Request
+        404:
+          description: Resource Not Found
+        201:
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SampleUnitsRequestDTO"
+  /collectionexercises/{id}:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve collection exercise for given collection exercise id
+      operationId: getCollectionExercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of collection exercise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionExerciseDTO"
+        404:
+          description: Resource Not Found
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request to update a collection exercise
+      operationId: updateCollectionExercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CollectionExerciseDTO"
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+        200:
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      tags:
+        - collection-exercise-endpoint
+      summary: DELETE request which deletes a collection exercise.
+      operationId: deleteCollectionExercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        201:
+          description: Successful Deletion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionExercise"
+        400:
+          description: Bad Request
+        404:
+          description: Resource Not Found
+  /collectionexercises/events/scheduled:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve all scheduled events from quartz
+      operationId: getAllScheduledEvents
+      responses:
+        401:
+          description: Unauthorized
+        404:
+          description: Resource Not Found
+        200:
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventDTO"
+  /collectionexercises/{id}/events/{tag}:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve specified tag event against collection exercise id
+      operationId: getEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        404:
+          description: Resource Not Found
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request for updating collection event date for a given event tag.
+      operationId: updateEventDate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful Update
+          content:
+            application/json:
+              schema:
+                type: object
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+    post:
+      tags:
+        - collection-exercise-endpoint
+      summary: POST request to remove tag event against collection exercise id.
+      operationId: deleteCollectionExerciseEventTag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        401:
+          description: Unauthorized
+        201:
+          description: Successful deletion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        400:
+          description: Bad Request
+    delete:
+      tags:
+        - collection-exercise-endpoint
+      summary: DELETE request to remove tag event against collection exercise id.
+      operationId: deleteCollectionExerciseEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        401:
+          description: Unauthorized
+        201:
+          description: Successful deletion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        400:
+          description: Bad Request
+  /collectionexercises/events:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve collection exercise events
+      operationId: getMultipleCollectionExerciseEvents
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of collection exercise events
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EventDTO"
+        404:
+          description: Resource Not Found
+  /collectionexercises/{exerciseRef}/survey/{surveyRef}:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve a collection exercise by exercise reference and survey reference
+      operationId: getCollectionExercisesForSurvey
+      parameters:
+        - name: exerciseRef
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: surveyRef
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of collection exercise by exercise reference and survey reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionExerciseDTO"
+        404:
+          description: Resource Not Found
+  /collectionexercises/survey/{id}:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to find collection exercises for the given survey Id.
+      operationId: getCollectionExercisesForSurvey_1
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: liveOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of collection exercises for surveyId
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CollectionExerciseDTO"
+        404:
+          description: Resource Not Found
+  /collectionexercises/{id}/scheduledStart:
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request to update a collection exercise scheduledStartDateTime
+      operationId: patchCollectionExerciseScheduledStart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+        200:
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+  /collectionexercises/{id}/exerciseRef:
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request to update a collection exercise exerciseRef
+      operationId: patchCollectionExerciseExerciseRef
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+        200:
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+  /collectionexercises/{id}/name:
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request to update a collection exercise name
+      operationId: patchCollectionExerciseName
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+        200:
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+  /collectionexercises/{id}/userDescription:
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request to update a collection exercise userDescription
+      operationId: patchCollectionExerciseUserDescription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+        200:
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+  /collectionexercises/{id}/surveyId:
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request to update a collection exercise surveyId
+      operationId: patchCollectionExerciseSurveyId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+        200:
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+  /collectionexercises/link/{collectionExerciseId}:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve list of UUIDs for the sample summaries linked to a specific collection exercise
+      operationId: getSampleLinks_1
+      parameters:
+        - name: collectionExerciseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful Operation
+          content:
+            application/vnd.ons.sdc.samplelink.v1+json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SampleLinkDTO"
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SampleLinkDTO"
+        404:
+          description: Resource Not Found
+    put:
+      tags:
+        - collection-exercise-endpoint
+      summary: PUT request for linking an array of sample summaries to a collection exercise.
+      operationId: linkSampleSummary
+      parameters:
+        - name: collectionExerciseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkSampleSummaryDTO"
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful Update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkedSampleSummariesDTO"
+        409:
+          description: Conflict
+        400:
+          description: Bad Request
+  /collectionexercises/unlink/{collectionExerciseId}/sample/{sampleSummaryId}:
+    delete:
+      tags:
+        - collection-exercise-endpoint
+      summary: DELETE request for unlinking sample summary from a collection exercise.
+      operationId: unlinkSampleSummary
+      parameters:
+        - name: collectionExerciseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: sampleSummaryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        201:
+          description: Successful Deletion
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: Bad Request
+        404:
+          description: Resource Not Found
+  /collectionexercises/{id}/events:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve events for collection exercise
+      operationId: getCollectionExerciseEvents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of events for collection exercise
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventDTO"
+        404:
+          description: Resource Not Found
+    post:
+      tags:
+        - collection-exercise-endpoint
+      summary: POST request to create a collection exercise event.
+      operationId: createCollectionExerciseEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventDTO"
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        201:
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: Bad Request
+  /collectionexercises/surveys:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve collection exercises for given list of survey ids
+      operationId: getCollectionExercisesForSurveys
+      parameters:
+        - name: surveyIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: liveOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of collection exercise
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+        404:
+          description: Resource Not Found
+  /collectionexercises:
+    get:
+      tags:
+        - collection-exercise-endpoint
+      summary: GET request to retrieve all collection exercises
+      operationId: getAllCollectionExercises
+      responses:
+        401:
+          description: Unauthorized
+        200:
+          description: Successful retrieval of collection exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CollectionExerciseDTO"
+    post:
+      tags:
+        - collection-exercise-endpoint
+      summary: POST request to create a collection exercise associated action plans and casetype overrides.
+      operationId: createCollectionExercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CollectionExerciseDTO"
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        409:
+          description: Conflict
+        201:
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: Bad Request
+components:
+  schemas:
+    SampleUnitsRequestDTO:
+      type: object
+      properties:
+        sampleUnitsTotal:
+          type: integer
+          format: int32
+    CaseTypeDTO:
+      type: object
+      properties:
+        actionPlanId:
+          type: string
+          format: uuid
+        sampleUnitType:
+          type: string
+    CollectionExerciseDTO:
+      required:
+        - exerciseRef
+        - surveyId
+        - userDescription
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        surveyId:
+          type: string
+        surveyRef:
+          type: string
+          writeOnly: true
+        name:
+          maxLength: 20
+          minLength: 1
+          type: string
+        actualExecutionDateTime:
+          type: string
+          format: date-time
+        scheduledExecutionDateTime:
+          type: string
+          format: date-time
+        scheduledStartDateTime:
+          type: string
+          format: date-time
+        actualPublishDateTime:
+          type: string
+          format: date-time
+        periodStartDateTime:
+          type: string
+          format: date-time
+        periodEndDateTime:
+          type: string
+          format: date-time
+        scheduledReturnDateTime:
+          type: string
+          format: date-time
+        scheduledEndDateTime:
+          type: string
+          format: date-time
+        executedBy:
+          type: string
+        state:
+          type: string
+          enum:
+            - CREATED
+            - SCHEDULED
+            - READY_FOR_REVIEW
+            - READY_FOR_LIVE
+            - EXECUTION_STARTED
+            - EXECUTED
+            - VALIDATED
+            - FAILEDVALIDATION
+            - LIVE
+        caseTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/CaseTypeDTO"
+        exerciseRef:
+          pattern: ^[0-9]{1,6}$
+          type: string
+        userDescription:
+          maxLength: 50
+          minLength: 1
+          type: string
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        deleted:
+          type: boolean
+        validationErrors:
+          type: array
+          items:
+            $ref: "#/components/schemas/SampleUnitValidationErrorDTO"
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/EventDTO"
+    EventDTO:
+      required:
+        - tag
+        - timestamp
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        collectionExerciseId:
+          type: string
+          format: uuid
+        tag:
+          maxLength: 20
+          minLength: 1
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    SampleUnitValidationErrorDTO:
+      type: object
+      properties:
+        sampleUnitRef:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+            enum:
+              - MISSING_COLLECTION_INSTRUMENT
+              - MISSING_PARTY
+    CollectionExercise:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        exercisePK:
+          type: integer
+          format: int32
+        actualExecutionDateTime:
+          type: string
+          format: date-time
+        scheduledExecutionDateTime:
+          type: string
+          format: date-time
+        scheduledStartDateTime:
+          type: string
+          format: date-time
+        actualPublishDateTime:
+          type: string
+          format: date-time
+        periodStartDateTime:
+          type: string
+          format: date-time
+        periodEndDateTime:
+          type: string
+          format: date-time
+        scheduledReturnDateTime:
+          type: string
+          format: date-time
+        scheduledEndDateTime:
+          type: string
+          format: date-time
+        executedBy:
+          type: string
+        state:
+          type: string
+          enum:
+            - CREATED
+            - SCHEDULED
+            - READY_FOR_REVIEW
+            - READY_FOR_LIVE
+            - EXECUTION_STARTED
+            - EXECUTED
+            - VALIDATED
+            - FAILEDVALIDATION
+            - LIVE
+        sampleSize:
+          type: integer
+          format: int32
+        exerciseRef:
+          type: string
+        userDescription:
+          type: string
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        deleted:
+          type: boolean
+        surveyId:
+          type: string
+          format: uuid
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventPK:
+          type: integer
+          format: int32
+        tag:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        collectionExercise:
+          $ref: "#/components/schemas/CollectionExercise"
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        deleted:
+          type: boolean
+        messageSent:
+          type: string
+          format: date-time
+    LinkSampleSummaryDTO:
+      type: object
+      properties:
+        sampleSummaryIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    LinkedSampleSummariesDTO:
+      type: object
+      properties:
+        collectionExerciseId:
+          type: string
+          format: uuid
+        sampleSummaryIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    SampleLinkDTO:
+      type: object
+      properties:
+        sampleSummaryId:
+          type: string
+        collectionExerciseId:
+          type: string
