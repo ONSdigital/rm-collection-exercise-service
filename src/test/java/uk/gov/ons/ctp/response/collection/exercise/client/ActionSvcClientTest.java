@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -13,6 +14,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
+import com.sun.jndi.toolkit.url.Uri;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +37,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.Act
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ActionSvcClientTest {
@@ -41,6 +45,7 @@ public class ActionSvcClientTest {
   private static final String ACTION_PLAN_NAME = "APName";
   private static final String ACTION_PLAN_DESCRIPTION = "APDescription";
   private static final String COLLECTION_EXERCISE_ID = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
+  private static final String ACTION_PLAN_ID = "14fb3e68-5dca-46db-bf49-04b84e07e77c";
 
   @Spy private RestUtility restUtility = new RestUtility(RestUtilityConfig.builder().build());
 
@@ -51,6 +56,8 @@ public class ActionSvcClientTest {
   @InjectMocks private ActionSvcClient actionSvcRestClient;
 
   private ResponseEntity<List<ActionPlanDTO>> responseEntity;
+
+  private ResponseEntity<ActionPlanDTO> actionPlanResponseEntity;
 
   private List<ActionPlanDTO> actionPlans;
 
@@ -69,6 +76,7 @@ public class ActionSvcClientTest {
     actionPlans.add(actionPlan);
 
     responseEntity = new ResponseEntity<>(actionPlans, HttpStatus.OK);
+    actionPlanResponseEntity = new ResponseEntity<>(actionPlan, HttpStatus.OK);
 
     MockitoAnnotations.initMocks(this);
 
@@ -103,6 +111,100 @@ public class ActionSvcClientTest {
     // Then
     verify(restTemplate, times(1))
         .postForObject(any(URI.class), any(HttpEntity.class), eq(ActionPlanDTO.class));
+  }
+
+  @Test
+  public void updateActionPlanNameAndDescription_200Response() throws CTPException {
+
+    // Given
+    when(restTemplate.exchange(
+      any(URI.class),
+      eq(HttpMethod.PUT),
+      any(HttpEntity.class),
+      eq(ActionPlanDTO.class)))
+      .thenReturn(actionPlanResponseEntity);
+
+    // When
+    ActionPlanDTO actionPlan =
+      actionSvcRestClient.updateActionPlanNameAndDescription(UUID.fromString(ACTION_PLAN_ID),
+        "test_name", "test_description");
+
+    assertEquals(actionPlan.getId(), actionPlans.get(0).getId());
+  }
+
+  @Test(expected = HttpClientErrorException.class)
+  public void updateActionPlanNameAndDescription_500Response() {
+    // Given
+    when(restTemplate.exchange(
+      any(URI.class),
+      eq(HttpMethod.PUT),
+      any(HttpEntity.class),
+      eq(ActionPlanDTO.class)))
+      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+
+    // When
+    actionSvcRestClient.updateActionPlanNameAndDescription(UUID.fromString(ACTION_PLAN_ID),
+      "test_name", "test_description");
+
+    // Then
+    verify(restTemplate, times(1))
+      .exchange(any(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class));
+  }
+
+  @Test
+  public void getActionPlanById_200Response() throws CTPException {
+
+    // Given
+    when(restTemplate.exchange(
+      any(URI.class),
+      eq(HttpMethod.GET),
+      any(HttpEntity.class),
+      eq(ActionPlanDTO.class)))
+      .thenReturn(actionPlanResponseEntity);
+
+    // When
+    ActionPlanDTO actionPlan =
+      actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
+
+    assertEquals(actionPlan.getId(), actionPlans.get(0).getId());
+  }
+
+  @Test
+  public void getActionPlanByID_404Response() throws CTPException {
+    // Given
+    when(restTemplate.exchange(
+      any(URI.class),
+      eq(HttpMethod.GET),
+      any(HttpEntity.class),
+      eq(ActionPlanDTO.class)))
+      .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+    // When
+    ActionPlanDTO actionPlan =
+    actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
+
+    // Then
+    verify(restTemplate, times(1))
+      .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
+    assertNull(actionPlan);
+  }
+
+  @Test(expected = HttpClientErrorException.class)
+  public void getActionPlanByID_500Response() {
+    // Given
+    when(restTemplate.exchange(
+      any(URI.class),
+      eq(HttpMethod.GET),
+      any(HttpEntity.class),
+      eq(ActionPlanDTO.class)))
+      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+
+    // When
+    actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
+
+    // Then
+    verify(restTemplate, times(1))
+      .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
   }
 
   @Test

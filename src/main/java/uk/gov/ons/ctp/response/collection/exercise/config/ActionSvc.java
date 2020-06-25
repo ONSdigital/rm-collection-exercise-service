@@ -13,4 +13,5 @@ public class ActionSvc {
   private String actionRulesPath;
   private String actionRulePath;
   private String actionRulesForActionPlanPath;
+  private String actionPlanPath;
 }

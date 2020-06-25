@@ -5,9 +5,7 @@ import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseAppl
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -23,11 +21,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePostRequestDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePutRequestDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
@@ -172,6 +166,27 @@ public class ActionSvcClient {
     return actionPlans.iterator().next();
   }
 
+  public ActionPlanDTO getActionPlanById(final UUID actionPlanId) {
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getActionSvc().getActionPlanPath(), null, actionPlanId);
+    HttpEntity httpEntity = restUtility.createHttpEntityWithAuthHeader();
+    ResponseEntity<ActionPlanDTO> responseEntity;
+    try {
+      log.with("actionPlanId", actionPlanId.toString()).debug("Retrieving action plan");
+      responseEntity =
+          restTemplate.exchange(
+              uriComponents.toUri(), HttpMethod.GET, httpEntity, ActionPlanDTO.class);
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
+      }
+      log.error("Failed to retrieve actionPlan", e);
+      throw e;
+    }
+    return responseEntity.getBody();
+  }
+
   private List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
     log.with("collection_exercise_id", collectionExerciseId)
         .debug("Retrieving action plan for selectors");
@@ -260,6 +275,35 @@ public class ActionSvcClient {
     return restTemplate
         .exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, ActionRuleDTO.class)
         .getBody();
+  }
+
+  public ActionPlanDTO updateActionPlanNameAndDescription(
+      final UUID actionPlanUUID, final String name, final String description)
+      throws RestClientException {
+    final ActionPlanPutRequestDTO actionPlanPutRequestDTO = new ActionPlanPutRequestDTO();
+    actionPlanPutRequestDTO.setDescription(description);
+    actionPlanPutRequestDTO.setName(name);
+    return updateActionPlan(actionPlanUUID, actionPlanPutRequestDTO);
+  }
+
+  private ActionPlanDTO updateActionPlan(
+      final UUID actionPlanUUID, final ActionPlanPutRequestDTO actionPlanPutRequestDTO)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getActionSvc().getActionPlanPath(), null, actionPlanUUID);
+
+    final HttpEntity<ActionPlanPutRequestDTO> httpEntity =
+        restUtility.createHttpEntity(actionPlanPutRequestDTO);
+    try {
+      log.with("actionPlanId", actionPlanUUID).debug("Updating action plan");
+      return restTemplate
+          .exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, ActionPlanDTO.class)
+          .getBody();
+    } catch (HttpClientErrorException e) {
+      log.error("Failed to update action plan", e);
+      throw e;
+    }
   }
 
   public HttpStatus deleteActionRule(
