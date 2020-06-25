@@ -640,8 +640,8 @@ public class CollectionExerciseService {
       collex.setUpdated(new Timestamp(new Date().getTime()));
       if (isActionPlanUpdateRequired) {
         log.with("new exercise reference", collex.getExerciseRef())
-          .with("survey id", survey.getId())
-          .debug("Update action plan already exists");
+            .with("survey id", survey.getId())
+            .debug("Update action plan already exists");
         updateActionPlanNameAndDiscription(collex.getExercisePK(), collex.getExerciseRef(), survey);
       }
       return updateCollectionExercise(collex);
@@ -735,9 +735,9 @@ public class CollectionExerciseService {
         String name = String.format("%s %s %s", shortName, sampleUnitType, exerciseRef);
         String description = String.format("%s %s Case %s", shortName, sampleUnitType, exerciseRef);
         log.with("name", name)
-          .with("description", description)
-          .with("actionPlanId", existingCaseTypeOverride.getActionPlanId())
-          .debug("updating name and description for existing action plan");
+            .with("description", description)
+            .with("actionPlanId", existingCaseTypeOverride.getActionPlanId())
+            .debug("updating name and description for existing action plan");
         actionSvcClient.updateActionPlanNameAndDescription(
             existingCaseTypeOverride.getActionPlanId(), name, description);
       }

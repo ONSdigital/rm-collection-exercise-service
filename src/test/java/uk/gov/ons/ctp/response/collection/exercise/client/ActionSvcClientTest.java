@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import com.sun.jndi.toolkit.url.Uri;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +35,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.Act
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
-import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ActionSvcClientTest {
@@ -118,16 +115,13 @@ public class ActionSvcClientTest {
 
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.PUT),
-      any(HttpEntity.class),
-      eq(ActionPlanDTO.class)))
-      .thenReturn(actionPlanResponseEntity);
+            any(URI.class), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenReturn(actionPlanResponseEntity);
 
     // When
     ActionPlanDTO actionPlan =
-      actionSvcRestClient.updateActionPlanNameAndDescription(UUID.fromString(ACTION_PLAN_ID),
-        "test_name", "test_description");
+        actionSvcRestClient.updateActionPlanNameAndDescription(
+            UUID.fromString(ACTION_PLAN_ID), "test_name", "test_description");
 
     assertEquals(actionPlan.getId(), actionPlans.get(0).getId());
   }
@@ -136,19 +130,16 @@ public class ActionSvcClientTest {
   public void updateActionPlanNameAndDescription_500Response() {
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.PUT),
-      any(HttpEntity.class),
-      eq(ActionPlanDTO.class)))
-      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+            any(URI.class), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     // When
-    actionSvcRestClient.updateActionPlanNameAndDescription(UUID.fromString(ACTION_PLAN_ID),
-      "test_name", "test_description");
+    actionSvcRestClient.updateActionPlanNameAndDescription(
+        UUID.fromString(ACTION_PLAN_ID), "test_name", "test_description");
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(any(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class));
+        .exchange(any(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class));
   }
 
   @Test
@@ -156,15 +147,12 @@ public class ActionSvcClientTest {
 
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(ActionPlanDTO.class)))
-      .thenReturn(actionPlanResponseEntity);
+            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenReturn(actionPlanResponseEntity);
 
     // When
     ActionPlanDTO actionPlan =
-      actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
+        actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
 
     assertEquals(actionPlan.getId(), actionPlans.get(0).getId());
   }
@@ -173,19 +161,16 @@ public class ActionSvcClientTest {
   public void getActionPlanByID_404Response() throws CTPException {
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(ActionPlanDTO.class)))
-      .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
     // When
     ActionPlanDTO actionPlan =
-    actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
+        actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
+        .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
     assertNull(actionPlan);
   }
 
@@ -193,18 +178,15 @@ public class ActionSvcClientTest {
   public void getActionPlanByID_500Response() {
     // Given
     when(restTemplate.exchange(
-      any(URI.class),
-      eq(HttpMethod.GET),
-      any(HttpEntity.class),
-      eq(ActionPlanDTO.class)))
-      .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     // When
     actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
 
     // Then
     verify(restTemplate, times(1))
-      .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
+        .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
   }
 
   @Test
