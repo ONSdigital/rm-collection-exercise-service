@@ -166,27 +166,6 @@ public class ActionSvcClient {
     return actionPlans.iterator().next();
   }
 
-  public ActionPlanDTO getActionPlanById(final UUID actionPlanId) {
-    UriComponents uriComponents =
-        restUtility.createUriComponents(
-            appConfig.getActionSvc().getActionPlanPath(), null, actionPlanId);
-    HttpEntity httpEntity = restUtility.createHttpEntityWithAuthHeader();
-    ResponseEntity<ActionPlanDTO> responseEntity;
-    try {
-      log.with("actionPlanId", actionPlanId.toString()).debug("Retrieving action plan");
-      responseEntity =
-          restTemplate.exchange(
-              uriComponents.toUri(), HttpMethod.GET, httpEntity, ActionPlanDTO.class);
-    } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        return null;
-      }
-      log.error("Failed to retrieve actionPlan", e);
-      throw e;
-    }
-    return responseEntity.getBody();
-  }
-
   private List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
     log.with("collection_exercise_id", collectionExerciseId)
         .debug("Retrieving action plan for selectors");

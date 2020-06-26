@@ -379,7 +379,6 @@ public class CollectionExerciseServiceTest {
     existing.setSurveyId(surveyId);
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
     when(surveyService.findSurvey(surveyId)).thenReturn(survey);
-    when(actionService.getActionPlanById(any())).thenReturn(new ActionPlanDTO());
     List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
     CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
     caseTypeOverride.setSampleUnitTypeFK("BI");
@@ -557,7 +556,6 @@ public class CollectionExerciseServiceTest {
     collex.setExerciseRef(exerciseRef);
     collex.setSurveyId(surveyId.toString());
     when(surveyService.findSurvey(surveyId)).thenReturn(survey);
-    when(actionService.getActionPlanById(any())).thenReturn(new ActionPlanDTO());
     List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
     CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
     caseTypeOverride.setSampleUnitTypeFK("BI");
@@ -580,7 +578,6 @@ public class CollectionExerciseServiceTest {
     String name = "Not BRES";
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     when(surveyService.findSurvey(any())).thenReturn(survey);
-    when(actionService.getActionPlanById(any())).thenReturn(new ActionPlanDTO());
     List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
     CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
     caseTypeOverride.setSampleUnitTypeFK("BI");
@@ -603,7 +600,6 @@ public class CollectionExerciseServiceTest {
     collex.setUserDescription(userDescription);
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     when(surveyService.findSurvey(any())).thenReturn(survey);
-    when(actionService.getActionPlanById(any())).thenReturn(new ActionPlanDTO());
     List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
     CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
     caseTypeOverride.setSampleUnitTypeFK("BI");

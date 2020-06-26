@@ -1,7 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -140,53 +139,6 @@ public class ActionSvcClientTest {
     // Then
     verify(restTemplate, times(1))
         .exchange(any(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class));
-  }
-
-  @Test
-  public void getActionPlanById_200Response() throws CTPException {
-
-    // Given
-    when(restTemplate.exchange(
-            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
-        .thenReturn(actionPlanResponseEntity);
-
-    // When
-    ActionPlanDTO actionPlan =
-        actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
-
-    assertEquals(actionPlan.getId(), actionPlans.get(0).getId());
-  }
-
-  @Test
-  public void getActionPlanByID_404Response() throws CTPException {
-    // Given
-    when(restTemplate.exchange(
-            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
-        .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-    // When
-    ActionPlanDTO actionPlan =
-        actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
-
-    // Then
-    verify(restTemplate, times(1))
-        .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
-    assertNull(actionPlan);
-  }
-
-  @Test(expected = HttpClientErrorException.class)
-  public void getActionPlanByID_401Response() {
-    // Given
-    when(restTemplate.exchange(
-            any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
-        .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
-
-    // When
-    actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
-
-    // Then
-    verify(restTemplate, times(1))
-        .exchange(any(), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class));
   }
 
   @Test
