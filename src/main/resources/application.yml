@@ -118,6 +118,7 @@ survey-svc:
 
 action-svc:
   action-plans-path: /actionplans
+  action-plan-path: /actionplans/{actionPlanId}
   action-rules-path: /actionrules
   action-rule-path: /actionrules/{actionRuleId}
   action-rules-for-action-plan-path: /actionrules/actionplan/{actionPlanId}

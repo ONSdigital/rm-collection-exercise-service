@@ -609,11 +609,11 @@ public class CollectionExerciseService {
 
       // If period/survey not supplied in patchData then this call will trivially return
       validateUniqueness(collex, proposedPeriod, proposedSurvey);
-
+      SurveyDTO survey = null;
       if (!StringUtils.isBlank(patchData.getSurveyId())) {
         UUID surveyId = UUID.fromString(patchData.getSurveyId());
 
-        SurveyDTO survey = this.surveyService.findSurvey(surveyId);
+        survey = this.surveyService.findSurvey(surveyId);
 
         if (survey == null) {
           throw new CTPException(
@@ -621,8 +621,12 @@ public class CollectionExerciseService {
         } else {
           collex.setSurveyId(surveyId);
         }
+      } else {
+        survey = this.surveyService.findSurvey(collex.getSurveyId());
       }
-
+      Boolean isActionPlanUpdateRequired =
+          !StringUtils.isBlank(patchData.getExerciseRef())
+              && !collex.getExerciseRef().equals(patchData.getExerciseRef());
       if (!StringUtils.isBlank(patchData.getExerciseRef())) {
         collex.setExerciseRef(patchData.getExerciseRef());
       }
@@ -633,9 +637,13 @@ public class CollectionExerciseService {
         collex.setScheduledStartDateTime(
             new Timestamp(patchData.getScheduledStartDateTime().getTime()));
       }
-
       collex.setUpdated(new Timestamp(new Date().getTime()));
-
+      if (isActionPlanUpdateRequired) {
+        log.with("new exercise reference", collex.getExerciseRef())
+            .with("survey id", survey.getId())
+            .debug("Update action plan already exists");
+        updateActionPlanNameAndDiscription(collex.getExercisePK(), collex.getExerciseRef(), survey);
+      }
       return updateCollectionExercise(collex);
     }
   }
@@ -696,14 +704,45 @@ public class CollectionExerciseService {
         throw new CTPException(
             CTPException.Fault.BAD_REQUEST, String.format("Survey %s does not exist", surveyUuid));
       } else {
+        // ActionPlan needs to be changed only when collection exerciseRef is changed
+        if (!existing.getExerciseRef().equals(collexDto.getExerciseRef())) {
+          log.with("existing exercise reference", existing.getExerciseRef())
+              .with("new exercise reference", collexDto.getExerciseRef())
+              .with("survey id", survey.getId())
+              .debug("Update action plan already exists");
+          updateActionPlanNameAndDiscription(
+              existing.getExercisePK(), collexDto.getExerciseRef(), survey);
+        }
         setCollectionExerciseFromDto(collexDto, existing);
         existing.setUpdated(new Timestamp(new Date().getTime()));
-
         return updateCollectionExercise(existing);
       }
     }
   }
 
+  public void updateActionPlanNameAndDiscription(
+      int exercisePK, String exerciseRef, SurveyDTO survey) throws CTPException {
+    List<CaseTypeOverride> existingCaseTypeOverrides =
+        caseTypeOverrideRepo.findByExerciseFK(exercisePK);
+    if (existingCaseTypeOverrides.size() == 0) {
+      throw new CTPException(
+          CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format("Expected existing case over rides , But None Found"));
+    } else {
+      for (CaseTypeOverride existingCaseTypeOverride : existingCaseTypeOverrides) {
+        String shortName = survey.getShortName();
+        String sampleUnitType = existingCaseTypeOverride.getSampleUnitTypeFK();
+        String name = String.format("%s %s %s", shortName, sampleUnitType, exerciseRef);
+        String description = String.format("%s %s Case %s", shortName, sampleUnitType, exerciseRef);
+        log.with("name", name)
+            .with("description", description)
+            .with("actionPlanId", existingCaseTypeOverride.getActionPlanId())
+            .debug("updating name and description for existing action plan");
+        actionSvcClient.updateActionPlanNameAndDescription(
+            existingCaseTypeOverride.getActionPlanId(), name, description);
+      }
+    }
+  }
   /**
    * Update a collection exercise
    *
