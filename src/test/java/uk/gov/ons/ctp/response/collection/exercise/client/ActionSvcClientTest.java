@@ -127,11 +127,11 @@ public class ActionSvcClientTest {
   }
 
   @Test(expected = HttpClientErrorException.class)
-  public void updateActionPlanNameAndDescription_500Response() {
+  public void updateActionPlanNameAndDescription_401Response() {
     // Given
     when(restTemplate.exchange(
             any(URI.class), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class)))
-        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+        .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
     // When
     actionSvcRestClient.updateActionPlanNameAndDescription(
@@ -175,11 +175,11 @@ public class ActionSvcClientTest {
   }
 
   @Test(expected = HttpClientErrorException.class)
-  public void getActionPlanByID_500Response() {
+  public void getActionPlanByID_401Response() {
     // Given
     when(restTemplate.exchange(
             any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(ActionPlanDTO.class)))
-        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+        .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
     // When
     actionSvcRestClient.getActionPlanById(UUID.fromString(ACTION_PLAN_ID));
