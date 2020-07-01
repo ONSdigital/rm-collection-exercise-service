@@ -1,9 +1,9 @@
 openapi: 3.0.1
 info:
-  title: rm-collection-exercise-service
+  title: collection-exercise
   version: UNVERSIONED
 servers:
-  - url: http://localhost:8145/api-docs.yaml
+  - url: http://localhost:8145
     description: Generated server url
 paths:
   /collectionexerciseexecution/{id}:
