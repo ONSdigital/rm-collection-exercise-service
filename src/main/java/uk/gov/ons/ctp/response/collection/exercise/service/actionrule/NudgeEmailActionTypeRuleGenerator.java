@@ -40,10 +40,7 @@ public class NudgeEmailActionTypeRuleGenerator {
     final ActionRuleDTO actionTypeBSNUERule =
         getActionRuleDTO(activeActionPlan, nudgeEmailIndex, ActionType.BSNUE);
 
-    final ActionRuleDTO actionTypeBSNULRule =
-        getActionRuleDTO(inactiveActionPlan, nudgeEmailIndex, ActionType.BSNUL);
-
-    return Arrays.asList(actionTypeBSNUERule, actionTypeBSNULRule);
+    return Arrays.asList(actionTypeBSNUERule);
   }
 
   private List<ActionRuleDTO> filterRulesMatchingSuffix(

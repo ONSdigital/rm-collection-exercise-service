@@ -111,10 +111,6 @@ public class NudgeEmailActionTypeRuleGeneratorTest {
     final UUID actionRuleId1 = UUID.fromString("7186077b-809f-46c7-a0ba-43139d3efa23");
     final ActionRuleDTO actionRuleDTO1 =
         createActionRuleDTO(actionRuleId1, ActionType.BSNUE, actionRuleSuffix);
-    final UUID actionRuleId2 = UUID.fromString("012cda1e-916a-4182-8d9a-cc66e32f8860");
-    final ActionRuleDTO actionRuleDTO2 =
-        createActionRuleDTO(actionRuleId2, ActionType.BSNUL, actionRuleSuffix);
-    final List<ActionRuleDTO> bActionRuleDTOs = Arrays.asList(actionRuleDTO2);
     final List<ActionRuleDTO> biActionRules = Arrays.asList(actionRuleDTO1);
     final UUID inactiveActionPlanId = UUID.fromString("29f312e4-fe2e-4042-97c6-98e7d48cacfa");
     final UUID activeActionPlanId = UUID.fromString("1795efdf-9961-40eb-b22a-db4b3612c1f3");
@@ -132,12 +128,9 @@ public class NudgeEmailActionTypeRuleGeneratorTest {
     when(actionSvcClient.getActionPlanBySelectorsBusiness(EXERCISE_ID.toString(), true))
         .thenReturn(activeActionPlanDTO);
     when(actionSvcClient.getActionRulesForActionPlan(activeActionPlanId)).thenReturn(biActionRules);
-    when(actionSvcClient.getActionRulesForActionPlan(inactiveActionPlanId))
-        .thenReturn(bActionRuleDTOs);
     List<ActionRuleDTO> actualActionRuleDTO =
         nudgeEmailActionTypeRuleGenerator.getActionRuleDTOS(event, collex);
     assertThat(actualActionRuleDTO, hasItem(actionRuleDTO1));
-    assertThat(actualActionRuleDTO, hasItem(actionRuleDTO2));
   }
 
   private ActionPlanDTO getActionPlanDTO(

@@ -57,13 +57,5 @@ public class NudgeEmailActionRuleCreator implements ActionRuleCreator {
         offsetDateTime,
         3,
         activeActionPlan.getId());
-
-    actionSvcClient.createActionRule(
-        survey.getShortName() + "NUDGE" + nudgeEmailIndex,
-        survey.getShortName() + " Nudge File " + collectionExercise.getExerciseRef(),
-        ActionType.BSNUL,
-        offsetDateTime,
-        3,
-        inactiveActionPlan.getId());
   }
 }
