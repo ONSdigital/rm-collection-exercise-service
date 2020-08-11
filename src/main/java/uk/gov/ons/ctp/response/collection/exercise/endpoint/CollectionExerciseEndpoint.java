@@ -1046,12 +1046,6 @@ public class CollectionExerciseEndpoint {
             .buildAndExpand(newEvent.getId(), newEvent.getTag())
             .toUri();
 
-    try {
-      SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
-    } catch (SchedulerException e) {
-      log.with("event", newEvent).error("Failed to schedule event", e);
-    }
-
     return ResponseEntity.created(location).build();
   }
 

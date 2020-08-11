@@ -57,6 +57,8 @@ public class SchedulerConfiguration {
       deleteScheduledJob(scheduler, event, detail, jobKey);
     }
     log.with("job-key", jobKey).with("event", event.getTag()).info("Creating new JOB for event");
+    log.with("trigger-job-key", detail.getTrigger().getJobKey())
+        .info("This is the Trigger Job key");
     return scheduler.scheduleJob(detail.getJobDetail(), detail.getTrigger());
   }
 
