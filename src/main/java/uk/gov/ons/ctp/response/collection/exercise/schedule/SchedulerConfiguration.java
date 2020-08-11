@@ -56,18 +56,15 @@ public class SchedulerConfiguration {
     if (scheduler.checkExists(jobKey)) {
       deleteScheduledJob(scheduler, event, detail, jobKey);
     }
-    log.with("job-key", jobKey)
-       .with("event", event.getTag())
-      .info("Creating new JOB for event");
+    log.with("job-key", jobKey).with("event", event.getTag()).info("Creating new JOB for event");
     return scheduler.scheduleJob(detail.getJobDetail(), detail.getTrigger());
   }
 
-  private static boolean deleteScheduledJob(Scheduler scheduler,
-                                            Event event,
-                                            EventJobTriggerDetail detail,
-                                            JobKey jobKey) throws SchedulerException {
+  private static boolean deleteScheduledJob(
+      Scheduler scheduler, Event event, EventJobTriggerDetail detail, JobKey jobKey)
+      throws SchedulerException {
     log.with("job-key", jobKey)
-      .with("event", event.getTag())
+        .with("event", event.getTag())
         .info("Deleting scheduled job for event.");
     scheduler.interrupt(jobKey);
     scheduler.unscheduleJob(detail.getTrigger().getKey());
@@ -87,7 +84,7 @@ public class SchedulerConfiguration {
     EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
     JobKey jobKey = detail.getJobDetail().getKey();
 
-    return deleteScheduledJob(scheduler, event,detail,jobKey);
+    return deleteScheduledJob(scheduler, event, detail, jobKey);
   }
 
   /**
