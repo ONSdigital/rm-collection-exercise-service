@@ -53,13 +53,25 @@ public class SchedulerConfiguration {
       throws SchedulerException {
     EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
     JobKey jobKey = detail.getJobDetail().getKey();
-
     if (scheduler.checkExists(jobKey)) {
-      scheduler.interrupt(jobKey);
-      scheduler.deleteJob(jobKey);
+      deleteScheduledJob(scheduler, event, detail, jobKey);
     }
-
+    log.with("job-key", jobKey)
+       .with("event", event.getTag())
+      .info("Creating new JOB for event");
     return scheduler.scheduleJob(detail.getJobDetail(), detail.getTrigger());
+  }
+
+  private static boolean deleteScheduledJob(Scheduler scheduler,
+                                            Event event,
+                                            EventJobTriggerDetail detail,
+                                            JobKey jobKey) throws SchedulerException {
+    log.with("job-key", jobKey)
+      .with("event", event.getTag())
+        .info("Deleting scheduled job for event.");
+    scheduler.interrupt(jobKey);
+    scheduler.unscheduleJob(detail.getTrigger().getKey());
+    return scheduler.deleteJob(jobKey);
   }
 
   /**
@@ -75,7 +87,7 @@ public class SchedulerConfiguration {
     EventJobTriggerDetail detail = new EventJobTriggerDetail(event);
     JobKey jobKey = detail.getJobDetail().getKey();
 
-    return scheduler.deleteJob(jobKey);
+    return deleteScheduledJob(scheduler, event,detail,jobKey);
   }
 
   /**
@@ -254,6 +266,7 @@ public class SchedulerConfiguration {
       JobDetail job =
           newJob()
               .ofType(EventJob.class)
+              .storeDurably(false)
               .withIdentity(JobKey.jobKey(jobKey))
               .withDescription("Executing event " + jobKey + " at " + event.getTimestamp())
               .usingJobData(DataKey.tag.name(), event.getTag())

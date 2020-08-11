@@ -34,6 +34,7 @@ public class EventJob implements Job {
     log.with("tag", tag)
         .with("collection_exercise_id", collexId)
         .with("date", date)
+        .with("job-key", jobDetail.getKey())
         .info("Executing event");
 
     try {
