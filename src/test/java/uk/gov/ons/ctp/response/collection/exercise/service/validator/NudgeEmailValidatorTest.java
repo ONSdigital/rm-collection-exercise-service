@@ -7,12 +7,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -150,6 +153,12 @@ public class NudgeEmailValidatorTest {
 
     final List<Event> events = Arrays.asList(goLive, returnBy);
     CTPException actualException = null;
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    sdf.setTimeZone(TimeZone.getTimeZone("Europe/London"));
+    Date goLiveDate = new Date(goLive.getTimestamp().getTime());
+    Date returnByDate = new Date(returnBy.getTimestamp().getTime());
+
     try {
       nudgeEmailValidator.validate(
           events, nudgeEvent, CollectionExerciseDTO.CollectionExerciseState.SCHEDULED);
@@ -159,10 +168,10 @@ public class NudgeEmailValidatorTest {
     assertNotNull(actualException);
     String expectedMessage =
         "Nudge email must be set after the Go Live date ("
-            + goLive.getTimestamp()
+            + sdf.format(goLiveDate)
             + ") "
             + "and before Return by date ("
-            + returnBy.getTimestamp()
+            + sdf.format(returnByDate)
             + ")";
     assertEquals(expectedMessage, actualException.getMessage());
   }
@@ -181,6 +190,11 @@ public class NudgeEmailValidatorTest {
     nudgeEvent.setTag(EventService.Tag.nudge_email_0.toString());
     nudgeEvent.setTimestamp(Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    sdf.setTimeZone(TimeZone.getTimeZone("Europe/London"));
+    Date goLiveDate = new Date(goLive.getTimestamp().getTime());
+    Date returnByDate = new Date(returnBy.getTimestamp().getTime());
+
     CTPException actualException = null;
     try {
       nudgeEmailValidator.validate(
@@ -191,10 +205,10 @@ public class NudgeEmailValidatorTest {
     assertNotNull(actualException);
     String expectedMessage =
         "Nudge email must be set after the Go Live date ("
-            + goLive.getTimestamp()
+            + sdf.format(goLiveDate)
             + ") "
             + "and before Return by date ("
-            + returnBy.getTimestamp()
+            + sdf.format(returnByDate)
             + ")";
     assertEquals(expectedMessage, actualException.getMessage());
   }
