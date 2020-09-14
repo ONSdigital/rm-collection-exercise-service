@@ -39,7 +39,7 @@ public class NudgeEmailValidator implements EventValidator {
           CTPException.Fault.BAD_REQUEST, "Nudge email cannot be set in the past");
     }
     if (!isEventBetweenGoLiveAndReturnBy(goLive, submittedEvent, returnBy)) {
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
       sdf.setTimeZone(TimeZone.getTimeZone("Europe/London"));
       Date goLiveDate = new Date(goLive.getTimestamp().getTime());
       Date returnByDate = new Date(returnBy.getTimestamp().getTime());

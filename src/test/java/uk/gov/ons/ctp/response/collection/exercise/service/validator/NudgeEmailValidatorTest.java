@@ -154,7 +154,7 @@ public class NudgeEmailValidatorTest {
     final List<Event> events = Arrays.asList(goLive, returnBy);
     CTPException actualException = null;
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     sdf.setTimeZone(TimeZone.getTimeZone("Europe/London"));
     Date goLiveDate = new Date(goLive.getTimestamp().getTime());
     Date returnByDate = new Date(returnBy.getTimestamp().getTime());
