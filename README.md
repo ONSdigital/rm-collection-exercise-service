@@ -5,6 +5,8 @@
 # Collection Exercise Service
 The Collection Exercise service will be responsible for the orchestration of the processes necessary to begin the data collection for a particular field period for a particular survey.
 
+Test
+
 ## Running
 
 There are two ways of running this service
