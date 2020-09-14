@@ -168,7 +168,7 @@ public class NudgeEmailValidatorTest {
     assertNotNull(actualException);
     String expectedMessage =
         "Nudge email must be set after the Go Live date ("
-            + sdf.format(returnByDate)
+            + sdf.format(goLiveDate)
             + ") "
             + "and before Return by date ("
             + sdf.format(returnByDate)
