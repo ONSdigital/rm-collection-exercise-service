@@ -79,7 +79,6 @@ public class ValidateSampleUnits {
   /** Validate SampleUnits */
   @Transactional
   public void validateSampleUnits() {
-
     // Make sure that any collection exercises which were having their sample units sent from
     // the sample service are state transitioned once they've got all their sample units.
     updateExecutingCollectionExercises();
@@ -96,6 +95,9 @@ public class ValidateSampleUnits {
 
       sampleUnits.forEach(
           (sampleUnit) -> {
+            log.with("sampleUnitPK", sampleUnit.getSampleUnitPK())
+                .with("collectionInstrumentId", sampleUnit.getCollectionInstrumentId())
+                .info("Beginning validation of sample unit");
             final CollectionExercise collex =
                 sampleUnit.getSampleUnitGroup().getCollectionExercise();
 
@@ -184,11 +186,15 @@ public class ValidateSampleUnits {
     List<CollectionExercise> exercises =
         collexService.findByState(CollectionExerciseState.EXECUTION_STARTED);
 
+    log.debug("Found [" + exercises.size() + "] collection exercises in EXECUTION_STARTED state");
     for (CollectionExercise collex : exercises) {
       if (collex.getSampleSize() != null
           && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex)
               == collex.getSampleSize()) {
 
+        log.with("id", collex.getId())
+            .debug(
+                "Number of records in sample unit group match the sampleSize, about to transition");
         collex.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
 
         try {

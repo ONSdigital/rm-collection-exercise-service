@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.validation;
 
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -14,6 +16,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
  */
 @Component
 public class ValidationScheduler {
+  private static final Logger log = LoggerFactory.getLogger(ValidationScheduler.class);
   private static final String VALIDATION_GLOBAL_LOCK_NAME = "SampleValidationCollexLock";
 
   private SampleService sampleService;
@@ -29,19 +32,23 @@ public class ValidationScheduler {
   @Scheduled(fixedDelayString = "#{appConfig.schedules.validationScheduleDelayMilliSeconds}")
   public void scheduleValidation() {
     RLock lock = redissonClient.getFairLock(VALIDATION_GLOBAL_LOCK_NAME);
-
+    log.info("starting scheduleValidation");
     // Get a lock. Automatically unlock after a certain amount of time to prevent issues
     // when lock holder crashes or Redis crashes causing permanent lockout
     try {
       if (lock.tryLock(1, TimeUnit.HOURS)) {
         try {
+          log.with("lockName", VALIDATION_GLOBAL_LOCK_NAME)
+              .info("lock acquired, starting validateSampleUnits");
           sampleService.validateSampleUnits();
         } finally {
+          log.with("lockName", VALIDATION_GLOBAL_LOCK_NAME).info("Releasing lock");
           lock.unlock();
         }
       }
     } catch (InterruptedException e) {
       // Ignored
     }
+    log.info("finished scheduleValidation");
   }
 }
