@@ -183,7 +183,7 @@ public class ValidateSampleUnits {
                 transitionCollectionExercise(exercise);
               } catch (CTPException e) {
                 throw new IllegalStateException(); // Not thrown because we already checked the
-                                                   // state
+                // state
               }
             });
   }
