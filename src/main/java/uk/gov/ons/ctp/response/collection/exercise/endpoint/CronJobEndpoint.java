@@ -61,6 +61,7 @@ public class CronJobEndpoint {
       List<CollectionExercise> exercises =
           collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.VALIDATED);
 
+      log.info("Found [" + exercises.size() + "] collection exercises to distribute");
       for (CollectionExercise collectionExercise : exercises) {
         sampleService.distributeSampleUnits(collectionExercise);
       }

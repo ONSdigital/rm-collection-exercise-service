@@ -112,7 +112,7 @@ public class SampleUnitDistributor {
    * @param exercise for which to distribute sample units
    */
   public void distributeSampleUnits(CollectionExercise exercise) {
-
+    log.with("collection_exercise_id", exercise.getId()).info("Distributing sample unit");
     List<ExerciseSampleUnitGroup> sampleUnitGroups = new ArrayList<>();
     try {
       sampleUnitGroups = retrieveSampleUnitGroups(exercise);
