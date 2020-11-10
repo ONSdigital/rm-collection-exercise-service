@@ -31,7 +31,6 @@ public class CronJobEndpoint {
 
   /**
    * Validates sample units and transitions collection exercises.
-   * process
    *
    * @throws CTPException on any exception thrown
    */
