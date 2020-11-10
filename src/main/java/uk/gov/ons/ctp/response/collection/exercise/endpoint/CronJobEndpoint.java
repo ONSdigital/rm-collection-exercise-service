@@ -20,7 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 public class CronJobEndpoint {
   private static final Logger log = LoggerFactory.getLogger(CronJobEndpoint.class);
 
-  private CollectionExerciseRepository collectRepo;
+  private final CollectionExerciseRepository collectRepo;
   private final SampleService sampleService;
 
   @Autowired
@@ -30,7 +30,8 @@ public class CronJobEndpoint {
   }
 
   /**
-   * TODO: Docstring for this function
+   * Validates sample units and transitions collection exercises.
+   * process
    *
    * @throws CTPException on any exception thrown
    */
@@ -50,7 +51,7 @@ public class CronJobEndpoint {
   }
 
   /**
-   * TODO: Docstring for this function
+   * Finds all the validated collection exercises and distributes them.
    *
    * @throws CTPException on any exception thrown
    */
