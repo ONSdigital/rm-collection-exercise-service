@@ -126,7 +126,6 @@ public class SampleUnitDistributorTest {
   public void setUp() throws Exception {
 
     ScheduleSettings scheduleSettings = new ScheduleSettings();
-    scheduleSettings.setDistributionScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
     scheduleSettings.setDistributionScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
 
     appConfig.setSchedules(scheduleSettings);

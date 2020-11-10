@@ -1,9 +1,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ .Values.crons.validateSampleUnit.name }}
+  name: {{ .Values.crons.distributeSampleUnit.name }}
 spec:
-  schedule: "{{ .Values.crons.validateSampleUnit.cron }}"
+  schedule: "{{ .Values.crons.distributeSampleUnit.cron }}"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
@@ -12,7 +12,7 @@ spec:
       template:
         spec:
           containers:
-          - name: {{ .Values.crons.validateSampleUnit.name }}
+          - name: {{ .Values.crons.distributeSampleUnit.name }}
             image: radial/busyboxplus:curl
             env:
             - name: SECURITY_USER_NAME
@@ -30,7 +30,7 @@ spec:
             - name: APP_PORT
               value: "{{ .Values.service.port }}"
             - name: TARGET
-              value: {{ .Values.crons.validateSampleUnit.target }}
+              value: {{ .Values.crons.distributeSampleUnit.target }}
             args:
             - /bin/sh
             - -c

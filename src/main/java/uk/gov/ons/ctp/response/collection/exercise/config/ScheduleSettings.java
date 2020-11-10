@@ -7,6 +7,5 @@ import net.sourceforge.cobertura.CoverageIgnore;
 @CoverageIgnore
 @Data
 public class ScheduleSettings {
-  private String distributionScheduleDelayMilliSeconds;
   private Integer distributionScheduleRetrievalMax;
 }
