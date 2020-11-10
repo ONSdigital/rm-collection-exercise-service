@@ -128,8 +128,6 @@ public class SampleUnitDistributorTest {
     ScheduleSettings scheduleSettings = new ScheduleSettings();
     scheduleSettings.setDistributionScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
     scheduleSettings.setDistributionScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
-    scheduleSettings.setValidationScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
-    scheduleSettings.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
 
     appConfig.setSchedules(scheduleSettings);
 

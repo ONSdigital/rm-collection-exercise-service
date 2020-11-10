@@ -12,6 +12,12 @@ image:
   tag: latest
   pullPolicy: Always
 
+crons:
+  validateSampleUnit:
+    name: collection-exercise-sample-unit-validation
+    cron: "* * * * *"
+    target: "sample-unit-validation"
+
 database:
   managedPostgres: false
   sqlProxyEnabled: false
