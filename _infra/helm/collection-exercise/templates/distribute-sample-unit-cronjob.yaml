@@ -34,5 +34,5 @@ spec:
             args:
             - /bin/sh
             - -c
-            - curl -s -u $(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD) http://$(APP_NAME):$(APP_PORT)/$(TARGET)
+            - curl -s -S -u $(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD) http://$(APP_NAME):$(APP_PORT)/$(TARGET)
           restartPolicy: OnFailure
