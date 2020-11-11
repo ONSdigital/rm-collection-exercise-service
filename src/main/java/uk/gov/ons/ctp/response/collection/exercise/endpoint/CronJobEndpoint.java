@@ -66,7 +66,7 @@ public class CronJobEndpoint {
         sampleService.distributeSampleUnits(collectionExercise);
       }
       log.info("Completed sample unit distribution");
-      return ResponseEntity.ok().body("Completed sample unit validation");
+      return ResponseEntity.ok().body("Completed sample unit distribution");
     } catch (RuntimeException e) {
       log.error(
           "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
