@@ -31,8 +31,3 @@ redisson-config:
 rabbitmq:
   host: localhost
   port: 35672
-
-schedules:
-  validation-schedule-delay-milli-seconds: 5000
-  distribution-schedule-delay-milli-seconds: 5000
-
