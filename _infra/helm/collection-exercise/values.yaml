@@ -12,6 +12,16 @@ image:
   tag: latest
   pullPolicy: Always
 
+crons:
+  distributeSampleUnit:
+    name: collection-exercise-sample-unit-distribution
+    cron: "* * * * *"
+    target: "cron/sample-unit-distribution"
+  validateSampleUnit:
+    name: collection-exercise-sample-unit-validation
+    cron: "* * * * *"
+    target: "cron/sample-unit-validation"
+
 database:
   managedPostgres: false
   sqlProxyEnabled: false

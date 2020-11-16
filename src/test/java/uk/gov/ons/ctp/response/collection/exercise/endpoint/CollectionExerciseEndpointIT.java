@@ -17,6 +17,7 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
 import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -41,6 +43,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -350,19 +353,51 @@ public class CollectionExerciseEndpointIT {
 
     String xml = sampleUnitToXmlString(sampleUnit);
 
-    log.debug("xml = " + xml);
+    log.info("xml = " + xml);
 
     sender.sendMessage("sample-outbound-exchange", "Sample.SampleDelivery.binding", xml);
 
+    //// When PlanScheduler and ActionDistributor runs
+    final int threadPort = this.port;
+    Thread thread =
+        new Thread(
+            () -> {
+              //// When PlanScheduler and ActionDistributor runs
+              try {
+                for (int i = 0; i < 3; i++) {
+                  HttpResponse<String> distributeResponse =
+                      Unirest.get("http://localhost:" + threadPort + "/cron/sample-unit-validation")
+                          .basicAuth("admin", "secret")
+                          .header("accept", "application/json")
+                          .asString();
+                  assertThat(distributeResponse.getStatus(), Matchers.is(200));
+                  assertThat(
+                      distributeResponse.getBody(),
+                      Matchers.is("Completed sample unit validation"));
+
+                  HttpResponse<String> response =
+                      Unirest.get(
+                              "http://localhost:" + threadPort + "/cron/sample-unit-distribution")
+                          .basicAuth("admin", "secret")
+                          .header("accept", "application/json")
+                          .asString();
+                  assertThat(response.getStatus(), Matchers.is(200));
+                  assertThat(response.getBody(), Matchers.is("Completed sample unit distribution"));
+                }
+              } catch (Exception e) {
+                log.error("exception in thread", e);
+              }
+            });
+    thread.start();
     // The service stubs will exit once the call below times out preventing further debugging of
     // this test in other
     // threads (i.e. you have 2 minutes to debug before the service calls will start to fail)
-    //    String message = queue.poll(2, TimeUnit.MINUTES);
+    String message = queue.poll(2, TimeUnit.MINUTES);
     // If you need more than 2 minutes to debug this test, then either change the timeout above or
     // comment that line
     // and uncomment the one below (which gives infinite time).
-    String message = queue.take();
-    log.debug("message = " + message);
+    // String message = queue.take();
+    log.info("message = " + message);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
 
     JAXBContext jaxbContext = JAXBContext.newInstance(SampleUnitParent.class);
