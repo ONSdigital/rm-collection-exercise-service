@@ -139,8 +139,6 @@
    Holds association between collection exercise and action plan id
    #### `samplelink`
    Holds collection-exercise and sample summary id
-   #### `messagelog`
-   Holds job id and message information.
    
    
    ## improvements
@@ -150,7 +148,6 @@
    but it does interact with multiple services to carry out its function.
    This service can be simplified by improving existing service, a rewrite might not be necessary.
    * DB structure need to be improved to provide more viable link and relationship between tables.
-   * Remove `report` and `reporttype` table. I haven't seen its usage.
    * Remove `sampleunittype` as it can easily be removed by a static value. 
    * Remove the use of XML/XSD and replace with JSON.
    * Improving service to propagate the changes to action for any changes. Few of the function does not seem to propagate
