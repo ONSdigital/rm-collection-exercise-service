@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 12.1
+      author: Adam Wilkie
+      changes:
+        - sqlFile:
+            comment: Remove report table and procedures
+            path: remove_report_table_and_procedures.sql
+            relativeToChangelogFile: true
+            splitStatements: false
