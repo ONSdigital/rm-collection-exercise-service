@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
@@ -366,6 +367,30 @@ public class CollectionExerciseServiceTest {
     overrideBISelectors.put("activeEnrolment", "true");
     verify(actionService, times(0))
         .createActionPlan("BRES BI 202103", "BRES BI Case 202103", overrideBISelectors);
+  }
+
+  @Test
+  public void testCreateCollectionExerciseSkipsActionPlansIfDeprecated() throws Exception {
+    // Given
+    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", false);
+    CollectionExerciseDTO toCreate =
+        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise collectionExercise =
+        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
+    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+
+    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(any(), any()))
+        .thenReturn(caseTypeOverride);
+
+    // When
+    this.collectionExerciseService.createCollectionExercise(toCreate, survey);
+
+    // Then
+    verify(actionService, times(0)).createActionPlan(any(), any(), any());
   }
 
   @Test

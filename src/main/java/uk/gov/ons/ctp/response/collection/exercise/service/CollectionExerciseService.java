@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
@@ -67,6 +68,9 @@ public class CollectionExerciseService {
           CollectionExerciseDTO.CollectionExerciseState,
           CollectionExerciseDTO.CollectionExerciseEvent>
       collectionExerciseTransitionState;
+
+  @Value("{action_svc.deprecated}")
+  private Boolean actionDeprecated;
 
   @Autowired
   public CollectionExerciseService(
@@ -393,7 +397,9 @@ public class CollectionExerciseService {
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
     // Save collection exercise before creating action plans because we need the exercisepk
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-    createActionPlans(collectionExercise, survey);
+    if (!actionDeprecated) {
+      createActionPlans(collectionExercise, survey);
+    }
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise");
     return collectionExercise;
