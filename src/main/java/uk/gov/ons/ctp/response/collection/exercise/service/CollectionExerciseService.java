@@ -69,7 +69,7 @@ public class CollectionExerciseService {
           CollectionExerciseDTO.CollectionExerciseEvent>
       collectionExerciseTransitionState;
 
-  @Value("{action_svc.deprecated}")
+  @Value("#{new Boolean('${action_svc.deprecated')}")
   private Boolean actionDeprecated;
 
   @Autowired
