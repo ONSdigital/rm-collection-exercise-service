@@ -117,6 +117,7 @@ survey-svc:
     read-timeout-milli-seconds: 5000
 
 action-svc:
+  deprecated: false
   action-plans-path: /actionplans
   action-plan-path: /actionplans/{actionPlanId}
   action-rules-path: /actionrules
