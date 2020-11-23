@@ -229,6 +229,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExercise() throws Exception {
     // Given
+    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", false);
     CollectionExercise collectionExercise =
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
@@ -261,6 +262,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
     // Given
+    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", false);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
@@ -301,6 +303,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseExistingDefaultActionPlans() throws Exception {
     // Given
+    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", false);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
@@ -332,6 +335,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseExistingOverrideActionPlans() throws Exception {
     // Given
+    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", false);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
@@ -372,7 +376,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseSkipsActionPlansIfDeprecated() throws Exception {
     // Given
-    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", false);
+    ReflectionTestUtils.setField(collectionExerciseService, "actionDeprecated", true);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
