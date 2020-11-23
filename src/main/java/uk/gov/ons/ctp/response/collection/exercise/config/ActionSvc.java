@@ -14,4 +14,5 @@ public class ActionSvc {
   private String actionRulePath;
   private String actionRulesForActionPlanPath;
   private String actionPlanPath;
+  private boolean deprecated;
 }

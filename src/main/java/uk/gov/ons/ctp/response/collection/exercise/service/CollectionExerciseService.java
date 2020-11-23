@@ -69,9 +69,6 @@ public class CollectionExerciseService {
           CollectionExerciseDTO.CollectionExerciseEvent>
       collectionExerciseTransitionState;
 
-  @Value("#{new Boolean('${action-svc.deprecated')}")
-  private Boolean actionDeprecated;
-
   @Autowired
   public CollectionExerciseService(
       CaseTypeDefaultRepository caseTypeDefaultRepo,
@@ -397,7 +394,7 @@ public class CollectionExerciseService {
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
     // Save collection exercise before creating action plans because we need the exercisepk
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-    if (!actionDeprecated) {
+    if (!actionSvcClient.isDeprecated()) {
       createActionPlans(collectionExercise, survey);
     }
     log.with("collection_exercise_id", collectionExercise.getId())

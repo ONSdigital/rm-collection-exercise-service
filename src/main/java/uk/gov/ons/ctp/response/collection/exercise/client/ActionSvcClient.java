@@ -336,4 +336,8 @@ public class ActionSvcClient {
 
     return response.getBody();
   }
+
+  public boolean isDeprecated() {
+      return appConfig.getActionSvc().getDeprecated();
+  }
 }
