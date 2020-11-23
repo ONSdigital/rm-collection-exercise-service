@@ -32,7 +32,8 @@ public class NudgeEmailActionRuleCreator implements ActionRuleCreator {
 
   @Override
   public void execute(Event collectionExerciseEvent) throws CTPException {
-    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isNudgeEmail()) {
+    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isNudgeEmail()
+        || actionSvcClient.isDeprecated()) {
       return;
     }
     final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
