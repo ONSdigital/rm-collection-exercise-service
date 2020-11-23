@@ -59,6 +59,19 @@ public class NudgeEmailActionRuleCreaterTest {
   }
 
   @Test
+  public void doNothingIfActionDeprecated() throws CTPException {
+    when(actionSvcClient.isDeprecated()).thenReturn(true);
+
+    final CollectionExercise collex = new CollectionExercise();
+    final Event event = createCollectionExerciseEvent(EventService.Tag.nudge_email_0.name(), null, collex);
+
+    nudgeEmailActionRuleCreator.execute(event);
+
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyDTO.SurveyType.Social);
