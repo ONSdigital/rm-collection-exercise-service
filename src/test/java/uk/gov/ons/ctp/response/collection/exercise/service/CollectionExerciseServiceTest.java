@@ -31,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
