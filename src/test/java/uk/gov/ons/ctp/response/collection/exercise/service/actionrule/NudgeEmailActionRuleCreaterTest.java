@@ -63,7 +63,8 @@ public class NudgeEmailActionRuleCreaterTest {
     when(actionSvcClient.isDeprecated()).thenReturn(true);
 
     final CollectionExercise collex = new CollectionExercise();
-    final Event event = createCollectionExerciseEvent(EventService.Tag.nudge_email_0.name(), null, collex);
+    final Event event =
+        createCollectionExerciseEvent(EventService.Tag.nudge_email_0.name(), null, collex);
 
     nudgeEmailActionRuleCreator.execute(event);
 
