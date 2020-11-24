@@ -482,6 +482,9 @@ public class EventServiceTest {
     eventDto.setTag(tag);
     eventDto.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
     collex.setId(collexUuid);
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
         .thenReturn(null);
