@@ -52,3 +52,5 @@ tomcat:
 dns:
   enabled: false
   wellKnownPort: 8080
+
+deprecateAction: false

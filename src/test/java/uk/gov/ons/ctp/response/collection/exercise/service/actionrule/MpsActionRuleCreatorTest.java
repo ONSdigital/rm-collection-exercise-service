@@ -62,6 +62,19 @@ public class MpsActionRuleCreatorTest {
   }
 
   @Test
+  public void doNothingIfActionDeprecated() throws CTPException {
+    when(actionSvcClient.isDeprecated()).thenReturn(true);
+
+    final CollectionExercise collex = new CollectionExercise();
+    final Event event = createCollectionExerciseEvent(Tag.mps.name(), null, collex);
+
+    mpsActionRuleCreator.execute(event);
+
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyType.Social);
