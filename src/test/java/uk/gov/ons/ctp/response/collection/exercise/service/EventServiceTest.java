@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -26,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -499,12 +501,13 @@ public class EventServiceTest {
   @Test
   public void testStatusIsPopulatedWhenActionIsDeprecated() {
     final CollectionExercise collex = new CollectionExercise();
-
-    when(appConfig.getActionSvc().isDeprecated()).thenReturn(false);
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     EventDTO eventDto = new EventDTO();
     eventDto.setCollectionExerciseId(COLLEX_UUID);
-
+    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
     try {
       Event event = eventService.createEvent(eventDto);
       assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
