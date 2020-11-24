@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -66,6 +67,8 @@ public class EventServiceTest {
   @Mock private EventValidator eventValidator;
 
   @Mock private EventRepository eventRepository;
+
+  @Mock private AppConfig appConfig;
 
   @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
 
@@ -489,6 +492,24 @@ public class EventServiceTest {
       eventService.createEvent(eventDto);
     } catch (final CTPException e) {
       assertThat(e.getFault(), is(Fault.BAD_REQUEST));
+    }
+  }
+
+  /** Given action is deprecated, new events are created with a populated status field */
+  @Test
+  public void testStatusIsPopulatedWhenActionIsDeprecated() {
+    final CollectionExercise collex = new CollectionExercise();
+
+    when(appConfig.getActionSvc().isDeprecated()).thenReturn(false);
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    EventDTO eventDto = new EventDTO();
+    eventDto.setCollectionExerciseId(COLLEX_UUID);
+
+    try {
+      Event event = eventService.createEvent(eventDto);
+      assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
+    } catch (CTPException e) {
+      fail();
     }
   }
 

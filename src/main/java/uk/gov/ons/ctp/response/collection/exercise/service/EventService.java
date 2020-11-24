@@ -31,7 +31,8 @@ import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfigurati
 @Service
 public class EventService {
   private static final Logger log = LoggerFactory.getLogger(EventService.class);
-  private AppConfig appConfig;
+
+  @Autowired private AppConfig appConfig;
 
   /** An enum to represent the collection exercise events that are mandatory for all surveys */
   public enum Tag {
