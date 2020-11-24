@@ -22,4 +22,10 @@ public class EventDTO {
   private String tag;
 
   @NotNull private Date timestamp;
+
+  public enum Status {
+    SCHEDULED,
+    PROCESSED,
+    FAILED
+  }
 }

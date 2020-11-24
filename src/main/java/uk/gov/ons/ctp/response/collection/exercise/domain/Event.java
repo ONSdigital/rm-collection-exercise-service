@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 /** Domain model object. */
 @Entity
@@ -55,4 +56,7 @@ public class Event {
 
   @Column(name = "message_sent")
   private Timestamp messageSent;
+
+  @Column(name = "status")
+  private EventDTO.Status status;
 }

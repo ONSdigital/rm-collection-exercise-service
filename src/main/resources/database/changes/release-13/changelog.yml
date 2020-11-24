@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 13.1
+      author: Adam Mann
+      changes:
+        - sqlFile:
+            comment: Add status to event table
+            path: add_status_to_event_table.sql
+            relativeToChangelogFile: true
+            splitStatements: false

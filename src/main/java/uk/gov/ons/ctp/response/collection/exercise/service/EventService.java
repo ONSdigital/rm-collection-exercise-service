@@ -16,6 +16,7 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -30,6 +31,7 @@ import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfigurati
 @Service
 public class EventService {
   private static final Logger log = LoggerFactory.getLogger(EventService.class);
+  private AppConfig appConfig;
 
   /** An enum to represent the collection exercise events that are mandatory for all surveys */
   public enum Tag {
@@ -143,6 +145,10 @@ public class EventService {
     event.setId(UUID.randomUUID());
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
+
+    if (appConfig.getActionSvc().isDeprecated()) {
+      event.setStatus(EventDTO.Status.SCHEDULED);
+    }
 
     validateSubmittedEvent(collex, event);
 
