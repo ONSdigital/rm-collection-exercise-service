@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -504,13 +505,19 @@ public class EventServiceTest {
   @Test
   public void testStatusIsPopulatedWhenActionIsDeprecated() {
     final CollectionExercise collex = new CollectionExercise();
+    String tag = Tag.mps.name();
+
     ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
+    actionSvc.setDeprecated(true);
     given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
+
     EventDTO eventDto = new EventDTO();
     eventDto.setCollectionExerciseId(COLLEX_UUID);
+    eventDto.setTag(tag);
     eventDto.setTimestamp(new Timestamp(new Date().getTime()));
+
     try {
       Event event = eventService.createEvent(eventDto);
       assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
