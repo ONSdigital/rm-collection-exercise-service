@@ -1,7 +1,5 @@
-DROP TABLE [IF EXISTS]
-    collectionexercise.messagelog,
-    collectionexercise.report,
-    collectionexercise.reporttype;
-DROP FUNCTION [IF EXISTS]
-    collectionexercise.generate_collectionexercise_mi,
-    collectionexercise.logmessage;
+DROP TABLE collectionexercise.messagelog;
+DROP TABLE collectionexercise.report;
+DROP TABLE collectionexercise.reporttype;
+DROP FUNCTION collectionexercise.generate_collectionexercise_mi();
+DROP FUNCTION collectionexercise.logmessage(text, numeric, text, text);
