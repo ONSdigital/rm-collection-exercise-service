@@ -501,9 +501,9 @@ public class EventServiceTest {
     }
   }
 
-  /** Given action is deprecated, new events are created with a populated status field */
+  /** Given action is deprecated, new events are created with a 'SCHEDULED' status */
   @Test
-  public void testStatusIsPopulatedWhenActionIsDeprecated() {
+  public void testStatusIsSetToScheduledWhenActionIsDeprecated() {
     final CollectionExercise collex = new CollectionExercise();
     String tag = Tag.mps.name();
 
@@ -521,6 +521,31 @@ public class EventServiceTest {
     try {
       Event event = eventService.createEvent(eventDto);
       assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  /** Given action is NOT deprecated, new events are created with a 'NOT_SET status */
+  @Test
+  public void testStatusIsSetToNotSetWhenActionIsDeprecated() {
+    final CollectionExercise collex = new CollectionExercise();
+    String tag = Tag.mps.name();
+
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
+
+    EventDTO eventDto = new EventDTO();
+    eventDto.setCollectionExerciseId(COLLEX_UUID);
+    eventDto.setTag(tag);
+    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
+
+    try {
+      Event event = eventService.createEvent(eventDto);
+      assertThat(event.getStatus(), is(EventDTO.Status.NOT_SET));
     } catch (CTPException e) {
       fail();
     }

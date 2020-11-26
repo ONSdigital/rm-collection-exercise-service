@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.representation;
 
 import java.util.Date;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -23,7 +24,9 @@ public class EventDTO {
 
   @NotNull private Date timestamp;
 
+  @Nullable
   public enum Status {
+    NOT_SET,
     SCHEDULED,
     PROCESSED,
     FAILED

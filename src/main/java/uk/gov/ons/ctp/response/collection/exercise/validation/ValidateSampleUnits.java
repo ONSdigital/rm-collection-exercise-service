@@ -194,12 +194,14 @@ public class ValidateSampleUnits {
 
     log.debug("Found [" + exercises.size() + "] collection exercises in EXECUTION_STARTED state");
     for (CollectionExercise collex : exercises) {
+      log.with("collection_exercise_id", collex.getId())
+          .info("Checking number of records in sample unit group match the sampleSize");
       if (collex.getSampleSize() != null
           && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex)
               == collex.getSampleSize()) {
 
         log.with("id", collex.getId())
-            .debug(
+            .info(
                 "Number of records in sample unit group match the sampleSize, about to transition");
         collex.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
 
@@ -209,6 +211,13 @@ public class ValidateSampleUnits {
         } catch (CTPException e) {
           throw new IllegalStateException(); // Never thrown because we already checked the state
         }
+      } else {
+        log.with("collection_exercise_id", collex.getId())
+            .with("sampleSize", collex.getSampleSize())
+            .with(
+                "sample_group_count",
+                sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex))
+            .info("Number of records in sample unit group did not match the sampleSize");
       }
     }
   }
