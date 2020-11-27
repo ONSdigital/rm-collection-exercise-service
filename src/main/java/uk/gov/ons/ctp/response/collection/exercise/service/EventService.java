@@ -439,19 +439,29 @@ public class EventService {
     List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
     log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
     for (Event event : eventList) {
-      log.with("id", event.getId()).with("tag", event.getTag()).info("Executing event");
-      caseSvcClient.executeEvent(event.getTag(), "");
-      Boolean success = true;
-      if (success) {
-        log.info("Event processing succeeded, setting to PROCESSED state");
-        event.setStatus(EventDTO.Status.PROCESSED);
-        event.setMessageSent(
-            Timestamp.from(Instant.now())); // Worth keeping it backwards compatible for now?
+      if (event.getTimestamp().before(Timestamp.from(Instant.now()))) {
+        log.with("id", event.getId())
+            .with("tag", event.getTag())
+            .with("timestamp", event.getTimestamp())
+            .info("Executing event");
+        caseSvcClient.executeEvent(event.getTag(), event.getCollectionExercise().getId());
+        Boolean success = true;
+        if (success) {
+          log.info("Event processing succeeded, setting to PROCESSED state");
+          event.setStatus(EventDTO.Status.PROCESSED);
+          event.setMessageSent(
+              Timestamp.from(Instant.now())); // Worth keeping it backwards compatible for now?
+        } else {
+          log.error("Event processing failed, setting to FAILED state");
+          event.setStatus(EventDTO.Status.FAILED);
+        }
+        eventRepository.saveAndFlush(event);
       } else {
-        log.error("Event processing failed, setting to FAILED state");
-        event.setStatus(EventDTO.Status.FAILED);
+        log.with("id", event.getId())
+            .with("tag", event.getTag())
+            .with("timestamp", event.getTimestamp())
+            .info("Event in future, not going to execute"); // Will this be too noisy?
       }
-      eventRepository.saveAndFlush(event);
     }
   }
 

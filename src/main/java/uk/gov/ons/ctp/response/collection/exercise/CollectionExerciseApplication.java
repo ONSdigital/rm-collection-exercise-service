@@ -94,6 +94,17 @@ public class CollectionExerciseApplication {
   }
 
   /**
+   * The RestUtility bean for the Case service
+   *
+   * @return the RestUtility bean for the Sample service
+   */
+  @Bean
+  @Qualifier("caseRestUtility")
+  public RestUtility caseRestUtility() {
+    return new RestUtility(appConfig.getCaseSvc().getConnectionConfig());
+  }
+
+  /**
    * The RestUtility bean for the CollectionInstrument service
    *
    * @return the RestUtility bean for the CollectionInstrument service

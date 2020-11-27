@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -25,7 +26,7 @@ public class CaseSvcClient {
   public CaseSvcClient(
       AppConfig appConfig,
       final RestTemplate restTemplate,
-      final @Qualifier("actionRestUtility") RestUtility restUtility) {
+      final @Qualifier("caseRestUtility") RestUtility restUtility) {
     this.appConfig = appConfig;
     this.restTemplate = restTemplate;
     this.restUtility = restUtility;
@@ -34,17 +35,16 @@ public class CaseSvcClient {
   /**
    * Request for an event to be executed in case
    *
-   * @param name name of action plan
-   * @param description description of action plan
+   * @param tag The tag of the event (i.e., mps, go_live, return_by)
+   * @param collectionExerciseId The id of the collection exercise the event relates too.
    * @return ActionPlanDTO representation of the created action plan
    */
-  public ActionRuleDTO executeEvent(final String tag, final String description)
+  public ActionRuleDTO executeEvent(final String tag, final UUID collectionExerciseId)
       throws RestClientException {
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getCaseSvc().getExecuteEventsPath(), null);
 
     final ActionRulePutRequestDTO actionRulePutRequestDTO = new ActionRulePutRequestDTO();
-    actionRulePutRequestDTO.setDescription(description);
 
     final HttpEntity<ActionRulePutRequestDTO> httpEntity =
         restUtility.createHttpEntity(actionRulePutRequestDTO);

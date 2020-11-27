@@ -26,7 +26,7 @@ public class EventDTO {
 
   @Nullable
   public enum Status {
-    NOT_SET,
+    NOT_SET, // Used as a stepping stone, will be removed once action is no longer used.
     SCHEDULED,
     PROCESSED,
     FAILED
