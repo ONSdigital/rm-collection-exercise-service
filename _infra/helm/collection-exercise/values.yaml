@@ -21,6 +21,10 @@ crons:
     name: collection-exercise-sample-unit-validation
     cron: "* * * * *"
     target: "cron/sample-unit-validation"
+  executeEvents:
+    name: collection-exercise-execute-events
+    cron: "* * * * *"
+    target: "cron/execute-events"
 
 database:
   managedPostgres: false

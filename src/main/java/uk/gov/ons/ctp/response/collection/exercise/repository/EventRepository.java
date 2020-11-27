@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
   Event findOneById(UUID id);
@@ -16,6 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
   List<Event> findByCollectionExerciseId(UUID collexId);
 
   List<Event> findByCollectionExerciseId(List<UUID> collexId);
+
+  List<Event> findByStatus(EventDTO.Status status);
 
   /**
    * Find events where elapsed message has already been sent

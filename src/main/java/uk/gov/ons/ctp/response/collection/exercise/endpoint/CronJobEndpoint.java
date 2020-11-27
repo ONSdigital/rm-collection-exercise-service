@@ -12,6 +12,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 
 /** The REST endpoint controller for ActionDistributor. */
@@ -22,11 +23,16 @@ public class CronJobEndpoint {
 
   private final CollectionExerciseRepository collectRepo;
   private final SampleService sampleService;
+  private final EventService eventService;
 
   @Autowired
-  public CronJobEndpoint(CollectionExerciseRepository collectRepo, SampleService sampleService) {
+  public CronJobEndpoint(
+      CollectionExerciseRepository collectRepo,
+      SampleService sampleService,
+      EventService eventService) {
     this.collectRepo = collectRepo;
     this.sampleService = sampleService;
+    this.eventService = eventService;
   }
 
   /**
@@ -72,6 +78,26 @@ public class CronJobEndpoint {
           "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
       throw new CTPException(
           CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when validating sample units");
+    }
+  }
+
+  /**
+   * Gets all the SCHEDULED events and sends them to case to be acted on
+   *
+   * @throws CTPException on any exception thrown
+   */
+  @RequestMapping(value = "/execute-scheduled-events", method = RequestMethod.GET)
+  public final ResponseEntity<String> executeScheduledEvents() throws CTPException {
+    try {
+      log.info("About to begin executing scheduled events");
+      eventService.executeEvents();
+      log.info("Completed executing scheduled events");
+      return ResponseEntity.ok().body("Completed executing scheduled events");
+    } catch (RuntimeException e) {
+      log.error(
+          "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
+      throw new CTPException(
+          CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when executing scheduled events");
     }
   }
 }

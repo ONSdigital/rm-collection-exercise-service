@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -123,6 +125,8 @@ public class EventService {
   @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
 
   @Autowired private List<ActionRuleRemover> actionRuleRemovers;
+
+  @Autowired private CaseSvcClient caseSvcClient;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -427,6 +431,27 @@ public class EventService {
     } catch (SchedulerException e) {
       throw new CTPException(
           Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
+    }
+  }
+
+  /** Get all the scheduled events and send them to case to be acted on. */
+  public void executeEvents() {
+    List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
+    log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
+    for (Event event : eventList) {
+      log.with("id", event.getId()).with("tag", event.getTag()).info("Executing event");
+      caseSvcClient.executeEvent(event.getTag(), "");
+      Boolean success = true;
+      if (success) {
+        log.info("Event processing succeeded, setting to PROCESSED state");
+        event.setStatus(EventDTO.Status.PROCESSED);
+        event.setMessageSent(
+            Timestamp.from(Instant.now())); // Worth keeping it backwards compatible for now?
+      } else {
+        log.error("Event processing failed, setting to FAILED state");
+        event.setStatus(EventDTO.Status.FAILED);
+      }
+      eventRepository.saveAndFlush(event);
     }
   }
 
