@@ -1037,7 +1037,6 @@ public class CollectionExerciseEndpoint {
         .debug("Creating event for collection exercise");
 
     eventDto.setCollectionExerciseId(id);
-
     Event newEvent = eventService.createEvent(eventDto);
 
     URI location =

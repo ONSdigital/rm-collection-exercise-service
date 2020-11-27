@@ -2,19 +2,13 @@ package uk.gov.ons.ctp.response.collection.exercise.domain;
 
 import java.sql.Timestamp;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 /** Domain model object. */
 @Entity
@@ -55,4 +49,8 @@ public class Event {
 
   @Column(name = "message_sent")
   private Timestamp messageSent;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status")
+  private EventDTO.Status status;
 }

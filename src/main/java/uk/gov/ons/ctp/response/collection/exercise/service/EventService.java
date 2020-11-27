@@ -16,6 +16,7 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -30,7 +31,6 @@ import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfigurati
 @Service
 public class EventService {
   private static final Logger log = LoggerFactory.getLogger(EventService.class);
-
   /** An enum to represent the collection exercise events that are mandatory for all surveys */
   public enum Tag {
     mps(true),
@@ -106,6 +106,8 @@ public class EventService {
     return dto;
   }
 
+  @Autowired private AppConfig appConfig;
+
   @Autowired private CollectionExerciseService collectionExerciseService;
 
   @Autowired private EventRepository eventRepository;
@@ -143,6 +145,14 @@ public class EventService {
     event.setId(UUID.randomUUID());
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
+
+    if (appConfig.getActionSvc().isDeprecated()) {
+      event.setStatus(EventDTO.Status.SCHEDULED);
+    } else {
+      // Need to do this for a bit until the switch to not using action is completed as empty
+      // enums aren't allowed.
+      event.setStatus(EventDTO.Status.NOT_SET);
+    }
 
     validateSubmittedEvent(collex, event);
 

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -26,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -66,6 +70,8 @@ public class EventServiceTest {
   @Mock private EventValidator eventValidator;
 
   @Mock private EventRepository eventRepository;
+
+  @Mock private AppConfig appConfig;
 
   @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
 
@@ -477,6 +483,9 @@ public class EventServiceTest {
     eventDto.setTag(tag);
     eventDto.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
     collex.setId(collexUuid);
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
         .thenReturn(null);
@@ -489,6 +498,56 @@ public class EventServiceTest {
       eventService.createEvent(eventDto);
     } catch (final CTPException e) {
       assertThat(e.getFault(), is(Fault.BAD_REQUEST));
+    }
+  }
+
+  /** Given action is deprecated, new events are created with a 'SCHEDULED' status */
+  @Test
+  public void testStatusIsSetToScheduledWhenActionIsDeprecated() {
+    final CollectionExercise collex = new CollectionExercise();
+    String tag = Tag.mps.name();
+
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(true);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
+
+    EventDTO eventDto = new EventDTO();
+    eventDto.setCollectionExerciseId(COLLEX_UUID);
+    eventDto.setTag(tag);
+    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
+
+    try {
+      Event event = eventService.createEvent(eventDto);
+      assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  /** Given action is NOT deprecated, new events are created with a 'NOT_SET status */
+  @Test
+  public void testStatusIsSetToNotSetWhenActionIsDeprecated() {
+    final CollectionExercise collex = new CollectionExercise();
+    String tag = Tag.mps.name();
+
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
+
+    EventDTO eventDto = new EventDTO();
+    eventDto.setCollectionExerciseId(COLLEX_UUID);
+    eventDto.setTag(tag);
+    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
+
+    try {
+      Event event = eventService.createEvent(eventDto);
+      assertThat(event.getStatus(), is(EventDTO.Status.NOT_SET));
+    } catch (CTPException e) {
+      fail();
     }
   }
 
