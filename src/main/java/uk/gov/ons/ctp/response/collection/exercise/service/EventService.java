@@ -17,8 +17,8 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -152,18 +152,17 @@ public class EventService {
 
     if (appConfig.getActionSvc().isDeprecated()) {
       event.setStatus(EventDTO.Status.SCHEDULED);
+      validateSubmittedEvent(collex, event);
+      event = eventRepository.save(event);
     } else {
       // Need to do this for a bit until the switch to not using action is completed as empty
       // enums aren't allowed.
       event.setStatus(EventDTO.Status.NOT_SET);
+      validateSubmittedEvent(collex, event);
+      createActionRulesForEvent(event);
+      event = eventRepository.save(event);
+      fireEventChangeHandlers(MessageType.EventCreated, event);
     }
-
-    validateSubmittedEvent(collex, event);
-
-    createActionRulesForEvent(event);
-    event = eventRepository.save(event);
-
-    fireEventChangeHandlers(MessageType.EventCreated, event);
 
     return event;
   }
@@ -216,13 +215,17 @@ public class EventService {
     ResponseEventDTO updatedEvent = new ResponseEventDTO();
     event.setTimestamp(new Timestamp(date.getTime()));
     validateSubmittedEvent(collex, event);
-    updateActionRules(event);
+    if (!appConfig.getActionSvc().isDeprecated()) {
+      updateActionRules(event);
+    }
     if (tag.equals("return_by")) {
       deleteNudgeEmail(collex, event, updatedEvent);
     }
     eventRepository.save(event);
 
-    fireEventChangeHandlers(MessageType.EventUpdated, event);
+    if (!appConfig.getActionSvc().isDeprecated()) {
+      fireEventChangeHandlers(MessageType.EventUpdated, event);
+    }
     updatedEvent.setEvent(event);
     return updatedEvent;
   }
@@ -317,24 +320,20 @@ public class EventService {
   public Event deleteEvent(UUID collexUuid, String tag) throws CTPException {
 
     CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
-    if (collex != null) {
-      Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
-      if (event != null) {
+    Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
+    if (event != null) {
+      if (!appConfig.getActionSvc().isDeprecated()) {
         deleteActionRulesForEvent(event);
-        event.setDeleted(true);
-        this.eventRepository.delete(event);
-
-        fireEventChangeHandlers(MessageType.EventDeleted, event);
-        return event;
-      } else {
-        throw new CTPException(
-            Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
       }
-
+      event.setDeleted(true);
+      this.eventRepository.delete(event);
+      if (!appConfig.getActionSvc().isDeprecated()) {
+        fireEventChangeHandlers(MessageType.EventDeleted, event);
+      }
+      return event;
     } else {
       throw new CTPException(
-          Fault.BAD_REQUEST,
-          String.format("Collection exercise %s does not exist", collex.getId()));
+          Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
     }
   }
 
