@@ -220,9 +220,7 @@ public class EventService {
     }
     eventRepository.save(event);
 
-    if (!appConfig.getActionSvc().isDeprecated()) {
-      fireEventChangeHandlers(MessageType.EventUpdated, event);
-    }
+    fireEventChangeHandlers(MessageType.EventUpdated, event);
     updatedEvent.setEvent(event);
     return updatedEvent;
   }
@@ -324,9 +322,8 @@ public class EventService {
       }
       event.setDeleted(true);
       this.eventRepository.delete(event);
-      if (!appConfig.getActionSvc().isDeprecated()) {
-        fireEventChangeHandlers(MessageType.EventDeleted, event);
-      }
+      fireEventChangeHandlers(MessageType.EventDeleted, event);
+
       return event;
     } else {
       throw new CTPException(
