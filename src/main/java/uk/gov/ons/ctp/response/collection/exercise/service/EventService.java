@@ -339,12 +339,10 @@ public class EventService {
    */
   private void fireEventChangeHandlers(final MessageType messageType, final Event event) {
 
-    log.debug("About to fire change handlers");
     Arrays.stream(changeHandlers)
         .forEach(
             handler -> {
               try {
-                log.debug(handler.getClass().getSimpleName());
                 handler.handleEventLifecycle(messageType, event);
               } catch (CTPException e) {
                 log.with("message_type", messageType)
@@ -439,8 +437,9 @@ public class EventService {
             .with("tag", event.getTag())
             .with("timestamp", event.getTimestamp())
             .info("Executing event");
-        caseSvcClient.executeEvent(event.getTag(), event.getCollectionExercise().getId());
-        Boolean success = true;
+        // boolean success = caseSvcClient.executeEvent(event.getTag(),
+        // event.getCollectionExercise().getId());
+        boolean success = true; // Hard code response until endpoint exists.
         if (success) {
           log.info("Event processing succeeded, setting to PROCESSED state");
           event.setStatus(EventDTO.Status.PROCESSED);

@@ -5,6 +5,7 @@ import com.godaddy.logging.LoggerFactory;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -38,7 +39,7 @@ public class CaseSvcClient {
    * @param tag The tag of the event (i.e., mps, go_live, return_by)
    * @param collectionExerciseId The id of the collection exercise the event relates too.
    */
-  public String executeEvent(final String tag, final UUID collectionExerciseId)
+  public boolean executeEvent(final String tag, final UUID collectionExerciseId)
       throws RestClientException {
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getCaseSvc().getExecuteEventsPath(), null);
@@ -47,10 +48,10 @@ public class CaseSvcClient {
     processEventDTO.setTag(tag);
     processEventDTO.setCollectionExerciseId(collectionExerciseId);
     final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
-    final String response =
-        restTemplate.postForObject(uriComponents.toUri(), httpEntity, String.class);
-    log.info(response);
-    return response;
+    final ResponseEntity<String> response =
+        restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
+    log.info(String.valueOf(response));
+    return response.getStatusCode().is2xxSuccessful();
   }
 
   public boolean isDeprecated() {
