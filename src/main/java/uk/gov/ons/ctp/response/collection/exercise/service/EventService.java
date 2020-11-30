@@ -153,16 +153,13 @@ public class EventService {
     if (appConfig.getActionSvc().isDeprecated()) {
       event.setStatus(EventDTO.Status.SCHEDULED);
       validateSubmittedEvent(collex, event);
-      event = eventRepository.save(event);
     } else {
-      // Need to do this for a bit until the switch to not using action is completed as empty
-      // enums aren't allowed.
       event.setStatus(EventDTO.Status.NOT_SET);
       validateSubmittedEvent(collex, event);
       createActionRulesForEvent(event);
-      event = eventRepository.save(event);
-      fireEventChangeHandlers(MessageType.EventCreated, event);
     }
+    event = eventRepository.save(event);
+    fireEventChangeHandlers(MessageType.EventCreated, event);
 
     return event;
   }
