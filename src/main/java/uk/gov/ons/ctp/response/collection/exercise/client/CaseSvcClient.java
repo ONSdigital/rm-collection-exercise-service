@@ -14,7 +14,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDTO;
 
-/** HTTP RestClient implementation for calls to the Action service. */
+/** HTTP RestClient implementation for calls to the Case service. */
 @Component
 public class CaseSvcClient {
   private static final Logger log = LoggerFactory.getLogger(CaseSvcClient.class);
@@ -37,7 +37,6 @@ public class CaseSvcClient {
    *
    * @param tag The tag of the event (i.e., mps, go_live, return_by)
    * @param collectionExerciseId The id of the collection exercise the event relates too.
-   * @return ActionPlanDTO representation of the created action plan
    */
   public String executeEvent(final String tag, final UUID collectionExerciseId)
       throws RestClientException {

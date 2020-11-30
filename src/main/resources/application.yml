@@ -130,14 +130,14 @@ action-svc:
     username: admin
     password: secret
 
-  case-svc:
-    execute-events-path: /exeute-event
-    connection-config:
-      scheme: http
-      host: localhost
-      port: 8171
-      username: admin
-      password: secret
+case-svc:
+  execute-events-path: /execute-event
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8171
+    username: admin
+    password: secret
 
 collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument

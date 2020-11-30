@@ -96,7 +96,7 @@ public class CollectionExerciseApplication {
   /**
    * The RestUtility bean for the Case service
    *
-   * @return the RestUtility bean for the Sample service
+   * @return the RestUtility bean for the Case service
    */
   @Bean
   @Qualifier("caseRestUtility")
