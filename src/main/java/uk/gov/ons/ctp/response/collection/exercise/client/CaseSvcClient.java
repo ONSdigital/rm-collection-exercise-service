@@ -39,7 +39,7 @@ public class CaseSvcClient {
    * @param collectionExerciseId The id of the collection exercise the event relates too.
    * @return ActionPlanDTO representation of the created action plan
    */
-  public ProcessEventDTO executeEvent(final String tag, final UUID collectionExerciseId)
+  public String executeEvent(final String tag, final UUID collectionExerciseId)
       throws RestClientException {
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getCaseSvc().getExecuteEventsPath(), null);
@@ -48,8 +48,9 @@ public class CaseSvcClient {
     processEventDTO.setTag(tag);
     processEventDTO.setCollectionExerciseId(collectionExerciseId);
     final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
-    final ProcessEventDTO response =
-        restTemplate.postForObject(uriComponents.toUri(), httpEntity, ProcessEventDTO.class);
+    final String response =
+        restTemplate.postForObject(uriComponents.toUri(), httpEntity, String.class);
+    log.info(response);
     return response;
   }
 

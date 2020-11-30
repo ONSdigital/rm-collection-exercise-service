@@ -273,7 +273,9 @@ public class EventServiceTest {
     final List<Event> existingEvents = new ArrayList<>();
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     try {
       eventService.updateEvent(collexUuid, Tag.mps.name(), new Date());
     } catch (final CTPException e) {
@@ -306,7 +308,9 @@ public class EventServiceTest {
 
     actionRuleUpdaters.add(actionRuleUpdater);
     actionRuleUpdaters.add(actionRuleUpdater2);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.updateEvent(COLLEX_UUID, Tag.mps.name(), new Date());
 
     verify(eventRepository, atLeastOnce()).save(eq(existingEvent));
@@ -340,7 +344,9 @@ public class EventServiceTest {
     eventValidators.add(eventValidator);
 
     actionRuleRemovers.add(actionRuleRemover);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.deleteEvent(COLLEX_UUID, Tag.nudge_email_4.name());
 
     verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
@@ -367,6 +373,9 @@ public class EventServiceTest {
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.reminder.name()))
         .thenReturn(existingEvent);
 
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     final List<Event> existingEvents = new ArrayList<>();
 
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
@@ -421,7 +430,9 @@ public class EventServiceTest {
     eventValidators.add(eventValidator);
 
     actionRuleUpdaters.add(actionRuleUpdater);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.updateEvent(COLLEX_UUID, Tag.return_by.name(), newDate);
 
     verify(eventRepository, atLeastOnce()).save(returnByEvent);
