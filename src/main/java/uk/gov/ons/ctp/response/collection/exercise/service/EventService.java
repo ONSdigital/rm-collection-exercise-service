@@ -339,10 +339,12 @@ public class EventService {
    */
   private void fireEventChangeHandlers(final MessageType messageType, final Event event) {
 
+    log.debug("About to fire change handlers");
     Arrays.stream(changeHandlers)
         .forEach(
             handler -> {
               try {
+                log.debug(handler.getClass().getSimpleName());
                 handler.handleEventLifecycle(messageType, event);
               } catch (CTPException e) {
                 log.with("message_type", messageType)
