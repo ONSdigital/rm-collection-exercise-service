@@ -5,7 +5,6 @@ import com.godaddy.logging.LoggerFactory;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +12,7 @@ import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDTO;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component
@@ -39,18 +39,18 @@ public class CaseSvcClient {
    * @param collectionExerciseId The id of the collection exercise the event relates too.
    * @return ActionPlanDTO representation of the created action plan
    */
-  public ActionRuleDTO executeEvent(final String tag, final UUID collectionExerciseId)
+  public ProcessEventDTO executeEvent(final String tag, final UUID collectionExerciseId)
       throws RestClientException {
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getCaseSvc().getExecuteEventsPath(), null);
 
-    final ActionRulePutRequestDTO actionRulePutRequestDTO = new ActionRulePutRequestDTO();
-
-    final HttpEntity<ActionRulePutRequestDTO> httpEntity =
-        restUtility.createHttpEntity(actionRulePutRequestDTO);
-    return restTemplate
-        .exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, ActionRuleDTO.class)
-        .getBody();
+    final ProcessEventDTO processEventDTO = new ProcessEventDTO();
+    processEventDTO.setTag(tag);
+    processEventDTO.setCollectionExerciseId(collectionExerciseId);
+    final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
+    final ProcessEventDTO response =
+        restTemplate.postForObject(uriComponents.toUri(), httpEntity, ProcessEventDTO.class);
+    return response;
   }
 
   public boolean isDeprecated() {
