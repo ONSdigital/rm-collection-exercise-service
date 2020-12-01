@@ -443,8 +443,7 @@ public class EventService {
         if (success) {
           log.info("Event processing succeeded, setting to PROCESSED state");
           event.setStatus(EventDTO.Status.PROCESSED);
-          event.setMessageSent(
-              Timestamp.from(Instant.now())); // Worth keeping it backwards compatible for now?
+          event.setMessageSent(Timestamp.from(Instant.now()));
         } else {
           log.error("Event processing failed, setting to FAILED state");
           event.setStatus(EventDTO.Status.FAILED);
