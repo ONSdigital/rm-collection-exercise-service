@@ -4,12 +4,7 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.quartz.Scheduler;
@@ -432,15 +427,20 @@ public class EventService {
     List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
     log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
     for (Event event : eventList) {
-      if (event.getTimestamp().before(Timestamp.from(Instant.now()))) {
+      CollectionExercise exercise =
+          collectionExerciseService.findCollectionExercise(event.getCollectionExercise().getId());
+      boolean isExerciseLive =
+          exercise.getState().equals(CollectionExerciseDTO.CollectionExerciseState.LIVE);
+      boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
+      if (isExerciseLive && isEventInThePast) {
         log.with("id", event.getId())
             .with("tag", event.getTag())
-            .with("timestamp", event.getTimestamp())
+            .with("timestamp", event.getTimestamp().toString())
             .info("Executing event");
         // boolean success = caseSvcClient.executeEvent(event.getTag(),
         // event.getCollectionExercise().getId());
-        boolean success = true; // Hard code response until endpoint exists.
-        if (success) {
+        // Hard code response until endpoint exists.
+        if (true) {
           log.info("Event processing succeeded, setting to PROCESSED state");
           event.setStatus(EventDTO.Status.PROCESSED);
           event.setMessageSent(Timestamp.from(Instant.now()));
