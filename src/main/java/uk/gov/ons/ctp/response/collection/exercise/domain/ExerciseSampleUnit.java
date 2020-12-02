@@ -61,6 +61,15 @@ public class ExerciseSampleUnit {
   @Column(name = "sampleunittypefk")
   private SampleUnitDTO.SampleUnitType sampleUnitType;
 
+  public SampleUnitParent toSampleUnitParent(final UUID collectionExerciseId) {
+    final SampleUnitParent parent = new SampleUnitParent();
+    populateSampleUnit(parent);
+    parent.setCollectionExerciseId(collectionExerciseId.toString());
+
+    return parent;
+  }
+
+  // To be deleted once action is no longer used
   public SampleUnitParent toSampleUnitParent(
       final String activeActionPlanId, final UUID collectionExerciseId) {
     final SampleUnitParent parent = new SampleUnitParent();
@@ -76,6 +85,15 @@ public class ExerciseSampleUnit {
     return child;
   }
 
+  private void populateSampleUnit(final SampleUnit sampleUnit) {
+    sampleUnit.setId(getSampleUnitId().toString());
+    sampleUnit.setSampleUnitRef(getSampleUnitRef());
+    sampleUnit.setSampleUnitType(getSampleUnitType().name());
+    sampleUnit.setPartyId(Objects.toString(getPartyId(), null));
+    sampleUnit.setCollectionInstrumentId(getCollectionInstrumentId().toString());
+  }
+
+  // To be deleted once action is no longer used
   private void populateSampleUnit(final String activeActionPlanId, final SampleUnit sampleUnit) {
     sampleUnit.setId(getSampleUnitId().toString());
     sampleUnit.setSampleUnitRef(getSampleUnitRef());

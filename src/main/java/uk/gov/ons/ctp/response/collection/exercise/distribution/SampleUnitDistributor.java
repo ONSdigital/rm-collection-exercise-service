@@ -189,7 +189,9 @@ public class SampleUnitDistributor {
   }
 
   /**
-   * Distribute SampleUnits for a SampleUnitGroup
+   * Distribute SampleUnits for a SampleUnitGroup. Will send the sampleUnitParent data to Case via
+   * Rabbit and will transition the sampleUnitGroup state in collection exercise to PUBLISHED on
+   * success.
    *
    * @param exercise CollectionExercise of which sampleUnitGroup is a member
    * @param sampleUnitGroup for which to distribute sample units
@@ -197,20 +199,24 @@ public class SampleUnitDistributor {
   private void distributeSampleUnitGroup(
       CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
     ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
+    SampleUnitParent sampleUnitParent;
 
-    String actionPlanId;
-    if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
-      actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
+    if (actionSvcClient.isDeprecated()) {
+      sampleUnitParent = sampleUnit.toSampleUnitParent(exercise.getId());
     } else {
-      actionPlanId = getActionPlanIdSocial(exercise).toString();
-    }
+      String actionPlanId;
+      if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
+        actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
+      } else {
+        actionPlanId = getActionPlanIdSocial(exercise).toString();
+      }
 
-    // SampleUnitParents/Children are being removed
-    // We only expect one sample unit per sample unit group now
-    // but still use SampleUnitParent class until it's removed from rabbit message
-    SampleUnitParent sampleUnitParent =
-        sampleUnit.toSampleUnitParent(actionPlanId, exercise.getId());
-    publishSampleUnit(sampleUnitGroup, sampleUnitParent);
+      // SampleUnitParents/Children are being removed
+      // We only expect one sample unit per sample unit group now
+      // but still use SampleUnitParent class until it's removed from rabbit message
+      sampleUnitParent = sampleUnit.toSampleUnitParent(actionPlanId, exercise.getId());
+    }
+    publishSampleUnitToCase(sampleUnitGroup, sampleUnitParent);
   }
 
   private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
@@ -254,7 +260,7 @@ public class SampleUnitDistributor {
    * @param sampleUnitGroup from which publish message created and for which to transition state.
    * @param sampleUnitMessage to publish.
    */
-  private void publishSampleUnit(
+  private void publishSampleUnitToCase(
       ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage) {
 
     transactionTemplate.execute(

@@ -58,6 +58,9 @@ public class CronJobEndpoint {
   /**
    * Finds all the validated collection exercises and distributes them.
    *
+   * <p>Distributing a sample unit means sending a message to the case service with details about
+   * the sample unit.
+   *
    * @throws CTPException on any exception thrown
    */
   @RequestMapping(value = "/sample-unit-distribution", method = RequestMethod.GET)
