@@ -24,7 +24,7 @@ crons:
   executeEvents:
     name: collection-exercise-execute-events
     cron: "* * * * *"
-    target: "cron/execute-events"
+    target: "cron/execute-scheduled-events"
 
 database:
   managedPostgres: false
