@@ -36,18 +36,26 @@ service:
   port: 8080
 
 resources:
-  requests:
-    memory: "500Mi"
-    cpu: "25m"
-  limits:
-    memory: "1000Mi"
-    cpu: "100m"
+  application:
+    requests:
+      memory: "500Mi"
+      cpu: "35m"
+    limits:
+      memory: "2000Mi"
+      cpu: "1000m"
+  proxy:
+    requests:
+      memory: "25Mi"
+      cpu: "5m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
 
 autoscaling: false
 scaleAt:
   # These are expressed as a percentage of resources.requests, not resources.limits
-  memoryPercentage: 150
-  cpuPercentage: 200
+  memoryPercentage: 200
+  cpuPercentage: 500
 replicas: 1
 rollingUpdate:
   maxSurge: 1
