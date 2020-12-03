@@ -454,22 +454,26 @@ public class EventService {
         }
 
         if (tag.isActionable()) {
-          log.with("tag", event.getTag()).info("Tag is actionable, sending to case");
+          log.with("tag", event.getTag()).info("Event is actionable, sending to case");
           // Hard code response until endpoint exists.
           // Do we need to tell case about every event?  or should we only tell it about some
           // events?
           // boolean success = caseSvcClient.executeEvent(event.getTag(),
           // event.getCollectionExercise().getId());
-        }
-        if (true) {
-          log.info("Event processing succeeded, setting to PROCESSED state");
-          event.setStatus(EventDTO.Status.PROCESSED);
-          event.setMessageSent(Timestamp.from(Instant.now()));
+
+          if (true) {
+            log.info("Event processing succeeded, setting to PROCESSED state");
+            event.setStatus(EventDTO.Status.PROCESSED);
+            event.setMessageSent(Timestamp.from(Instant.now()));
+          } else {
+            log.error("Event processing failed, setting to FAILED state");
+            event.setStatus(EventDTO.Status.FAILED);
+          }
+          eventRepository.saveAndFlush(event);
         } else {
-          log.error("Event processing failed, setting to FAILED state");
-          event.setStatus(EventDTO.Status.FAILED);
+          log.with("tag", event.getTag()).debug("Event is not actionable, ignoring");
         }
-        eventRepository.saveAndFlush(event);
+
       } else {
         log.with("id", event.getId())
             .with("tag", event.getTag())
