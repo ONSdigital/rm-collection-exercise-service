@@ -1216,9 +1216,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<Event> deleteCollectionExerciseEventTag(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
       throws CTPException {
-    log.with("event_id", id)
-        .with("tag", tag)
-        .info("Deleting collection exercise event");
+    log.with("event_id", id).with("tag", tag).info("Deleting collection exercise event");
 
     eventService.deleteEvent(id, tag);
 
