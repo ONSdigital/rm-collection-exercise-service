@@ -59,7 +59,8 @@ public class CronJobEndpoint {
    * Finds all the validated collection exercises and distributes them.
    *
    * <p>Distributing a sample unit means sending a message to the case service with details about
-   * the sample unit.
+   * the sample unit and transitioning the state of the sample in collection-exercise to mark the
+   * event happening.
    *
    * @throws CTPException on any exception thrown
    */
