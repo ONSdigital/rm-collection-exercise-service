@@ -469,10 +469,11 @@ public class EventService {
             log.error("Event processing failed, setting to FAILED state");
             event.setStatus(EventDTO.Status.FAILED);
           }
-          eventRepository.saveAndFlush(event);
         } else {
           log.with("tag", event.getTag()).debug("Event is not actionable, ignoring");
+          event.setStatus(EventDTO.Status.PROCESSED);
         }
+        eventRepository.saveAndFlush(event);
 
       } else {
         log.with("id", event.getId())
