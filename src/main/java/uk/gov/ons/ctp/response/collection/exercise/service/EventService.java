@@ -429,14 +429,14 @@ public class EventService {
     for (Event event : eventList) {
       CollectionExercise exercise =
           collectionExerciseService.findCollectionExercise(event.getCollectionExercise().getId());
-      List<CollectionExerciseDTO.CollectionExerciseState> states = Arrays.asList(CollectionExerciseDTO.CollectionExerciseState.LIVE,
-        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE);
+      List<CollectionExerciseDTO.CollectionExerciseState> states =
+          Arrays.asList(
+              CollectionExerciseDTO.CollectionExerciseState.LIVE,
+              CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE);
       boolean isExerciseLive = states.contains(exercise.getState());
       boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
       if (isExerciseLive && isEventInThePast) {
-        log.with("id", event.getId())
-            .with("tag", event.getTag())
-            .info("Executing event");
+        log.with("id", event.getId()).with("tag", event.getTag()).info("Executing event");
         // boolean success = caseSvcClient.executeEvent(event.getTag(),
         // event.getCollectionExercise().getId());
         // Hard code response until endpoint exists.
