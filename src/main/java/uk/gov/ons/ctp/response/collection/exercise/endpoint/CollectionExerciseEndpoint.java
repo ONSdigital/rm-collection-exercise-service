@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -80,6 +81,8 @@ public class CollectionExerciseEndpoint {
   private MapperFacade mapperFacade;
 
   private Scheduler scheduler;
+
+  @Autowired private AppConfig appConfig;
 
   @Autowired
   public CollectionExerciseEndpoint(
@@ -1045,10 +1048,13 @@ public class CollectionExerciseEndpoint {
             .buildAndExpand(newEvent.getId(), newEvent.getTag())
             .toUri();
 
-    try {
-      SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
-    } catch (SchedulerException e) {
-      log.with("event", newEvent).error("Failed to schedule event", e);
+    if (!appConfig.getActionSvc().isDeprecated()) {
+      // Don't schedule event if action is deprecated, the trigger is different
+      try {
+        SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
+      } catch (SchedulerException e) {
+        log.with("event", newEvent).error("Failed to schedule event", e);
+      }
     }
 
     return ResponseEntity.created(location).build();

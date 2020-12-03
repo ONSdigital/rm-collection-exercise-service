@@ -437,9 +437,30 @@ public class EventService {
       boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
       if (isExerciseLive && isEventInThePast) {
         log.with("id", event.getId()).with("tag", event.getTag()).info("Executing event");
-        // boolean success = caseSvcClient.executeEvent(event.getTag(),
-        // event.getCollectionExercise().getId());
-        // Hard code response until endpoint exists.
+
+        // If the event is go_live we need to transition the state of the collection exercise
+        Tag tag = EventService.Tag.valueOf(event.getTag());
+        if (tag == EventService.Tag.go_live) {
+          UUID collexId = event.getCollectionExercise().getId();
+          try {
+            collectionExerciseService.transitionCollectionExercise(
+                collexId, CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+            log.with("collection_exercise_id", collexId)
+                .info("Set collection exercise to LIVE state");
+          } catch (CTPException e) {
+            log.with("collection_exercise_id", collexId)
+                .error("Failed to set collection exercise to LIVE state", e);
+          }
+        }
+
+        if (tag.isActionable()) {
+          log.with("tag", event.getTag()).info("Tag is actionable, sending to case");
+          // Hard code response until endpoint exists.
+          // Do we need to tell case about every event?  or should we only tell it about some
+          // events?
+          // boolean success = caseSvcClient.executeEvent(event.getTag(),
+          // event.getCollectionExercise().getId());
+        }
         if (true) {
           log.info("Event processing succeeded, setting to PROCESSED state");
           event.setStatus(EventDTO.Status.PROCESSED);
