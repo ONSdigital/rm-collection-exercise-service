@@ -9,5 +9,5 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityCo
 @CoverageIgnore
 public class CaseSvc {
   private RestUtilityConfig connectionConfig;
-  private String executeEventsPath;
+  private String processEventPath;
 }

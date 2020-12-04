@@ -131,7 +131,7 @@ action-svc:
     password: secret
 
 case-svc:
-  execute-events-path: /execute-event
+  process-event-path: /process-event
   connection-config:
     scheme: http
     host: localhost

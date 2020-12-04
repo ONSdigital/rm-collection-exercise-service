@@ -34,15 +34,15 @@ public class CaseSvcClient {
   }
 
   /**
-   * Request for an event to be executed in case
+   * Request for an event to be process in case
    *
    * @param tag The tag of the event (i.e., mps, go_live, return_by)
    * @param collectionExerciseId The id of the collection exercise the event relates too.
    */
-  public boolean executeEvent(final String tag, final UUID collectionExerciseId)
+  public boolean processEvent(final String tag, final UUID collectionExerciseId)
       throws RestClientException {
     final UriComponents uriComponents =
-        restUtility.createUriComponents(appConfig.getCaseSvc().getExecuteEventsPath(), null);
+        restUtility.createUriComponents(appConfig.getCaseSvc().getProcessEventPath(), null);
 
     final ProcessEventDTO processEventDTO = new ProcessEventDTO();
     processEventDTO.setTag(tag);

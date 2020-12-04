@@ -90,18 +90,18 @@ public class CronJobEndpoint {
    *
    * @throws CTPException on any exception thrown
    */
-  @RequestMapping(value = "/execute-scheduled-events", method = RequestMethod.GET)
-  public final ResponseEntity<String> executeScheduledEvents() throws CTPException {
+  @RequestMapping(value = "/process-scheduled-events", method = RequestMethod.GET)
+  public final ResponseEntity<String> processScheduledEvents() throws CTPException {
     try {
-      log.info("About to begin executing scheduled events");
-      eventService.executeEvents();
-      log.info("Completed executing scheduled events");
-      return ResponseEntity.ok().body("Completed executing scheduled events");
+      log.info("About to begin processing scheduled events");
+      eventService.processEvents();
+      log.info("Completed processing scheduled events");
+      return ResponseEntity.ok().body("Completed processing scheduled events");
     } catch (RuntimeException e) {
       log.error(
           "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when executing scheduled events");
+          CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when processing scheduled events");
     }
   }
 }

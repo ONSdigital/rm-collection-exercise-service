@@ -423,32 +423,27 @@ public class EventService {
   }
 
   /** Get all the scheduled events and send them to case to be acted on. */
-  public void executeEvents() {
+  public void processEvents() {
     List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
     log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
     for (Event event : eventList) {
-      CollectionExercise exercise =
-          collectionExerciseService.findCollectionExercise(event.getCollectionExercise().getId());
-      List<CollectionExerciseDTO.CollectionExerciseState> states =
-          Arrays.asList(
-              CollectionExerciseDTO.CollectionExerciseState.LIVE,
-              CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE);
-      boolean isExerciseLive = states.contains(exercise.getState());
+      CollectionExercise exercise = event.getCollectionExercise();
+      boolean hasExerciseStarted = hasCollectionExerciseStarted(exercise);
       boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
-      if (isExerciseLive && isEventInThePast) {
-        log.with("id", event.getId()).with("tag", event.getTag()).info("Executing event");
+      if (hasExerciseStarted && isEventInThePast) {
+        log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
         // If the event is go_live we need to transition the state of the collection exercise
         Tag tag = EventService.Tag.valueOf(event.getTag());
         if (tag == EventService.Tag.go_live) {
-          UUID collexId = event.getCollectionExercise().getId();
           try {
             collectionExerciseService.transitionCollectionExercise(
-                collexId, CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-            log.with("collection_exercise_id", collexId)
+                event.getCollectionExercise(),
+                CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+            log.with("collection_exercise_id", event.getCollectionExercise().getId())
                 .info("Set collection exercise to LIVE state");
           } catch (CTPException e) {
-            log.with("collection_exercise_id", collexId)
+            log.with("collection_exercise_id", event.getCollectionExercise().getId())
                 .error("Failed to set collection exercise to LIVE state", e);
           }
         }
@@ -458,7 +453,7 @@ public class EventService {
           // Hard code response until endpoint exists.
           // Do we need to tell case about every event?  or should we only tell it about some
           // events?
-          // boolean success = caseSvcClient.executeEvent(event.getTag(),
+          // boolean success = caseSvcClient.processEvent(event.getTag(),
           // event.getCollectionExercise().getId());
 
           if (true) {
@@ -478,9 +473,7 @@ public class EventService {
       } else {
         log.with("id", event.getId())
             .with("tag", event.getTag())
-            .with("isCollectionExerciseLive", isExerciseLive)
-            .with("isEventInThePast", isEventInThePast)
-            .debug("Event in future, not going to execute");
+            .debug("Event not ready to be processed");
       }
     }
   }
@@ -498,6 +491,22 @@ public class EventService {
         .filter(Objects::nonNull)
         .filter(event -> isEventAfterReturnBy(event, submittedEvent))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Check if a collection exercise is in a started state. 'Started' in this context means either
+   * live or ready_for_live. An exercise in the READY_FOR_LIVE state has preperation events that can
+   * happen even if it's not 'live' yet (i.e., mps).
+   *
+   * @param exercise A collection exercise
+   * @return True/False value on whether the exercise has started
+   */
+  private boolean hasCollectionExerciseStarted(CollectionExercise exercise) {
+    List<CollectionExerciseDTO.CollectionExerciseState> states =
+        Arrays.asList(
+            CollectionExerciseDTO.CollectionExerciseState.LIVE,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE);
+    return states.contains(exercise.getState());
   }
 
   private boolean isEventAfterReturnBy(Event nudgeEvent, Event submittedEvent) {
