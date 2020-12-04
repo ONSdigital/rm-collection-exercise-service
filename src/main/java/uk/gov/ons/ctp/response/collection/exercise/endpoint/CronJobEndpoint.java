@@ -86,7 +86,8 @@ public class CronJobEndpoint {
   }
 
   /**
-   * Gets all the SCHEDULED events and sends them to case to be acted on
+   * Gets all the SCHEDULED events for active collection exercises and if an event requires an
+   * action to be taken (i.e., a letter or email to be sent) sends it to case to be acted on
    *
    * @throws CTPException on any exception thrown
    */

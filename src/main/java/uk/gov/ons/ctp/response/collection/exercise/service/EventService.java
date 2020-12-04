@@ -428,9 +428,9 @@ public class EventService {
     log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
     for (Event event : eventList) {
       CollectionExercise exercise = event.getCollectionExercise();
-      boolean hasExerciseStarted = hasCollectionExerciseStarted(exercise);
+      boolean isExerciseActive = isCollectionExerciseActive(exercise);
       boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
-      if (hasExerciseStarted && isEventInThePast) {
+      if (isExerciseActive && isEventInThePast) {
         log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
         // If the event is go_live we need to transition the state of the collection exercise
@@ -491,14 +491,14 @@ public class EventService {
   }
 
   /**
-   * Check if a collection exercise is in a started state. 'Started' in this context means either
+   * Check if a collection exercise is in an active state. 'Active' in this context means either
    * live or ready_for_live. An exercise in the READY_FOR_LIVE state has preparation events that can
    * happen even if it's not 'live' yet (i.e., mps).
    *
-   * @param exercise A collection exercise
-   * @return True/False value on whether the exercise has started
+   * @param exercise A collection exercise object
+   * @return True/False value on whether the exercise is active
    */
-  private boolean hasCollectionExerciseStarted(CollectionExercise exercise) {
+  private boolean isCollectionExerciseActive(CollectionExercise exercise) {
     List<CollectionExerciseDTO.CollectionExerciseState> states =
         Arrays.asList(
             CollectionExerciseDTO.CollectionExerciseState.LIVE,
