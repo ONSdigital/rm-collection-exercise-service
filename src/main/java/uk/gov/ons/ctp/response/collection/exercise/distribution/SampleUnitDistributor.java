@@ -30,7 +30,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransit
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.Association;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.Enrolment;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleUnitPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -205,12 +204,7 @@ public class SampleUnitDistributor {
       boolean activeEnrolment = doesSampleUnitHaveAnActiveEnrolment(sampleUnit, exercise);
       sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnrolment, exercise.getId());
     } else {
-      String actionPlanId;
-      if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
-        actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
-      } else {
-        actionPlanId = getActionPlanIdSocial(exercise).toString();
-      }
+      String actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
 
       // SampleUnitParents/Children are being removed
       // We only expect one sample unit per sample unit group now
@@ -236,10 +230,6 @@ public class SampleUnitDistributor {
     return actionSvcClient
         .getActionPlanBySelectorsBusiness(exercise.getId().toString(), activeEnrolment)
         .getId();
-  }
-
-  private UUID getActionPlanIdSocial(CollectionExercise exercise) throws CTPException {
-    return actionSvcClient.getActionPlanBySelectorsSocial(exercise.getId().toString()).getId();
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {
