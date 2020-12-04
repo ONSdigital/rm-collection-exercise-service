@@ -202,7 +202,8 @@ public class SampleUnitDistributor {
     SampleUnitParent sampleUnitParent;
 
     if (actionSvcClient.isDeprecated()) {
-      sampleUnitParent = sampleUnit.toSampleUnitParent(exercise.getId());
+      boolean activeEnolment = doesSampleUnitHaveAnActiveEnrolment(sampleUnit, exercise);
+      sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnolment, exercise.getId());
     } else {
       String actionPlanId;
       if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
@@ -217,6 +218,13 @@ public class SampleUnitDistributor {
       sampleUnitParent = sampleUnit.toSampleUnitParent(actionPlanId, exercise.getId());
     }
     publishSampleUnitToCase(sampleUnitGroup, sampleUnitParent);
+  }
+
+  private boolean doesSampleUnitHaveAnActiveEnrolment(
+      ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
+    PartyDTO businessParty =
+        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    return surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
   }
 
   private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)

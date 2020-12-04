@@ -61,9 +61,10 @@ public class ExerciseSampleUnit {
   @Column(name = "sampleunittypefk")
   private SampleUnitDTO.SampleUnitType sampleUnitType;
 
-  public SampleUnitParent toSampleUnitParent(final UUID collectionExerciseId) {
+  public SampleUnitParent toSampleUnitParent(
+      final boolean activeEnrolment, final UUID collectionExerciseId) {
     final SampleUnitParent parent = new SampleUnitParent();
-    populateSampleUnit(parent);
+    populateSampleUnit(activeEnrolment, parent);
     parent.setCollectionExerciseId(collectionExerciseId.toString());
 
     return parent;
@@ -85,7 +86,8 @@ public class ExerciseSampleUnit {
     return child;
   }
 
-  private void populateSampleUnit(final SampleUnit sampleUnit) {
+  private void populateSampleUnit(final boolean activeEnrolment, final SampleUnit sampleUnit) {
+    sampleUnit.setActiveEnrolment(activeEnrolment);
     sampleUnit.setId(getSampleUnitId().toString());
     sampleUnit.setSampleUnitRef(getSampleUnitRef());
     sampleUnit.setSampleUnitType(getSampleUnitType().name());

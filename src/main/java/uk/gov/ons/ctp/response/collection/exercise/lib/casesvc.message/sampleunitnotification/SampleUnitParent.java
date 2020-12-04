@@ -57,10 +57,18 @@ public class SampleUnitParent extends SampleUnit {
       final String sampleUnitType,
       final String partyId,
       final String collectionInstrumentId,
+      final boolean activeEnrolment,
       final String actionPlanId,
       final String collectionExerciseId,
       final SampleUnitChildren sampleUnitChildren) {
-    super(id, sampleUnitRef, sampleUnitType, partyId, collectionInstrumentId, actionPlanId);
+    super(
+        id,
+        sampleUnitRef,
+        sampleUnitType,
+        partyId,
+        collectionInstrumentId,
+        activeEnrolment,
+        actionPlanId);
     this.collectionExerciseId = collectionExerciseId;
     this.sampleUnitChildren = sampleUnitChildren;
   }

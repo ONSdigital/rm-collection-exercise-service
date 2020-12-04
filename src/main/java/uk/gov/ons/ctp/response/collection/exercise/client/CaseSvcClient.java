@@ -53,8 +53,4 @@ public class CaseSvcClient {
     log.info(String.valueOf(response));
     return response.getStatusCode().is2xxSuccessful();
   }
-
-  public boolean isDeprecated() {
-    return appConfig.getActionSvc().isDeprecated();
-  }
 }

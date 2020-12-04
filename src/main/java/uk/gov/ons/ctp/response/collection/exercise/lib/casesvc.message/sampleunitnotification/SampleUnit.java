@@ -46,6 +46,7 @@ import javax.xml.bind.annotation.*;
       "sampleUnitType",
       "partyId",
       "collectionInstrumentId",
+      "activeEnrolment",
       "actionPlanId"
     })
 @XmlSeeAlso({SampleUnitParent.class})
@@ -64,7 +65,9 @@ public class SampleUnit {
   @XmlElement(required = true)
   protected String collectionInstrumentId;
 
-  @XmlElement(required = true)
+  protected boolean activeEnrolment;
+
+  // To be removed once action is removed
   protected String actionPlanId;
 
   /** Default no-arg constructor */
@@ -79,12 +82,14 @@ public class SampleUnit {
       final String sampleUnitType,
       final String partyId,
       final String collectionInstrumentId,
+      final boolean activeEnrolment,
       final String actionPlanId) {
     this.id = id;
     this.sampleUnitRef = sampleUnitRef;
     this.sampleUnitType = sampleUnitType;
     this.partyId = partyId;
     this.collectionInstrumentId = collectionInstrumentId;
+    this.activeEnrolment = activeEnrolment;
     this.actionPlanId = actionPlanId;
   }
 
@@ -179,6 +184,24 @@ public class SampleUnit {
   }
 
   /**
+   * Gets the value of the activeEnrolment property.
+   *
+   * @return possible object is {@link String }
+   */
+  public boolean getActiveEnrolment() {
+    return activeEnrolment;
+  }
+
+  /**
+   * Sets the value of the actionPlanId property.
+   *
+   * @param value allowed object is {@link boolean }
+   */
+  public void setActiveEnrolment(boolean value) {
+    this.activeEnrolment = value;
+  }
+
+  /**
    * Gets the value of the actionPlanId property.
    *
    * @return possible object is {@link String }
@@ -208,6 +231,7 @@ public class SampleUnit {
     _other.sampleUnitType = this.sampleUnitType;
     _other.partyId = this.partyId;
     _other.collectionInstrumentId = this.collectionInstrumentId;
+    _other.activeEnrolment = this.activeEnrolment;
     _other.actionPlanId = this.actionPlanId;
   }
 
@@ -274,6 +298,13 @@ public class SampleUnit {
             || (!collectionInstrumentIdPropertyTree.isLeaf())))) {
       _other.collectionInstrumentId = this.collectionInstrumentId;
     }
+    final PropertyTree activeEnrolmentPropertyTree =
+        ((_propertyTree == null) ? null : _propertyTree.get("actionPlanId"));
+    if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
+        ? (activeEnrolmentPropertyTree != null)
+        : ((activeEnrolmentPropertyTree == null) || (!activeEnrolmentPropertyTree.isLeaf())))) {
+      _other.activeEnrolment = this.activeEnrolment;
+    }
     final PropertyTree actionPlanIdPropertyTree =
         ((_propertyTree == null) ? null : _propertyTree.get("actionPlanId"));
     if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
@@ -323,6 +354,7 @@ public class SampleUnit {
     private String sampleUnitType;
     private String partyId;
     private String collectionInstrumentId;
+    private boolean activeEnrolment;
     private String actionPlanId;
 
     public Builder(final _B _parentBuilder, final SampleUnit _other, final boolean _copy) {
@@ -335,6 +367,7 @@ public class SampleUnit {
           this.sampleUnitType = _other.sampleUnitType;
           this.partyId = _other.partyId;
           this.collectionInstrumentId = _other.collectionInstrumentId;
+          this.activeEnrolment = _other.activeEnrolment;
           this.actionPlanId = _other.actionPlanId;
         } else {
           _storedValue = _other;
@@ -390,6 +423,14 @@ public class SampleUnit {
                   || (!collectionInstrumentIdPropertyTree.isLeaf())))) {
             this.collectionInstrumentId = _other.collectionInstrumentId;
           }
+          final PropertyTree activeEnrolmentPropertyTree =
+              ((_propertyTree == null) ? null : _propertyTree.get("activeEnrolment"));
+          if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
+              ? (activeEnrolmentPropertyTree != null)
+              : ((activeEnrolmentPropertyTree == null)
+                  || (!activeEnrolmentPropertyTree.isLeaf())))) {
+            this.activeEnrolment = _other.activeEnrolment;
+          }
           final PropertyTree actionPlanIdPropertyTree =
               ((_propertyTree == null) ? null : _propertyTree.get("actionPlanId"));
           if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
@@ -415,6 +456,7 @@ public class SampleUnit {
       _product.sampleUnitType = this.sampleUnitType;
       _product.partyId = this.partyId;
       _product.collectionInstrumentId = this.collectionInstrumentId;
+      _product.activeEnrolment = this.activeEnrolment;
       _product.actionPlanId = this.actionPlanId;
       return _product;
     }
@@ -470,6 +512,16 @@ public class SampleUnit {
     }
 
     /**
+     * Sets the new value of "activeEnrolment" (any previous value will be replaced)
+     *
+     * @param activeEnrolment New value of the "activeEnrolment" property.
+     */
+    public SampleUnit.Builder<_B> withActiveEnrolment(final boolean activeEnrolment) {
+      this.activeEnrolment = activeEnrolment;
+      return this;
+    }
+
+    /**
      * Sets the new value of "actionPlanId" (any previous value will be replaced)
      *
      * @param actionPlanId New value of the "actionPlanId" property.
@@ -509,6 +561,7 @@ public class SampleUnit {
     private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> partyId = null;
     private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> collectionInstrumentId =
         null;
+    private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> activeEnrolment = null;
     private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> actionPlanId = null;
 
     public Selector(final TRoot root, final TParent parent, final String propertyName) {
@@ -533,6 +586,9 @@ public class SampleUnit {
       }
       if (this.collectionInstrumentId != null) {
         products.put("collectionInstrumentId", this.collectionInstrumentId.init());
+      }
+      if (this.activeEnrolment != null) {
+        products.put("activeEnrolment", this.activeEnrolment.init());
       }
       if (this.actionPlanId != null) {
         products.put("actionPlanId", this.actionPlanId.init());
@@ -578,6 +634,14 @@ public class SampleUnit {
               new com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>>(
                   this._root, this, "collectionInstrumentId")
           : this.collectionInstrumentId);
+    }
+
+    public com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> activeEnrolment() {
+      return ((this.activeEnrolment == null)
+          ? this.activeEnrolment =
+              new com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>>(
+                  this._root, this, "activeEnrolment")
+          : this.activeEnrolment);
     }
 
     public com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> actionPlanId() {
