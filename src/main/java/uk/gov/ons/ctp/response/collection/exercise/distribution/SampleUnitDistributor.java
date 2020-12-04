@@ -202,8 +202,8 @@ public class SampleUnitDistributor {
     SampleUnitParent sampleUnitParent;
 
     if (actionSvcClient.isDeprecated()) {
-      boolean activeEnolment = doesSampleUnitHaveAnActiveEnrolment(sampleUnit, exercise);
-      sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnolment, exercise.getId());
+      boolean activeEnrolment = doesSampleUnitHaveAnActiveEnrolment(sampleUnit, exercise);
+      sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnrolment, exercise.getId());
     } else {
       String actionPlanId;
       if (sampleUnit.getSampleUnitType().equals(SampleUnitDTO.SampleUnitType.B)) {
