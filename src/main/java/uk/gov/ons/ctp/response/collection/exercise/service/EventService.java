@@ -449,13 +449,9 @@ public class EventService {
         }
 
         if (tag.isActionable()) {
-          log.with("tag", event.getTag()).info("Event is actionable, sending to case");
+          log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
           // Hard code response until endpoint exists.
-          // Do we need to tell case about every event?  or should we only tell it about some
-          // events?
           // boolean success = caseSvcClient.processEvent(event.getTag(),
-          // event.getCollectionExercise().getId());
-
           if (true) {
             log.info("Event processing succeeded, setting to PROCESSED state");
             event.setStatus(EventDTO.Status.PROCESSED);
@@ -465,7 +461,8 @@ public class EventService {
             event.setStatus(EventDTO.Status.FAILED);
           }
         } else {
-          log.with("tag", event.getTag()).debug("Event is not actionable, ignoring");
+          log.with("tag", event.getTag())
+              .debug("Event is not actionable, setting to PROCESSED state");
           event.setStatus(EventDTO.Status.PROCESSED);
         }
         eventRepository.saveAndFlush(event);
@@ -495,7 +492,7 @@ public class EventService {
 
   /**
    * Check if a collection exercise is in a started state. 'Started' in this context means either
-   * live or ready_for_live. An exercise in the READY_FOR_LIVE state has preperation events that can
+   * live or ready_for_live. An exercise in the READY_FOR_LIVE state has preparation events that can
    * happen even if it's not 'live' yet (i.e., mps).
    *
    * @param exercise A collection exercise
