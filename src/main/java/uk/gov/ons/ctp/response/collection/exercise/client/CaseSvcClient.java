@@ -11,7 +11,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDTO;
 
@@ -20,9 +19,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDT
 public class CaseSvcClient {
   private static final Logger log = LoggerFactory.getLogger(CaseSvcClient.class);
 
-  private final AppConfig appConfig;
-  private final RestTemplate restTemplate;
-  private final RestUtility restUtility;
+  private AppConfig appConfig;
+  private RestTemplate restTemplate;
+  private RestUtility restUtility;
 
   public CaseSvcClient(
       AppConfig appConfig,
@@ -50,7 +49,6 @@ public class CaseSvcClient {
     final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
     final ResponseEntity<String> response =
         restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
-    log.info(String.valueOf(response));
     return response.getStatusCode().is2xxSuccessful();
   }
 }
