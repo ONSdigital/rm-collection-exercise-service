@@ -17,7 +17,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
 public class AppConfig {
 
   private ActionSvc actionSvc;
-  private CaseSvc caseSvc;
   private SampleSvc sampleSvc;
   private SurveySvc surveySvc;
   private CollectionInstrumentSvc collectionInstrumentSvc;

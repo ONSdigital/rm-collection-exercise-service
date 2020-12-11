@@ -25,6 +25,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDTO;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component
@@ -289,6 +290,26 @@ public class ActionSvcClient {
     }
 
     return response.getBody();
+  }
+
+  /**
+   * Request for an event to be process in case
+   *
+   * @param tag The tag of the event (i.e., mps, go_live, return_by)
+   * @param collectionExerciseId The id of the collection exercise the event relates too.
+   */
+  public boolean processEvent(final String tag, final UUID collectionExerciseId)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(appConfig.getActionSvc().getProcessEventPath(), null);
+
+    final ProcessEventDTO processEventDTO = new ProcessEventDTO();
+    processEventDTO.setTag(tag);
+    processEventDTO.setCollectionExerciseId(collectionExerciseId);
+    final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
+    final ResponseEntity<String> response =
+        restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
+    return response.getStatusCode().is2xxSuccessful();
   }
 
   public boolean isDeprecated() {

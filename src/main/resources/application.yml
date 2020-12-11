@@ -123,19 +123,11 @@ action-svc:
   action-rules-path: /actionrules
   action-rule-path: /actionrules/{actionRuleId}
   action-rules-for-action-plan-path: /actionrules/actionplan/{actionPlanId}
-  connection-config:
-    scheme: http
-    host: localhost
-    port: 8151
-    username: admin
-    password: secret
-
-case-svc:
   process-event-path: /process-event
   connection-config:
     scheme: http
     host: localhost
-    port: 8171
+    port: 8151
     username: admin
     password: secret
 

@@ -12,7 +12,6 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -120,8 +119,6 @@ public class EventService {
   @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
 
   @Autowired private List<ActionRuleRemover> actionRuleRemovers;
-
-  @Autowired private CaseSvcClient caseSvcClient;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -451,7 +448,7 @@ public class EventService {
         if (tag.isActionable()) {
           log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
           // Hard code response until endpoint exists.
-          // boolean success = caseSvcClient.processEvent(event.getTag(),
+          // boolean success = actionSvcClient.processEvent(event.getTag(),
           if (true) {
             log.info("Event processing succeeded, setting to PROCESSED state");
             event.setStatus(EventDTO.Status.PROCESSED);
