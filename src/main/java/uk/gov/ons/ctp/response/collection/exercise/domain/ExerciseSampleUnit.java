@@ -70,7 +70,7 @@ public class ExerciseSampleUnit {
     return parent;
   }
 
-  // To be deleted once action is no longer used
+  // To be removed once actionplans are deprecated
   public SampleUnitParent toSampleUnitParent(
       final String activeActionPlanId, final UUID collectionExerciseId) {
     final SampleUnitParent parent = new SampleUnitParent();
@@ -95,7 +95,7 @@ public class ExerciseSampleUnit {
     sampleUnit.setCollectionInstrumentId(getCollectionInstrumentId().toString());
   }
 
-  // To be deleted once action is no longer used
+  // To be removed once actionplans are deprecated
   private void populateSampleUnit(final String activeActionPlanId, final SampleUnit sampleUnit) {
     sampleUnit.setId(getSampleUnitId().toString());
     sampleUnit.setSampleUnitRef(getSampleUnitRef());

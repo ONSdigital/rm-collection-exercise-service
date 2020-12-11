@@ -26,7 +26,7 @@ public class EventDTO {
 
   @Nullable
   public enum Status {
-    NOT_SET, // Used as a stepping stone, will be removed once in future
+    NOT_SET, // To be removed once actionplans are deprecated
     SCHEDULED,
     PROCESSED,
     FAILED

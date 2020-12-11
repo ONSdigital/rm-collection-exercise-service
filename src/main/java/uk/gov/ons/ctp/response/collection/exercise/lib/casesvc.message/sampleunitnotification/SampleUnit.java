@@ -67,7 +67,7 @@ public class SampleUnit {
 
   protected boolean activeEnrolment;
 
-  // To be removed once action is removed
+  // To be removed once actionplans are deprecated
   protected String actionPlanId;
 
   /** Default no-arg constructor */
