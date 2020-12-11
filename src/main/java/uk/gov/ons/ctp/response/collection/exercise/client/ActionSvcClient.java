@@ -293,8 +293,8 @@ public class ActionSvcClient {
   }
 
   /**
-   * Request for an event to be processed in action.  Processing an event means doing any physical actions
-   * that might need to be done, such as sending a letter or an email relating to the event.
+   * Request for an event to be processed in action. Processing an event means doing any physical
+   * actions that might need to be done, such as sending a letter or an email relating to the event.
    *
    * @param tag The tag of the event (i.e., mps, go_live, return_by)
    * @param collectionExerciseId The id of the collection exercise the event relates too.

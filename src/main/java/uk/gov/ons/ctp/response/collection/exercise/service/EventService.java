@@ -419,7 +419,7 @@ public class EventService {
     }
   }
 
-  /** Get all the scheduled events and send them to case to be acted on. */
+  /** Get all the scheduled events and send them to action to be acted on. */
   public void processEvents() {
     List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
     log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
@@ -448,7 +448,7 @@ public class EventService {
         if (tag.isActionable()) {
           log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
           // Hard code response until endpoint exists.
-          // boolean success = actionSvcClient.processEvent(event.getTag(),
+          // boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId())
           if (true) {
             log.info("Event processing succeeded, setting to PROCESSED state");
             event.setStatus(EventDTO.Status.PROCESSED);
