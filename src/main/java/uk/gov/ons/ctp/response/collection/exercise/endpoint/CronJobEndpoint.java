@@ -12,6 +12,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 
 /** The REST endpoint controller for ActionDistributor. */
@@ -22,11 +23,16 @@ public class CronJobEndpoint {
 
   private final CollectionExerciseRepository collectRepo;
   private final SampleService sampleService;
+  private final EventService eventService;
 
   @Autowired
-  public CronJobEndpoint(CollectionExerciseRepository collectRepo, SampleService sampleService) {
+  public CronJobEndpoint(
+      CollectionExerciseRepository collectRepo,
+      SampleService sampleService,
+      EventService eventService) {
     this.collectRepo = collectRepo;
     this.sampleService = sampleService;
+    this.eventService = eventService;
   }
 
   /**
@@ -52,6 +58,10 @@ public class CronJobEndpoint {
   /**
    * Finds all the validated collection exercises and distributes them.
    *
+   * <p>Distributing a sample unit means sending a message to the case service with details about
+   * the sample unit and transitioning the state of the sample in collection-exercise to mark the
+   * event happening.
+   *
    * @throws CTPException on any exception thrown
    */
   @RequestMapping(value = "/sample-unit-distribution", method = RequestMethod.GET)
@@ -72,6 +82,27 @@ public class CronJobEndpoint {
           "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
       throw new CTPException(
           CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when validating sample units");
+    }
+  }
+
+  /**
+   * Gets all the SCHEDULED events for active collection exercises and if an event requires an
+   * action to be taken (i.e., a letter or email to be sent) sends it to action to be acted on
+   *
+   * @throws CTPException on any exception thrown
+   */
+  @RequestMapping(value = "/process-scheduled-events", method = RequestMethod.GET)
+  public final ResponseEntity<String> processScheduledEvents() throws CTPException {
+    try {
+      log.info("About to begin processing scheduled events");
+      eventService.processEvents();
+      log.info("Completed processing scheduled events");
+      return ResponseEntity.ok().body("Completed processing scheduled events");
+    } catch (RuntimeException e) {
+      log.error(
+          "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
+      throw new CTPException(
+          CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when processing scheduled events");
     }
   }
 }

@@ -25,6 +25,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
+import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDTO;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component
@@ -141,52 +142,6 @@ public class ActionSvcClient {
     log.with("collection_exercise_id", collectionExerciseId)
         .with("active_enrolment", activeEnrolment)
         .debug("Successfully retrieved action plans for selectors");
-    return responseEntity.getBody();
-  }
-
-  public ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId)
-      throws CTPException {
-
-    final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
-
-    if (actionPlans == null) {
-      log.with("collection_exercise_id", collectionExerciseId).error("Retrieved no action plans");
-      throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
-    }
-
-    if (actionPlans.size() > 1) {
-      log.with("collection_exercise_id", collectionExerciseId)
-          .error("Retrieved more than one action plan");
-      throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND,
-          String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
-    }
-
-    return actionPlans.iterator().next();
-  }
-
-  private List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
-    log.with("collection_exercise_id", collectionExerciseId)
-        .debug("Retrieving action plan for selectors");
-
-    final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
-    final UriComponents uriComponents =
-        restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
-
-    HttpEntity httpEntity = restUtility.createHttpEntity(null);
-
-    final ResponseEntity<List<ActionPlanDTO>> responseEntity;
-    responseEntity =
-        restTemplate.exchange(
-            uriComponents.toString(),
-            HttpMethod.GET,
-            httpEntity,
-            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
-
-    log.with("collection_exercise_id", collectionExerciseId)
-        .debug("Successfully retrieved action plan for selectors");
     return responseEntity.getBody();
   }
 
@@ -335,6 +290,27 @@ public class ActionSvcClient {
     }
 
     return response.getBody();
+  }
+
+  /**
+   * Request for an event to be processed in action. Processing an event means doing any physical
+   * actions that might need to be done, such as sending a letter or an email relating to the event.
+   *
+   * @param tag The tag of the event (i.e., mps, go_live, return_by)
+   * @param collectionExerciseId The id of the collection exercise the event relates too.
+   */
+  public boolean processEvent(final String tag, final UUID collectionExerciseId)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(appConfig.getActionSvc().getProcessEventPath(), null);
+
+    final ProcessEventDTO processEventDTO = new ProcessEventDTO();
+    processEventDTO.setTag(tag);
+    processEventDTO.setCollectionExerciseId(collectionExerciseId);
+    final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
+    final ResponseEntity<String> response =
+        restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
+    return response.getStatusCode().is2xxSuccessful();
   }
 
   public boolean isDeprecated() {

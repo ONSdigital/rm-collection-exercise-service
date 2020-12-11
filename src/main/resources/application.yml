@@ -123,6 +123,7 @@ action-svc:
   action-rules-path: /actionrules
   action-rule-path: /actionrules/{actionRuleId}
   action-rules-for-action-plan-path: /actionrules/actionplan/{actionPlanId}
+  process-event-path: /process-event
   connection-config:
     scheme: http
     host: localhost

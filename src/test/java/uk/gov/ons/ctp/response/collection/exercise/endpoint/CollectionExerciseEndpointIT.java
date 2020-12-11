@@ -287,16 +287,6 @@ public class CollectionExerciseEndpointIT {
   }
 
   @Test
-  public void ensureSampleUnitIdIsPropagatedHereSocial() throws Exception {
-    stubCreateActionPlan();
-    stubGetSurvey();
-    stubGetActionPlansBySelectors();
-    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("H");
-
-    assertNull("Party id must be null", sampleUnit.getPartyId());
-  }
-
-  @Test
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
     stubCreateActionPlan();
     stubSurveyServiceBusiness();
