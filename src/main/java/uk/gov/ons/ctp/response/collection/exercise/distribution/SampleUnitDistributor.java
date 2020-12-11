@@ -201,7 +201,7 @@ public class SampleUnitDistributor {
     SampleUnitParent sampleUnitParent;
 
     if (actionSvcClient.isDeprecated()) {
-      boolean activeEnrolment = doesSampleUnitHaveAnActiveEnrolment(sampleUnit, exercise);
+      boolean activeEnrolment = hasActiveEnrolment(sampleUnit, exercise);
       sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnrolment, exercise.getId());
     } else {
       String actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
@@ -214,8 +214,13 @@ public class SampleUnitDistributor {
     publishSampleUnitToCase(sampleUnitGroup, sampleUnitParent);
   }
 
-  private boolean doesSampleUnitHaveAnActiveEnrolment(
-      ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
+  /**
+   * Checks if the sample unit has a respondent enrolled against it for the survey the collection
+   * exercise relates too.
+   *
+   * @return True if a respondent is enrolled, false otherwise
+   */
+  private boolean hasActiveEnrolment(ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
     PartyDTO businessParty =
         partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
     return surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
