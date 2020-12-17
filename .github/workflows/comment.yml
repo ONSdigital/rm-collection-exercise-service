@@ -20,6 +20,12 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           echo NAMESPACE=$(echo $COMMENT_BODY | cut -d' ' -f2) >> $GITHUB_ENV
+          PARAM_KV_PAIR=$(echo $COMMENT_BODY | cut -d' ' -f3)
+          IFS='='
+          arrIN=($PARAM_KV_PAIR)
+          echo PARAM_KEY=${arrIN[0]} >> $GITHUB_ENV
+          echo PARAM_VALUE=${arrIN[1]} >> $GITHUB_ENV
+          unset IFS
 
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
@@ -40,5 +46,5 @@ jobs:
       - name: Trigger spinnaker
         run: |
           gcloud pubsub topics publish $SPINNAKER_TOPIC --project $HOST \
-          --message "{ \"kind\": \"storage#object\", \"name\": \"$IMAGE/$IMAGE-latest.tgz\", \"bucket\": \"$ARTIFACT_BUCKET\", \"parameters\": { \"tag\": \"pr-${{ github.event.issue.number }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"cluster\": \"dev\", \"actor\": \"$GITHUB_ACTOR\" } }" \
+          --message "{ \"kind\": \"storage#object\", \"name\": \"$IMAGE/$IMAGE-latest.tgz\", \"bucket\": \"$ARTIFACT_BUCKET\", \"parameters\": { \"tag\": \"pr-${{ github.event.issue.number }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"cluster\": \"dev\", \"actor\": \"$GITHUB_ACTOR\", \"paramKey\": \"PARAM_KEY\", \"paramValue\": \"$PARAM_VALUE\" } }" \
           --attribute ci="actions"
