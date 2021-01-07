@@ -25,7 +25,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
-import uk.gov.ons.ctp.response.collection.exercise.representation.ProcessEventDTO;
 
 /** HTTP RestClient implementation for calls to the Action service. */
 @Component
@@ -304,10 +303,10 @@ public class ActionSvcClient {
     final UriComponents uriComponents =
         restUtility.createUriComponents(appConfig.getActionSvc().getProcessEventPath(), null);
 
-    final ProcessEventDTO processEventDTO = new ProcessEventDTO();
-    processEventDTO.setTag(tag);
-    processEventDTO.setCollectionExerciseId(collectionExerciseId);
-    final HttpEntity<ProcessEventDTO> httpEntity = restUtility.createHttpEntity(processEventDTO);
+    final Event event = new Event();
+    event.setCollectionExerciseID(collectionExerciseId);
+    event.setTag(Event.EventTag.valueOf(tag));
+    final HttpEntity<Event> httpEntity = restUtility.createHttpEntity(event);
     final ResponseEntity<String> response =
         restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
     return response.getStatusCode().is2xxSuccessful();
