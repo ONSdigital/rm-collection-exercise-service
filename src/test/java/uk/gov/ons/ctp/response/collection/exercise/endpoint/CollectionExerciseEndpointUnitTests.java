@@ -30,12 +30,14 @@ import java.util.List;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
 import org.hamcrest.core.Is;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -833,5 +835,33 @@ public class CollectionExerciseEndpointUnitTests {
             "/collectionexercises/events?ids=" + uuid.toString() + "," + uuid2.toString());
     ResultActions actions = mockCollectionExerciseMvc.perform(builder);
     actions.andExpect(status().isOk());
+  }
+
+  /**
+   * Test that creating an event via POST raises an error gives us the right output
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testPostEventError() throws Exception {
+
+    String json = getResourceAsString("CollectionExerciseEndpointUnitTests.EventCreate.mps.json");
+    when(eventService.createEvent(any()))
+        .thenThrow(
+            new CTPException(
+                CTPException.Fault.BAD_REQUEST,
+                "Collection exercise events must be set sequentially"));
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            postJson("/collectionexercises/" + COLLECTIONEXERCISE_ID1 + "/events", json));
+
+    actions.andExpect(status().isBadRequest());
+
+    MvcResult mvcResult = actions.andReturn();
+    JSONObject result = new JSONObject(mvcResult.getResponse().getContentAsString());
+    assertEquals("BAD_REQUEST", result.getJSONObject("error").get("code"));
+    assertEquals(
+        "Collection exercise events must be set sequentially",
+        result.getJSONObject("error").get("message"));
   }
 }

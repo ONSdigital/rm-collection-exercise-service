@@ -1044,8 +1044,10 @@ public class CollectionExerciseEndpoint {
     try {
       newEvent = eventService.createEvent(eventDto);
     } catch (CTPException e) {
-      log.info(e.getFault().toString());
-      return ResponseEntity.badRequest().body(e.getFault().toString());
+      log.with("fault", e.getFault())
+          .with("message", e.getMessage())
+          .info("An error occurred creating event");
+      return ResponseEntity.badRequest().body(e);
     }
 
     URI location =
