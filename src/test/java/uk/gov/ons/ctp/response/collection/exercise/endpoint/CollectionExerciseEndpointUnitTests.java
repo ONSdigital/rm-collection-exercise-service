@@ -7,15 +7,14 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.ons.ctp.lib.common.MvcHelper.getJson;
-import static uk.gov.ons.ctp.lib.common.MvcHelper.postJson;
-import static uk.gov.ons.ctp.lib.common.MvcHelper.putJson;
+import static uk.gov.ons.ctp.lib.common.MvcHelper.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 
 import com.godaddy.logging.Logger;
@@ -776,6 +775,35 @@ public class CollectionExerciseEndpointUnitTests {
     assertEquals(uuid, uuidCaptor.getValue());
     assertEquals("End", tagCaptor.getValue());
     assertEquals(expectedDate, dateCaptor.getValue());
+  }
+
+  /**
+   * Test that updating an event via PUT raises an error gives us the right output
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void testPutEventError() throws Exception {
+
+    String newDate = "2021-01-09T07:00:00.000+00:00";
+    String tag = "mps";
+    when(eventService.updateEvent(eq(COLLECTIONEXERCISE_ID1), eq(tag), any()))
+        .thenThrow(
+            new CTPException(
+                CTPException.Fault.BAD_REQUEST,
+                "Collection exercise events must be set sequentially"));
+    ResultActions actions =
+        textPlainMock.perform(
+            putText("/collectionexercises/" + COLLECTIONEXERCISE_ID1 + "/events/" + tag, newDate));
+
+    actions.andExpect(status().isBadRequest());
+
+    MvcResult mvcResult = actions.andReturn();
+    JSONObject result = new JSONObject(mvcResult.getResponse().getContentAsString());
+    assertEquals("BAD_REQUEST", result.getJSONObject("error").get("code"));
+    assertEquals(
+        "Collection exercise events must be set sequentially",
+        result.getJSONObject("error").get("message"));
   }
 
   /**
