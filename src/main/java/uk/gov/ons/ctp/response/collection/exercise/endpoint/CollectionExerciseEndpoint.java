@@ -1040,7 +1040,13 @@ public class CollectionExerciseEndpoint {
         .debug("Creating event for collection exercise");
 
     eventDto.setCollectionExerciseId(id);
-    Event newEvent = eventService.createEvent(eventDto);
+    Event newEvent;
+    try {
+      newEvent = eventService.createEvent(eventDto);
+    } catch (CTPException e) {
+      log.info(e.getFault().toString());
+      return ResponseEntity.badRequest().body(e.getFault().toString());
+    }
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
