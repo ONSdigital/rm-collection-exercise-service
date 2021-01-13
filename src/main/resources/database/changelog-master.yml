@@ -46,6 +46,9 @@ databaseChangeLog:
   - include:
       file: database/changes/release-13/changelog.yml
 
+  - include:
+      file: database/changes/release-14/changelog.yml
+
 # When adding new groups of migrations to this file the numbers are arbitrary, please follow the following format for
 # all migrations after this point, using the the format "release-$NEXT_NUMBER". Incrementing $NEXT_NUMBER each
 # time.
