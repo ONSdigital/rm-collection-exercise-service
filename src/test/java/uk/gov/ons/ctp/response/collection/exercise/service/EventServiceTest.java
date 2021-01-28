@@ -633,7 +633,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(actionSvcClient, atMost(1)).processEvent(any(), any());
     try {
       verify(collectionExerciseService, atMost(1))
           .transitionCollectionExercise(

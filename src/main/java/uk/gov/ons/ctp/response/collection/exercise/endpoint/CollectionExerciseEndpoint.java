@@ -1040,7 +1040,15 @@ public class CollectionExerciseEndpoint {
         .debug("Creating event for collection exercise");
 
     eventDto.setCollectionExerciseId(id);
-    Event newEvent = eventService.createEvent(eventDto);
+    Event newEvent;
+    try {
+      newEvent = eventService.createEvent(eventDto);
+    } catch (CTPException e) {
+      log.with("fault", e.getFault())
+          .with("message", e.getMessage())
+          .info("An error occurred creating event");
+      return ResponseEntity.badRequest().body(e);
+    }
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
@@ -1160,6 +1168,11 @@ public class CollectionExerciseEndpoint {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST,
           String.format("Unparseable date %s (%s)", date, e.getLocalizedMessage()));
+    } catch (CTPException e) {
+      log.with("fault", e.getFault())
+          .with("message", e.getMessage())
+          .info("An error occurred updating event");
+      return ResponseEntity.badRequest().body(e);
     }
   }
 
