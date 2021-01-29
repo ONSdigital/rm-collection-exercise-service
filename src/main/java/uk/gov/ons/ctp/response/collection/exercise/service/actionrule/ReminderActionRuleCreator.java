@@ -34,7 +34,8 @@ public final class ReminderActionRuleCreator implements ActionRuleCreator {
   @Override
   public void execute(final Event collectionExerciseEvent) throws CTPException {
 
-    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isReminder()) {
+    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isReminder()
+        || actionSvcClient.isDeprecated()) {
       return;
     }
 

@@ -228,6 +228,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExercise() throws Exception {
     // Given
+    when(this.actionService.isDeprecated()).thenReturn(false);
     CollectionExercise collectionExercise =
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
@@ -260,6 +261,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
     // Given
+    when(this.actionService.isDeprecated()).thenReturn(false);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
@@ -300,6 +302,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseExistingDefaultActionPlans() throws Exception {
     // Given
+    when(this.actionService.isDeprecated()).thenReturn(false);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
@@ -331,6 +334,7 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExerciseExistingOverrideActionPlans() throws Exception {
     // Given
+    when(this.actionService.isDeprecated()).thenReturn(false);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     CollectionExercise collectionExercise =
@@ -369,6 +373,30 @@ public class CollectionExerciseServiceTest {
   }
 
   @Test
+  public void testCreateCollectionExerciseSkipsActionPlansIfDeprecated() throws Exception {
+    // Given
+    when(this.actionService.isDeprecated()).thenReturn(true);
+    CollectionExerciseDTO toCreate =
+        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
+    CollectionExercise collectionExercise =
+        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
+    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
+    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+
+    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(any(), any()))
+        .thenReturn(caseTypeOverride);
+
+    // When
+    this.collectionExerciseService.createCollectionExercise(toCreate, survey);
+
+    // Then
+    verify(actionService, times(0)).createActionPlan(any(), any(), any());
+  }
+
+  @Test
   public void testUpdateCollectionExercise() throws Exception {
     CollectionExerciseDTO toUpdate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
@@ -379,6 +407,11 @@ public class CollectionExerciseServiceTest {
     existing.setSurveyId(surveyId);
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
     when(surveyService.findSurvey(surveyId)).thenReturn(survey);
+    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    caseTypeOverride.setSampleUnitTypeFK("BI");
+    caseTypeOverrides.add(caseTypeOverride);
+    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
 
     this.collectionExerciseService.updateCollectionExercise(existing.getId(), toUpdate);
 
@@ -545,9 +578,17 @@ public class CollectionExerciseServiceTest {
   public void testPatchCollectionExerciseExerciseRef() throws Exception {
     CollectionExercise existing = setupCollectionExercise();
     CollectionExerciseDTO collex = new CollectionExerciseDTO();
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    UUID surveyId = UUID.fromString(survey.getId());
     String exerciseRef = "209966";
     collex.setExerciseRef(exerciseRef);
-
+    collex.setSurveyId(surveyId.toString());
+    when(surveyService.findSurvey(surveyId)).thenReturn(survey);
+    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    caseTypeOverride.setSampleUnitTypeFK("BI");
+    caseTypeOverrides.add(caseTypeOverride);
+    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
     this.collectionExerciseService.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
@@ -563,7 +604,13 @@ public class CollectionExerciseServiceTest {
     CollectionExercise existing = setupCollectionExercise();
     CollectionExerciseDTO collex = new CollectionExerciseDTO();
     String name = "Not BRES";
-
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    when(surveyService.findSurvey(any())).thenReturn(survey);
+    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    caseTypeOverride.setSampleUnitTypeFK("BI");
+    caseTypeOverrides.add(caseTypeOverride);
+    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
     this.collectionExerciseService.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
@@ -579,7 +626,13 @@ public class CollectionExerciseServiceTest {
     CollectionExerciseDTO collex = new CollectionExerciseDTO();
     String userDescription = "Really odd description";
     collex.setUserDescription(userDescription);
-
+    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
+    when(surveyService.findSurvey(any())).thenReturn(survey);
+    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
+    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
+    caseTypeOverride.setSampleUnitTypeFK("BI");
+    caseTypeOverrides.add(caseTypeOverride);
+    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
     this.collectionExerciseService.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);

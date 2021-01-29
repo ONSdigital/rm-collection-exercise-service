@@ -5,21 +5,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -29,16 +25,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
+import uk.gov.ons.ctp.response.collection.exercise.service.actionrule.NudgeEmailActionRuleRemover;
+import uk.gov.ons.ctp.response.collection.exercise.service.actionrule.ReminderActionRuleRemover;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
@@ -48,6 +50,8 @@ public class EventServiceTest {
       UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
   private static final UUID COLLEX_UUID = UUID.fromString("f03206ee-137d-41e3-af5c-2dea393bb360");
   private static final int EXERCISE_PK = 6433;
+
+  @Mock private ActionSvcClient actionSvcClient;
 
   @Mock private SurveySvcClient surveySvcClient;
 
@@ -59,13 +63,17 @@ public class EventServiceTest {
 
   @Mock private ActionRuleUpdater actionRuleUpdater;
 
-  @Mock private ActionRuleRemover actionRuleRemover;
+  @Mock private NudgeEmailActionRuleRemover actionRuleRemover;
+
+  @Mock private ReminderActionRuleRemover actionRuleRemover2;
 
   @Mock private ActionRuleUpdater actionRuleUpdater2;
 
   @Mock private EventValidator eventValidator;
 
   @Mock private EventRepository eventRepository;
+
+  @Mock private AppConfig appConfig;
 
   @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
 
@@ -83,6 +91,24 @@ public class EventServiceTest {
     event.setTimestamp(eventTime);
     event.setTag(tag.name());
 
+    return event;
+  }
+
+  /**
+   * @param tag Tag object
+   * @param timestamp Timestamp in the form of dd/MM/yyyy
+   * @return An event with the tag and timestamp setup
+   */
+  private static Event createEvent(Tag tag, String timestamp) {
+    Date parsedDate = new Date();
+    try {
+      parsedDate = new SimpleDateFormat("dd/MM/yyyy").parse(timestamp);
+    } catch (ParseException e) {
+      fail("Failed to parse date");
+    }
+    Event event = new Event();
+    event.setTimestamp(new java.sql.Timestamp(parsedDate.getTime()));
+    event.setTag(tag.name());
     return event;
   }
 
@@ -267,7 +293,9 @@ public class EventServiceTest {
     final List<Event> existingEvents = new ArrayList<>();
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     try {
       eventService.updateEvent(collexUuid, Tag.mps.name(), new Date());
     } catch (final CTPException e) {
@@ -300,7 +328,9 @@ public class EventServiceTest {
 
     actionRuleUpdaters.add(actionRuleUpdater);
     actionRuleUpdaters.add(actionRuleUpdater2);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.updateEvent(COLLEX_UUID, Tag.mps.name(), new Date());
 
     verify(eventRepository, atLeastOnce()).save(eq(existingEvent));
@@ -334,11 +364,50 @@ public class EventServiceTest {
     eventValidators.add(eventValidator);
 
     actionRuleRemovers.add(actionRuleRemover);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.deleteEvent(COLLEX_UUID, Tag.nudge_email_4.name());
 
     verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
-    verify(actionRuleRemover, atLeastOnce()).execute(existingEvent);
+    verify(actionRuleRemover, atMost(1)).execute(existingEvent);
+    verify(actionRuleRemover2, atMost(0)).execute(existingEvent);
+  }
+
+  @Test
+  public void givenReminderEmailIsDeletedItGetsPropagatedToActionSVC() throws CTPException {
+
+    final CollectionExercise collex = new CollectionExercise();
+    collex.setId(COLLEX_UUID);
+    collex.setExercisePK(EXERCISE_PK);
+    final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
+    collex.setState(collectionExerciseState);
+
+    final SurveyDTO survey = new SurveyDTO();
+    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
+
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    final Event existingEvent = new Event();
+    existingEvent.setTag(Tag.reminder.toString());
+    existingEvent.setId(UUID.randomUUID());
+    when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.reminder.name()))
+        .thenReturn(existingEvent);
+
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
+    final List<Event> existingEvents = new ArrayList<>();
+
+    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
+    eventValidators.add(eventValidator);
+
+    actionRuleRemovers.add(actionRuleRemover2);
+
+    eventService.deleteEvent(COLLEX_UUID, Tag.reminder.name());
+
+    verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
+    verify(actionRuleRemover2, atMost(1)).execute(existingEvent);
+    verify(actionRuleRemover, atMost(0)).execute(existingEvent);
   }
 
   @Test
@@ -381,7 +450,9 @@ public class EventServiceTest {
     eventValidators.add(eventValidator);
 
     actionRuleUpdaters.add(actionRuleUpdater);
-
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.updateEvent(COLLEX_UUID, Tag.return_by.name(), newDate);
 
     verify(eventRepository, atLeastOnce()).save(returnByEvent);
@@ -443,6 +514,9 @@ public class EventServiceTest {
     eventDto.setTag(tag);
     eventDto.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
     collex.setId(collexUuid);
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
         .thenReturn(null);
@@ -455,6 +529,118 @@ public class EventServiceTest {
       eventService.createEvent(eventDto);
     } catch (final CTPException e) {
       assertThat(e.getFault(), is(Fault.BAD_REQUEST));
+    }
+  }
+
+  /** Given action is deprecated, new events are created with a 'SCHEDULED' status */
+  @Test
+  public void testStatusIsSetToScheduledWhenActionIsDeprecated() {
+    final CollectionExercise collex = new CollectionExercise();
+    String tag = Tag.mps.name();
+
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(true);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
+
+    EventDTO eventDto = new EventDTO();
+    eventDto.setCollectionExerciseId(COLLEX_UUID);
+    eventDto.setTag(tag);
+    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
+
+    try {
+      Event event = eventService.createEvent(eventDto);
+      assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  /** Given action is NOT deprecated, new events are created with a 'NOT_SET status */
+  @Test
+  public void testStatusIsSetToNotSetWhenActionIsDeprecated() {
+    final CollectionExercise collex = new CollectionExercise();
+    String tag = Tag.mps.name();
+
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    given(appConfig.getActionSvc()).willReturn(actionSvc);
+    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
+    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
+
+    EventDTO eventDto = new EventDTO();
+    eventDto.setCollectionExerciseId(COLLEX_UUID);
+    eventDto.setTag(tag);
+    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
+
+    try {
+      Event event = eventService.createEvent(eventDto);
+      assertThat(event.getStatus(), is(EventDTO.Status.NOT_SET));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testProcessEventsNoScheduledEvents() {
+    // Given
+    List<Event> emptyList = Collections.emptyList();
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(emptyList);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, never()).processEvent(any(), any());
+  }
+
+  @Test
+  public void testProcessEventsOnlyEventInFuture() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.mps, "31/12/2999");
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, never()).processEvent(any(), any());
+  }
+
+  @Test
+  public void testProcessEventsTransitionGoLive() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.go_live);
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, atMost(1)).processEvent(any(), any());
+    try {
+      verify(collectionExerciseService, atMost(1))
+          .transitionCollectionExercise(
+              any(CollectionExercise.class),
+              any(CollectionExerciseDTO.CollectionExerciseEvent.class));
+    } catch (CTPException e) {
+      fail();
     }
   }
 

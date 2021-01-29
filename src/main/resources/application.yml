@@ -117,10 +117,13 @@ survey-svc:
     read-timeout-milli-seconds: 5000
 
 action-svc:
+  deprecated: false
   action-plans-path: /actionplans
+  action-plan-path: /actionplans/{actionPlanId}
   action-rules-path: /actionrules
   action-rule-path: /actionrules/{actionRuleId}
   action-rules-for-action-plan-path: /actionrules/actionplan/{actionPlanId}
+  process-event-path: /process-event
   connection-config:
     scheme: http
     host: localhost
@@ -166,10 +169,6 @@ redisson-config:
   list-time-to-wait-seconds: 300
 
 schedules:
-  validation-schedule-delay-milli-seconds: 60000
-  # total retrieved for all collection exercises each run, does not retrieve for a particular exercise
-  validation-schedule-retrieval-max: 1000
-  distribution-schedule-delay-milli-seconds: 60000
   # number retrieved for each collection exercise each run, distributes this number for each exercise
   distribution-schedule-retrieval-max: 1000
 
@@ -196,3 +195,12 @@ swagger-settings:
   title: Collection Exercise Service API
   description: API for ${project.artifactId}
   version: ${project.version}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: false
+  swagger-ui:
+    path: /api-doc.html
+    operationsSorter: method
+    enabled: false

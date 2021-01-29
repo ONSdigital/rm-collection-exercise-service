@@ -5,9 +5,7 @@ import static uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseAppl
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -23,11 +21,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePostRequestDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRulePutRequestDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
@@ -150,52 +144,6 @@ public class ActionSvcClient {
     return responseEntity.getBody();
   }
 
-  public ActionPlanDTO getActionPlanBySelectorsSocial(String collectionExerciseId)
-      throws CTPException {
-
-    final List<ActionPlanDTO> actionPlans = getActionPlansBySelectorsSocial(collectionExerciseId);
-
-    if (actionPlans == null) {
-      log.with("collection_exercise_id", collectionExerciseId).error("Retrieved no action plans");
-      throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND, String.format(FOUND_NO_ACTION_PLANS_2, collectionExerciseId));
-    }
-
-    if (actionPlans.size() > 1) {
-      log.with("collection_exercise_id", collectionExerciseId)
-          .error("Retrieved more than one action plan");
-      throw new CTPException(
-          Fault.RESOURCE_NOT_FOUND,
-          String.format(MULTIPLE_ACTION_PLANS_FOUND_2, collectionExerciseId, actionPlans.size()));
-    }
-
-    return actionPlans.iterator().next();
-  }
-
-  private List<ActionPlanDTO> getActionPlansBySelectorsSocial(final String collectionExerciseId) {
-    log.with("collection_exercise_id", collectionExerciseId)
-        .debug("Retrieving action plan for selectors");
-
-    final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-    queryParams.add(SELECTOR_COLLECTION_EXERCISE_ID, collectionExerciseId);
-    final UriComponents uriComponents =
-        restUtility.createUriComponents(appConfig.getActionSvc().getActionPlansPath(), queryParams);
-
-    HttpEntity httpEntity = restUtility.createHttpEntity(null);
-
-    final ResponseEntity<List<ActionPlanDTO>> responseEntity;
-    responseEntity =
-        restTemplate.exchange(
-            uriComponents.toString(),
-            HttpMethod.GET,
-            httpEntity,
-            new ParameterizedTypeReference<List<ActionPlanDTO>>() {});
-
-    log.with("collection_exercise_id", collectionExerciseId)
-        .debug("Successfully retrieved action plan for selectors");
-    return responseEntity.getBody();
-  }
-
   /**
    * Request action rule is created.
    *
@@ -262,6 +210,35 @@ public class ActionSvcClient {
         .getBody();
   }
 
+  public ActionPlanDTO updateActionPlanNameAndDescription(
+      final UUID actionPlanUUID, final String name, final String description)
+      throws RestClientException {
+    final ActionPlanPutRequestDTO actionPlanPutRequestDTO = new ActionPlanPutRequestDTO();
+    actionPlanPutRequestDTO.setDescription(description);
+    actionPlanPutRequestDTO.setName(name);
+    return updateActionPlan(actionPlanUUID, actionPlanPutRequestDTO);
+  }
+
+  private ActionPlanDTO updateActionPlan(
+      final UUID actionPlanUUID, final ActionPlanPutRequestDTO actionPlanPutRequestDTO)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getActionSvc().getActionPlanPath(), null, actionPlanUUID);
+
+    final HttpEntity<ActionPlanPutRequestDTO> httpEntity =
+        restUtility.createHttpEntity(actionPlanPutRequestDTO);
+    try {
+      log.with("actionPlanId", actionPlanUUID).debug("Updating action plan");
+      return restTemplate
+          .exchange(uriComponents.toUri(), HttpMethod.PUT, httpEntity, ActionPlanDTO.class)
+          .getBody();
+    } catch (HttpClientErrorException e) {
+      log.error("Failed to update action plan", e);
+      throw e;
+    }
+  }
+
   public HttpStatus deleteActionRule(
       final UUID actionRuleId,
       final String name,
@@ -312,5 +289,30 @@ public class ActionSvcClient {
     }
 
     return response.getBody();
+  }
+
+  /**
+   * Request for an event to be processed in action. Processing an event means doing any physical
+   * actions that might need to be done, such as sending a letter or an email relating to the event.
+   *
+   * @param tag The tag of the event (i.e., mps, go_live, return_by)
+   * @param collectionExerciseId The id of the collection exercise the event relates too.
+   */
+  public boolean processEvent(final String tag, final UUID collectionExerciseId)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(appConfig.getActionSvc().getProcessEventPath(), null);
+
+    final Event event = new Event();
+    event.setCollectionExerciseID(collectionExerciseId);
+    event.setTag(Event.EventTag.valueOf(tag));
+    final HttpEntity<Event> httpEntity = restUtility.createHttpEntity(event);
+    final ResponseEntity<String> response =
+        restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
+    return response.getStatusCode().is2xxSuccessful();
+  }
+
+  public boolean isDeprecated() {
+    return appConfig.getActionSvc().isDeprecated();
   }
 }

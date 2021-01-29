@@ -1,16 +1,25 @@
 env: minikube
 namespace: minikube
 
-replicas: 1
-rollingUpdate:
-  maxSurge: 1
-  maxUnavailable: 1
-
 image:
   devRepo: eu.gcr.io/ons-rasrmbs-management
   name: eu.gcr.io/ons-rasrmbs-management
   tag: latest
   pullPolicy: Always
+
+crons:
+  distributeSampleUnit:
+    name: collection-exercise-sample-unit-distribution
+    cron: "* * * * *"
+    target: "cron/sample-unit-distribution"
+  validateSampleUnit:
+    name: collection-exercise-sample-unit-validation
+    cron: "* * * * *"
+    target: "cron/sample-unit-validation"
+  processEvents:
+    name: collection-exercise-process-events
+    cron: "* * * * *"
+    target: "cron/process-scheduled-events"
 
 database:
   managedPostgres: false
@@ -27,8 +36,31 @@ service:
   port: 8080
 
 resources:
-  requests:
-    memory: "512Mi"
+  application:
+    requests:
+      memory: "500Mi"
+      cpu: "35m"
+    limits:
+      memory: "2000Mi"
+      cpu: "1000m"
+  proxy:
+    requests:
+      memory: "25Mi"
+      cpu: "5m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
+
+autoscaling: false
+scaleAt:
+  # These are expressed as a percentage of resources.requests, not resources.limits
+  memoryPercentage: 200
+  cpuPercentage: 500
+replicas: 1
+maxReplicas: 1
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 1
 
 managedRabbitMQ:
   enabled: false
@@ -42,3 +74,5 @@ tomcat:
 dns:
   enabled: false
   wellKnownPort: 8080
+
+deprecateAction: false

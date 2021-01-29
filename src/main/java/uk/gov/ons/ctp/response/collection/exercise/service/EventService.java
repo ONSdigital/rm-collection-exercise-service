@@ -3,12 +3,8 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.quartz.Scheduler;
@@ -16,6 +12,8 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -30,7 +28,6 @@ import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfigurati
 @Service
 public class EventService {
   private static final Logger log = LoggerFactory.getLogger(EventService.class);
-
   /** An enum to represent the collection exercise events that are mandatory for all surveys */
   public enum Tag {
     mps(true),
@@ -106,6 +103,8 @@ public class EventService {
     return dto;
   }
 
+  @Autowired private AppConfig appConfig;
+
   @Autowired private CollectionExerciseService collectionExerciseService;
 
   @Autowired private EventRepository eventRepository;
@@ -121,6 +120,8 @@ public class EventService {
   @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
 
   @Autowired private List<ActionRuleRemover> actionRuleRemovers;
+
+  @Autowired private ActionSvcClient actionSvcClient;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -144,11 +145,15 @@ public class EventService {
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
 
-    validateSubmittedEvent(collex, event);
-
-    createActionRulesForEvent(event);
+    if (appConfig.getActionSvc().isDeprecated()) {
+      event.setStatus(EventDTO.Status.SCHEDULED);
+      validateSubmittedEvent(collex, event);
+    } else {
+      event.setStatus(EventDTO.Status.NOT_SET);
+      validateSubmittedEvent(collex, event);
+      createActionRulesForEvent(event);
+    }
     event = eventRepository.save(event);
-
     fireEventChangeHandlers(MessageType.EventCreated, event);
 
     return event;
@@ -202,7 +207,9 @@ public class EventService {
     ResponseEventDTO updatedEvent = new ResponseEventDTO();
     event.setTimestamp(new Timestamp(date.getTime()));
     validateSubmittedEvent(collex, event);
-    updateActionRules(event);
+    if (!appConfig.getActionSvc().isDeprecated()) {
+      updateActionRules(event);
+    }
     if (tag.equals("return_by")) {
       deleteNudgeEmail(collex, event, updatedEvent);
     }
@@ -303,24 +310,19 @@ public class EventService {
   public Event deleteEvent(UUID collexUuid, String tag) throws CTPException {
 
     CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
-    if (collex != null) {
-      Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
-      if (event != null) {
+    Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
+    if (event != null) {
+      if (!appConfig.getActionSvc().isDeprecated()) {
         deleteActionRulesForEvent(event);
-        event.setDeleted(true);
-        this.eventRepository.delete(event);
-
-        fireEventChangeHandlers(MessageType.EventDeleted, event);
-        return event;
-      } else {
-        throw new CTPException(
-            Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
       }
+      event.setDeleted(true);
+      this.eventRepository.delete(event);
+      fireEventChangeHandlers(MessageType.EventDeleted, event);
 
+      return event;
     } else {
       throw new CTPException(
-          Fault.BAD_REQUEST,
-          String.format("Collection exercise %s does not exist", collex.getId()));
+          Fault.RESOURCE_NOT_FOUND, String.format("Event %s does not exist", tag));
     }
   }
 
@@ -420,6 +422,59 @@ public class EventService {
     }
   }
 
+  /** Get all the scheduled events and send them to action to be acted on. */
+  public void processEvents() {
+    List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
+    log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
+    for (Event event : eventList) {
+      CollectionExercise exercise = event.getCollectionExercise();
+      boolean isExerciseActive = isCollectionExerciseActive(exercise);
+      boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
+      if (isExerciseActive && isEventInThePast) {
+        log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
+
+        // If the event is go_live we need to transition the state of the collection exercise
+        Tag tag = EventService.Tag.valueOf(event.getTag());
+        if (tag == EventService.Tag.go_live) {
+          try {
+            collectionExerciseService.transitionCollectionExercise(
+                event.getCollectionExercise(),
+                CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+            log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                .info("Set collection exercise to LIVE state");
+          } catch (CTPException e) {
+            log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                .error("Failed to set collection exercise to LIVE state", e);
+          }
+        }
+
+        if (tag.isActionable()) {
+          log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
+          // Hard code response until endpoint exists.
+          boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
+          if (success) {
+            log.info("Event processing succeeded, setting to PROCESSED state");
+            event.setStatus(EventDTO.Status.PROCESSED);
+            event.setMessageSent(Timestamp.from(Instant.now()));
+          } else {
+            log.error("Event processing failed, setting to FAILED state");
+            event.setStatus(EventDTO.Status.FAILED);
+          }
+        } else {
+          log.with("tag", event.getTag())
+              .debug("Event is not actionable, setting to PROCESSED state");
+          event.setStatus(EventDTO.Status.PROCESSED);
+        }
+        eventRepository.saveAndFlush(event);
+
+      } else {
+        log.with("id", event.getId())
+            .with("tag", event.getTag())
+            .debug("Event not ready to be processed");
+      }
+    }
+  }
+
   private List<Event> filterExistingNudgeEmails(
       List<Event> existingEvents,
       Event submittedEvent,
@@ -433,6 +488,22 @@ public class EventService {
         .filter(Objects::nonNull)
         .filter(event -> isEventAfterReturnBy(event, submittedEvent))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Check if a collection exercise is in an active state. 'Active' in this context means either
+   * live or ready_for_live. An exercise in the READY_FOR_LIVE state has preparation events that can
+   * happen even if it's not 'live' yet (i.e., mps).
+   *
+   * @param exercise A collection exercise object
+   * @return True/False value on whether the exercise is active
+   */
+  private boolean isCollectionExerciseActive(CollectionExercise exercise) {
+    List<CollectionExerciseDTO.CollectionExerciseState> states =
+        Arrays.asList(
+            CollectionExerciseDTO.CollectionExerciseState.LIVE,
+            CollectionExerciseDTO.CollectionExerciseState.READY_FOR_LIVE);
+    return states.contains(exercise.getState());
   }
 
   private boolean isEventAfterReturnBy(Event nudgeEvent, Event submittedEvent) {

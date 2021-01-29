@@ -29,7 +29,7 @@ public final class GoLiveActionRuleCreator implements ActionRuleCreator {
   @Override
   public void execute(final Event collectionExerciseEvent) throws CTPException {
 
-    if (!isGoLive(collectionExerciseEvent)) {
+    if (!isGoLive(collectionExerciseEvent) || actionSvcClient.isDeprecated()) {
       return;
     }
 

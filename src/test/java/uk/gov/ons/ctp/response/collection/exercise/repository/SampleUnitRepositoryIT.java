@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.repository;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -53,7 +53,7 @@ public class SampleUnitRepositoryIT {
         sampleUnitRepo.existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
             "ABC123", SampleUnitType.B, collectionExercise);
 
-    assertEquals(false, actual);
+    assertFalse(actual);
 
     // Tear down specific entities because of dodgy data created by other tests
     collexRepo.delete(collectionExercise);
@@ -86,7 +86,7 @@ public class SampleUnitRepositoryIT {
         sampleUnitRepo.existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
             "ABC123", SampleUnitType.B, collectionExercise);
 
-    assertEquals(true, actual);
+    assertTrue(actual);
 
     // Tear down specific entities because of dodgy data created by other tests
     sampleUnitRepo.delete(exerciseSampleUnit);

@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -38,9 +39,12 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityCo
 @RunWith(MockitoJUnitRunner.class)
 public class ActionSvcClientTest {
 
+  private static final String EVENT_TAG = "mps";
   private static final String ACTION_PLAN_NAME = "APName";
   private static final String ACTION_PLAN_DESCRIPTION = "APDescription";
   private static final String COLLECTION_EXERCISE_ID = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
+  private static final UUID COLLECTION_EXERCISE_UUID = UUID.fromString(COLLECTION_EXERCISE_ID);
+  private static final String ACTION_PLAN_ID = "14fb3e68-5dca-46db-bf49-04b84e07e77c";
 
   @Spy private RestUtility restUtility = new RestUtility(RestUtilityConfig.builder().build());
 
@@ -51,6 +55,8 @@ public class ActionSvcClientTest {
   @InjectMocks private ActionSvcClient actionSvcRestClient;
 
   private ResponseEntity<List<ActionPlanDTO>> responseEntity;
+
+  private ResponseEntity<ActionPlanDTO> actionPlanResponseEntity;
 
   private List<ActionPlanDTO> actionPlans;
 
@@ -69,6 +75,7 @@ public class ActionSvcClientTest {
     actionPlans.add(actionPlan);
 
     responseEntity = new ResponseEntity<>(actionPlans, HttpStatus.OK);
+    actionPlanResponseEntity = new ResponseEntity<>(actionPlan, HttpStatus.OK);
 
     MockitoAnnotations.initMocks(this);
 
@@ -103,6 +110,38 @@ public class ActionSvcClientTest {
     // Then
     verify(restTemplate, times(1))
         .postForObject(any(URI.class), any(HttpEntity.class), eq(ActionPlanDTO.class));
+  }
+
+  @Test
+  public void updateActionPlanNameAndDescription_200Response() throws CTPException {
+
+    // Given
+    when(restTemplate.exchange(
+            any(URI.class), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenReturn(actionPlanResponseEntity);
+
+    // When
+    ActionPlanDTO actionPlan =
+        actionSvcRestClient.updateActionPlanNameAndDescription(
+            UUID.fromString(ACTION_PLAN_ID), "test_name", "test_description");
+
+    assertEquals(actionPlan.getId(), actionPlans.get(0).getId());
+  }
+
+  @Test(expected = HttpClientErrorException.class)
+  public void updateActionPlanNameAndDescription_401Response() {
+    // Given
+    when(restTemplate.exchange(
+            any(URI.class), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class)))
+        .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
+
+    // When
+    actionSvcRestClient.updateActionPlanNameAndDescription(
+        UUID.fromString(ACTION_PLAN_ID), "test_name", "test_description");
+
+    // Then
+    verify(restTemplate, times(1))
+        .exchange(any(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(ActionPlanDTO.class));
   }
 
   @Test
@@ -165,56 +204,43 @@ public class ActionSvcClientTest {
   }
 
   @Test
-  public void getActionPlanBySelectorsSocial_200Response() throws CTPException {
-
+  public void processEvent_204Response() {
     // Given
-    when(restTemplate.exchange(
-            any(String.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
+    ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    when(restTemplate.postForEntity(any(URI.class), any(HttpEntity.class), any()))
         .thenReturn(responseEntity);
 
     // When
-    ActionPlanDTO actionplan =
-        actionSvcRestClient.getActionPlanBySelectorsSocial(COLLECTION_EXERCISE_ID);
+    boolean result = actionSvcRestClient.processEvent(EVENT_TAG, COLLECTION_EXERCISE_UUID);
 
-    // Then call is made to correct url
-    assertEquals(actionplan.getId(), actionPlans.get(0).getId());
+    // Then
+    verify(restTemplate, times(1)).postForEntity(any(URI.class), any(HttpEntity.class), any(null));
+    assertTrue(result);
   }
 
-  @Test(expected = CTPException.class)
-  public void getActionPlanBySelectorsSocial_204Response() throws CTPException {
-
+  @Test(expected = HttpClientErrorException.class)
+  public void processEvent_400Response() {
     // Given
-    when(restTemplate.exchange(
-            any(String.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    when(restTemplate.postForEntity(any(URI.class), any(HttpEntity.class), any()))
+        .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
     // When
-    actionSvcRestClient.getActionPlanBySelectorsSocial(COLLECTION_EXERCISE_ID);
+    boolean result = actionSvcRestClient.processEvent(EVENT_TAG, COLLECTION_EXERCISE_UUID);
 
-    // Then CTPException is thrown
+    // Then
+    verify(restTemplate, times(1)).postForEntity(any(URI.class), any(HttpEntity.class), any(null));
   }
 
-  @Test(expected = CTPException.class)
-  public void getActionPlanBySelectorsSocial_MultipleActionPlans() throws CTPException {
+  @Test(expected = HttpClientErrorException.class)
+  public void processEvent_500Response() {
     // Given
-    when(restTemplate.exchange(
-            any(String.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<ActionPlanDTO>>() {})))
-        .thenReturn(
-            new ResponseEntity<>(
-                Arrays.asList(new ActionPlanDTO(), new ActionPlanDTO()), HttpStatus.OK));
+    when(restTemplate.postForEntity(any(URI.class), any(HttpEntity.class), any()))
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     // When
-    actionSvcRestClient.getActionPlanBySelectorsSocial(COLLECTION_EXERCISE_ID);
+    actionSvcRestClient.processEvent(EVENT_TAG, COLLECTION_EXERCISE_UUID);
 
-    // Then CTPException is thrown
+    // Then
+    verify(restTemplate, times(1)).postForEntity(any(URI.class), any(HttpEntity.class), any(null));
   }
 }
