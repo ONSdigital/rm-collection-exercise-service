@@ -1,0 +1,40 @@
+{{- if eq .Values.deprecateAction true}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.crons.processEvents.name }}
+spec:
+  schedule: "{{ .Values.crons.processEvents.cron }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Values.crons.processEvents.name }}
+            image: radial/busyboxplus:curl
+            env:
+            - name: SECURITY_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: security-credentials
+                  key: security-user
+            - name: SECURITY_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: security-credentials
+                  key: security-password
+            - name: APP_NAME
+              value: {{ .Chart.Name }}
+            - name: APP_PORT
+              value: "{{ .Values.service.port }}"
+            - name: TARGET
+              value: {{ .Values.crons.processEvents.target }}
+            args:
+            - /bin/sh
+            - -c
+            - curl -s -S -u $(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD) http://$(APP_NAME):$(APP_PORT)/$(TARGET)
+          restartPolicy: OnFailure
+{{- end}}

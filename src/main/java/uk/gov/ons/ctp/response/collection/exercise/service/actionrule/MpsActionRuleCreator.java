@@ -30,7 +30,7 @@ public final class MpsActionRuleCreator implements ActionRuleCreator {
   @Override
   public void execute(final Event collectionExerciseEvent) throws CTPException {
 
-    if (!isMps(collectionExerciseEvent)) {
+    if (!isMps(collectionExerciseEvent) || actionSvcClient.isDeprecated()) {
       return;
     }
 

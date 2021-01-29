@@ -393,7 +393,9 @@ public class CollectionExerciseService {
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
     // Save collection exercise before creating action plans because we need the exercisepk
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-    createActionPlans(collectionExercise, survey);
+    if (!actionSvcClient.isDeprecated()) {
+      createActionPlans(collectionExercise, survey);
+    }
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise");
     return collectionExercise;

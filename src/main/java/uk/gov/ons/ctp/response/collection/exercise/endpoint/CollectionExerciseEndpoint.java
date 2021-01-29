@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -80,6 +81,8 @@ public class CollectionExerciseEndpoint {
   private MapperFacade mapperFacade;
 
   private Scheduler scheduler;
+
+  @Autowired private AppConfig appConfig;
 
   @Autowired
   public CollectionExerciseEndpoint(
@@ -1037,8 +1040,15 @@ public class CollectionExerciseEndpoint {
         .debug("Creating event for collection exercise");
 
     eventDto.setCollectionExerciseId(id);
-
-    Event newEvent = eventService.createEvent(eventDto);
+    Event newEvent;
+    try {
+      newEvent = eventService.createEvent(eventDto);
+    } catch (CTPException e) {
+      log.with("fault", e.getFault())
+          .with("message", e.getMessage())
+          .info("An error occurred creating event");
+      return ResponseEntity.badRequest().body(e);
+    }
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
@@ -1046,10 +1056,13 @@ public class CollectionExerciseEndpoint {
             .buildAndExpand(newEvent.getId(), newEvent.getTag())
             .toUri();
 
-    try {
-      SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
-    } catch (SchedulerException e) {
-      log.with("event", newEvent).error("Failed to schedule event", e);
+    if (!appConfig.getActionSvc().isDeprecated()) {
+      // Don't schedule event if action is deprecated, the trigger is different
+      try {
+        SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
+      } catch (SchedulerException e) {
+        log.with("event", newEvent).error("Failed to schedule event", e);
+      }
     }
 
     return ResponseEntity.created(location).build();
@@ -1155,6 +1168,11 @@ public class CollectionExerciseEndpoint {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST,
           String.format("Unparseable date %s (%s)", date, e.getLocalizedMessage()));
+    } catch (CTPException e) {
+      log.with("fault", e.getFault())
+          .with("message", e.getMessage())
+          .info("An error occurred updating event");
+      return ResponseEntity.badRequest().body(e);
     }
   }
 
@@ -1217,9 +1235,7 @@ public class CollectionExerciseEndpoint {
   public ResponseEntity<Event> deleteCollectionExerciseEventTag(
       @PathVariable("id") final UUID id, @PathVariable("tag") final String tag)
       throws CTPException {
-    log.with("event_id", id)
-        .with("tag", tag)
-        .info("Deleting collection exercise event id, event tag ");
+    log.with("event_id", id).with("tag", tag).info("Deleting collection exercise event");
 
     eventService.deleteEvent(id, tag);
 

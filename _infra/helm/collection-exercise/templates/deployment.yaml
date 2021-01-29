@@ -57,6 +57,8 @@ spec:
               secretKeyRef:
                 name: db-config
                 key: db-port
+          resources:
+            {{- toYaml .Values.resources.proxy | nindent 12 }}
         {{- end }}
         - name: {{ .Chart.Name }}
           {{- if eq .Values.image.tag "latest"}}
@@ -287,5 +289,7 @@ spec:
             value: "{{ .Values.tomcat.maxIdle }}"
           - name: SPRING_DATASOURCE_TOMCAT_MIN_IDLE
             value: "{{ .Values.tomcat.minIdle }}"
+          - name: ACTION_SVC_DEPRECATED
+            value: "{{ .Values.deprecateAction }}"
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resources.application | nindent 12 }}

@@ -62,6 +62,16 @@ public class ExerciseSampleUnit {
   private SampleUnitDTO.SampleUnitType sampleUnitType;
 
   public SampleUnitParent toSampleUnitParent(
+      final boolean activeEnrolment, final UUID collectionExerciseId) {
+    final SampleUnitParent parent = new SampleUnitParent();
+    populateSampleUnit(activeEnrolment, parent);
+    parent.setCollectionExerciseId(collectionExerciseId.toString());
+
+    return parent;
+  }
+
+  // To be removed once actionplans are deprecated
+  public SampleUnitParent toSampleUnitParent(
       final String activeActionPlanId, final UUID collectionExerciseId) {
     final SampleUnitParent parent = new SampleUnitParent();
     populateSampleUnit(activeActionPlanId, parent);
@@ -76,6 +86,16 @@ public class ExerciseSampleUnit {
     return child;
   }
 
+  private void populateSampleUnit(final boolean activeEnrolment, final SampleUnit sampleUnit) {
+    sampleUnit.setActiveEnrolment(activeEnrolment);
+    sampleUnit.setId(getSampleUnitId().toString());
+    sampleUnit.setSampleUnitRef(getSampleUnitRef());
+    sampleUnit.setSampleUnitType(getSampleUnitType().name());
+    sampleUnit.setPartyId(Objects.toString(getPartyId(), null));
+    sampleUnit.setCollectionInstrumentId(getCollectionInstrumentId().toString());
+  }
+
+  // To be removed once actionplans are deprecated
   private void populateSampleUnit(final String activeActionPlanId, final SampleUnit sampleUnit) {
     sampleUnit.setId(getSampleUnitId().toString());
     sampleUnit.setSampleUnitRef(getSampleUnitRef());

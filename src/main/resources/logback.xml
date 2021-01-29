@@ -19,20 +19,11 @@
           <pattern>${ISO8601_DATE_FORMAT}</pattern>
           <fieldName>created</fieldName>
         </timestamp>
-        <Pattern>
-          <Pattern>
-            {
-            "trace" : "%X{X-B3-TraceId:-}",
-            "span" : "%X{X-B3-SpanId:-}",
-            "parent" : "%X{X-B3-ParentSpanId:-}"
-            }
-          </Pattern>
-        </Pattern>
         <globalCustomFields>
           <customFields>{"service":"collectionexercisesvc"}</customFields>
         </globalCustomFields>
         <message>
-          <fieldName>event</fieldName>
+          <fieldName>message</fieldName>
         </message>
         <loggerName/>
         <threadName/>

@@ -76,10 +76,9 @@ public class ValidateSampleUnits {
     this.sampleUnitGroupState = sampleUnitGroupState;
   }
 
-  /** Validate SampleUnits */
+  /** Validate SampleUnits and transition collection exercises */
   @Transactional
   public void validateSampleUnits() {
-
     // Make sure that any collection exercises which were having their sample units sent from
     // the sample service are state transitioned once they've got all their sample units.
     updateExecutingCollectionExercises();
@@ -90,12 +89,16 @@ public class ValidateSampleUnits {
     // provides a very significant performance boost when 'validating' large samples (e.g. 100k+)
     Map<CollectionExercise, Map<String, Optional<UUID>>> collectionInstrumentMap = new HashMap<>();
 
+    log.debug("beginning validation of sample units");
     try (Stream<ExerciseSampleUnit> sampleUnits =
         sampleUnitRepo.findBySampleUnitGroupCollectionExerciseStateAndSampleUnitGroupStateFK(
             CollectionExerciseState.EXECUTED, SampleUnitGroupState.INIT)) {
 
       sampleUnits.forEach(
           (sampleUnit) -> {
+            log.with("sampleUnitPK", sampleUnit.getSampleUnitPK())
+                .with("collectionInstrumentId", sampleUnit.getCollectionInstrumentId())
+                .info("Beginning validation of sample unit");
             final CollectionExercise collex =
                 sampleUnit.getSampleUnitGroup().getCollectionExercise();
 
@@ -152,6 +155,10 @@ public class ValidateSampleUnits {
 
             SampleUnitGroupEvent event = SampleUnitGroupEvent.VALIDATE;
             if (!isSampleUnitValid(sampleUnit)) {
+              log.with("partyId", sampleUnit.getPartyId())
+                  .with("collectionInstrumentId", sampleUnit.getCollectionInstrumentId())
+                  .with("sampleUnitPK", sampleUnit.getSampleUnitPK())
+                  .info("Sample unit is invalid");
               event = SampleUnitGroupEvent.INVALIDATE;
             }
 
@@ -167,6 +174,7 @@ public class ValidateSampleUnits {
           });
     }
 
+    log.debug("beginning transitioning of collection exercises");
     collectionInstrumentMap
         .keySet()
         .forEach(
@@ -184,11 +192,17 @@ public class ValidateSampleUnits {
     List<CollectionExercise> exercises =
         collexService.findByState(CollectionExerciseState.EXECUTION_STARTED);
 
+    log.debug("Found [" + exercises.size() + "] collection exercises in EXECUTION_STARTED state");
     for (CollectionExercise collex : exercises) {
+      log.with("collection_exercise_id", collex.getId())
+          .info("Checking number of records in sample unit group match the sampleSize");
       if (collex.getSampleSize() != null
           && sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex)
               == collex.getSampleSize()) {
 
+        log.with("id", collex.getId())
+            .info(
+                "Number of records in sample unit group match the sampleSize, about to transition");
         collex.setActualExecutionDateTime(new Timestamp(new Date().getTime()));
 
         try {
@@ -197,6 +211,13 @@ public class ValidateSampleUnits {
         } catch (CTPException e) {
           throw new IllegalStateException(); // Never thrown because we already checked the state
         }
+      } else {
+        log.with("collection_exercise_id", collex.getId())
+            .with("sampleSize", collex.getSampleSize())
+            .with(
+                "sample_group_count",
+                sampleUnitRepo.countBySampleUnitGroupCollectionExercise(collex))
+            .info("Number of records in sample unit group did not match the sampleSize");
       }
     }
   }
@@ -293,6 +314,12 @@ public class ValidateSampleUnits {
     return searchString.toString();
   }
 
+  /**
+   * Validates and transitions the collection exercise.
+   *
+   * @param exercise A collection exercise database object
+   * @throws CTPException thrown when transitioning state fails
+   */
   private void transitionCollectionExercise(CollectionExercise exercise) throws CTPException {
     CollectionExerciseEvent event = null;
     long init =
@@ -305,19 +332,23 @@ public class ValidateSampleUnits {
             SampleUnitGroupState.FAILEDVALIDATION, exercise);
 
     if (validated == exercise.getSampleSize().longValue()) {
-      // All sample units validated, set exercise state to VALIDATED
+      // All sample units validated, set exercise state to VALIDATE
       event = CollectionExerciseEvent.VALIDATE;
       log.with("collection_exercise_id", exercise.getId())
-          .debug("State of collection exercise is now VALIDATE");
+          .info("State of collection exercise is now VALIDATE");
     } else if (init < 1 && failed > 0) {
-      // None left to validate but some failed, set exercise to FAILEDVALIDATION
+      // None left to validate but some failed, set exercise to INVALIDATE
       log.with("collection_exercise_id", exercise.getId())
-          .info("State of collection exercise is now INVALIDATED (FAILEDVALIDATION)");
+          .with("failed_count", failed)
+          .with("init_count", init)
+          .info("State of collection exercise is now INVALIDATE as it failed validation");
       event = CollectionExerciseEvent.INVALIDATE;
     }
 
     if (event != null) {
       collexService.transitionCollectionExercise(exercise, event);
+    } else {
+      log.info("Event is null, not transitioning collection exercise state");
     }
   }
 

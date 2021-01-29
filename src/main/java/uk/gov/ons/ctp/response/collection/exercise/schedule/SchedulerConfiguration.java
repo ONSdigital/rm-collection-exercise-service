@@ -55,6 +55,7 @@ public class SchedulerConfiguration {
     JobKey jobKey = detail.getJobDetail().getKey();
 
     if (scheduler.checkExists(jobKey)) {
+      scheduler.interrupt(jobKey);
       scheduler.deleteJob(jobKey);
     }
 

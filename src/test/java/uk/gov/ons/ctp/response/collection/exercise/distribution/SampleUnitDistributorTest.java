@@ -126,10 +126,7 @@ public class SampleUnitDistributorTest {
   public void setUp() throws Exception {
 
     ScheduleSettings scheduleSettings = new ScheduleSettings();
-    scheduleSettings.setDistributionScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
     scheduleSettings.setDistributionScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
-    scheduleSettings.setValidationScheduleDelayMilliSeconds(DISTRIBUTION_SCHEDULE_DELAY);
-    scheduleSettings.setValidationScheduleRetrievalMax(DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX);
 
     appConfig.setSchedules(scheduleSettings);
 
@@ -170,7 +167,6 @@ public class SampleUnitDistributorTest {
         .thenReturn(actionPlans.get(0));
     when(actionSvcClient.getActionPlanBySelectorsBusiness(any(), eq(true)))
         .thenReturn(actionPlans.get(0));
-    when(actionSvcClient.getActionPlanBySelectorsSocial(any())).thenReturn(actionPlans.get(0));
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))

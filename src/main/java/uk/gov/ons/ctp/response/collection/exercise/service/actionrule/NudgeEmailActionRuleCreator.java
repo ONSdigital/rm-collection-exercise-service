@@ -32,7 +32,8 @@ public class NudgeEmailActionRuleCreator implements ActionRuleCreator {
 
   @Override
   public void execute(Event collectionExerciseEvent) throws CTPException {
-    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isNudgeEmail()) {
+    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isNudgeEmail()
+        || actionSvcClient.isDeprecated()) {
       return;
     }
     final CollectionExercise collectionExercise = collectionExerciseEvent.getCollectionExercise();
@@ -57,13 +58,5 @@ public class NudgeEmailActionRuleCreator implements ActionRuleCreator {
         offsetDateTime,
         3,
         activeActionPlan.getId());
-
-    actionSvcClient.createActionRule(
-        survey.getShortName() + "NUDGE" + nudgeEmailIndex,
-        survey.getShortName() + " Nudge File " + collectionExercise.getExerciseRef(),
-        ActionType.BSNUL,
-        offsetDateTime,
-        3,
-        inactiveActionPlan.getId());
   }
 }

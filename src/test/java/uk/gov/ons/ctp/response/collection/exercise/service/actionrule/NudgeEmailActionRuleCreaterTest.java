@@ -59,6 +59,20 @@ public class NudgeEmailActionRuleCreaterTest {
   }
 
   @Test
+  public void doNothingIfActionDeprecated() throws CTPException {
+    when(actionSvcClient.isDeprecated()).thenReturn(true);
+
+    final CollectionExercise collex = new CollectionExercise();
+    final Event event =
+        createCollectionExerciseEvent(EventService.Tag.nudge_email_0.name(), null, collex);
+
+    nudgeEmailActionRuleCreator.execute(event);
+
+    verify(actionSvcClient, never())
+        .createActionRule(anyString(), anyString(), any(), any(), anyInt(), any());
+  }
+
+  @Test
   public void doNothingIfNotBusinessSurveyEvent() throws CTPException {
     final SurveyDTO survey = new SurveyDTO();
     survey.setSurveyType(SurveyDTO.SurveyType.Social);
@@ -166,14 +180,6 @@ public class NudgeEmailActionRuleCreaterTest {
             eq(3),
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID)))
         .thenReturn(new ActionRuleDTO());
-    when(actionSvcClient.createActionRule(
-            anyString(),
-            anyString(),
-            eq(ActionType.BSNUL),
-            eq(eventTriggerOffsetDateTime),
-            eq(3),
-            eq(BUSINESS_ACTION_PLAN_ID)))
-        .thenReturn(new ActionRuleDTO());
 
     // When
     nudgeEmailActionRuleCreator.execute(collectionExerciseEvent);
@@ -187,13 +193,5 @@ public class NudgeEmailActionRuleCreaterTest {
             eq(eventTriggerOffsetDateTime),
             eq(3),
             eq(BUSINESS_INDIVIDUAL_ACTION_PLAN_ID));
-    verify(actionSvcClient)
-        .createActionRule(
-            eq(SURVEY_SHORT_NAME + "NUDGE" + suffixNumber),
-            eq(SURVEY_SHORT_NAME + " Nudge File " + EXERCISE_REF),
-            eq(ActionType.BSNUL),
-            eq(eventTriggerOffsetDateTime),
-            eq(3),
-            eq(BUSINESS_ACTION_PLAN_ID));
   }
 }
