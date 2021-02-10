@@ -76,3 +76,6 @@ dns:
   wellKnownPort: 8080
 
 deprecateAction: false
+
+messaging:
+  consumingThreads: 1000

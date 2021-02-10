@@ -291,5 +291,7 @@ spec:
             value: "{{ .Values.tomcat.minIdle }}"
           - name: ACTION_SVC_DEPRECATED
             value: "{{ .Values.deprecateAction }}"
+          - name: MESSAGING_CONSUMING_THREADS
+            value: "{{ .Values.messaging.consumingThreads }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}
