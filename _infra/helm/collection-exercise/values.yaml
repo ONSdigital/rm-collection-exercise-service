@@ -78,4 +78,4 @@ dns:
 deprecateAction: false
 
 messaging:
-  consumingThreads: 1000
+  consumingThreads: 100
