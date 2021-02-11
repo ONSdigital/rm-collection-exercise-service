@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:8-jre-slim
 
 RUN apt-get update
 COPY target/collectionexercisesvc.jar /opt/collectionexercisesvc.jar
