@@ -48,7 +48,7 @@ jobs:
         run: |
           mvn fmt:check
           mvn clean verify
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - uses: google-github-actions/setup-gcloud@master
         with:
           version: '270.0.0'
           service_account_key: ${{ secrets.GCR_KEY }}
