@@ -1,0 +1,166 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Manual Workflow
+on: [workflow_dispatch]
+
+env:
+  IMAGE: collection-exercise
+  REGISTRY_HOSTNAME: eu.gcr.io
+  HOST: ${{ secrets.GOOGLE_PROJECT_ID }}
+  RELEASE_HOST: ${{ secrets.RELEASE_PROJECT_ID }}
+  CHART_DIRECTORY: _infra/helm/collection-exercise
+  SPINNAKER_TOPIC: ${{ secrets.SPINNAKER_TOPIC }}
+  ARTIFACT_BUCKET: ${{ secrets.ARTIFACT_BUCKET }}
+
+jobs:
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          token: ${{ secrets.BOT_TOKEN }}
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run Tests
+        run: |
+          mvn fmt:check
+          mvn clean verify
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCR_KEY }}
+        # Configure docker to use the gcloud command-line tool as a credential helper
+      - run: |
+          gcloud auth configure-docker
+
+      - name: pr docker tag
+        if: github.ref != 'refs/heads/master'
+        id: tag
+        run: |
+          PR=$(echo "$GITHUB_REF" | awk -F / '{print $3}')
+          echo "$PR"
+          echo ::set-output name=pr_number::pr-"$PR"
+        # Build the Docker image
+      - name: Build Docker Image
+        if: github.ref != 'refs/heads/master'
+        run: |
+          docker build -t "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":${{ steps.tag.outputs.pr_number }} .
+      - name: Push dev image
+        if: github.ref != 'refs/heads/master'
+        run: |
+          docker push "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":${{ steps.tag.outputs.pr_number }}
+      - name: template helm
+        run: |
+          helm template $CHART_DIRECTORY
+    
+      - name: package helm
+        run: |
+          echo HELM_VERSION=$(grep -E "version:\s+" $CHART_DIRECTORY/Chart.yaml | cut -d" " -f2 | sed -r 's/"//g') >> $GITHUB_ENV
+          helm dep up $CHART_DIRECTORY
+          helm package $CHART_DIRECTORY
+
+      - name: Publish dev Chart
+        if: github.ref != 'refs/heads/master'
+        run: |
+          mv $IMAGE-${{ env.HELM_VERSION }}.tgz $IMAGE-latest.tgz
+          gsutil cp $IMAGE-*.tgz gs://$ARTIFACT_BUCKET/$IMAGE/
+      
+      - name: Set current tag
+        if: github.ref != 'refs/heads/master'
+        id: vars
+        run: |
+          git fetch --tags
+          echo ::set-output name=tag::$(git describe --tags --abbrev=0)
+
+      - name: update version
+        if: github.ref != 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          COMMIT_MSG: |
+            [ci skip] auto patch increment
+            skip-checks: true
+        shell: bash
+        run: |
+          echo "Current git version: ${{ steps.vars.outputs.tag }}"
+          export APP_VERSION=$(grep -E "appVersion:\s+" $CHART_DIRECTORY/Chart.yaml | cut -d" " -f2 | sed -r 's/"//g')
+          echo "appVersion: $APP_VERSION"
+          if [ ${{ steps.vars.outputs.tag }} = $APP_VERSION ]; then
+            echo "versions match, incrementing patch"
+            OLD_PATCH=$(echo ${{ steps.vars.outputs.tag }} | cut -d '.' -f3)
+            echo "OLD patch: $OLD_PATCH"
+            NEW_PATCH=$(($OLD_PATCH + 1))
+            echo "New patch version: $NEW_PATCH"
+            NEW_VERSION="appVersion: $(echo ${{ steps.vars.outputs.tag }} | sed -e "s/[0-9]\{1,3\}/$NEW_PATCH/3")"
+            echo "new version: $NEW_VERSION"
+            sed -i -e "s/appVersion: .*/$NEW_VERSION/g" $CHART_DIRECTORY/Chart.yaml
+
+            git config user.name "ras-rm-pr-bot"
+            git config user.email "${{ secrets.BOT_EMAIL }}"
+
+            git remote set-url origin https://ras-rm-pr-bot:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+
+            git remote update
+            git fetch
+            git checkout ${{ github.head_ref }}
+            git add $CHART_DIRECTORY/Chart.yaml
+            git commit -m "$COMMIT_MSG"
+
+            git push 
+          else
+            echo "git version and appVersion do not not match"
+            echo "Using current appVersion: $APP_VERSION"
+          fi
+
+      - name: output new version
+        if: github.ref == 'refs/heads/master'
+        id: release
+        shell: bash
+        run: |
+          echo ::set-output name=version::$(grep -E "appVersion:\s+" $CHART_DIRECTORY/Chart.yaml | cut -d" " -f2 | sed -r 's/"//g')
+
+      - name: Build Release Image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker build -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }} .
+      - name: Push Release image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker push "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }}
+      
+      - name: Publish Charts
+        if: github.ref == 'refs/heads/master'
+        run: |
+          gsutil cp $IMAGE-*.tgz gs://$ARTIFACT_BUCKET/$IMAGE/
+
+      - uses: actions/create-release@v1
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release.outputs.version }}
+          release_name: ${{ steps.release.outputs.version }}
+          body: |
+            Automated release
+            ${{ steps.release.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: CD hook
+        if: github.ref == 'refs/heads/master'
+        run: |
+          gcloud pubsub topics publish $SPINNAKER_TOPIC --project $HOST \
+          --message "{ \"kind\": \"storage#object\", \"name\": \"$IMAGE/$IMAGE-${{ env.HELM_VERSION }}.tgz\", \"bucket\": \"$ARTIFACT_BUCKET\" }" \
+          --attribute cd="actions"
+
