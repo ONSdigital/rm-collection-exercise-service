@@ -1,5 +1,5 @@
 curl http://localhost:8145/info/ -v -X GET
-200 {"name":"collectionexercisesvc","version":"10.44.0-SNAPSHOT","origin":"git@github.com:ONSdigital/rm-collection-exercise-service.git","commit":"39a381ced177a6b78df5c9d956a9b562cbc4a824","branch":"master","built":"2017-08-02T16:48:02Z"}
+200 {"name":"collectionexercisesvc","version":"10.44.0-SNAPSHOT","origin":"git@github.com:ONSdigital/rm-collection-exercise-service.git","commit":"39a381ced177a6b78df5c9d956a9b562cbc4a824","branch":"main","built":"2017-08-02T16:48:02Z"}
 
 
 curl http://localhost:8145/collectionexercises/survey/3b136c4b-7a14-4904-9e01-13364dd7b972 -v -X GET

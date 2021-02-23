@@ -12,20 +12,20 @@ end note
 CREATED --> CREATED : ci_sample_added
 CREATED --> CREATED : ci_sample_deleted
 CREATED --> CREATED : events_deleted
-CREATED --> SCHEDULED : events_added [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/change/ScheduledStateTransitionHandler.java#L39 *]]
-CREATED --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
+CREATED --> SCHEDULED : events_added [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/change/ScheduledStateTransitionHandler.java#L39 *]]
+CREATED --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
 SCHEDULED --> SCHEDULED : events_added
 SCHEDULED --> SCHEDULED : ci_sample_deleted
-SCHEDULED --> READY_FOR_REVIEW : ci_sample_added [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/CollectionExerciseServiceImpl.java#L477 *]]
-READY_FOR_REVIEW --> SCHEDULED : ci_sample_deleted [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/CollectionExerciseServiceImpl.java#L480 *]]
-READY_FOR_REVIEW --> CREATED : events_deleted [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/change/ScheduledStateTransitionHandler.java#L46 *]]
-SCHEDULED --> CREATED : events_deleted [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/change/ScheduledStateTransitionHandler.java#L46 *]]
-READY_FOR_REVIEW --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
-EXECUTION_STARTED --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
-EXECUTION_STARTED --> EXECUTED : execution_complete [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L169 *]]
-EXECUTED --> VALIDATED : validate [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/validation/ValidateSampleUnits.java#L413 *]]
-EXECUTED --> FAILEDVALIDATION : invalidate [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/validation/ValidateSampleUnits.java#L417 *]]
-VALIDATED --> READY_FOR_LIVE : publish [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/distribution/SampleUnitDistributor.java#L279 *]]
-READY_FOR_LIVE --> LIVE : go_live [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/message/impl/CollectionExerciseEventInboundReceiver.java#L79 *]]
-FAILEDVALIDATION --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/master/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
+SCHEDULED --> READY_FOR_REVIEW : ci_sample_added [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/CollectionExerciseServiceImpl.java#L477 *]]
+READY_FOR_REVIEW --> SCHEDULED : ci_sample_deleted [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/CollectionExerciseServiceImpl.java#L480 *]]
+READY_FOR_REVIEW --> CREATED : events_deleted [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/change/ScheduledStateTransitionHandler.java#L46 *]]
+SCHEDULED --> CREATED : events_deleted [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/change/ScheduledStateTransitionHandler.java#L46 *]]
+READY_FOR_REVIEW --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
+EXECUTION_STARTED --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
+EXECUTION_STARTED --> EXECUTED : execution_complete [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L169 *]]
+EXECUTED --> VALIDATED : validate [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/validation/ValidateSampleUnits.java#L413 *]]
+EXECUTED --> FAILEDVALIDATION : invalidate [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/validation/ValidateSampleUnits.java#L417 *]]
+VALIDATED --> READY_FOR_LIVE : publish [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/distribution/SampleUnitDistributor.java#L279 *]]
+READY_FOR_LIVE --> LIVE : go_live [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/message/impl/CollectionExerciseEventInboundReceiver.java#L79 *]]
+FAILEDVALIDATION --> EXECUTION_STARTED : execute [[https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/src/main/java/uk/gov/ons/ctp/response/collection/exercise/service/impl/SampleServiceImpl.java#L123 *]]
 @enduml
