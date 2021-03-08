@@ -112,25 +112,6 @@ paths:
           description: Bad Request
         404:
           description: Resource Not Found
-  /collectionexercises/events/scheduled:
-    get:
-      tags:
-        - collection-exercise-endpoint
-      summary: GET request to retrieve all scheduled events from quartz
-      operationId: getAllScheduledEvents
-      responses:
-        401:
-          description: Unauthorized
-        404:
-          description: Resource Not Found
-        200:
-          description: Successful Operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/EventDTO"
   /collectionexercises/{id}/events/{tag}:
     get:
       tags:

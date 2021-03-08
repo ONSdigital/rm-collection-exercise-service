@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
@@ -28,7 +27,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
@@ -391,11 +389,7 @@ public class CollectionExerciseService {
         .with("exercise_ref", collex.getExerciseRef())
         .debug("Creating collection exercise");
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
-    // Save collection exercise before creating action plans because we need the exercisepk
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-    if (!actionSvcClient.isDeprecated()) {
-      createActionPlans(collectionExercise, survey);
-    }
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise");
     return collectionExercise;
@@ -417,172 +411,6 @@ public class CollectionExerciseService {
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise from DTO");
     return collectionExercise;
-  }
-
-  /**
-   * Create required action plans
-   *
-   * @param collectionExercise Collection Exercise
-   * @param survey SurveyDTO representing survey of collection exercise
-   */
-  private void createActionPlans(CollectionExercise collectionExercise, SurveyDTO survey) {
-    log.with("collection_exercise_id", collectionExercise.getId())
-        .with("survey_id", survey.getId())
-        .debug("Creating action plans for exercise");
-
-    switch (survey.getSurveyType()) {
-      case Business:
-        createDefaultActionPlan(survey, "B");
-        createDefaultActionPlan(survey, "BI");
-        createOverrideActionPlan(collectionExercise, survey, "B");
-        createOverrideActionPlan(collectionExercise, survey, "BI");
-        break;
-
-      case Social:
-        createDefaultActionPlan(survey, "H");
-        createOverrideActionPlan(collectionExercise, survey, "H");
-        break;
-
-      case Census:
-      default:
-        throw new RuntimeException("Census surveys not supported... yet!");
-    }
-
-    log.with("collection_exercise_id", collectionExercise.getId())
-        .with("survey_id", survey.getId())
-        .debug("Successfully created action plans for exercise");
-  }
-
-  /**
-   * Create default action plan for collection exercise and case type if not already exists
-   *
-   * @param survey DTO Representation of survey
-   * @param sampleUnitType Sample Unit Type i.e. (B, H, HI)
-   */
-  private void createDefaultActionPlan(SurveyDTO survey, String sampleUnitType) {
-    log.with("sample_unit_type", sampleUnitType)
-        .with("survey_id", survey.getId())
-        .debug("Creating default action plan");
-
-    // If a casetypedefault already exists for this survey/sampleUnitType do nothing
-    CaseTypeDefault existingCaseTypeDefault =
-        caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(
-            UUID.fromString(survey.getId()), sampleUnitType);
-    if (existingCaseTypeDefault != null) {
-      log.with("sample_unit_type", sampleUnitType)
-          .with("survey_id", survey.getId())
-          .debug("Default action plan already exists");
-      return;
-    }
-
-    // Create new action plan and associated casetypedefault
-    String shortName = survey.getShortName();
-    String name = String.format("%s %s", shortName, sampleUnitType);
-    String description = String.format("%s %s Case", shortName, sampleUnitType);
-    ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description, null);
-    createCaseTypeDefault(survey, sampleUnitType, actionPlan);
-    log.with("sample_unit_type", sampleUnitType)
-        .with("survey_id", survey.getId())
-        .with("action_plan_id", actionPlan.getId())
-        .debug("Successfully created default action plan");
-  }
-
-  /**
-   * Create case type default for action plan, survey and sample unit type if not already exists
-   *
-   * @param survey DTO Representation of survey
-   * @param sampleUnitType Sample Unit Type
-   * @param actionPlan DTO Representation of action plan
-   */
-  private void createCaseTypeDefault(
-      SurveyDTO survey, String sampleUnitType, ActionPlanDTO actionPlan) {
-    log.with("sample_unit_type", sampleUnitType)
-        .with("survey_id", survey.getId())
-        .with("action_plan_id", actionPlan.getId())
-        .debug("Creating case type default");
-    CaseTypeDefault caseTypeDefault = new CaseTypeDefault();
-    caseTypeDefault.setSurveyId(UUID.fromString(survey.getId()));
-    caseTypeDefault.setSampleUnitTypeFK(sampleUnitType);
-    caseTypeDefault.setActionPlanId(actionPlan.getId());
-
-    this.caseTypeDefaultRepo.saveAndFlush(caseTypeDefault);
-    log.with("sample_unit_type", sampleUnitType)
-        .with("survey_id", survey.getId())
-        .with("action_plan_id", actionPlan.getId())
-        .debug("Successfully created case type default");
-  }
-
-  /**
-   * Create action plan for given collection exercise and case type if not already exists
-   *
-   * @param survey DTO Representation of survey for collection exercise
-   * @param collectionExercise Collection Exercise
-   * @param sampleUnitType Sample Unit Type i.e. (B, H, HI)
-   */
-  private void createOverrideActionPlan(
-      CollectionExercise collectionExercise, SurveyDTO survey, String sampleUnitType) {
-    log.with("sample_unit_type", sampleUnitType)
-        .with("survey_id", survey.getId())
-        .with("collection_exercise_id", collectionExercise.getId())
-        .debug("Creating override action plan");
-
-    // If a casetypeoverride already exists for this exercise/sampleUnitType do nothing
-    CaseTypeOverride existingCaseTypeOverride =
-        caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(
-            collectionExercise.getExercisePK(), sampleUnitType);
-    if (existingCaseTypeOverride != null) {
-      log.with("sample_unit_type", sampleUnitType)
-          .with("survey_id", survey.getId())
-          .with("collection_exercise_id", collectionExercise.getId())
-          .debug("Override action plan already exists");
-      return;
-    }
-
-    // Create action plan with appropriate name and description
-    HashMap<String, String> selectors = new HashMap<>();
-    selectors.put("collectionExerciseId", collectionExercise.getId().toString());
-    if (!"H".equals(sampleUnitType) && !"HI".equals(sampleUnitType)) {
-      String activeEnrolment = Boolean.toString("BI".equals(sampleUnitType));
-      selectors.put("activeEnrolment", activeEnrolment);
-    }
-    String shortName = survey.getShortName();
-    String exerciseRef = collectionExercise.getExerciseRef();
-    String name = String.format("%s %s %s", shortName, sampleUnitType, exerciseRef);
-    String description = String.format("%s %s Case %s", shortName, sampleUnitType, exerciseRef);
-    ActionPlanDTO actionPlan = actionSvcClient.createActionPlan(name, description, selectors);
-
-    // Create casetypeoverride linking collection exercise and sample unit type to the action plan
-    createCaseTypeOverride(collectionExercise, sampleUnitType, actionPlan);
-    log.with("sample_unit_type", sampleUnitType)
-        .with("action_plan_id", actionPlan.getId())
-        .with("collection_exercise_id", collectionExercise.getId())
-        .debug("Successfully created override action plan");
-  }
-
-  /**
-   * Create case type override for given action plan and collection exercise
-   *
-   * @param collectionExercise representation of collection exercise
-   * @param sampleUnitType Sample unit type i.e. (B, H, HI)
-   * @param actionPlan the newly created action plan
-   * @throws DataAccessException if caseTypeOverride fails to save to database
-   */
-  private void createCaseTypeOverride(
-      CollectionExercise collectionExercise, String sampleUnitType, ActionPlanDTO actionPlan)
-      throws DataAccessException {
-    log.with("sample_unit_type", sampleUnitType)
-        .with("action_plan_id", actionPlan.getId())
-        .with("collection_exercise_id", collectionExercise.getId())
-        .debug("Creating case type override");
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    caseTypeOverride.setExerciseFK(collectionExercise.getExercisePK());
-    caseTypeOverride.setSampleUnitTypeFK(sampleUnitType);
-    caseTypeOverride.setActionPlanId(actionPlan.getId());
-    this.caseTypeOverrideRepo.saveAndFlush(caseTypeOverride);
-    log.with("sample_unit_type", sampleUnitType)
-        .with("action_plan_id", actionPlan.getId())
-        .with("collection_exercise_id", collectionExercise.getId())
-        .debug("Successfully created case type override");
   }
 
   /**
@@ -626,9 +454,6 @@ public class CollectionExerciseService {
       } else {
         survey = this.surveyService.findSurvey(collex.getSurveyId());
       }
-      Boolean isActionPlanUpdateRequired =
-          !StringUtils.isBlank(patchData.getExerciseRef())
-              && !collex.getExerciseRef().equals(patchData.getExerciseRef());
       if (!StringUtils.isBlank(patchData.getExerciseRef())) {
         collex.setExerciseRef(patchData.getExerciseRef());
       }
@@ -640,12 +465,6 @@ public class CollectionExerciseService {
             new Timestamp(patchData.getScheduledStartDateTime().getTime()));
       }
       collex.setUpdated(new Timestamp(new Date().getTime()));
-      if (isActionPlanUpdateRequired) {
-        log.with("new exercise reference", collex.getExerciseRef())
-            .with("survey id", survey.getId())
-            .debug("Update action plan already exists");
-        updateActionPlanNameAndDiscription(collex.getExercisePK(), collex.getExerciseRef(), survey);
-      }
       return updateCollectionExercise(collex);
     }
   }
@@ -706,15 +525,6 @@ public class CollectionExerciseService {
         throw new CTPException(
             CTPException.Fault.BAD_REQUEST, String.format("Survey %s does not exist", surveyUuid));
       } else {
-        // ActionPlan needs to be changed only when collection exerciseRef is changed
-        if (!existing.getExerciseRef().equals(collexDto.getExerciseRef())) {
-          log.with("existing exercise reference", existing.getExerciseRef())
-              .with("new exercise reference", collexDto.getExerciseRef())
-              .with("survey id", survey.getId())
-              .debug("Update action plan already exists");
-          updateActionPlanNameAndDiscription(
-              existing.getExercisePK(), collexDto.getExerciseRef(), survey);
-        }
         setCollectionExerciseFromDto(collexDto, existing);
         existing.setUpdated(new Timestamp(new Date().getTime()));
         return updateCollectionExercise(existing);
@@ -722,29 +532,6 @@ public class CollectionExerciseService {
     }
   }
 
-  public void updateActionPlanNameAndDiscription(
-      int exercisePK, String exerciseRef, SurveyDTO survey) throws CTPException {
-    List<CaseTypeOverride> existingCaseTypeOverrides =
-        caseTypeOverrideRepo.findByExerciseFK(exercisePK);
-    if (existingCaseTypeOverrides.size() == 0) {
-      throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format("Expected existing case over rides , But None Found"));
-    } else {
-      for (CaseTypeOverride existingCaseTypeOverride : existingCaseTypeOverrides) {
-        String shortName = survey.getShortName();
-        String sampleUnitType = existingCaseTypeOverride.getSampleUnitTypeFK();
-        String name = String.format("%s %s %s", shortName, sampleUnitType, exerciseRef);
-        String description = String.format("%s %s Case %s", shortName, sampleUnitType, exerciseRef);
-        log.with("name", name)
-            .with("description", description)
-            .with("actionPlanId", existingCaseTypeOverride.getActionPlanId())
-            .debug("updating name and description for existing action plan");
-        actionSvcClient.updateActionPlanNameAndDescription(
-            existingCaseTypeOverride.getActionPlanId(), name, description);
-      }
-    }
-  }
   /**
    * Update a collection exercise
    *
