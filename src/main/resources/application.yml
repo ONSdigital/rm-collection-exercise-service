@@ -30,16 +30,6 @@ security:
     name: admin
     password: secret
 
-management:
-  security:
-    role: SUPERUSER
-    enabled: true
-  health:
-    mongo:
-      enabled: true
-    rabbit:
-      enabled: false
-
 server:
   port: 8145
   servlet-path: /
