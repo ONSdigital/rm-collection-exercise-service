@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.*;
  *         &lt;element name="sampleUnitType" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="partyId" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="collectionInstrumentId" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="actionPlanId" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -46,8 +45,7 @@ import javax.xml.bind.annotation.*;
       "sampleUnitType",
       "partyId",
       "collectionInstrumentId",
-      "activeEnrolment",
-      "actionPlanId"
+      "activeEnrolment"
     })
 @XmlSeeAlso({SampleUnitParent.class})
 public class SampleUnit {
@@ -67,9 +65,6 @@ public class SampleUnit {
 
   protected boolean activeEnrolment;
 
-  // To be removed once actionplans are deprecated
-  protected String actionPlanId;
-
   /** Default no-arg constructor */
   public SampleUnit() {
     super();
@@ -82,15 +77,13 @@ public class SampleUnit {
       final String sampleUnitType,
       final String partyId,
       final String collectionInstrumentId,
-      final boolean activeEnrolment,
-      final String actionPlanId) {
+      final boolean activeEnrolment) {
     this.id = id;
     this.sampleUnitRef = sampleUnitRef;
     this.sampleUnitType = sampleUnitType;
     this.partyId = partyId;
     this.collectionInstrumentId = collectionInstrumentId;
     this.activeEnrolment = activeEnrolment;
-    this.actionPlanId = actionPlanId;
   }
 
   /**
@@ -193,30 +186,12 @@ public class SampleUnit {
   }
 
   /**
-   * Sets the value of the actionPlanId property.
+   * Sets the value of the activeEnrolment property.
    *
    * @param value allowed object is {@link boolean }
    */
   public void setActiveEnrolment(boolean value) {
     this.activeEnrolment = value;
-  }
-
-  /**
-   * Gets the value of the actionPlanId property.
-   *
-   * @return possible object is {@link String }
-   */
-  public String getActionPlanId() {
-    return actionPlanId;
-  }
-
-  /**
-   * Sets the value of the actionPlanId property.
-   *
-   * @param value allowed object is {@link String }
-   */
-  public void setActionPlanId(String value) {
-    this.actionPlanId = value;
   }
 
   /**
@@ -232,7 +207,6 @@ public class SampleUnit {
     _other.partyId = this.partyId;
     _other.collectionInstrumentId = this.collectionInstrumentId;
     _other.activeEnrolment = this.activeEnrolment;
-    _other.actionPlanId = this.actionPlanId;
   }
 
   public <_B> SampleUnit.Builder<_B> newCopyBuilder(final _B _parentBuilder) {
@@ -299,18 +273,11 @@ public class SampleUnit {
       _other.collectionInstrumentId = this.collectionInstrumentId;
     }
     final PropertyTree activeEnrolmentPropertyTree =
-        ((_propertyTree == null) ? null : _propertyTree.get("actionPlanId"));
+        ((_propertyTree == null) ? null : _propertyTree.get("activeEnrolment"));
     if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
         ? (activeEnrolmentPropertyTree != null)
         : ((activeEnrolmentPropertyTree == null) || (!activeEnrolmentPropertyTree.isLeaf())))) {
       _other.activeEnrolment = this.activeEnrolment;
-    }
-    final PropertyTree actionPlanIdPropertyTree =
-        ((_propertyTree == null) ? null : _propertyTree.get("actionPlanId"));
-    if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
-        ? (actionPlanIdPropertyTree != null)
-        : ((actionPlanIdPropertyTree == null) || (!actionPlanIdPropertyTree.isLeaf())))) {
-      _other.actionPlanId = this.actionPlanId;
     }
   }
 
@@ -355,7 +322,6 @@ public class SampleUnit {
     private String partyId;
     private String collectionInstrumentId;
     private boolean activeEnrolment;
-    private String actionPlanId;
 
     public Builder(final _B _parentBuilder, final SampleUnit _other, final boolean _copy) {
       this._parentBuilder = _parentBuilder;
@@ -368,7 +334,6 @@ public class SampleUnit {
           this.partyId = _other.partyId;
           this.collectionInstrumentId = _other.collectionInstrumentId;
           this.activeEnrolment = _other.activeEnrolment;
-          this.actionPlanId = _other.actionPlanId;
         } else {
           _storedValue = _other;
         }
@@ -431,13 +396,6 @@ public class SampleUnit {
                   || (!activeEnrolmentPropertyTree.isLeaf())))) {
             this.activeEnrolment = _other.activeEnrolment;
           }
-          final PropertyTree actionPlanIdPropertyTree =
-              ((_propertyTree == null) ? null : _propertyTree.get("actionPlanId"));
-          if (((_propertyTreeUse == PropertyTreeUse.INCLUDE)
-              ? (actionPlanIdPropertyTree != null)
-              : ((actionPlanIdPropertyTree == null) || (!actionPlanIdPropertyTree.isLeaf())))) {
-            this.actionPlanId = _other.actionPlanId;
-          }
         } else {
           _storedValue = _other;
         }
@@ -457,7 +415,6 @@ public class SampleUnit {
       _product.partyId = this.partyId;
       _product.collectionInstrumentId = this.collectionInstrumentId;
       _product.activeEnrolment = this.activeEnrolment;
-      _product.actionPlanId = this.actionPlanId;
       return _product;
     }
 
@@ -521,16 +478,6 @@ public class SampleUnit {
       return this;
     }
 
-    /**
-     * Sets the new value of "actionPlanId" (any previous value will be replaced)
-     *
-     * @param actionPlanId New value of the "actionPlanId" property.
-     */
-    public SampleUnit.Builder<_B> withActionPlanId(final String actionPlanId) {
-      this.actionPlanId = actionPlanId;
-      return this;
-    }
-
     @Override
     public SampleUnit build() {
       if (_storedValue == null) {
@@ -562,7 +509,6 @@ public class SampleUnit {
     private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> collectionInstrumentId =
         null;
     private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> activeEnrolment = null;
-    private com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> actionPlanId = null;
 
     public Selector(final TRoot root, final TParent parent, final String propertyName) {
       super(root, parent, propertyName);
@@ -589,9 +535,6 @@ public class SampleUnit {
       }
       if (this.activeEnrolment != null) {
         products.put("activeEnrolment", this.activeEnrolment.init());
-      }
-      if (this.actionPlanId != null) {
-        products.put("actionPlanId", this.actionPlanId.init());
       }
       return products;
     }
@@ -642,14 +585,6 @@ public class SampleUnit {
               new com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>>(
                   this._root, this, "activeEnrolment")
           : this.activeEnrolment);
-    }
-
-    public com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>> actionPlanId() {
-      return ((this.actionPlanId == null)
-          ? this.actionPlanId =
-              new com.kscs.util.jaxb.Selector<TRoot, Selector<TRoot, TParent>>(
-                  this._root, this, "actionPlanId")
-          : this.actionPlanId);
     }
   }
 }

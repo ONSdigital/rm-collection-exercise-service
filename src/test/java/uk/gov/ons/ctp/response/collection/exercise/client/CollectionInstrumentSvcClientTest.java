@@ -57,7 +57,7 @@ public class CollectionInstrumentSvcClientTest {
   }
 
   @Test
-  public void createActionPlan_201Response() {
+  public void getCollectionInstruments_200Response() {
     // Given
     ResponseEntity<List<CollectionInstrumentDTO>> responseEntity =
         new ResponseEntity<>(collectionInstruments, HttpStatus.CREATED);
@@ -81,7 +81,7 @@ public class CollectionInstrumentSvcClientTest {
   }
 
   @Test(expected = HttpClientErrorException.class)
-  public void createActionPlan_500Response() {
+  public void getCollectionInstruments_500Response() {
     // Given
     when(restTemplate.exchange(
             any(URI.class),
