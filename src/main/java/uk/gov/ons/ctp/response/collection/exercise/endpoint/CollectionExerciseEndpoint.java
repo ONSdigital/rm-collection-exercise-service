@@ -628,11 +628,10 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * POST request to create a collection exercise Also creates required action plans and
-   * casetypeoverrides
+   * POST request to create a collection exercise
    *
    * @param collex A dto containing the data about the collection exercise
-   * @return 201 if all is ok, 400 for bad request, 409 for conflict
+   * @return 201 on success, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
   @Operation(summary = "POST request to create a collection exercise")

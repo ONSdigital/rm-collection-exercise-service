@@ -685,7 +685,7 @@ paths:
     post:
       tags:
         - collection-exercise-endpoint
-      summary: POST request to create a collection exercise associated action plans and casetype overrides.
+      summary: POST request to create a collection exercise
       operationId: createCollectionExercise
       requestBody:
         content:
