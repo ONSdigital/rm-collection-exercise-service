@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
@@ -637,9 +635,7 @@ public class CollectionExerciseEndpoint {
    * @return 201 if all is ok, 400 for bad request, 409 for conflict
    * @throws CTPException on resource not found
    */
-  @Operation(
-      summary =
-          "POST request to create a collection exercise associated action plans and casetype overrides.")
+  @Operation(summary = "POST request to create a collection exercise")
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "201", description = "Successful creation"),
@@ -967,13 +963,9 @@ public class CollectionExerciseEndpoint {
       final CollectionExercise collectionExercise) {
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Populating data for requested collection exercise");
-    Collection<CaseType> caseTypeList =
-        collectionExerciseService.getCaseTypesList(collectionExercise);
-    List<CaseTypeDTO> caseTypeDTOList = mapperFacade.mapAsList(caseTypeList, CaseTypeDTO.class);
 
     CollectionExerciseDTO collectionExerciseDTO =
         mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
-    collectionExerciseDTO.setCaseTypes(caseTypeDTOList);
     // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now
     // the survey id
     // is not validated and passed on verbatim

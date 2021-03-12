@@ -66,7 +66,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageListe
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -100,8 +99,6 @@ public class CollectionExerciseEndpointIT {
 
   @Autowired private AppConfig appConfig;
 
-  @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepository;
-
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
   @Autowired private SampleUnitRepository sampleUnitRepository;
@@ -130,7 +127,6 @@ public class CollectionExerciseEndpointIT {
     sampleUnitRepository.deleteAllInBatch();
     sampleLinkRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
-    caseTypeOverrideRepository.deleteAllInBatch();
     sampleUnitGroupRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
 

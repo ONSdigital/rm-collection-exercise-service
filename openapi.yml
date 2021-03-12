@@ -714,14 +714,6 @@ components:
         sampleUnitsTotal:
           type: integer
           format: int32
-    CaseTypeDTO:
-      type: object
-      properties:
-        actionPlanId:
-          type: string
-          format: uuid
-        sampleUnitType:
-          type: string
     CollectionExerciseDTO:
       required:
         - exerciseRef
@@ -779,10 +771,6 @@ components:
             - VALIDATED
             - FAILEDVALIDATION
             - LIVE
-        caseTypes:
-          type: array
-          items:
-            $ref: "#/components/schemas/CaseTypeDTO"
         exerciseRef:
           pattern: ^[0-9]{1,6}$
           type: string
