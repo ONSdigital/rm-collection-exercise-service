@@ -84,8 +84,6 @@ public class CollectionExerciseEndpointUnitTests {
       UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff5e");
   private static final UUID COLLECTIONEXERCISE_IDNOTFOUND =
       UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff6e");
-  private static final UUID Party_IDNOTFOUND =
-      UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
 
   private static final UUID SAMPLE_SUMMARY_ID1 =
       UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");

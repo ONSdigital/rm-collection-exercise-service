@@ -32,8 +32,7 @@
    It receives data from response operation UI to create an event against an existing collection exercise record over 
    the endpoint `/collectionexercises/{id}/events`. At this point eventservice looks for an existing collection exercise
    if it exists and if the event with the same tag does not exist, a validation is performed for respective event tag.
-   Once the validation passes, it gives a call to the action service to add action rule for the event tag against the 
-   action plan created for collection exercise and creates a record to `event` table. At this point
+   Once the validation passes, it  creates a record to `event` table. At this point
    a request to event change request handler is given, which publishes the event to the message queue. 
    After which the schedular is called to schedule a collection exercise event. Events also follow defined state i.e.
    `CREADED`, `UPDATED`, `DELETED`, `EventElapsed`.
