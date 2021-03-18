@@ -1,4 +1,3 @@
-{{- if eq .Values.deprecateAction true}}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -37,4 +36,3 @@ spec:
             - -c
             - curl -s -S -u $(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD) http://$(APP_NAME):$(APP_PORT)/$(TARGET)
           restartPolicy: OnFailure
-{{- end}}

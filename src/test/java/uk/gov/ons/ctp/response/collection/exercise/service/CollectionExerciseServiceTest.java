@@ -41,7 +41,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
@@ -228,7 +227,6 @@ public class CollectionExerciseServiceTest {
   @Test
   public void testCreateCollectionExercise() throws Exception {
     // Given
-    when(this.actionService.isDeprecated()).thenReturn(false);
     CollectionExercise collectionExercise =
         FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
     when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
@@ -237,11 +235,6 @@ public class CollectionExerciseServiceTest {
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
     when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
-
-    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
-    actionPlanDTO.setId(UUID.randomUUID());
-    when(actionService.createActionPlan(any(), any(), any())).thenReturn(actionPlanDTO);
-    when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(any(), any())).thenReturn(null);
 
     // When
     this.collectionExerciseService.createCollectionExercise(toCreate, survey);
@@ -254,146 +247,7 @@ public class CollectionExerciseServiceTest {
     assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
     assertEquals(toCreate.getSurveyId(), collex.getSurveyId().toString());
     assertNotNull(collex.getCreated());
-    verify(this.caseTypeOverrideRepo, times(2)).saveAndFlush(any());
-  }
-
-  /** Tests that create collection exercise endpoint creates the action plans. */
-  @Test
-  public void testCreateCollectionExerciseCreatesTheActionPlans() throws Exception {
-    // Given
-    when(this.actionService.isDeprecated()).thenReturn(false);
-    CollectionExerciseDTO toCreate =
-        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-    CollectionExercise collectionExercise =
-        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
-    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
-    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
-    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
-    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
-    actionPlanDTO.setId(UUID.randomUUID());
-    when(actionService.createActionPlan(any(), any(), any())).thenReturn(actionPlanDTO);
-
-    // When
-    this.collectionExerciseService.createCollectionExercise(toCreate, survey);
-
-    // Then check that all actionplans are created in the correct state
-    verify(actionService, times(1)).createActionPlan("BRES B", "BRES B Case", null);
-    verify(actionService, times(1)).createActionPlan("BRES BI", "BRES BI Case", null);
-
-    String exerciseId = collectionExercise.getId().toString();
-    HashMap<String, String> overrideBSelectors = new HashMap<>();
-    overrideBSelectors.put("collectionExerciseId", exerciseId);
-    overrideBSelectors.put("activeEnrolment", "false");
-    verify(actionService, times(1))
-        .createActionPlan("BRES B 202103", "BRES B Case 202103", overrideBSelectors);
-
-    HashMap<String, String> overrideBISelectors = new HashMap<>();
-    overrideBISelectors.put("collectionExerciseId", exerciseId);
-    overrideBISelectors.put("activeEnrolment", "true");
-    verify(actionService, times(1))
-        .createActionPlan("BRES BI 202103", "BRES BI Case 202103", overrideBISelectors);
-  }
-
-  /**
-   * Tests that creating a collection exercise for which action plans exists does not try to create
-   * existing default action plans
-   */
-  @Test
-  public void testCreateCollectionExerciseExistingDefaultActionPlans() throws Exception {
-    // Given
-    when(this.actionService.isDeprecated()).thenReturn(false);
-    CollectionExerciseDTO toCreate =
-        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-    CollectionExercise collectionExercise =
-        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
-    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
-    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
-
-    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
-    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
-    actionPlanDTO.setId(UUID.randomUUID());
-    when(actionService.createActionPlan(any(), any(), any())).thenReturn(actionPlanDTO);
-    CaseTypeDefault caseTypedefault = new CaseTypeDefault();
-    when(caseTypeDefaultRepo.findTopBySurveyIdAndSampleUnitTypeFK(any(), any()))
-        .thenReturn(caseTypedefault);
-
-    // When
-    this.collectionExerciseService.createCollectionExercise(toCreate, survey);
-
-    // Then
-    verify(actionService, times(0)).createActionPlan("BRES B", "BRES B Case", null);
-    verify(actionService, times(0)).createActionPlan("BRES BI", "BRES BI Case", null);
-  }
-
-  /**
-   * Tests that creating a collection exercise for which action plans exists does not try to create
-   * existing override action plans
-   */
-  @Test
-  public void testCreateCollectionExerciseExistingOverrideActionPlans() throws Exception {
-    // Given
-    when(this.actionService.isDeprecated()).thenReturn(false);
-    CollectionExerciseDTO toCreate =
-        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-    CollectionExercise collectionExercise =
-        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
-    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
-    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
-
-    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
-    ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
-    actionPlanDTO.setId(UUID.randomUUID());
-    when(actionService.createActionPlan(any(), any(), any())).thenReturn(actionPlanDTO);
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(any(), any()))
-        .thenReturn(caseTypeOverride);
-
-    // When
-    this.collectionExerciseService.createCollectionExercise(toCreate, survey);
-
-    // Then
-    String exerciseRef = collectionExercise.getExerciseRef();
-    String surveyRef = survey.getSurveyRef();
-    HashMap<String, String> overrideBSelectors = new HashMap<>();
-    overrideBSelectors.put("surveyRef", surveyRef);
-    overrideBSelectors.put("exerciseRef", exerciseRef);
-    overrideBSelectors.put("activeEnrolment", "false");
-    verify(actionService, times(0))
-        .createActionPlan("BRES B 202103", "BRES B Case 202103", overrideBSelectors);
-
-    HashMap<String, String> overrideBISelectors = new HashMap<>();
-    overrideBISelectors.put("surveyRef", surveyRef);
-    overrideBISelectors.put("exerciseRef", exerciseRef);
-    overrideBISelectors.put("activeEnrolment", "true");
-    verify(actionService, times(0))
-        .createActionPlan("BRES BI 202103", "BRES BI Case 202103", overrideBISelectors);
-  }
-
-  @Test
-  public void testCreateCollectionExerciseSkipsActionPlansIfDeprecated() throws Exception {
-    // Given
-    when(this.actionService.isDeprecated()).thenReturn(true);
-    CollectionExerciseDTO toCreate =
-        FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-    CollectionExercise collectionExercise =
-        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    collectionExercise.setExerciseRef(toCreate.getExerciseRef());
-    when(collexRepo.saveAndFlush(any())).thenReturn(collectionExercise);
-    SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
-
-    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    when(caseTypeOverrideRepo.findTopByExerciseFKAndSampleUnitTypeFK(any(), any()))
-        .thenReturn(caseTypeOverride);
-
-    // When
-    this.collectionExerciseService.createCollectionExercise(toCreate, survey);
-
-    // Then
-    verify(actionService, times(0)).createActionPlan(any(), any(), any());
+    verify(this.caseTypeOverrideRepo, times(0)).saveAndFlush(any());
   }
 
   @Test

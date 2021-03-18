@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -27,8 +26,6 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
-import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -39,15 +36,10 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
-import uk.gov.ons.ctp.response.collection.exercise.service.actionrule.NudgeEmailActionRuleRemover;
-import uk.gov.ons.ctp.response.collection.exercise.service.actionrule.ReminderActionRuleRemover;
 
 /** Class containing tests for EventServiceImpl */
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceTest {
-  private static final UUID SURVEY_ID = UUID.fromString("4ca97b1b-de9c-4fed-9898-fac594d1565f");
-  private static final UUID COLLECTION_EXERCISE_EVENT_ID =
-      UUID.fromString("ba6a92c1-9869-41ca-b0d8-12c27fc30e23");
   private static final UUID COLLEX_UUID = UUID.fromString("f03206ee-137d-41e3-af5c-2dea393bb360");
   private static final int EXERCISE_PK = 6433;
 
@@ -57,29 +49,9 @@ public class EventServiceTest {
 
   @Mock private CollectionExerciseService collectionExerciseService;
 
-  @Mock private ActionRuleCreator actionRuleCreator;
-
-  @Mock private ActionRuleCreator actionRuleCreator2;
-
-  @Mock private ActionRuleUpdater actionRuleUpdater;
-
-  @Mock private NudgeEmailActionRuleRemover actionRuleRemover;
-
-  @Mock private ReminderActionRuleRemover actionRuleRemover2;
-
-  @Mock private ActionRuleUpdater actionRuleUpdater2;
-
   @Mock private EventValidator eventValidator;
 
   @Mock private EventRepository eventRepository;
-
-  @Mock private AppConfig appConfig;
-
-  @Spy private List<ActionRuleCreator> actionRuleCreators = new ArrayList<>();
-
-  @Spy private List<ActionRuleUpdater> actionRuleUpdaters = new ArrayList<>();
-
-  @Spy private List<ActionRuleRemover> actionRuleRemovers = new ArrayList<>();
 
   @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
@@ -149,50 +121,6 @@ public class EventServiceTest {
       // Expected 409
       assertThat(e.getFault(), is(Fault.RESOURCE_VERSION_CONFLICT));
     }
-  }
-
-  @Test
-  public void testCreateCorrectActionRulesForAnyEvent() throws CTPException {
-    // Given
-    Event collectionExerciseEvent = new Event();
-
-    CollectionExercise collex = new CollectionExercise();
-    collex.setExercisePK(EXERCISE_PK);
-    collex.setSurveyId(SURVEY_ID);
-
-    Instant eventTriggerInstant = Instant.now();
-    Timestamp eventTriggerDate = new Timestamp(eventTriggerInstant.toEpochMilli());
-
-    collectionExerciseEvent.setCollectionExercise(collex);
-    collectionExerciseEvent.setTag(Tag.mps.name());
-    collectionExerciseEvent.setTimestamp(eventTriggerDate);
-    collectionExerciseEvent.setId(COLLECTION_EXERCISE_EVENT_ID);
-
-    actionRuleCreators.add(actionRuleCreator);
-    actionRuleCreators.add(actionRuleCreator2);
-
-    // When
-    eventService.createActionRulesForEvent(collectionExerciseEvent);
-
-    // Then
-    verify(actionRuleCreator).execute(eq(collectionExerciseEvent));
-    verify(actionRuleCreator2).execute(eq(collectionExerciseEvent));
-  }
-
-  @Test
-  public void testNoActionRulesCreatedForNonActionableEvents() throws CTPException {
-    // Given
-    final Event collectionExerciseEvent = new Event();
-    final CollectionExercise collex = new CollectionExercise();
-
-    collectionExerciseEvent.setCollectionExercise(collex);
-    collectionExerciseEvent.setTag(Tag.employment.name());
-
-    // When
-    eventService.createActionRulesForEvent(collectionExerciseEvent);
-
-    // Then
-    verify(actionRuleCreator, never()).execute(any());
   }
 
   @Test
@@ -293,9 +221,6 @@ public class EventServiceTest {
     final List<Event> existingEvents = new ArrayList<>();
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     try {
       eventService.updateEvent(collexUuid, Tag.mps.name(), new Date());
     } catch (final CTPException e) {
@@ -326,16 +251,9 @@ public class EventServiceTest {
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
 
-    actionRuleUpdaters.add(actionRuleUpdater);
-    actionRuleUpdaters.add(actionRuleUpdater2);
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.updateEvent(COLLEX_UUID, Tag.mps.name(), new Date());
 
     verify(eventRepository, atLeastOnce()).save(eq(existingEvent));
-    verify(actionRuleUpdater, atLeastOnce()).execute(existingEvent);
-    verify(actionRuleUpdater2, atLeastOnce()).execute(existingEvent);
   }
 
   @Test
@@ -363,15 +281,9 @@ public class EventServiceTest {
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
 
-    actionRuleRemovers.add(actionRuleRemover);
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.deleteEvent(COLLEX_UUID, Tag.nudge_email_4.name());
 
     verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
-    verify(actionRuleRemover, atMost(1)).execute(existingEvent);
-    verify(actionRuleRemover2, atMost(0)).execute(existingEvent);
   }
 
   @Test
@@ -393,21 +305,14 @@ public class EventServiceTest {
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.reminder.name()))
         .thenReturn(existingEvent);
 
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     final List<Event> existingEvents = new ArrayList<>();
 
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
 
-    actionRuleRemovers.add(actionRuleRemover2);
-
     eventService.deleteEvent(COLLEX_UUID, Tag.reminder.name());
 
     verify(eventRepository, atLeastOnce()).delete(eq(existingEvent));
-    verify(actionRuleRemover2, atMost(1)).execute(existingEvent);
-    verify(actionRuleRemover, atMost(0)).execute(existingEvent);
   }
 
   @Test
@@ -449,15 +354,10 @@ public class EventServiceTest {
     when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
 
-    actionRuleUpdaters.add(actionRuleUpdater);
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     eventService.updateEvent(COLLEX_UUID, Tag.return_by.name(), newDate);
 
     verify(eventRepository, atLeastOnce()).save(returnByEvent);
     verify(eventRepository, atLeastOnce()).delete(eq(nudgeEvent));
-    verify(actionRuleUpdater, atLeastOnce()).execute(returnByEvent);
   }
 
   @Test
@@ -514,9 +414,6 @@ public class EventServiceTest {
     eventDto.setTag(tag);
     eventDto.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
     collex.setId(collexUuid);
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(collexUuid)).thenReturn(collex);
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
         .thenReturn(null);
@@ -532,15 +429,11 @@ public class EventServiceTest {
     }
   }
 
-  /** Given action is deprecated, new events are created with a 'SCHEDULED' status */
   @Test
-  public void testStatusIsSetToScheduledWhenActionIsDeprecated() {
+  public void testStatusIsSetToScheduledNewEventCreated() {
     final CollectionExercise collex = new CollectionExercise();
     String tag = Tag.mps.name();
 
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(true);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
 
@@ -552,31 +445,6 @@ public class EventServiceTest {
     try {
       Event event = eventService.createEvent(eventDto);
       assertThat(event.getStatus(), is(EventDTO.Status.SCHEDULED));
-    } catch (CTPException e) {
-      fail();
-    }
-  }
-
-  /** Given action is NOT deprecated, new events are created with a 'NOT_SET status */
-  @Test
-  public void testStatusIsSetToNotSetWhenActionIsDeprecated() {
-    final CollectionExercise collex = new CollectionExercise();
-    String tag = Tag.mps.name();
-
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    given(appConfig.getActionSvc()).willReturn(actionSvc);
-    when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
-    when(eventRepository.save(any(Event.class))).then(returnsFirstArg());
-
-    EventDTO eventDto = new EventDTO();
-    eventDto.setCollectionExerciseId(COLLEX_UUID);
-    eventDto.setTag(tag);
-    eventDto.setTimestamp(new Timestamp(new Date().getTime()));
-
-    try {
-      Event event = eventService.createEvent(eventDto);
-      assertThat(event.getStatus(), is(EventDTO.Status.NOT_SET));
     } catch (CTPException e) {
       fail();
     }

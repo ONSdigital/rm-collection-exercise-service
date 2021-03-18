@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -200,17 +199,9 @@ public class SampleUnitDistributor {
     ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
     SampleUnitParent sampleUnitParent;
 
-    if (actionSvcClient.isDeprecated()) {
-      boolean activeEnrolment = hasActiveEnrolment(sampleUnit, exercise);
-      sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnrolment, exercise.getId());
-    } else {
-      String actionPlanId = getActionPlanIdBusiness(sampleUnit, exercise).toString();
+    boolean activeEnrolment = hasActiveEnrolment(sampleUnit, exercise);
+    sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnrolment, exercise.getId());
 
-      // SampleUnitParents/Children are being removed
-      // We only expect one sample unit per sample unit group now
-      // but still use SampleUnitParent class until it's removed from rabbit message
-      sampleUnitParent = sampleUnit.toSampleUnitParent(actionPlanId, exercise.getId());
-    }
     publishSampleUnitToCase(sampleUnitGroup, sampleUnitParent);
   }
 
@@ -224,17 +215,6 @@ public class SampleUnitDistributor {
     PartyDTO businessParty =
         partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
     return surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-  }
-
-  private UUID getActionPlanIdBusiness(ExerciseSampleUnit sampleUnit, CollectionExercise exercise)
-      throws CTPException {
-    boolean activeEnrolment;
-    PartyDTO businessParty =
-        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
-    activeEnrolment = surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
-    return actionSvcClient
-        .getActionPlanBySelectorsBusiness(exercise.getId().toString(), activeEnrolment)
-        .getId();
   }
 
   private boolean surveyHasEnrolledRespondent(PartyDTO party, String surveyId) {

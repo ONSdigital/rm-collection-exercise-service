@@ -29,8 +29,6 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +54,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateF
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
@@ -80,8 +77,6 @@ public class CollectionExerciseEndpoint {
 
   private MapperFacade mapperFacade;
 
-  private Scheduler scheduler;
-
   @Autowired private AppConfig appConfig;
 
   @Autowired
@@ -90,14 +85,12 @@ public class CollectionExerciseEndpoint {
       SurveySvcClient surveyService,
       SampleService sampleService,
       EventService eventService,
-      @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade,
-      Scheduler scheduler) {
+      @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade) {
     this.collectionExerciseService = collectionExerciseService;
     this.surveyService = surveyService;
     this.sampleService = sampleService;
     this.eventService = eventService;
     this.mapperFacade = mapperFacade;
-    this.scheduler = scheduler;
   }
 
   /**
@@ -1056,15 +1049,6 @@ public class CollectionExerciseEndpoint {
             .buildAndExpand(newEvent.getId(), newEvent.getTag())
             .toUri();
 
-    if (!appConfig.getActionSvc().isDeprecated()) {
-      // Don't schedule event if action is deprecated, the trigger is different
-      try {
-        SchedulerConfiguration.scheduleEvent(this.scheduler, newEvent);
-      } catch (SchedulerException e) {
-        log.with("event", newEvent).error("Failed to schedule event", e);
-      }
-    }
-
     return ResponseEntity.created(location).build();
   }
 
@@ -1274,32 +1258,5 @@ public class CollectionExerciseEndpoint {
     eventService.deleteEvent(id, tag);
 
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Get's the list of all scheduled events from quartz (i.e. it's not the list of events as stored
-   * in the database, it's the actual jobs scheduled in quartz)
-   *
-   * @return the list of events derived from quartz jobs
-   * @throws SchedulerException thrown if issues getting data from quartz
-   */
-  @Operation(summary = "GET request to retrieve all scheduled events from quartz")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "200", description = "Successful Operation"),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized",
-            content = @Content(examples = {})),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Resource Not Found",
-            content = @Content(examples = {}))
-      })
-  @RequestMapping(value = "/events/scheduled", method = RequestMethod.GET)
-  public ResponseEntity<List<EventDTO>> getAllScheduledEvents() throws SchedulerException {
-    List<EventDTO> scheduledEvents = SchedulerConfiguration.getAllScheduledEvents(this.scheduler);
-
-    return ResponseEntity.ok(scheduledEvents);
   }
 }

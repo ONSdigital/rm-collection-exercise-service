@@ -9,11 +9,5 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityCo
 @CoverageIgnore
 public class ActionSvc {
   private RestUtilityConfig connectionConfig;
-  private String actionPlansPath;
-  private String actionRulesPath;
-  private String actionRulePath;
-  private String actionRulesForActionPlanPath;
-  private String actionPlanPath;
   private String processEventPath;
-  private boolean deprecated;
 }

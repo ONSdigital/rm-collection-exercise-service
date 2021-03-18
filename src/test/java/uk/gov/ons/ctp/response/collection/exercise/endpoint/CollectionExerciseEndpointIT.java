@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -59,8 +58,6 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionRuleDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionType;
 import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
@@ -168,11 +165,8 @@ public class CollectionExerciseEndpointIT {
   @Test
   public void shouldUpdateEventDate() throws IOException, CTPException, InterruptedException {
     stubCreateActionPlan();
-    stubCreateActionRule();
     stubCollectionInstrumentCount();
     stubSurveyServiceBusiness();
-    stubGetActionRulesByActionPlan();
-    stubUpdateActionRule();
     String exerciseRef = "899990";
     String userDescription = "Test Description";
 
@@ -214,7 +208,6 @@ public class CollectionExerciseEndpointIT {
       throws Exception {
     // Given
     stubCreateActionPlan();
-    stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     stubGetPartyBySampleUnitRef();
@@ -249,7 +242,6 @@ public class CollectionExerciseEndpointIT {
     // Given;
 
     stubCreateActionPlan();
-    stubCreateActionRule();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     stubGetPartyBySampleUnitRef();
@@ -544,38 +536,6 @@ public class CollectionExerciseEndpointIT {
     inactiveActionPlan.setSelectors(activeSelectors);
     stubGetActionPlansBySelectors(
         collectionExerciseId, true, Collections.singletonList(activeActionPlan));
-  }
-
-  private void stubGetActionRulesByActionPlan() throws IOException {
-    final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
-    actionRuleDTO.setId(UUID.randomUUID());
-    actionRuleDTO.setActionTypeName(ActionType.BSNL);
-    actionRuleDTO.setPriority(3);
-
-    wireMockRule.stubFor(
-        get(urlPathMatching("/actionrules/actionplan/(.*)"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(Arrays.asList(actionRuleDTO)))));
-  }
-
-  private void stubCreateActionRule() throws IOException {
-    final ActionRuleDTO actionRuleDTO = new ActionRuleDTO();
-    actionRuleDTO.setId(UUID.randomUUID());
-
-    wireMockRule.stubFor(
-        post(urlPathMatching("/actionrules"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(actionRuleDTO))));
-  }
-
-  private void stubUpdateActionRule() {
-    wireMockRule.stubFor(
-        put(urlPathMatching("/actionrules/(.*)"))
-            .willReturn(aResponse().withHeader("Content-Type", "application/json")));
   }
 
   private SampleSummaryDTO stubSampleSummary() throws IOException {
