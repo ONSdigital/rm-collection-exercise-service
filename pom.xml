@@ -10,7 +10,7 @@
     <description>CTP : CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>1.5.6.RELEASE</springboot.version>
+        <springboot.version>2.0.9.RELEASE</springboot.version>
         <java.version>11</java.version>
         <orika.version>1.5.1</orika.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -104,9 +104,15 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-properties-migrator</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>4.2.3.RELEASE</version>
+            <version>5.0.19.RELEASE</version>
         </dependency>
 
         <!-- SPRING END -->

@@ -439,7 +439,7 @@ public class CollectionExerciseService {
 
       // If period/survey not supplied in patchData then this call will trivially return
       validateUniqueness(collex, proposedPeriod, proposedSurvey);
-      SurveyDTO survey = null;
+      SurveyDTO survey;
       if (!StringUtils.isBlank(patchData.getSurveyId())) {
         UUID surveyId = UUID.fromString(patchData.getSurveyId());
 

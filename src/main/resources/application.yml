@@ -15,12 +15,7 @@ logging:
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
-liquibase:
-  user: postgres
-  password: postgres
-  default-schema: collectionexercise
-  url: jdbc:postgresql://localhost:6432/postgres
-  changeLog: classpath:/database/changelog-master.yml
+
 
 security:
   basic:
@@ -51,6 +46,12 @@ endpoints:
   enabled: true
 
 spring:
+  liquibase:
+    user: postgres
+    password: postgres
+    default-schema: collectionexercise
+    url: jdbc:postgresql://localhost:6432/postgres
+    changeLog: classpath:/database/changelog-master.yml
   output:
     ansi:
       enabled: never
