@@ -6,8 +6,8 @@
     <version>UNVERSIONED</version>
     <packaging>jar</packaging>
 
-    <name>CTP : CollectionExerciseService</name>
-    <description>CTP : CollectionExerciseService</description>
+    <name>CollectionExerciseService</name>
+    <description>CollectionExerciseService</description>
 
     <properties>
         <springboot.version>2.0.9.RELEASE</springboot.version>
@@ -61,6 +61,15 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
+        <!-- Added because of mockito errors. It's explained more here
+        https://dev.to/scottshipp/how-to-fix-a-mockito-cannot-mock-this-class-exception-in-a-spring-boot-app-457e -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.22.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
@@ -101,12 +110,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-properties-migrator</artifactId>
-            <scope>runtime</scope>
         </dependency>
 
         <dependency>
