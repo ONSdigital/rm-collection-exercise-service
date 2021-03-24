@@ -94,15 +94,6 @@
    * `/collectionexercises/unlink/{collectionExerciseId}/sample/{sampleSummaryId}` - to unlink sample summary from a
    collection exercise.
    
-   #### Quartz Scheduler 
-   The collection-exercise-service executes collection exercise events and sample unit  via 
-   quartz scheduler. The scheduler is configured as per the configuration.
-   
-   Quartz Scheduler distributes SampleUnits for a Collection-exercise. At this point distribution service retrieves
-   SampleUnitGroups to be distributed which are in  'VALIDATED' state. For each sample unit group, it gets
-   associated action plan, respondents from party service, collection instrument and creates a parent sample unit to be 
-   published to the queue and then transitions collection-exercise state to LIVE from READY TO REVIEW.
-   
    #### Rabbit queues
    The collection-exercise-service utilises rabbit queues and spring integration to process uploaded collection 
    instrument and samples via response operations UI also for processing scheduled collection exercise events.

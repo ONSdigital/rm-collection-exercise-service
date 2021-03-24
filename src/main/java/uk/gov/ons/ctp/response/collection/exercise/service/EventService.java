@@ -7,10 +7,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -23,7 +20,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
-import uk.gov.ons.ctp.response.collection.exercise.schedule.SchedulerConfiguration;
 
 @Service
 public class EventService {
@@ -113,14 +109,6 @@ public class EventService {
 
   @Autowired private List<EventValidator> eventValidators;
 
-  @Autowired @Lazy private Scheduler scheduler;
-
-  @Autowired private List<ActionRuleCreator> actionRuleCreators;
-
-  @Autowired private List<ActionRuleUpdater> actionRuleUpdaters;
-
-  @Autowired private List<ActionRuleRemover> actionRuleRemovers;
-
   @Autowired private ActionSvcClient actionSvcClient;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
@@ -144,51 +132,13 @@ public class EventService {
     event.setId(UUID.randomUUID());
     event.setTimestamp(new Timestamp(eventDto.getTimestamp().getTime()));
     event.setCreated(new Timestamp(new Date().getTime()));
+    event.setStatus(EventDTO.Status.SCHEDULED);
+    validateSubmittedEvent(collex, event);
 
-    if (appConfig.getActionSvc().isDeprecated()) {
-      event.setStatus(EventDTO.Status.SCHEDULED);
-      validateSubmittedEvent(collex, event);
-    } else {
-      event.setStatus(EventDTO.Status.NOT_SET);
-      validateSubmittedEvent(collex, event);
-      createActionRulesForEvent(event);
-    }
     event = eventRepository.save(event);
     fireEventChangeHandlers(MessageType.EventCreated, event);
 
     return event;
-  }
-
-  /**
-   * Create action rules for collection exercise event
-   *
-   * @param collectionExerciseEvent the event to create action rules for
-   * @throws CTPException on error
-   */
-  public void createActionRulesForEvent(final Event collectionExerciseEvent) throws CTPException {
-    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isActionable()) {
-      return;
-    }
-
-    for (ActionRuleCreator arc : actionRuleCreators) {
-      arc.execute(collectionExerciseEvent);
-    }
-  }
-
-  /**
-   * Delete action rules for collection exercise event
-   *
-   * @param collectionExerciseEvent the event to create action rules for
-   * @throws CTPException on error
-   */
-  public void deleteActionRulesForEvent(final Event collectionExerciseEvent) throws CTPException {
-    if (!Tag.valueOf(collectionExerciseEvent.getTag()).isActionable()) {
-      return;
-    }
-
-    for (ActionRuleRemover arc : actionRuleRemovers) {
-      arc.execute(collectionExerciseEvent);
-    }
   }
 
   public List<Event> getEvents(UUID collexId) throws CTPException {
@@ -207,9 +157,6 @@ public class EventService {
     ResponseEventDTO updatedEvent = new ResponseEventDTO();
     event.setTimestamp(new Timestamp(date.getTime()));
     validateSubmittedEvent(collex, event);
-    if (!appConfig.getActionSvc().isDeprecated()) {
-      updateActionRules(event);
-    }
     if (tag.equals("return_by")) {
       deleteNudgeEmail(collex, event, updatedEvent);
     }
@@ -218,13 +165,6 @@ public class EventService {
     fireEventChangeHandlers(MessageType.EventUpdated, event);
     updatedEvent.setEvent(event);
     return updatedEvent;
-  }
-
-  private void updateActionRules(final Event event) throws CTPException {
-
-    for (final ActionRuleUpdater aru : actionRuleUpdaters) {
-      aru.execute(event);
-    }
   }
 
   private void deleteNudgeEmail(
@@ -240,7 +180,6 @@ public class EventService {
               existingNudgeEmails.size()));
     }
     for (Event nudgeEmail : existingNudgeEmails) {
-      deleteActionRulesForEvent(nudgeEmail);
       nudgeEmail.setDeleted(true);
       this.eventRepository.delete(nudgeEmail);
     }
@@ -312,9 +251,6 @@ public class EventService {
     CollectionExercise collex = getCollectionExercise(collexUuid, Fault.BAD_REQUEST);
     Event event = this.eventRepository.findOneByCollectionExerciseAndTag(collex, tag);
     if (event != null) {
-      if (!appConfig.getActionSvc().isDeprecated()) {
-        deleteActionRulesForEvent(event);
-      }
       event.setDeleted(true);
       this.eventRepository.delete(event);
       fireEventChangeHandlers(MessageType.EventDeleted, event);
@@ -390,36 +326,6 @@ public class EventService {
             .collect(Collectors.toList())
             .size()
         >= numberOfMandatoryEvents;
-  }
-
-  /**
-   * Unschedule a collection exercise event
-   *
-   * @param event the event to unschedule
-   * @throws CTPException thrown if error occurred scheduling event
-   */
-  public void unscheduleEvent(final Event event) throws CTPException {
-    try {
-      SchedulerConfiguration.unscheduleEvent(this.scheduler, event);
-    } catch (SchedulerException e) {
-      throw new CTPException(
-          Fault.SYSTEM_ERROR, String.format("Error unscheduling event %s", event.getId()), e);
-    }
-  }
-
-  /**
-   * Schedule a collection exercise event
-   *
-   * @param event the event to shchedule
-   * @throws CTPException thrown if error occurred scheduling event
-   */
-  public void scheduleEvent(final Event event) throws CTPException {
-    try {
-      SchedulerConfiguration.scheduleEvent(this.scheduler, event);
-    } catch (SchedulerException e) {
-      throw new CTPException(
-          Fault.SYSTEM_ERROR, String.format("Error scheduling event %s", event.getId()), e);
-    }
   }
 
   /** Get all the scheduled events and send them to action to be acted on. */

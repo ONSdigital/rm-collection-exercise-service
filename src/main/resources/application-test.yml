@@ -22,7 +22,6 @@ party-svc:
         port: 18002
 
 action-svc:
-  deprecated: false
   connection-config:
     port: 18002
 

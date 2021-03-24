@@ -10,6 +10,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.Sam
 public class ExerciseSampleUnitTest {
 
   private static final String ACTIVE_ACTION_PLAN_ID = "897b7564-cc31-49d6-afb5-2652c62b5ab4";
+  private static final Boolean ACTIVE_ENROLMENT = true;
   private static final UUID COLLECTION_EXERCISE_ID =
       UUID.fromString("6ec01dfa-aff7-41aa-9b36-a8eb8a09f370");
   private static final UUID SAMPLE_UNIT_ID =
@@ -20,84 +21,12 @@ public class ExerciseSampleUnitTest {
       UUID.fromString("32abf434-aa37-4dd5-a611-4985f1a2e5b6");
 
   @Test
-  public void toSampleUnitChild_ActionPlanId() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-
-    assertThat(
-        exerciseSampleUnit.toSampleUnitChild(ACTIVE_ACTION_PLAN_ID).getActionPlanId(),
-        is(ACTIVE_ACTION_PLAN_ID));
-  }
-
-  @Test
-  public void toSampleUnitChild_Id() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-    exerciseSampleUnit.setSampleUnitId(SAMPLE_UNIT_ID);
-
-    assertThat(
-        exerciseSampleUnit.toSampleUnitChild(ACTIVE_ACTION_PLAN_ID).getId(),
-        is(SAMPLE_UNIT_ID.toString()));
-  }
-
-  @Test
-  public void toSampleUnitChild_SampleUnitRef() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-    exerciseSampleUnit.setSampleUnitRef(SAMPLE_UNIT_REF);
-
-    assertThat(
-        exerciseSampleUnit.toSampleUnitChild(ACTIVE_ACTION_PLAN_ID).getSampleUnitRef(),
-        is(SAMPLE_UNIT_REF));
-  }
-
-  @Test
-  public void toSampleUnitChild_SampleUnitType() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-    exerciseSampleUnit.setSampleUnitType(SampleUnitType.B);
-
-    assertThat(
-        exerciseSampleUnit.toSampleUnitChild(ACTIVE_ACTION_PLAN_ID).getSampleUnitType(),
-        is(SampleUnitType.B.toString()));
-  }
-
-  @Test
-  public void toSampleUnitChild_PartyId() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-    exerciseSampleUnit.setPartyId(PARTY_ID);
-
-    assertThat(
-        exerciseSampleUnit.toSampleUnitChild(ACTIVE_ACTION_PLAN_ID).getPartyId(),
-        is(PARTY_ID.toString()));
-  }
-
-  @Test
-  public void toSampleUnitChild_CollectionInstrument() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-    exerciseSampleUnit.setCollectionInstrumentId(COLLECTION_INSTRUMENT_ID);
-
-    assertThat(
-        exerciseSampleUnit.toSampleUnitChild(ACTIVE_ACTION_PLAN_ID).getCollectionInstrumentId(),
-        is(COLLECTION_INSTRUMENT_ID.toString()));
-  }
-
-  @Test
-  public void toSampleUnitParent_ActionPlanId() {
-    final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
-
-    assertThat(
-        exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
-            .getActionPlanId(),
-        is(ACTIVE_ACTION_PLAN_ID));
-  }
-
-  @Test
   public void toSampleUnitParent_Id() {
     final ExerciseSampleUnit exerciseSampleUnit = getExerciseSampleUnit();
     exerciseSampleUnit.setSampleUnitId(SAMPLE_UNIT_ID);
 
     assertThat(
-        exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
-            .getId(),
+        exerciseSampleUnit.toSampleUnitParent(ACTIVE_ENROLMENT, COLLECTION_EXERCISE_ID).getId(),
         is(SAMPLE_UNIT_ID.toString()));
   }
 
@@ -108,7 +37,7 @@ public class ExerciseSampleUnitTest {
 
     assertThat(
         exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
+            .toSampleUnitParent(ACTIVE_ENROLMENT, COLLECTION_EXERCISE_ID)
             .getSampleUnitRef(),
         is(SAMPLE_UNIT_REF));
   }
@@ -120,7 +49,7 @@ public class ExerciseSampleUnitTest {
 
     assertThat(
         exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
+            .toSampleUnitParent(ACTIVE_ENROLMENT, COLLECTION_EXERCISE_ID)
             .getSampleUnitType(),
         is(SampleUnitType.B.toString()));
   }
@@ -132,7 +61,7 @@ public class ExerciseSampleUnitTest {
 
     assertThat(
         exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
+            .toSampleUnitParent(ACTIVE_ENROLMENT, COLLECTION_EXERCISE_ID)
             .getPartyId(),
         is(PARTY_ID.toString()));
   }
@@ -144,7 +73,7 @@ public class ExerciseSampleUnitTest {
 
     assertThat(
         exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
+            .toSampleUnitParent(ACTIVE_ENROLMENT, COLLECTION_EXERCISE_ID)
             .getCollectionInstrumentId(),
         is(COLLECTION_INSTRUMENT_ID.toString()));
   }
@@ -156,7 +85,7 @@ public class ExerciseSampleUnitTest {
 
     assertThat(
         exerciseSampleUnit
-            .toSampleUnitParent(ACTIVE_ACTION_PLAN_ID, COLLECTION_EXERCISE_ID)
+            .toSampleUnitParent(ACTIVE_ENROLMENT, COLLECTION_EXERCISE_ID)
             .getCollectionExerciseId(),
         is(COLLECTION_EXERCISE_ID.toString()));
   }

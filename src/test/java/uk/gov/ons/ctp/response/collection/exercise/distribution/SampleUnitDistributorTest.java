@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.distribution;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -36,7 +37,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.LockingException;
@@ -70,7 +70,6 @@ public class SampleUnitDistributorTest {
   private static final String PARTY_ID_PARENT = "45297c23-763d-46a9-b4e5-c37ff5b4fbe8";
   private static final String SAMPLE_UNIT_REF = "50000065975";
   private static final String SAMPLE_UNIT_TYPE_PARENT = "B";
-  private static final String ACTION_PLAN_ID_PARENT = "5381731e-e386-41a1-8462-26373744db86";
   private static final String TEST_EXCEPTION = "Test Exception thrown";
 
   @InjectMocks private SampleUnitDistributor sampleUnitDistributor;
@@ -113,7 +112,6 @@ public class SampleUnitDistributorTest {
   private List<Event> events;
   private List<ExerciseSampleUnitGroup> sampleUnitGroups;
   private List<ExerciseSampleUnit> sampleUnitParentOnly;
-  private List<ActionPlanDTO> actionPlans;
   private List<PartyDTO> parties;
   private List<SurveyDTO> surveys;
 
@@ -138,7 +136,6 @@ public class SampleUnitDistributorTest {
         .setTimestamp(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
     sampleUnitParentOnly =
         FixtureHelper.loadClassFixtures(ExerciseSampleUnit[].class, "ParentOnly");
-    actionPlans = FixtureHelper.loadClassFixtures(ActionPlanDTO[].class);
     parties = FixtureHelper.loadClassFixtures(PartyDTO[].class);
     surveys = FixtureHelper.loadClassFixtures(SurveyDTO[].class);
 
@@ -162,11 +159,6 @@ public class SampleUnitDistributorTest {
     when(partySvcClient.requestParty(any(), any())).thenReturn(parties.get(0));
 
     when(surveySvcClient.findSurvey(collectionExercise.getSurveyId())).thenReturn(surveys.get(0));
-
-    when(actionSvcClient.getActionPlanBySelectorsBusiness(any(), eq(false)))
-        .thenReturn(actionPlans.get(0));
-    when(actionSvcClient.getActionPlanBySelectorsBusiness(any(), eq(true)))
-        .thenReturn(actionPlans.get(0));
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
@@ -206,7 +198,7 @@ public class SampleUnitDistributorTest {
           assertEquals(PARTY_ID_PARENT, sampleUnitParent.getPartyId());
           assertEquals(COLLECTION_INSTRUMENT_ID, sampleUnitParent.getCollectionInstrumentId());
           assertEquals(COLLECTION_EXERCISE_ID, sampleUnitParent.getCollectionExerciseId());
-          assertEquals(ACTION_PLAN_ID_PARENT, sampleUnitParent.getActionPlanId());
+          assertTrue(sampleUnitParent.getActiveEnrolment());
           assertNull(sampleUnitParent.getSampleUnitChildren());
         });
 
