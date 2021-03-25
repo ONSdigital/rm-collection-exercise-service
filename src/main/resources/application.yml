@@ -15,11 +15,6 @@ logging:
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
-security:
-  basic:
-    enabled: true
-    realm: sdc
-
 server:
   port: 8145
   servlet:
@@ -31,7 +26,7 @@ spring:
     password: postgres
     default-schema: collectionexercise
     url: jdbc:postgresql://localhost:6432/postgres
-    changeLog: classpath:/database/changelog-master.yml
+    change-log: classpath:/database/changelog-master.yml
 
   output:
     ansi:
@@ -59,7 +54,6 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
-    show-sql: false
     properties:
       hibernate:
         ddl-auto: update
