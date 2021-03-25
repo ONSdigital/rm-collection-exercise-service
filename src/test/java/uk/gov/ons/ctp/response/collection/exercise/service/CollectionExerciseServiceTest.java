@@ -84,7 +84,6 @@ public class CollectionExerciseServiceTest {
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     CollectionExerciseDTO toCreate =
         FixtureHelper.loadClassFixtures(CollectionExerciseDTO[].class).get(0);
-    when(this.surveyService.findSurvey(UUID.fromString(toCreate.getSurveyId()))).thenReturn(survey);
 
     // When
     this.collectionExerciseService.createCollectionExercise(toCreate, survey);
