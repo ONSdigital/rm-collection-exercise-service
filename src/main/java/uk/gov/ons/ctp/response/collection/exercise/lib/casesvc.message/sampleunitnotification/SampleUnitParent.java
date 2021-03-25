@@ -58,17 +58,9 @@ public class SampleUnitParent extends SampleUnit {
       final String partyId,
       final String collectionInstrumentId,
       final boolean activeEnrolment,
-      final String actionPlanId,
       final String collectionExerciseId,
       final SampleUnitChildren sampleUnitChildren) {
-    super(
-        id,
-        sampleUnitRef,
-        sampleUnitType,
-        partyId,
-        collectionInstrumentId,
-        activeEnrolment,
-        actionPlanId);
+    super(id, sampleUnitRef, sampleUnitType, partyId, collectionInstrumentId, activeEnrolment);
     this.collectionExerciseId = collectionExerciseId;
     this.sampleUnitChildren = sampleUnitChildren;
   }
@@ -320,13 +312,9 @@ public class SampleUnitParent extends SampleUnit {
 
     /**
      * Returns a new builder to build the value of the "sampleUnitChildren" property (replacing
-     * previous value). Use {@link
-     * uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitChildren.Builder#end()}
-     * to return to the current builder.
+     * previous value).
      *
-     * @return A new builder to build the value of the "sampleUnitChildren" property. Use {@link
-     *     uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitChildren.Builder#end()}
-     *     to return to the current builder.
+     * @return A new builder to build the value of the "sampleUnitChildren" property.
      */
     public SampleUnitChildren.Builder<? extends SampleUnitParent.Builder<_B>>
         withSampleUnitChildren() {
@@ -387,17 +375,6 @@ public class SampleUnitParent extends SampleUnit {
     public SampleUnitParent.Builder<_B> withCollectionInstrumentId(
         final String collectionInstrumentId) {
       super.withCollectionInstrumentId(collectionInstrumentId);
-      return this;
-    }
-
-    /**
-     * Sets the new value of "actionPlanId" (any previous value will be replaced)
-     *
-     * @param actionPlanId New value of the "actionPlanId" property.
-     */
-    @Override
-    public SampleUnitParent.Builder<_B> withActionPlanId(final String actionPlanId) {
-      super.withActionPlanId(actionPlanId);
       return this;
     }
 
