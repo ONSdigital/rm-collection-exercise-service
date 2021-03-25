@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
-import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -62,7 +61,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 public class SampleUnitDistributorTest {
 
   private static final Integer DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX = 10;
-  private static final String DISTRIBUTION_SCHEDULE_DELAY = "10";
   private static final int IMPOSSIBLE_ID = Integer.MAX_VALUE;
 
   private static final String COLLECTION_EXERCISE_ID = "14fb3e68-4dca-46db-bf49-04b84e07e77c";
@@ -83,8 +81,6 @@ public class SampleUnitDistributorTest {
   @Mock private SampleUnitRepository sampleUnitRepo;
 
   @Mock private SampleUnitGroupRepository sampleUnitGroupRepo;
-
-  @Mock private ActionSvcClient actionSvcClient;
 
   @Mock private PartySvcClient partySvcClient;
 

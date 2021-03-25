@@ -52,7 +52,7 @@ public class PartySvcClientTest {
   }
 
   @Test
-  public void createActionPlan_201Response() {
+  public void getParty_200Response() {
     // Given
     when(restTemplate.exchange(
             any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(PartyDTO.class)))
@@ -67,7 +67,7 @@ public class PartySvcClientTest {
   }
 
   @Test(expected = HttpClientErrorException.class)
-  public void createActionPlan_500Response() {
+  public void getParty_500Response() {
     // Given
     when(restTemplate.exchange(
             any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(PartyDTO.class)))

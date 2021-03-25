@@ -15,14 +15,11 @@ import static uk.gov.ons.ctp.response.collection.exercise.representation.Collect
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -32,21 +29,15 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
-import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -56,22 +47,11 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @RunWith(MockitoJUnitRunner.class)
 public class CollectionExerciseServiceTest {
 
-  private static final UUID ACTIONPLANID1 = UUID.fromString("60df56d9-f491-4ac8-b256-a10154290a8b");
-  private static final UUID ACTIONPLANID2 = UUID.fromString("60df56d9-f491-4ac8-b256-a10154290a8c");
-  private static final UUID ACTIONPLANID3 = UUID.fromString("70df56d9-f491-4ac8-b256-a10154290a8b");
-  private static final UUID ACTIONPLANID4 = UUID.fromString("80df56d9-f491-4ac8-b256-a10154290a8b");
-
-  @Mock private CaseTypeDefaultRepository caseTypeDefaultRepo;
-
-  @Mock private CaseTypeOverrideRepository caseTypeOverrideRepo;
-
   @Mock private CollectionExerciseRepository collexRepo;
 
   @Mock private SampleLinkRepository sampleLinkRepository;
 
   @Mock private SurveySvcClient surveyService;
-
-  @Mock private ActionSvcClient actionService;
 
   @Mock private CollectionInstrumentSvcClient collectionInstrument;
 
@@ -92,136 +72,6 @@ public class CollectionExerciseServiceTest {
                       CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
 
   @InjectMocks @Spy private CollectionExerciseService collectionExerciseService;
-
-  /** Tests that default and override are empty */
-  @Test
-  public void givenThatDefaultAndOverrideAreEmptyExpectEmpty() {
-    List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
-    List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
-
-    Collection<CaseType> caseTypeList =
-        this.collectionExerciseService.createCaseTypeList(
-            caseTypeDefaultList, caseTypeOverrideList);
-
-    Assert.assertTrue(caseTypeList.isEmpty());
-  }
-
-  /** Check that only default are present is Override is empty */
-  @Test
-  public void givenThatDefaultIsPopulatedAndOverrideIsEmptyExpectDefaultOnly() {
-    List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
-    List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
-
-    caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID1, "B"));
-
-    Collection<CaseType> caseTypeList =
-        this.collectionExerciseService.createCaseTypeList(
-            caseTypeDefaultList, caseTypeOverrideList);
-
-    assertEquals(caseTypeList.iterator().next().getActionPlanId(), ACTIONPLANID1);
-  }
-
-  @Test
-  public void givenThatDefaultIsEmptyAndOverrideIsPopulatedExpectEmpty() {
-    List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
-    List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
-
-    caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "B"));
-
-    Collection<CaseType> caseTypeList =
-        this.collectionExerciseService.createCaseTypeList(
-            caseTypeDefaultList, caseTypeOverrideList);
-
-    assertEquals(caseTypeList.iterator().next().getActionPlanId(), ACTIONPLANID3);
-  }
-
-  @Test
-  public void givenThatDefaultIsPopulatedAndOverrideIsPopulatedExpectOnlyOverride() {
-    List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
-    List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
-
-    caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID1, "B"));
-
-    caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "B"));
-
-    Collection<CaseType> caseTypeList =
-        this.collectionExerciseService.createCaseTypeList(
-            caseTypeDefaultList, caseTypeOverrideList);
-
-    assertEquals(caseTypeList.iterator().next().getActionPlanId(), ACTIONPLANID3);
-  }
-
-  @Test
-  public void
-      givenThatDefaultIsPopulatedWithMultipleAndOverrideIsPopulatedWithOneExpectOneDefaultAndOneOverride() {
-
-    List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
-    List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
-
-    caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID1, "B"));
-    caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID2, "BI"));
-
-    caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "BI"));
-
-    Collection<CaseType> caseTypeList =
-        this.collectionExerciseService.createCaseTypeList(
-            caseTypeDefaultList, caseTypeOverrideList);
-    Iterator<CaseType> i = caseTypeList.iterator();
-    assertEquals(i.next().getActionPlanId(), ACTIONPLANID1);
-    assertEquals(i.next().getActionPlanId(), ACTIONPLANID3);
-  }
-
-  @Test
-  public void
-      givenThatDefaultIsPopulatedWithMultipleAndOverrideIsPopulatedWithMultipleExpectMultipleOverride() {
-
-    List<CaseTypeDefault> caseTypeDefaultList = new ArrayList<>();
-    List<CaseTypeOverride> caseTypeOverrideList = new ArrayList<>();
-
-    caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID1, "B"));
-    caseTypeDefaultList.add(createCaseTypeDefault(ACTIONPLANID2, "BI"));
-
-    caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID3, "B"));
-    caseTypeOverrideList.add(createCaseTypeOverride(ACTIONPLANID4, "BI"));
-
-    Collection<CaseType> caseTypeList =
-        this.collectionExerciseService.createCaseTypeList(
-            caseTypeDefaultList, caseTypeOverrideList);
-
-    Iterator<CaseType> i = caseTypeList.iterator();
-    assertEquals(i.next().getActionPlanId(), ACTIONPLANID3);
-    assertEquals(i.next().getActionPlanId(), ACTIONPLANID4);
-  }
-
-  /**
-   * Creates a Defualt Case Type
-   *
-   * @param actionPlanId actionPlanId to be used
-   * @param sampleUnitTypeFK sampleUnitTypeFK as string
-   * @return CaseTypeDefault
-   */
-  private CaseTypeDefault createCaseTypeDefault(UUID actionPlanId, String sampleUnitTypeFK) {
-    CaseTypeDefault.builder().caseTypeDefaultPK(1).surveyId(UUID.randomUUID());
-    return CaseTypeDefault.builder()
-        .actionPlanId(actionPlanId)
-        .sampleUnitTypeFK(sampleUnitTypeFK)
-        .build();
-  }
-
-  /**
-   * Creates a Default Case Type
-   *
-   * @param actionPlanId actionPlanId to be used
-   * @param sampleUnitTypeFK sampleUnitTypeFK as string
-   * @return CaseTypeOverride
-   */
-  private CaseTypeOverride createCaseTypeOverride(UUID actionPlanId, String sampleUnitTypeFK) {
-    CaseTypeOverride.builder().caseTypeOverridePK(1).exerciseFK(1);
-    return CaseTypeOverride.builder()
-        .actionPlanId(actionPlanId)
-        .sampleUnitTypeFK(sampleUnitTypeFK)
-        .build();
-  }
 
   /** Tests collection exercise is created with the correct details. */
   @Test
@@ -247,7 +97,6 @@ public class CollectionExerciseServiceTest {
     assertEquals(toCreate.getExerciseRef(), collex.getExerciseRef());
     assertEquals(toCreate.getSurveyId(), collex.getSurveyId().toString());
     assertNotNull(collex.getCreated());
-    verify(this.caseTypeOverrideRepo, times(0)).saveAndFlush(any());
   }
 
   @Test
@@ -261,11 +110,6 @@ public class CollectionExerciseServiceTest {
     existing.setSurveyId(surveyId);
     when(collexRepo.findOneById(existing.getId())).thenReturn(existing);
     when(surveyService.findSurvey(surveyId)).thenReturn(survey);
-    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    caseTypeOverride.setSampleUnitTypeFK("BI");
-    caseTypeOverrides.add(caseTypeOverride);
-    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
 
     this.collectionExerciseService.updateCollectionExercise(existing.getId(), toUpdate);
 
@@ -438,11 +282,6 @@ public class CollectionExerciseServiceTest {
     collex.setExerciseRef(exerciseRef);
     collex.setSurveyId(surveyId.toString());
     when(surveyService.findSurvey(surveyId)).thenReturn(survey);
-    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    caseTypeOverride.setSampleUnitTypeFK("BI");
-    caseTypeOverrides.add(caseTypeOverride);
-    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
     this.collectionExerciseService.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
@@ -460,11 +299,6 @@ public class CollectionExerciseServiceTest {
     String name = "Not BRES";
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     when(surveyService.findSurvey(any())).thenReturn(survey);
-    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    caseTypeOverride.setSampleUnitTypeFK("BI");
-    caseTypeOverrides.add(caseTypeOverride);
-    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
     this.collectionExerciseService.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);
@@ -482,11 +316,6 @@ public class CollectionExerciseServiceTest {
     collex.setUserDescription(userDescription);
     SurveyDTO survey = FixtureHelper.loadClassFixtures(SurveyDTO[].class).get(0);
     when(surveyService.findSurvey(any())).thenReturn(survey);
-    List<CaseTypeOverride> caseTypeOverrides = new ArrayList<>();
-    CaseTypeOverride caseTypeOverride = new CaseTypeOverride();
-    caseTypeOverride.setSampleUnitTypeFK("BI");
-    caseTypeOverrides.add(caseTypeOverride);
-    when(caseTypeOverrideRepo.findByExerciseFK(any())).thenReturn(caseTypeOverrides);
     this.collectionExerciseService.patchCollectionExercise(existing.getId(), collex);
 
     ArgumentCaptor<CollectionExercise> captor = ArgumentCaptor.forClass(CollectionExercise.class);

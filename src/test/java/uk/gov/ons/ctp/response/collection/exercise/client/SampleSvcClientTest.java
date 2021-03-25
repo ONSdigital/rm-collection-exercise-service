@@ -22,7 +22,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.config.SampleSvc;
-import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
@@ -40,7 +39,7 @@ public class SampleSvcClientTest {
   @Mock private AppConfig appConfig;
 
   @Test
-  public void getSampleSummaries() throws CTPException {
+  public void getSampleSummaries() {
     // Given
     UUID sampleSummaryId = UUID.randomUUID();
     SampleSummaryDTO sampleSummary = new SampleSummaryDTO();

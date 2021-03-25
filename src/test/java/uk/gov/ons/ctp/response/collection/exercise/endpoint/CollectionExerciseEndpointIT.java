@@ -1,9 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -27,9 +25,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -57,7 +53,6 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.ActionPlanDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
@@ -66,7 +61,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageListe
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -100,8 +94,6 @@ public class CollectionExerciseEndpointIT {
 
   @Autowired private AppConfig appConfig;
 
-  @Autowired private CaseTypeOverrideRepository caseTypeOverrideRepository;
-
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
   @Autowired private SampleUnitRepository sampleUnitRepository;
@@ -130,7 +122,6 @@ public class CollectionExerciseEndpointIT {
     sampleUnitRepository.deleteAllInBatch();
     sampleLinkRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
-    caseTypeOverrideRepository.deleteAllInBatch();
     sampleUnitGroupRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
 
@@ -146,7 +137,6 @@ public class CollectionExerciseEndpointIT {
    */
   @Test
   public void shouldCreateCollectionExercise() throws Exception {
-    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     String exerciseRef = "899990";
     String userDescription = "Test Description";
@@ -164,7 +154,6 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void shouldUpdateEventDate() throws IOException, CTPException, InterruptedException {
-    stubCreateActionPlan();
     stubCollectionInstrumentCount();
     stubSurveyServiceBusiness();
     String exerciseRef = "899990";
@@ -174,8 +163,6 @@ public class CollectionExerciseEndpointIT {
         client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
     final CollectionExerciseDTO collectionExercise =
         client.getCollectionExercise(response.getRight());
-
-    setupStubsGetActionPlansBySelectors(collectionExercise.getId());
 
     final EventDTO mps = createEventDTO(collectionExercise, EventService.Tag.mps, 2);
     createEventDTO(collectionExercise, EventService.Tag.go_live, 3);
@@ -207,7 +194,6 @@ public class CollectionExerciseEndpointIT {
   public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryLink()
       throws Exception {
     // Given
-    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     stubGetPartyBySampleUnitRef();
@@ -240,8 +226,6 @@ public class CollectionExerciseEndpointIT {
   public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
       throws Exception {
     // Given;
-
-    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
     stubGetPartyBySampleUnitRef();
@@ -280,11 +264,9 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
-    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     stubGetPartyNoAssociations();
     stubCollectionInstrumentCount();
-    stubGetActionPlansBySelectors();
 
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
@@ -293,11 +275,9 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
-    stubCreateActionPlan();
     stubSurveyServiceBusiness();
     stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
-    stubGetActionPlansBySelectors();
     SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
@@ -482,62 +462,6 @@ public class CollectionExerciseEndpointIT {
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
-  private void stubCreateActionPlan() throws IOException {
-    final ActionPlanDTO actionPlanDTO = new ActionPlanDTO();
-    actionPlanDTO.setId(UUID.randomUUID());
-
-    wireMockRule.stubFor(
-        post(urlPathEqualTo("/actionplans"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(actionPlanDTO))));
-  }
-
-  private void stubGetActionPlansBySelectors() throws IOException {
-    ActionPlanDTO actionPlan = new ActionPlanDTO();
-    actionPlan.setId(UUID.randomUUID());
-
-    wireMockRule.stubFor(
-        get(urlPathMatching("/actionplans?(.*)"))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(Collections.singletonList(actionPlan)))));
-  }
-
-  private void stubGetActionPlansBySelectors(
-      UUID collectionExerciseId, Boolean activeEnrolment, List<ActionPlanDTO> actionPlans)
-      throws IOException {
-    wireMockRule.stubFor(
-        get(urlPathEqualTo("/actionplans"))
-            .withQueryParam("collectionExerciseId", equalTo(collectionExerciseId.toString()))
-            .withQueryParam("activeEnrolment", equalTo(activeEnrolment.toString()))
-            .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(mapper.writeValueAsString(actionPlans))));
-  }
-
-  private void setupStubsGetActionPlansBySelectors(UUID collectionExerciseId) throws IOException {
-    HashMap<String, String> inactiveSelectors = new HashMap<>();
-
-    inactiveSelectors.put("activeEnrolment", "false");
-    ActionPlanDTO inactiveActionPlan = new ActionPlanDTO();
-    inactiveActionPlan.setSelectors(inactiveSelectors);
-
-    stubGetActionPlansBySelectors(
-        collectionExerciseId, false, Collections.singletonList(inactiveActionPlan));
-
-    HashMap<String, String> activeSelectors = new HashMap<>();
-
-    activeSelectors.put("activeEnrolment", "true");
-    ActionPlanDTO activeActionPlan = new ActionPlanDTO();
-    inactiveActionPlan.setSelectors(activeSelectors);
-    stubGetActionPlansBySelectors(
-        collectionExerciseId, true, Collections.singletonList(activeActionPlan));
-  }
-
   private SampleSummaryDTO stubSampleSummary() throws IOException {
     SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
     sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
@@ -667,8 +591,6 @@ public class CollectionExerciseEndpointIT {
         client.createCollectionExercise(TEST_SURVEY_ID, exerciseRef, userDescription);
     String collexId = StringUtils.substringAfterLast(result.getRight(), "/");
     UUID collectionExerciseId = UUID.fromString(collexId);
-
-    setupStubsGetActionPlansBySelectors(collectionExerciseId);
 
     Arrays.stream(EventService.Tag.values())
         .filter(EventService.Tag::isMandatory)
