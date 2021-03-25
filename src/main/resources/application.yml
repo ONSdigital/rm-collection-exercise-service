@@ -15,25 +15,15 @@ logging:
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
-
-
 security:
   basic:
     enabled: true
     realm: sdc
-  user:
-    name: admin
-    password: secret
 
 server:
   port: 8145
-  servlet-path: /
-
-endpoints:
-  info:
-    enabled: true
-    sensitive: false
-  enabled: true
+  servlet:
+    path: /
 
 spring:
   liquibase:
@@ -42,9 +32,15 @@ spring:
     default-schema: collectionexercise
     url: jdbc:postgresql://localhost:6432/postgres
     changeLog: classpath:/database/changelog-master.yml
+
   output:
     ansi:
       enabled: never
+
+  security:
+    user:
+      name: admin
+      password: secret
     
   application:
     name: ONS CollectionExerciseSvc
@@ -189,3 +185,10 @@ springdoc:
     path: /api-doc.html
     operationsSorter: method
     enabled: false
+
+management:
+  endpoint:
+    info:
+      enabled: true
+  endpoints:
+    enabled-by-default: true
