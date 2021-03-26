@@ -51,6 +51,7 @@ spring:
       max-active: 10
       max-idle: 5
       min-idle: 3
+    initialization-mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
