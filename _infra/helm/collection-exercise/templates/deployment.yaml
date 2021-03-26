@@ -72,7 +72,7 @@ spec:
               containerPort: {{ .Values.container.port }}
           readinessProbe:
             httpGet:
-              path: /info
+              path: /actuator/info
               port: {{ .Values.container.port }}
             periodSeconds: 5
             failureThreshold: 3
@@ -80,7 +80,7 @@ spec:
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
-              path: /info
+              path: /actuator/info
               port: {{ .Values.container.port }}
             initialDelaySeconds: 300
             periodSeconds: 20
