@@ -180,10 +180,3 @@ springdoc:
     path: /api-doc.html
     operationsSorter: method
     enabled: false
-
-management:
-  endpoint:
-    info:
-      enabled: true
-  endpoints:
-    enabled-by-default: true
