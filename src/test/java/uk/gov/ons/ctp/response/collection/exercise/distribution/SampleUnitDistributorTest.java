@@ -143,7 +143,7 @@ public class SampleUnitDistributorTest {
                 SampleUnitGroupState.VALIDATED,
                 collectionExercise,
                 new ArrayList<>(Collections.singletonList(IMPOSSIBLE_ID)),
-                new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
+                PageRequest.of(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
         .thenReturn(sampleUnitGroups);
 
     when(eventRepository.findOneByCollectionExerciseAndTag(
@@ -255,7 +255,7 @@ public class SampleUnitDistributorTest {
                 SampleUnitGroupState.VALIDATED,
                 collectionExercise,
                 new ArrayList<>(Collections.singletonList(IMPOSSIBLE_ID)),
-                new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
+                PageRequest.of(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
         .thenReturn(Collections.EMPTY_LIST);
 
     // When
