@@ -10,7 +10,7 @@
     <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>2.2.13.RELEASE</springboot.version>
+        <springboot.version>2.3.9.RELEASE</springboot.version>
         <jackson.version>2.12.2</jackson.version>
         <java.version>11</java.version>
         <orika.version>1.5.4</orika.version>
