@@ -10,7 +10,7 @@
     <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>2.0.9.RELEASE</springboot.version>
+        <springboot.version>2.1.18.RELEASE</springboot.version>
         <java.version>11</java.version>
         <orika.version>1.5.4</orika.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -120,6 +120,14 @@
         <!-- SPRING END -->
 
         <!-- third party libraries -->
+
+        <!-- Fixes missing SOAPException when running integration tests when upgrading from SB 2.0 to 2.1 -->
+        <dependency>
+            <groupId>com.sun.xml.messaging.saaj</groupId>
+            <artifactId>saaj-impl</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
