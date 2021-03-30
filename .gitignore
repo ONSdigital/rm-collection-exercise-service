@@ -24,6 +24,7 @@ local.properties
 .idea/
 out/
 tools/addend/target/classes/
+src/main/resources/META-INF/
 
 # External tool builders
 .externalToolBuilders/

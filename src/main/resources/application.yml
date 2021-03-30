@@ -17,12 +17,11 @@ logging:
 
 server:
   port: 8145
-  servlet:
-    path: /
 
 spring:
   main:
-    allow-bean-definition-overriding: true # Added as part of upgrade to 2.1, review once upgrades are done.
+    # Added as part of upgrade to 2.1 to quiet a an error where the 'restExceptionHandler' bean is defined twice.
+    allow-bean-definition-overriding: true
 
   liquibase:
     user: postgres
@@ -62,7 +61,10 @@ spring:
       hibernate:
         ddl-auto: update
         default_schema: collectionexercise
-    open-in-view: true # Used to suppress warning that appeared after upgrade to spring 2.0.
+
+    # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true and we weren't setting
+    # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
+    open-in-view: true
 
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
