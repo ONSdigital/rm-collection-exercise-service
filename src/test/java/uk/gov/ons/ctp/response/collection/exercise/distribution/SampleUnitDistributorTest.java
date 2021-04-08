@@ -3,8 +3,8 @@ package uk.gov.ons.ctp.response.collection.exercise.distribution;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,7 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -143,7 +143,7 @@ public class SampleUnitDistributorTest {
                 SampleUnitGroupState.VALIDATED,
                 collectionExercise,
                 new ArrayList<>(Collections.singletonList(IMPOSSIBLE_ID)),
-                new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
+                PageRequest.of(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
         .thenReturn(sampleUnitGroups);
 
     when(eventRepository.findOneByCollectionExerciseAndTag(
@@ -153,8 +153,6 @@ public class SampleUnitDistributorTest {
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitParentOnly);
 
     when(partySvcClient.requestParty(any(), any())).thenReturn(parties.get(0));
-
-    when(surveySvcClient.findSurvey(collectionExercise.getSurveyId())).thenReturn(surveys.get(0));
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
@@ -257,7 +255,7 @@ public class SampleUnitDistributorTest {
                 SampleUnitGroupState.VALIDATED,
                 collectionExercise,
                 new ArrayList<>(Collections.singletonList(IMPOSSIBLE_ID)),
-                new PageRequest(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
+                PageRequest.of(0, DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX)))
         .thenReturn(Collections.EMPTY_LIST);
 
     // When

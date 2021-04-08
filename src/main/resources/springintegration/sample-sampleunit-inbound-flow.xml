@@ -15,7 +15,6 @@
 		<property name="queueNames" value="Sample.SampleDelivery" />
 		<property name="concurrentConsumers" value="${messaging.consumingThreads}" />
 		<property name="prefetchCount" value="${messaging.prefetchCount}" />
-		<property name="txSize" value="${messaging.txSize}" />
 		<property name="channelTransacted" value="true" />
 	</bean>
 

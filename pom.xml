@@ -6,11 +6,12 @@
     <version>UNVERSIONED</version>
     <packaging>jar</packaging>
 
-    <name>CTP : CollectionExerciseService</name>
-    <description>CTP : CollectionExerciseService</description>
+    <name>CollectionExerciseService</name>
+    <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>1.5.6.RELEASE</springboot.version>
+        <springboot.version>2.4.4</springboot.version>
+        <jackson.version>2.12.2</jackson.version>
         <java.version>11</java.version>
         <orika.version>1.5.4</orika.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,6 +62,15 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
+        <!-- Added because of mockito errors. It's explained more here
+        https://dev.to/scottshipp/how-to-fix-a-mockito-cannot-mock-this-class-exception-in-a-spring-boot-app-457e -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.22.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
@@ -79,7 +89,6 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-amqp</artifactId>
-            <version>1.7.11.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -106,12 +115,20 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>4.2.3.RELEASE</version>
+            <version>5.0.19.RELEASE</version>
         </dependency>
 
         <!-- SPRING END -->
 
         <!-- third party libraries -->
+
+        <!-- Fixes missing SOAPException when running integration tests when upgrading from SB 2.0 to 2.1 -->
+        <dependency>
+            <groupId>com.sun.xml.messaging.saaj</groupId>
+            <artifactId>saaj-impl</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
@@ -203,25 +220,25 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.6</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.10.7</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.9.6</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.9.6</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
@@ -250,11 +267,6 @@
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
             <version>2.3.0</version>
         </dependency>
         <dependency>
@@ -312,12 +324,12 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.2.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -369,6 +381,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

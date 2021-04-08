@@ -1,9 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 
 import java.net.URI;
 import java.util.Collections;
@@ -14,10 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -47,7 +46,6 @@ public class SampleSvcClientTest {
     sampleSummary.setId(sampleSummaryId);
     sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
     ResponseEntity<SampleSummaryDTO> responseEntity = Mockito.mock(ResponseEntity.class);
-    given(responseEntity.getStatusCode()).willReturn(HttpStatus.OK);
     given(responseEntity.getBody()).willReturn(sampleSummary);
     given(
             restTemplate.exchange(
@@ -93,7 +91,6 @@ public class SampleSvcClientTest {
     // Given
     given(appConfig.getSampleSvc()).willReturn(sampleSvc);
     given(sampleSvc.getRequestSampleUnitCountPath()).willReturn("test/path");
-    given(responseEntity.getStatusCode()).willReturn(HttpStatus.OK);
     given(responseEntity.getBody()).willReturn(response);
     given(
             restTemplate.exchange(

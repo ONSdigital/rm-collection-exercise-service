@@ -72,7 +72,7 @@ spec:
               containerPort: {{ .Values.container.port }}
           readinessProbe:
             httpGet:
-              path: /info
+              path: /actuator/info
               port: {{ .Values.container.port }}
             periodSeconds: 5
             failureThreshold: 3
@@ -80,7 +80,7 @@ spec:
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
-              path: /info
+              path: /actuator/info
               port: {{ .Values.container.port }}
             initialDelaySeconds: 300
             periodSeconds: 20
@@ -165,7 +165,7 @@ spec:
             {{- else }}
             value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable"
             {{- end }}
-          - name: LIQUIBASE_URL
+          - name: SPRING_LIQUIBASE_URL
             value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
           - name: REDIS_HOST
             {{- if .Values.database.managedRedis }}
@@ -273,9 +273,9 @@ spec:
             value: "1000"
           - name: SCHEDULES_DISTRIBUTION_SCHEDULE_DELAY_MILLI_SECONDS
             value: "1000"
-          - name: LIQUIBASE_USER
+          - name: SPRING_LIQUIBASE_USER
             value: "$(DB_USERNAME)"
-          - name: LIQUIBASE_PASSWORD
+          - name: SPRING_LIQUIBASE_PASSWORD
             value: "$(DB_PASSWORD)"
           - name: SPRING_DATASOURCE_USERNAME
             value: "$(DB_USERNAME)"

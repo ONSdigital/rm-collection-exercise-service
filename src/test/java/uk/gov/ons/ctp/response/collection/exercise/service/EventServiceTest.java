@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
@@ -23,14 +23,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
-import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -238,9 +237,6 @@ public class EventServiceTest {
     final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
     collex.setState(collectionExerciseState);
 
-    final SurveyDTO survey = new SurveyDTO();
-    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     final Event existingEvent = new Event();
     when(eventRepository.findOneByCollectionExerciseAndTag(collex, Tag.mps.name()))
@@ -266,9 +262,6 @@ public class EventServiceTest {
     final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
     collex.setState(collectionExerciseState);
 
-    final SurveyDTO survey = new SurveyDTO();
-    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     final Event existingEvent = new Event();
     existingEvent.setTag(Tag.nudge_email_4.toString());
@@ -278,7 +271,6 @@ public class EventServiceTest {
 
     final List<Event> existingEvents = new ArrayList<>();
 
-    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
 
     eventService.deleteEvent(COLLEX_UUID, Tag.nudge_email_4.name());
@@ -295,9 +287,6 @@ public class EventServiceTest {
     final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
     collex.setState(collectionExerciseState);
 
-    final SurveyDTO survey = new SurveyDTO();
-    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
-
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     final Event existingEvent = new Event();
     existingEvent.setTag(Tag.reminder.toString());
@@ -307,7 +296,6 @@ public class EventServiceTest {
 
     final List<Event> existingEvents = new ArrayList<>();
 
-    when(eventRepository.findByCollectionExercise(collex)).thenReturn(existingEvents);
     eventValidators.add(eventValidator);
 
     eventService.deleteEvent(COLLEX_UUID, Tag.reminder.name());
@@ -325,9 +313,6 @@ public class EventServiceTest {
     collex.setExercisePK(EXERCISE_PK);
     final CollectionExerciseState collectionExerciseState = CollectionExerciseState.SCHEDULED;
     collex.setState(collectionExerciseState);
-
-    final SurveyDTO survey = new SurveyDTO();
-    when(surveySvcClient.getSurveyForCollectionExercise(collex)).thenReturn(survey);
 
     when(collectionExerciseService.findCollectionExercise(COLLEX_UUID)).thenReturn(collex);
     final Event nudgeEvent = new Event();
