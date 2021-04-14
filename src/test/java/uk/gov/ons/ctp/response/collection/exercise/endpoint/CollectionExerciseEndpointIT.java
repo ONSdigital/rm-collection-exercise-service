@@ -339,7 +339,9 @@ public class CollectionExerciseEndpointIT {
 
                   HttpResponse<String> response =
                       Unirest.get(
-                              "http://localhost:" + threadPort + "/cron/sample-unit-distribution")
+                              "http://localhost:"
+                                  + threadPort
+                                  + "/collectionexercises/sample-unit-distribution")
                           .basicAuth("admin", "secret")
                           .header("accept", "application/json")
                           .asString();

@@ -50,6 +50,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -69,6 +70,7 @@ public class CollectionExerciseEndpoint {
       Validation.buildDefaultValidatorFactory();
 
   private CollectionExerciseService collectionExerciseService;
+  private CollectionExerciseRepository collectRepo;
   private EventService eventService;
   private SampleService sampleService;
   private SurveySvcClient surveyService;
@@ -80,11 +82,13 @@ public class CollectionExerciseEndpoint {
   @Autowired
   public CollectionExerciseEndpoint(
       CollectionExerciseService collectionExerciseService,
+      CollectionExerciseRepository collectRepo,
       SurveySvcClient surveyService,
       SampleService sampleService,
       EventService eventService,
       @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade) {
     this.collectionExerciseService = collectionExerciseService;
+    this.collectRepo = collectRepo;
     this.surveyService = surveyService;
     this.sampleService = sampleService;
     this.eventService = eventService;
@@ -1249,5 +1253,35 @@ public class CollectionExerciseEndpoint {
     eventService.deleteEvent(id, tag);
 
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Finds all the validated collection exercises and distributes them.
+   *
+   * <p>Distributing a sample unit means sending a message to the case service with details about
+   * the sample unit and transitioning the state of the sample in collection-exercise to mark the
+   * event happening.
+   *
+   * @throws CTPException on any exception thrown
+   */
+  @RequestMapping(value = "/sample-unit-distribution", method = RequestMethod.GET)
+  public final ResponseEntity<String> distributeSampleUnits() throws CTPException {
+    try {
+      log.info("About to begin sample unit distribution");
+      List<CollectionExercise> exercises =
+          collectRepo.findByState(CollectionExerciseDTO.CollectionExerciseState.VALIDATED);
+
+      log.info("Found [" + exercises.size() + "] collection exercises to distribute");
+      for (CollectionExercise collectionExercise : exercises) {
+        sampleService.distributeSampleUnits(collectionExercise);
+      }
+      log.info("Completed sample unit distribution");
+      return ResponseEntity.ok().body("Completed sample unit distribution");
+    } catch (RuntimeException e) {
+      log.error(
+          "Uncaught exception - transaction rolled back. Will re-run when scheduled by cron", e);
+      throw new CTPException(
+          CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when validating sample units");
+    }
   }
 }
