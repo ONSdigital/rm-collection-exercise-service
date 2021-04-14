@@ -1278,8 +1278,7 @@ public class CollectionExerciseEndpoint {
       log.info("Completed sample unit distribution");
       return ResponseEntity.ok().body("Completed sample unit distribution");
     } catch (RuntimeException e) {
-      log.error(
-          "Uncaught exception - transaction rolled back.", e);
+      log.error("Uncaught exception - transaction rolled back.", e);
       throw new CTPException(
           CTPException.Fault.SYSTEM_ERROR, "Uncaught exception when validating sample units");
     }
