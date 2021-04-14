@@ -291,6 +291,7 @@ public class CollectionExerciseEndpointIT {
     SimpleMessageSender sender = getMessageSender();
 
     CollectionExerciseDTO collex = createCollectionExercise(getRandomRef());
+    createEventDTO(collex, EventService.Tag.go_live, 3);
 
     sampleUnit.setId(id.toString());
     sampleUnit.setSampleUnitRef("LMS0001");
