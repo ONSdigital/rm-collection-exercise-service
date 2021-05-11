@@ -44,9 +44,9 @@ services:
     - spring_datasource_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
     - spring_datasource_username=postgres
     - spring_datasource_password=postgres
-    - liquibase_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
-    - liquibase_user=postgres
-    - liquibase_password=postgres
+    - spring_liquibase_url=jdbc:postgresql://postgres-it:5432/postgres?sslmode=disable
+    - spring_liquibase_user=postgres
+    - spring_liquibase_password=postgres
     - security_user_name=admin
     - security_user_password=secret
     - data_grid_address=redis-it:6379
