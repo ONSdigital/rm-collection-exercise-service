@@ -22,7 +22,7 @@ services:
     - "46672:15672"
  survey:
    container_name: survey-it
-   image:eu.gcr.io/ons-rasrmbs-management/survey
+   image: eu.gcr.io/ons-rasrmbs-management/survey
    ports:
     - "18080:8080"
    external_links:
