@@ -420,39 +420,58 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.dkanejs.maven.plugins</groupId>
-                <artifactId>docker-compose-maven-plugin</artifactId>
-                <version>2.0.1</version>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.23.0</version>
                 <executions>
                     <execution>
                         <id>pre-stop</id>
-                        <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>down</goal>
+                            <goal>stop</goal>
                         </goals>
+                        <phase>pre-integration-test</phase>
                         <configuration>
-                            <composeFile>${project.basedir}/docker-compose.yml</composeFile>
+                            <images>
+                                <image>
+                                    <external>
+                                        <type>compose</type>
+                                        <basedir>${project.basedir}</basedir>
+                                    </external>
+                                </image>
+                            </images>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>up</id>
-                        <phase>pre-integration-test</phase>
+                        <id>start</id>
                         <goals>
-                            <goal>up</goal>
+                            <goal>start</goal>
                         </goals>
                         <configuration>
-                            <composeFile>${project.basedir}/docker-compose.yml</composeFile>
-                            <detachedMode>true</detachedMode>
+                            <showLogs>false</showLogs>
+                            <images>
+                                <image>
+                                    <external>
+                                        <type>compose</type>
+                                        <basedir>${project.basedir}</basedir>
+                                    </external>
+                                </image>
+                            </images>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>down</id>
-                        <phase>post-integration-test</phase>
+                        <id>stop</id>
                         <goals>
-                            <goal>down</goal>
+                            <goal>stop</goal>
                         </goals>
                         <configuration>
-                            <composeFile>${project.basedir}/docker-compose.yml</composeFile>
+                            <images>
+                                <image>
+                                    <external>
+                                        <type>compose</type>
+                                        <basedir>${project.basedir}</basedir>
+                                    </external>
+                                </image>
+                            </images>
                         </configuration>
                     </execution>
                 </executions>
