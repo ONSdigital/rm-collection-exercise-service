@@ -422,7 +422,7 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.23.0</version>
+                <version>0.35.0</version>
                 <executions>
                     <execution>
                         <id>pre-stop</id>
