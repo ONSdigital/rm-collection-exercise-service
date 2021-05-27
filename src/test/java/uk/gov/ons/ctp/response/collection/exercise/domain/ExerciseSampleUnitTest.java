@@ -9,7 +9,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.Sam
 
 public class ExerciseSampleUnitTest {
 
-  private static final String ACTIVE_ACTION_PLAN_ID = "897b7564-cc31-49d6-afb5-2652c62b5ab4";
   private static final Boolean ACTIVE_ENROLMENT = true;
   private static final UUID COLLECTION_EXERCISE_ID =
       UUID.fromString("6ec01dfa-aff7-41aa-9b36-a8eb8a09f370");

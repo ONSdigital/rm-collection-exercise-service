@@ -223,16 +223,15 @@ public class CollectionExerciseApplication {
   }
 
   public static final String COLLECTION_INSTRUMENT_CACHE = "collectioninstruments";
-  public static final String ACTION_PLAN_CACHE = "actionplans";
 
   @Bean
   public CacheManager cacheManager() {
-    return new ConcurrentMapCacheManager(COLLECTION_INSTRUMENT_CACHE, ACTION_PLAN_CACHE);
+    return new ConcurrentMapCacheManager(COLLECTION_INSTRUMENT_CACHE);
   }
 
   @CacheEvict(
       allEntries = true,
-      cacheNames = {COLLECTION_INSTRUMENT_CACHE, ACTION_PLAN_CACHE})
+      cacheNames = {COLLECTION_INSTRUMENT_CACHE})
   @Scheduled(fixedDelay = 60000)
   public void cacheEvict() {
     /* This is getting rid of the cached entries in case anything's been changed. We imagine

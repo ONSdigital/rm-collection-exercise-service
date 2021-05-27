@@ -4,7 +4,6 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,17 +21,12 @@ import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeOverride;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeDefaultRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CaseTypeOverrideRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
@@ -42,10 +36,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 @Service
 public class CollectionExerciseService {
   private static final Logger log = LoggerFactory.getLogger(CollectionExerciseService.class);
-
-  private final CaseTypeDefaultRepository caseTypeDefaultRepo;
-
-  private final CaseTypeOverrideRepository caseTypeOverrideRepo;
 
   private final CollectionExerciseRepository collectRepo;
 
@@ -68,8 +58,6 @@ public class CollectionExerciseService {
 
   @Autowired
   public CollectionExerciseService(
-      CaseTypeDefaultRepository caseTypeDefaultRepo,
-      CaseTypeOverrideRepository caseTypeOverrideRepo,
       CollectionExerciseRepository collectRepo,
       SampleLinkRepository sampleLinkRepository,
       ActionSvcClient actionSvcClient,
@@ -82,8 +70,6 @@ public class CollectionExerciseService {
                   CollectionExerciseDTO.CollectionExerciseState,
                   CollectionExerciseDTO.CollectionExerciseEvent>
               collectionExerciseTransitionState) {
-    this.caseTypeOverrideRepo = caseTypeOverrideRepo;
-    this.caseTypeDefaultRepo = caseTypeDefaultRepo;
     this.collectRepo = collectRepo;
     this.sampleLinkRepository = sampleLinkRepository;
     this.actionSvcClient = actionSvcClient;
@@ -254,46 +240,6 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Find case types associated to a collection exercise from the Collection Exercise Service
-   *
-   * @param collectionExercise the collection exercise for which to find case types
-   * @return the associated case type DTOs.
-   */
-  public Collection<CaseType> getCaseTypesList(CollectionExercise collectionExercise) {
-
-    List<CaseTypeDefault> caseTypeDefaultList =
-        caseTypeDefaultRepo.findBySurveyId(collectionExercise.getSurveyId());
-
-    List<CaseTypeOverride> caseTypeOverrideList =
-        caseTypeOverrideRepo.findByExerciseFK(collectionExercise.getExercisePK());
-
-    return createCaseTypeList(caseTypeDefaultList, caseTypeOverrideList);
-  }
-
-  /**
-   * Creates a Collection of CaseTypes
-   *
-   * @param caseTypeDefaultList List of caseTypeDefaults
-   * @param caseTypeOverrideList List of caseTypeOverrides
-   * @return Collection<CaseType> Collection of CaseTypes
-   */
-  public Collection<CaseType> createCaseTypeList(
-      List<? extends CaseType> caseTypeDefaultList, List<? extends CaseType> caseTypeOverrideList) {
-
-    Map<String, CaseType> defaultMap = new HashMap<>();
-
-    for (CaseType caseTypeDefault : caseTypeDefaultList) {
-      defaultMap.put(caseTypeDefault.getSampleUnitTypeFK(), caseTypeDefault);
-    }
-
-    for (CaseType caseTypeOverride : caseTypeOverrideList) {
-      defaultMap.put(caseTypeOverride.getSampleUnitTypeFK(), caseTypeOverride);
-    }
-
-    return defaultMap.values();
-  }
-
-  /**
    * Delete existing SampleSummary links for input CollectionExercise then link all SampleSummaries
    * in list to CollectionExercise
    *
@@ -376,7 +322,7 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Create collection exercise This will also create the required action plans and casetypeoverride
+   * Create collection exercise.
    *
    * @param collex the data to create the collection exercise from
    * @param survey representation of the survey for the given collection exercise
@@ -439,7 +385,7 @@ public class CollectionExerciseService {
 
       // If period/survey not supplied in patchData then this call will trivially return
       validateUniqueness(collex, proposedPeriod, proposedSurvey);
-      SurveyDTO survey = null;
+      SurveyDTO survey;
       if (!StringUtils.isBlank(patchData.getSurveyId())) {
         UUID surveyId = UUID.fromString(patchData.getSurveyId());
 

@@ -55,8 +55,6 @@ public class CollectionExerciseDTO {
 
   private CollectionExerciseDTO.CollectionExerciseState state;
 
-  private List<CaseTypeDTO> caseTypes;
-
   @NotNull(groups = {PostValidation.class, PutValidation.class})
   @Pattern(
       regexp = "^[0-9]{1,6}$",

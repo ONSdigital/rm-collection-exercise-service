@@ -15,45 +15,29 @@ logging:
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
-liquibase:
-  user: postgres
-  password: postgres
-  default-schema: collectionexercise
-  url: jdbc:postgresql://localhost:6432/postgres
-  changeLog: classpath:/database/changelog-master.yml
-
-security:
-  basic:
-    enabled: true
-    realm: sdc
-  user:
-    name: admin
-    password: secret
-
-management:
-  security:
-    role: SUPERUSER
-    enabled: true
-  health:
-    mongo:
-      enabled: true
-    rabbit:
-      enabled: false
-
 server:
   port: 8145
-  servlet-path: /
-
-endpoints:
-  info:
-    enabled: true
-    sensitive: false
-  enabled: true
 
 spring:
+  main:
+    # Added as part of upgrade to 2.1 to quiet a an error where the 'restExceptionHandler' bean is defined twice.
+    allow-bean-definition-overriding: true
+
+  liquibase:
+    user: postgres
+    password: postgres
+    default-schema: collectionexercise
+    url: jdbc:postgresql://localhost:6432/postgres
+    change-log: classpath:/database/changelog-master.yml
+
   output:
     ansi:
       enabled: never
+
+  security:
+    user:
+      name: admin
+      password: secret
     
   application:
     name: ONS CollectionExerciseSvc
@@ -69,14 +53,18 @@ spring:
       max-active: 10
       max-idle: 5
       min-idle: 3
+    initialization-mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
-    show-sql: false
     properties:
       hibernate:
         ddl-auto: update
         default_schema: collectionexercise
+
+    # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true and we weren't setting
+    # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
+    open-in-view: true
 
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests

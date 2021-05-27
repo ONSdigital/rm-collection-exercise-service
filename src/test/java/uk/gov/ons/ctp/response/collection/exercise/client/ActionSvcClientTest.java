@@ -1,7 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +60,7 @@ public class ActionSvcClientTest {
     boolean result = actionSvcRestClient.processEvent(EVENT_TAG, COLLECTION_EXERCISE_UUID);
 
     // Then
-    verify(restTemplate, times(1)).postForEntity(any(URI.class), any(HttpEntity.class), any(null));
+    verify(restTemplate, times(1)).postForEntity(any(URI.class), any(HttpEntity.class), any());
     assertTrue(result);
   }
 

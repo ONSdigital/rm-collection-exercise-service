@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import ma.glasnost.orika.MapperFacade;
@@ -46,8 +45,6 @@ import uk.gov.ons.ctp.lib.common.matcher.DateMatcher;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseType;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CaseTypeDefault;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -82,14 +79,11 @@ public class CollectionExerciseEndpointUnitTests {
   private static final String COLLECTIONEXERCISE_DATE_OUTPUT = "2017-05-15T12:00:00.000+01:00";
 
   private static final String COLLECTIONEXERCISE_STATE = ("EXECUTED");
-  private static final UUID ACTIONPLANID = UUID.fromString("2de9d435-7d99-4819-9af8-5942f515500b");
 
   private static final UUID SURVEY_IDNOTFOUND =
       UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff5e");
   private static final UUID COLLECTIONEXERCISE_IDNOTFOUND =
       UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff6e");
-  private static final UUID Party_IDNOTFOUND =
-      UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
 
   private static final UUID SAMPLE_SUMMARY_ID1 =
       UUID.fromString("87043936-4d38-4696-952a-fcd55a51be96");
@@ -121,7 +115,6 @@ public class CollectionExerciseEndpointUnitTests {
   private List<CollectionExercise> collectionExerciseResultsSurvey1;
   private List<CollectionExercise> collectionExerciseResultsSurvey2;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
-  private Collection<CaseType> caseTypeDefaultResults;
   private List<LinkedSampleSummariesDTO> linkedSampleSummaries;
   private List<SampleLink> sampleLink;
 
@@ -156,11 +149,6 @@ public class CollectionExerciseEndpointUnitTests {
         FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
     this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
     this.sampleLink = FixtureHelper.loadClassFixtures(SampleLink[].class);
-    this.caseTypeDefaultResults = new ArrayList<>();
-    List<CaseTypeDefault> defaults = FixtureHelper.loadClassFixtures(CaseTypeDefault[].class);
-    for (CaseTypeDefault caseTypeDefault : defaults) {
-      caseTypeDefaultResults.add(caseTypeDefault);
-    }
   }
 
   /**
@@ -291,8 +279,6 @@ public class CollectionExerciseEndpointUnitTests {
   public void findCollectionExercise() throws Exception {
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
         .thenReturn(collectionExerciseResults.get(0));
-    when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
-        .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
         .thenReturn(surveyDtoResults.get(0));
 
@@ -311,11 +297,7 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().methodName("getCollectionExercise"))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
-        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
-        .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
-        .andExpect(jsonPath("$.caseTypes[*].*", hasSize(2)))
-        .andExpect(
-            jsonPath("$.caseTypes[*].actionPlanId", containsInAnyOrder(ACTIONPLANID.toString())));
+        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)));
   }
 
   /**
@@ -346,8 +328,6 @@ public class CollectionExerciseEndpointUnitTests {
           throws Exception {
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
         .thenReturn(collectionExerciseResults.get(0));
-    when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
-        .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
         .thenReturn(surveyDtoResults.get(0));
     when(eventService.getEvents(COLLECTIONEXERCISE_ID1))
@@ -363,11 +343,7 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(handler().methodName("getCollectionExercise"))
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
-        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
-        .andExpect(jsonPath("$.caseTypes[*]", hasSize(1)))
-        .andExpect(jsonPath("$.caseTypes[*].*", hasSize(2)))
-        .andExpect(
-            jsonPath("$.caseTypes[*].actionPlanId", containsInAnyOrder(ACTIONPLANID.toString())));
+        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)));
   }
 
   /**
@@ -381,8 +357,6 @@ public class CollectionExerciseEndpointUnitTests {
         .thenReturn(collectionExerciseResults);
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
         .thenReturn(collectionExerciseResults.get(0));
-    when(collectionExerciseService.getCaseTypesList(collectionExerciseResults.get(0)))
-        .thenReturn(caseTypeDefaultResults);
     when(surveyService.findSurvey(SURVEY_ID_1)).thenReturn(surveyDtoResults.get(0));
     when(surveyService.findSurvey(SURVEY_ID_2)).thenReturn(surveyDtoResults.get(1));
 

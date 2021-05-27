@@ -1,8 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -57,7 +57,7 @@ public class CollectionInstrumentSvcClientTest {
   }
 
   @Test
-  public void createActionPlan_201Response() {
+  public void getCollectionInstruments_200Response() {
     // Given
     ResponseEntity<List<CollectionInstrumentDTO>> responseEntity =
         new ResponseEntity<>(collectionInstruments, HttpStatus.CREATED);
@@ -81,7 +81,7 @@ public class CollectionInstrumentSvcClientTest {
   }
 
   @Test(expected = HttpClientErrorException.class)
-  public void createActionPlan_500Response() {
+  public void getCollectionInstruments_500Response() {
     // Given
     when(restTemplate.exchange(
             any(URI.class),

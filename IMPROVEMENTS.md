@@ -27,36 +27,12 @@
    It receives data from response operation UI to create a new collection exercise record over the endpoint
    `/collectionexercises`. At this point a service gives a call to survey-svc to retrieve existing survey based on 
    `surveyId` or `surveyref` present in the reqest body, if the survery exists the service looks for an existing 
-   collection exercise and if not present it creates a record to `collectionexercise` table. At this point service
-   gives call to [create action plan](#creation-of-action-plan).
-   * ##### creation of action plan: 
-        The service checks for the survey type for the collection exercise being created. 
-        - if `SurveyType == Business`:
-            It [creates default action plan](#default-action-plan) for sample unit type `B` and `BI` and then 
-            [overrides](#override-action-plan) it.
-        - if `SurveyType == Social`:
-            It [creates default action plan](#default-action-plan) for sample unit type `H` and then 
-             [overrides](#override-action-plan) it.
-        - if `SurveryType == Cencus`:
-            It throws an exception `Census surveys not supported... yet!` 
-            
-            * ##### default action plan :
-                The service looks for an existing record in `casetypedefault` table against `surveyId` and 
-                `sampleUnitType`, if doesn't exist it gives a call to the action service to create a new action 
-                plan with null selectors and creates a record to `casetypedefault` table with `surveyId` 
-                and `sampleUnitType`. 
-            * ##### override action plan :
-                 The service looks for an existing record in `casetypeoveride` table against 
-                 `collection exercise parent key` and `sampleUnitType`, if doesn't exist it gives a call to the action 
-                 service to create an action plan with selectors as activeEnrolment and collectionExerciseId, 
-                 it then creates a record to `casetypeoveride` table with `collection exercise parent key` and 
-                 `sampleUnitType`. 
+   collection exercise and if not present it creates a record to `collectionexercise` table. 
    
    It receives data from response operation UI to create an event against an existing collection exercise record over 
    the endpoint `/collectionexercises/{id}/events`. At this point eventservice looks for an existing collection exercise
    if it exists and if the event with the same tag does not exist, a validation is performed for respective event tag.
-   Once the validation passes, it gives a call to the action service to add action rule for the event tag against the 
-   action plan created for collection exercise and creates a record to `event` table. At this point
+   Once the validation passes, it  creates a record to `event` table. At this point
    a request to event change request handler is given, which publishes the event to the message queue. 
    After which the schedular is called to schedule a collection exercise event. Events also follow defined state i.e.
    `CREADED`, `UPDATED`, `DELETED`, `EventElapsed`.
@@ -124,10 +100,6 @@
    This table holds Business/Social sample unit type as `sampleunittypepk`
    #### `sampleunit`
    This table holds sample units with `sampleunitgroupfk` as `sampleunitgrouppk` and `sampleunittypefk` as `sampleunit.sampleunittypepk`
-   #### `casetypedefault`
-   Holds actionplan id and survey id
-   #### `casetypeoverride`
-   Holds association between collection exercise and action plan id
    #### `samplelink`
    Holds collection-exercise and sample summary id
    

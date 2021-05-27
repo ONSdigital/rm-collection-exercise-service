@@ -78,7 +78,7 @@ public class ExerciseSampleUnitGroupService {
       log.with("sample_unit_group_pk", sampleUnitGroup.getSampleUnitGroupPK())
           .warn("No sampleUnits updated for SampleUnitGroup");
     } else {
-      sampleUnitRepo.save(sampleUnits);
+      sampleUnitRepo.saveAll(sampleUnits);
     }
     return savedExerciseSampleUnitGroup;
   }

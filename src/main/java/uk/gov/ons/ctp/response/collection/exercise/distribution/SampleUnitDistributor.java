@@ -167,7 +167,7 @@ public class SampleUnitDistributor {
                 SampleUnitGroupDTO.SampleUnitGroupState.VALIDATED,
                 exercise,
                 excludedGroups,
-                new PageRequest(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
+                PageRequest.of(0, appConfig.getSchedules().getDistributionScheduleRetrievalMax()));
 
     if (!CollectionUtils.isEmpty(sampleUnitGroups)) {
       List<Integer> sampleUnitGroupPKs =

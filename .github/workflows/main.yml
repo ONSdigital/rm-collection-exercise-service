@@ -11,7 +11,6 @@ on:
     branches: [ main ]
     paths-ignore:
       - _infra/spinnaker/**
-      - _infra/helm/collection-exercise/Chart.yaml
 
 env:
   IMAGE: collection-exercise
@@ -45,16 +44,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Run Tests
-        run: |
-          mvn fmt:check
-          mvn clean verify
-      - uses: google-github-actions/setup-gcloud@master
+      - name: gcloud setup
+        uses: google-github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GCR_KEY }}
         # Configure docker to use the gcloud command-line tool as a credential helper
-      - run: |
+      - name: Configure GCR
+        run: |
           gcloud auth configure-docker
+
+      - name: Run Tests
+        run: |
+          export LD_LIBRARY_PATH=/usr/local/lib
+          mvn fmt:check
+          mvn clean verify
 
       - name: pr docker tag
         if: github.ref != 'refs/heads/main'
@@ -143,12 +146,13 @@ jobs:
       - name: Build Release Image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }} .
+          docker build -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":latest -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }} .
       - name: Push Release image
         if: github.ref == 'refs/heads/main'
         run: |
           docker push "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }}
-      
+          docker push "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":latest
+
       - name: Publish Charts
         if: github.ref == 'refs/heads/main'
         run: |

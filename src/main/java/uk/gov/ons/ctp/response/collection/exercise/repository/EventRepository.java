@@ -16,16 +16,9 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
 
   List<Event> findByCollectionExerciseId(UUID collexId);
 
-  List<Event> findByCollectionExerciseId(List<UUID> collexId);
+  List<Event> findByCollectionExerciseIdIn(List<UUID> collexId);
 
   List<Event> findByStatus(EventDTO.Status status);
-
-  /**
-   * Find events where elapsed message has already been sent
-   *
-   * @return the list of matching events
-   */
-  List<Event> findByMessageSentNotNull();
 
   /**
    * Find events where elapsed message has not been sent

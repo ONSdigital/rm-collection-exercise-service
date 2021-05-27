@@ -146,7 +146,7 @@ public class EventService {
   }
 
   public List<Event> getEvents(List<UUID> collexIds) throws CTPException {
-    return this.eventRepository.findByCollectionExerciseId(collexIds);
+    return this.eventRepository.findByCollectionExerciseIdIn(collexIds);
   }
 
   public ResponseEventDTO updateEvent(final UUID collexUuid, final String tag, final Date date)
