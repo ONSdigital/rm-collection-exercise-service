@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class GCP {
   String project;
-  String sampleDistributionTopic;
+  String caseNotificationTopic;
 }

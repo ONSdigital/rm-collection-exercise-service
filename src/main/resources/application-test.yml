@@ -34,4 +34,4 @@ rabbitmq:
 
 gcp:
   project: "test"
-  sampleDistributionTopic: "test_topic"
+  caseNotificationTopic: "test_topic"

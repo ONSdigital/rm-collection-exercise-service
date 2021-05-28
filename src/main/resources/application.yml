@@ -189,4 +189,4 @@ springdoc:
 
 gcp:
   project: ras-rm-sandbox
-  sampleDistributionTopic: "test_topic"
+  caseNotificationTopic: "test_topic"

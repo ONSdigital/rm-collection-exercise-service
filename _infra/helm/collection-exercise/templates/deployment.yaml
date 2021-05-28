@@ -21,8 +21,11 @@ spec:
         helmVersion: {{ .Chart.Version }}
         env: {{ .Values.env }}
     spec:
-      {{- if .Values.database.sqlProxyEnabled }}
       volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: google-application-credentials
+        {{- if .Values.database.sqlProxyEnabled }}
         - name: cloudsql-instance-credentials
           secret:
             secretName: cloudsql-proxy-credentials
@@ -30,7 +33,7 @@ spec:
             items:
             - key: "credentials.json"
               path: "credentials.json"
-      {{- end }}
+        {{- end }}
       containers:
         {{- if .Values.database.sqlProxyEnabled }}
         - name: cloudsql-proxy
@@ -289,5 +292,9 @@ spec:
             value: "{{ .Values.tomcat.maxIdle }}"
           - name: SPRING_DATASOURCE_TOMCAT_MIN_IDLE
             value: "{{ .Values.tomcat.minIdle }}"
+          - name: GCP_PROJECT
+            value: "{{ .Values.gcp.project }}"
+          - name: GCP_SAMPLEDISTRIBUTIONTOPIC
+            value: "{{ .Values.gcp.caseNotificationTopic }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

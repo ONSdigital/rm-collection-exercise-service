@@ -32,7 +32,7 @@ public class PubSub {
 
   public Publisher sampleUnitPublisher() throws IOException {
     return publisherSupplier(
-        appConfig.getGcp().getProject(), appConfig.getGcp().getSampleDistributionTopic());
+        appConfig.getGcp().getProject(), appConfig.getGcp().getCaseNotificationTopic());
   }
 
   public void shutdown() {
