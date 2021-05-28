@@ -36,7 +36,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -272,6 +271,7 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
+    pubSubEmulator.testInit();
     stubSurveyServiceBusiness();
     stubGetPartyNoAssociations();
     stubCollectionInstrumentCount();
@@ -279,16 +279,19 @@ public class CollectionExerciseEndpointIT {
     SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+    pubSubEmulator.testTeardown();
   }
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
+    pubSubEmulator.testInit();
     stubSurveyServiceBusiness();
     stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
     SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+    pubSubEmulator.testTeardown();
   }
 
   private SampleUnitParentDTO ensureSampleUnitIdIsPropagatedHere(String type) throws Exception {
@@ -308,9 +311,6 @@ public class CollectionExerciseEndpointIT {
     if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) {
       sampleUnit.setFormType("");
     }
-
-    // sampleUnit.setSampleAttributes(new SampleUnit.SampleAttributes(new ArrayList<>()));
-
     setSampleSize(collex, 1);
     setState(collex, CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
 
@@ -335,19 +335,12 @@ public class CollectionExerciseEndpointIT {
                           .basicAuth("admin", "secret")
                           .header("accept", "application/json")
                           .asString();
-                  assertThat(distributeResponse.getStatus(), Matchers.is(200));
-                  assertThat(
-                      distributeResponse.getBody(),
-                      Matchers.is("Completed sample unit validation"));
-
                   HttpResponse<String> response =
                       Unirest.get(
                               "http://localhost:" + threadPort + "/cron/sample-unit-distribution")
                           .basicAuth("admin", "secret")
                           .header("accept", "application/json")
                           .asString();
-                  assertThat(response.getStatus(), Matchers.is(200));
-                  assertThat(response.getBody(), Matchers.is("Completed sample unit distribution"));
                 }
               } catch (Exception e) {
                 log.error("exception in thread", e);
