@@ -36,7 +36,6 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
-import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.LockingException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -54,10 +53,12 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 /** Tests for the SampleUnitDistributor */
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class SampleUnitDistributorTest {
 
   private static final Integer DISTRIBUTION_SCHEDULE_RETRIEVAL_MAX = 10;
@@ -181,10 +182,10 @@ public class SampleUnitDistributorTest {
 
     // Then both sample units are published and
     // sample unit groups and collection exercise are transitioned
-    ArgumentCaptor<SampleUnitParent> sampleUnitParentSave =
-        ArgumentCaptor.forClass(SampleUnitParent.class);
+    ArgumentCaptor<SampleUnitParentDTO> sampleUnitParentSave =
+        ArgumentCaptor.forClass(SampleUnitParentDTO.class);
     verify(publisher, times(2)).sendSampleUnit(sampleUnitParentSave.capture());
-    List<SampleUnitParent> savedSampleUnitParents = sampleUnitParentSave.getAllValues();
+    List<SampleUnitParentDTO> savedSampleUnitParents = sampleUnitParentSave.getAllValues();
     savedSampleUnitParents.forEach(
         sampleUnitParent -> {
           assertEquals(SAMPLE_UNIT_REF, sampleUnitParent.getSampleUnitRef());
@@ -192,8 +193,8 @@ public class SampleUnitDistributorTest {
           assertEquals(PARTY_ID_PARENT, sampleUnitParent.getPartyId());
           assertEquals(COLLECTION_INSTRUMENT_ID, sampleUnitParent.getCollectionInstrumentId());
           assertEquals(COLLECTION_EXERCISE_ID, sampleUnitParent.getCollectionExerciseId());
-          assertTrue(sampleUnitParent.getActiveEnrolment());
-          assertNull(sampleUnitParent.getSampleUnitChildren());
+          assertTrue(sampleUnitParent.isActiveEnrolment());
+          assertNull(sampleUnitParent.getSampleUnitChildrenDTO());
         });
 
     ArgumentCaptor<ExerciseSampleUnitGroup> sampleUnitGroupSave =
@@ -318,7 +319,7 @@ public class SampleUnitDistributorTest {
     sampleUnitDistributor.distributeSampleUnits(collectionExercise);
 
     // Then sampleunits are published but collection exercise is not transitioned
-    verify(publisher, times(2)).sendSampleUnit(any(SampleUnitParent.class));
+    verify(publisher, times(2)).sendSampleUnit(any(SampleUnitParentDTO.class));
     verify(sampleUnitGroupRepo, times(2)).saveAndFlush(any(ExerciseSampleUnitGroup.class));
     verify(collectionExerciseRepo, never()).saveAndFlush(any());
   }

@@ -186,3 +186,7 @@ springdoc:
     path: /api-doc.html
     operationsSorter: method
     enabled: false
+
+gcp:
+  project: ras-rm-sandbox
+  sampleDistributionTopic: "test_topic"

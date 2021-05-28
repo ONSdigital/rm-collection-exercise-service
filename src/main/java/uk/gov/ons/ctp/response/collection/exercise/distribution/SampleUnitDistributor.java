@@ -21,7 +21,6 @@ import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
-import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.DistributedListManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.LockingException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -40,6 +39,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 
 /** Class responsible for business logic to distribute SampleUnits. */
@@ -197,7 +197,7 @@ public class SampleUnitDistributor {
   private void distributeSampleUnitGroup(
       CollectionExercise exercise, ExerciseSampleUnitGroup sampleUnitGroup) throws CTPException {
     ExerciseSampleUnit sampleUnit = sampleUnitRepo.findBySampleUnitGroup(sampleUnitGroup).get(0);
-    SampleUnitParent sampleUnitParent;
+    SampleUnitParentDTO sampleUnitParent;
 
     boolean activeEnrolment = hasActiveEnrolment(sampleUnit, exercise);
     sampleUnitParent = sampleUnit.toSampleUnitParent(activeEnrolment, exercise.getId());
@@ -244,7 +244,7 @@ public class SampleUnitDistributor {
    * @param sampleUnitMessage to publish.
    */
   private void publishSampleUnitToCase(
-      ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParent sampleUnitMessage) {
+      ExerciseSampleUnitGroup sampleUnitGroup, SampleUnitParentDTO sampleUnitMessage) {
 
     transactionTemplate.execute(
         new TransactionCallbackWithoutResult() {

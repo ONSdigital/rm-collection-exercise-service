@@ -16,7 +16,6 @@ import com.godaddy.logging.LoggerFactory;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.thoughtworks.xstream.XStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -43,6 +41,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -53,7 +52,6 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageBase;
@@ -61,6 +59,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageListe
 import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
+import uk.gov.ons.ctp.response.collection.exercise.message.TestPubSubMessage;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -69,8 +68,10 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitReposito
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 
 /** A class to contain integration tests for the collection exercise service */
@@ -109,10 +110,17 @@ public class CollectionExerciseEndpointIT {
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
   @ClassRule
+  public static final EnvironmentVariables environmentVariables =
+      new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
+
+  @ClassRule
   public static WireMockClassRule wireMockRule =
       new WireMockClassRule(options().port(18002).bindAddress("localhost"));
 
   private CollectionExerciseClient client;
+  private PubSubEmulator pubSubEmulator = new PubSubEmulator();
+
+  public CollectionExerciseEndpointIT() throws IOException {}
 
   /** Method to set up integration test */
   @Before
@@ -268,7 +276,7 @@ public class CollectionExerciseEndpointIT {
     stubGetPartyNoAssociations();
     stubCollectionInstrumentCount();
 
-    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
+    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
   }
@@ -278,12 +286,12 @@ public class CollectionExerciseEndpointIT {
     stubSurveyServiceBusiness();
     stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
-    SampleUnitParent sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
+    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
 
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
   }
 
-  private SampleUnitParent ensureSampleUnitIdIsPropagatedHere(String type) throws Exception {
+  private SampleUnitParentDTO ensureSampleUnitIdIsPropagatedHere(String type) throws Exception {
     createCollectionInstrumentStub();
 
     SampleUnit sampleUnit = new SampleUnit();
@@ -306,12 +314,7 @@ public class CollectionExerciseEndpointIT {
     setSampleSize(collex, 1);
     setState(collex, CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
 
-    SimpleMessageListener listener = getMessageListener();
-    BlockingQueue<String> queue =
-        listener.listen(
-            SimpleMessageBase.ExchangeType.Direct,
-            "collection-outbound-exchange",
-            "Case.CaseDelivery.binding");
+    TestPubSubMessage message = new TestPubSubMessage();
 
     String xml = sampleUnitToXmlString(sampleUnit);
 
@@ -351,27 +354,13 @@ public class CollectionExerciseEndpointIT {
               }
             });
     thread.start();
-    // The service stubs will exit once the call below times out preventing further debugging of
-    // this test in other
-    // threads (i.e. you have 2 minutes to debug before the service calls will start to fail)
-    String message = queue.poll(2, TimeUnit.MINUTES);
-    // If you need more than 2 minutes to debug this test, then either change the timeout above or
-    // comment that line
-    // and uncomment the one below (which gives infinite time).
-    // String message = queue.take();
+    SampleUnitParentDTO sampleUnitMessage = message.getPubSubSampleUnitMessage();
     log.info("message = " + message);
-    assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", message);
+    assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", sampleUnitMessage);
 
-    JAXBContext jaxbContext = JAXBContext.newInstance(SampleUnitParent.class);
-    SampleUnitParent sampleUnitParent =
-        (SampleUnitParent)
-            jaxbContext
-                .createUnmarshaller()
-                .unmarshal(new ByteArrayInputStream(message.getBytes()));
+    assertEquals(id, UUID.fromString(sampleUnitMessage.getId()));
 
-    assertEquals(id, UUID.fromString(sampleUnitParent.getId()));
-
-    return sampleUnitParent;
+    return sampleUnitMessage;
   }
 
   private EventDTO createEventDTO(
