@@ -294,7 +294,7 @@ spec:
             value: "{{ .Values.tomcat.minIdle }}"
           - name: GCP_PROJECT
             value: "{{ .Values.gcp.project }}"
-          - name: GCP_SAMPLEDISTRIBUTIONTOPIC
+          - name: GCP_CASENOTIFICATIONTOPIC
             value: "{{ .Values.gcp.caseNotificationTopic }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}
