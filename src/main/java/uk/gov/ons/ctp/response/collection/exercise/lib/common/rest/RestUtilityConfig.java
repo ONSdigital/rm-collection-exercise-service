@@ -13,9 +13,9 @@ import net.sourceforge.cobertura.CoverageIgnore;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RestUtilityConfig {
-  private String scheme = "http";
-  private String host = "localhost";
-  private String port = "8080";
+  @Builder.Default private String scheme = "http";
+  @Builder.Default private String host = "localhost";
+  @Builder.Default private String port = "8080";
   private String username;
   private String password;
 }

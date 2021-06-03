@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnit;
-import uk.gov.ons.ctp.response.collection.exercise.lib.casesvc.message.sampleunitnotification.SampleUnitParent;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnit;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
 
 /** Domain model object for sample units. */
 @CoverageIgnore
@@ -61,9 +61,9 @@ public class ExerciseSampleUnit {
   @Column(name = "sampleunittypefk")
   private SampleUnitDTO.SampleUnitType sampleUnitType;
 
-  public SampleUnitParent toSampleUnitParent(
+  public SampleUnitParentDTO toSampleUnitParent(
       final boolean activeEnrolment, final UUID collectionExerciseId) {
-    final SampleUnitParent parent = new SampleUnitParent();
+    final SampleUnitParentDTO parent = new SampleUnitParentDTO();
     populateSampleUnit(activeEnrolment, parent);
     parent.setCollectionExerciseId(collectionExerciseId.toString());
 

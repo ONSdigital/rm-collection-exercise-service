@@ -31,3 +31,7 @@ redisson-config:
 rabbitmq:
   host: localhost
   port: 35672
+
+gcp:
+  project: "test"
+  caseNotificationTopic: "test_topic"
