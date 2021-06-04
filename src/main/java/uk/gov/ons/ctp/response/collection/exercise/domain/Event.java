@@ -39,7 +39,7 @@ public class Event {
   private Timestamp timestamp;
 
   @ManyToOne
-  @JoinColumn(name = "collex_fk", referencedColumnName = "exercisePK")
+  @JoinColumn(name = "exercise_fk", referencedColumnName = "exercise_PK")
   private CollectionExercise collectionExercise;
 
   private Timestamp created;
