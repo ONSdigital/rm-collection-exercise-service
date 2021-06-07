@@ -65,6 +65,14 @@ public class PubSubEmulator {
         .build();
   }
 
+  public Subscriber getSampleUnitEmulatorSubscriber(MessageReceiver receiver) {
+    return Subscriber.newBuilder(
+            ProjectSubscriptionName.of(PROJECT_ID, "sample_unit_subscription"), receiver)
+        .setChannelProvider(CHANNEL_PROVIDER)
+        .setCredentialsProvider(CREDENTIAL_PROVIDER)
+        .build();
+  }
+
   public GrpcSubscriberStub getEmulatorSubscriberStub() throws IOException {
     return GrpcSubscriberStub.create(
         SubscriberStubSettings.newBuilder()
@@ -73,11 +81,11 @@ public class PubSubEmulator {
             .build());
   }
 
-  public void publishMessage(String message) {
+  public void publishMessage(String message, String topicId) {
     try {
       ByteString data = ByteString.copyFromUtf8(message);
       PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-      TopicName topicName = TopicName.of(PROJECT_ID, TOPIC_ID);
+      TopicName topicName = TopicName.of(PROJECT_ID, topicId);
       Publisher publisher = getEmulatorPublisher(topicName);
       log.with("publisher", publisher).info("Publishing message to pubsub emulator");
       ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);

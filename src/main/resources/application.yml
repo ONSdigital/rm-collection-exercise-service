@@ -190,3 +190,4 @@ springdoc:
 gcp:
   project: ras-rm-sandbox
   caseNotificationTopic: "test_topic"
+  sampleUnitReceiverSubscription: "test_subscription"
