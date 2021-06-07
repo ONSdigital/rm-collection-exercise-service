@@ -20,7 +20,7 @@ ALTER TABLE collectionexercise.collectionexercisestate RENAME COLUMN statepk TO 
 
 ALTER TABLE collectionexercise.sampleunit RENAME COLUMN sampleunitpk TO sample_unit_pk;
 ALTER TABLE collectionexercise.sampleunit RENAME COLUMN sampleunitgroupfk TO sample_unit_group_fk;
-ALTER TABLE collectionexercise.sampleunit RENAME COLUMN collectioninstrumentid TO collection+instrument_id;
+ALTER TABLE collectionexercise.sampleunit RENAME COLUMN collectioninstrumentid TO collection_instrument_id;
 ALTER TABLE collectionexercise.sampleunit RENAME COLUMN partyid TO party_id;
 ALTER TABLE collectionexercise.sampleunit RENAME COLUMN sampleunitref TO sample_unit_ref;
 ALTER TABLE collectionexercise.sampleunit RENAME COLUMN sampleunittypefk TO sample_unit_type_fk;
