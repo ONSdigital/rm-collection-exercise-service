@@ -13,11 +13,6 @@ ALTER TABLE collectionexercise.collectionexercise RENAME COLUMN samplesize TO sa
 ALTER TABLE collectionexercise.collectionexercise RENAME COLUMN exerciseref TO exercise_ref;
 ALTER TABLE collectionexercise.collectionexercise RENAME COLUMN survey_uuid TO survey_id;
 
-ALTER TABLE collectionexercise.casetypeoverride RENAME COLUMN casetypeoverridepk TO case_type_override_pk;
-ALTER TABLE collectionexercise.casetypeoverride RENAME COLUMN exercisefk TO exercise_fk;
-ALTER TABLE collectionexercise.casetypeoverride RENAME COLUMN sampleunittypefk TO sample_unit_type_fk;
-ALTER TABLE collectionexercise.casetypeoverride RENAME COLUMN actionplanid TO action_plan_id;
-
 ALTER TABLE collectionexercise.event RENAME COLUMN eventpk TO event_pk;
 ALTER TABLE collectionexercise.event RENAME COLUMN collexfk TO exercise_fk;
 
@@ -38,11 +33,6 @@ ALTER TABLE collectionexercise.sampleunitgroup RENAME COLUMN createddatetime TO 
 ALTER TABLE collectionexercise.sampleunitgroup RENAME COLUMN modifieddatetime TO modified_date_time;
 
 ALTER TABLE collectionexercise.sampleunitgroupstate RENAME COLUMN statepk TO state_pk;
-
-ALTER TABLE collectionexercise.casetypedefault RENAME COLUMN casetypedefaultpk TO case_type_default_pk;
-ALTER TABLE collectionexercise.casetypedefault RENAME COLUMN sampleunittypepk TO sample_unit_type_pk;
-ALTER TABLE collectionexercise.casetypedefault RENAME COLUMN actionplanid TO action_plan_id;
-ALTER TABLE collectionexercise.casetypedefault RENAME COLUMN survey_uuid TO survey_id;
 
 ALTER TABLE collectionexercise.sampleunittype RENAME COLUMN sampleunittypepk TO sample_unit_type_pk;
 
