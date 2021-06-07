@@ -291,7 +291,7 @@ public class CollectionExerciseEndpointIT {
     stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
     UUID id = publishMockSampleUnit("B");
-    Thread.sleep(20000);// Provided a sleep, as by the time emulator publishes the message,
+    Thread.sleep(20000); // Provided a sleep, as by the time emulator publishes the message,
     // ensureSampleUnitIdIsPropagatedHere() gets kicked in and fails.
     SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
