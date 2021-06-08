@@ -35,9 +35,10 @@ public class CachingTestIT {
   @Autowired private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
   private static final Logger log = LoggerFactory.getLogger(CachingTestIT.class);
+
   @ClassRule
   public static final EnvironmentVariables environmentVariables =
-    new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
+      new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
