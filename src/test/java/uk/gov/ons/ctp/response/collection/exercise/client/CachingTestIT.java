@@ -18,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,6 +35,9 @@ public class CachingTestIT {
   @Autowired private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
   private static final Logger log = LoggerFactory.getLogger(CachingTestIT.class);
+  @ClassRule
+  public static final EnvironmentVariables environmentVariables =
+    new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
