@@ -123,6 +123,10 @@ spec:
               secretKeyRef:
                 name: db-credentials
                 key: {{ .Values.database.secrets.passwordKey }}
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/credentials.json
+          - name: GOOGLE_CLOUD_PROJECT
+            value: "{{ .Values.gcp.project }}"
           - name: SECURITY_USER_NAME
             valueFrom:
               secretKeyRef:
@@ -295,10 +299,6 @@ spec:
             value: "{{ .Values.tomcat.maxIdle }}"
           - name: SPRING_DATASOURCE_TOMCAT_MIN_IDLE
             value: "{{ .Values.tomcat.minIdle }}"
-          - name: GOOGLE_APPLICATION_CREDENTIALS
-            value: /var/secrets/google/credentials.json
-          - name: GOOGLE_CLOUD_PROJECT
-            value: "{{ .Values.gcp.project }}"
           - name: GCP_PROJECT
             value: "{{ .Values.gcp.project }}"
           - name: GCP_CASENOTIFICATIONTOPIC
