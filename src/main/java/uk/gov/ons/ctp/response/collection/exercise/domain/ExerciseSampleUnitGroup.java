@@ -46,6 +46,7 @@ public class ExerciseSampleUnitGroup {
   private String formType;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "state_fk")
   private SampleUnitGroupState stateFK;
 
   @Column(name = "created_date_time")
