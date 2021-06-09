@@ -63,15 +63,12 @@ public class SampleServiceTest {
     collex.setSampleSize(99);
     collex.setState(CollectionExerciseState.EXECUTION_STARTED);
 
-    SampleUnit sampleUnit =
-        SampleUnit.builder()
-            .withId(SAMPLE_ID.toString())
-            .withFormType("X")
-            .withSampleUnitRef("REF123")
-            .withSampleUnitType("B")
-            .withCollectionExerciseId(COLLEX_ID.toString())
-            .build();
-
+    SampleUnit sampleUnit = new SampleUnit();
+    sampleUnit.setCollectionExerciseId(COLLEX_ID.toString());
+    sampleUnit.setFormType("X");
+    sampleUnit.setId(SAMPLE_ID.toString());
+    sampleUnit.setSampleUnitType("B");
+    sampleUnit.setSampleUnitRef("REF123");
     when(collectRepo.findOneById(any())).thenReturn(collex);
     when(sampleUnitRepo.existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
             any(), any(), any()))

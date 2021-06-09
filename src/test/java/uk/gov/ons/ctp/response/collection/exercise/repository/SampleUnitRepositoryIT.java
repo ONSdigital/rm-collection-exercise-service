@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,6 +34,11 @@ public class SampleUnitRepositoryIT {
 
   // Gubbins to make spring wire itself up
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+  @ClassRule
+  public static final EnvironmentVariables environmentVariables =
+      new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
+
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
   // Actual stuff that we want injected

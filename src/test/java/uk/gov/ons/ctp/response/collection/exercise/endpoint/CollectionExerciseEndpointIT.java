@@ -275,10 +275,12 @@ public class CollectionExerciseEndpointIT {
     stubSurveyServiceBusiness();
     stubGetPartyNoAssociations();
     stubCollectionInstrumentCount();
-
-    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
-
+    UUID id = publishMockSampleUnit("B");
+    Thread.sleep(20000); // Provided a sleep, as by the time emulator publishes the message,
+    // ensureSampleUnitIdIsPropagatedHere() gets kicked in and fails.
+    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+    assertEquals(id, UUID.fromString(sampleUnit.getId()));
     pubSubEmulator.testTeardown();
   }
 
@@ -288,40 +290,17 @@ public class CollectionExerciseEndpointIT {
     stubSurveyServiceBusiness();
     stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
-    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere("B");
-
+    UUID id = publishMockSampleUnit("B");
+    Thread.sleep(20000); // Provided a sleep, as by the time emulator publishes the message,
+    // ensureSampleUnitIdIsPropagatedHere() gets kicked in and fails.
+    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
+    assertEquals(id, UUID.fromString(sampleUnit.getId()));
     pubSubEmulator.testTeardown();
   }
 
-  private SampleUnitParentDTO ensureSampleUnitIdIsPropagatedHere(String type) throws Exception {
-    createCollectionInstrumentStub();
-
-    SampleUnit sampleUnit = new SampleUnit();
-    UUID id = UUID.randomUUID();
-    SimpleMessageSender sender = getMessageSender();
-
-    CollectionExerciseDTO collex = createCollectionExercise(getRandomRef());
-
-    sampleUnit.setId(id.toString());
-    sampleUnit.setSampleUnitRef("LMS0001");
-    sampleUnit.setCollectionExerciseId(collex.getId().toString());
-    sampleUnit.setSampleUnitType(type);
-
-    if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) {
-      sampleUnit.setFormType("");
-    }
-    setSampleSize(collex, 1);
-    setState(collex, CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
-
+  private SampleUnitParentDTO ensureSampleUnitIdIsPropagatedHere() throws Exception {
     TestPubSubMessage message = new TestPubSubMessage();
-
-    String xml = sampleUnitToXmlString(sampleUnit);
-
-    log.info("xml = " + xml);
-
-    sender.sendMessage("sample-outbound-exchange", "Sample.SampleDelivery.binding", xml);
-
     //// When PlanScheduler and ActionDistributor runs
     final int threadPort = this.port;
     Thread thread =
@@ -350,10 +329,32 @@ public class CollectionExerciseEndpointIT {
     SampleUnitParentDTO sampleUnitMessage = message.getPubSubSampleUnitMessage();
     log.info("message = " + message);
     assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", sampleUnitMessage);
-
-    assertEquals(id, UUID.fromString(sampleUnitMessage.getId()));
-
     return sampleUnitMessage;
+  }
+
+  private UUID publishMockSampleUnit(String type) throws IOException, CTPException {
+    createCollectionInstrumentStub();
+
+    SampleUnit sampleUnit = new SampleUnit();
+    UUID id = UUID.randomUUID();
+
+    CollectionExerciseDTO collex = createCollectionExercise(getRandomRef());
+
+    sampleUnit.setId(id.toString());
+    sampleUnit.setSampleUnitRef("LMS0001");
+    sampleUnit.setCollectionExerciseId(collex.getId().toString());
+    sampleUnit.setSampleUnitType(type);
+
+    if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) {
+      sampleUnit.setFormType("");
+    }
+    setSampleSize(collex, 1);
+    setState(collex, CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
+    PubSubEmulator pubSubEmulator = new PubSubEmulator();
+    ObjectMapper objectMapper = new ObjectMapper();
+    String publishMessage = objectMapper.writeValueAsString(sampleUnit);
+    pubSubEmulator.publishMessage(publishMessage, "sample_unit_topic");
+    return id;
   }
 
   private EventDTO createEventDTO(
