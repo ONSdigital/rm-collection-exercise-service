@@ -42,7 +42,7 @@ public class ExerciseSampleUnit {
   private Integer sampleUnitPK;
 
   @ManyToOne
-  @JoinColumn(name = "sample_unit_group_fk", referencedColumnName = "sampleunitgrouppk")
+  @JoinColumn(name = "sample_unit_group_fk", referencedColumnName = "sample_unit_group_pk")
   private ExerciseSampleUnitGroup sampleUnitGroup;
 
   @Column(name = "id")
