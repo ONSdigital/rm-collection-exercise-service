@@ -29,7 +29,7 @@ public class Event {
         @Parameter(name = "increment_size", value = "1")
       })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventseq_gen")
-  @Column(name = "eventpk")
+  @Column(name = "event_pk")
   private Integer eventPK;
 
   @Column(name = "tag", length = 20)
@@ -39,7 +39,7 @@ public class Event {
   private Timestamp timestamp;
 
   @ManyToOne
-  @JoinColumn(name = "collexfk", referencedColumnName = "exercisePK")
+  @JoinColumn(name = "exercise_fk", referencedColumnName = "exercise_PK")
   private CollectionExercise collectionExercise;
 
   private Timestamp created;

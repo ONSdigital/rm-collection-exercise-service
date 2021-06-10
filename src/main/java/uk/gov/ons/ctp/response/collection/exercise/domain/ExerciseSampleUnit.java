@@ -38,27 +38,27 @@ public class ExerciseSampleUnit {
         @Parameter(name = "increment_size", value = "1")
       })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sampleunitseq_gen")
-  @Column(name = "sampleunitpk")
+  @Column(name = "sample_unit_pk")
   private Integer sampleUnitPK;
 
   @ManyToOne
-  @JoinColumn(name = "sampleunitgroupfk", referencedColumnName = "sampleunitgrouppk")
+  @JoinColumn(name = "sample_unit_group_fk", referencedColumnName = "sample_unit_group_pk")
   private ExerciseSampleUnitGroup sampleUnitGroup;
 
   @Column(name = "id")
   private UUID sampleUnitId;
 
-  @Column(name = "collectioninstrumentid")
+  @Column(name = "collection_instrument_id")
   private UUID collectionInstrumentId;
 
-  @Column(name = "partyid")
+  @Column(name = "party_id")
   private UUID partyId;
 
-  @Column(name = "sampleunitref")
+  @Column(name = "sample_unit_ref")
   private String sampleUnitRef;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "sampleunittypefk")
+  @Column(name = "sample_unit_type_fk")
   private SampleUnitDTO.SampleUnitType sampleUnitType;
 
   public SampleUnitParentDTO toSampleUnitParent(

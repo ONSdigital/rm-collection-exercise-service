@@ -35,22 +35,23 @@ public class ExerciseSampleUnitGroup {
         @Parameter(name = "increment_size", value = "1")
       })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sampleunitgroupseq_gen")
-  @Column(name = "sampleunitgrouppk")
+  @Column(name = "sample_unit_group_pk")
   private Integer sampleUnitGroupPK;
 
   @ManyToOne
-  @JoinColumn(name = "exercisefk", referencedColumnName = "exercisepk")
+  @JoinColumn(name = "exercise_fk", referencedColumnName = "exercise_pk")
   private CollectionExercise collectionExercise;
 
-  @Column(name = "formtype")
+  @Column(name = "form_type")
   private String formType;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "state_fk")
   private SampleUnitGroupState stateFK;
 
-  @Column(name = "createddatetime")
+  @Column(name = "created_date_time")
   private Timestamp createdDateTime;
 
-  @Column(name = "modifieddatetime")
+  @Column(name = "modified_date_time")
   private Timestamp modifiedDateTime;
 }

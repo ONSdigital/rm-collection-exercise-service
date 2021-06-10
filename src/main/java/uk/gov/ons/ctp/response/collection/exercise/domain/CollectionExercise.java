@@ -36,44 +36,44 @@ public class CollectionExercise {
         @Parameter(name = "increment_size", value = "1")
       })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exerciseseq_gen")
-  @Column(name = "exercisepk")
+  @Column(name = "exercise_pk")
   private Integer exercisePK;
 
-  @Column(name = "actualexecutiondatetime")
+  @Column(name = "actual_execution_date_time")
   private Timestamp actualExecutionDateTime;
 
-  @Column(name = "scheduledexecutiondatetime")
+  @Column(name = "scheduled_execution_date_time")
   private Timestamp scheduledExecutionDateTime;
 
-  @Column(name = "scheduledstartdatetime")
+  @Column(name = "scheduled_start_date_time")
   private Timestamp scheduledStartDateTime;
 
-  @Column(name = "actualpublishdatetime")
+  @Column(name = "actual_publish_date_time")
   private Timestamp actualPublishDateTime;
 
-  @Column(name = "periodstartdatetime")
+  @Column(name = "period_start_date_time")
   private Timestamp periodStartDateTime;
 
-  @Column(name = "periodenddatetime")
+  @Column(name = "period_end_date_time")
   private Timestamp periodEndDateTime;
 
-  @Column(name = "scheduledreturndatetime")
+  @Column(name = "scheduled_return_date_time")
   private Timestamp scheduledReturnDateTime;
 
-  @Column(name = "scheduledenddatetime")
+  @Column(name = "scheduled_end_date_time")
   private Timestamp scheduledEndDateTime;
 
-  @Column(name = "executedby")
+  @Column(name = "executed_by")
   private String executedBy;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "statefk")
+  @Column(name = "state_fk")
   private CollectionExerciseDTO.CollectionExerciseState state;
 
-  @Column(name = "samplesize")
+  @Column(name = "sample_size")
   private Integer sampleSize;
 
-  @Column(name = "exerciseref")
+  @Column(name = "exercise_ref")
   private String exerciseRef;
 
   @Column(name = "user_description", length = 50)
@@ -88,6 +88,6 @@ public class CollectionExercise {
   @Column(name = "deleted")
   private Boolean deleted;
 
-  @Column(name = "survey_uuid")
+  @Column(name = "survey_id")
   private UUID surveyId;
 }
