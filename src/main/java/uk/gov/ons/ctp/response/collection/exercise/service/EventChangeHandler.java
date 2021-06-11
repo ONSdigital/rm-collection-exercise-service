@@ -1,8 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 
 /**
  * An interface to implement if you want to perform some action when a collection exercise event is
@@ -18,6 +18,5 @@ public interface EventChangeHandler {
    * @param event the event to which the change occurred
    * @throws CTPException thrown if an error occurs
    */
-  void handleEventLifecycle(CollectionExerciseEventPublisher.MessageType change, Event event)
-      throws CTPException;
+  void handleEventLifecycle(MessageType change, Event event) throws CTPException;
 }

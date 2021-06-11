@@ -1,7 +1,0 @@
-<def:sampleUnit xmlns:def="http://ons.gov.uk/ctp/response/sampleunit/definition">
-  <sampleUnitRef>string</sampleUnitRef>
-  <sampleUnitType>string</sampleUnitType>
-  <formType>string</formType>
-  <!--Optional:-->
-  <collectionExerciseId>string</collectionExerciseId>
-</def:sampleUnit>
