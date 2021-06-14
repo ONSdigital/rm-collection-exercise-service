@@ -188,7 +188,7 @@ public class SampleUnitDistributor {
 
   /**
    * Distribute SampleUnits for a SampleUnitGroup. Will send the sampleUnitParent data to Case via
-   * Rabbit and will transition the sampleUnitGroup state in collection exercise to PUBLISHED on
+   * PubSub and will transition the sampleUnitGroup state in collection exercise to PUBLISHED on
    * success.
    *
    * @param exercise CollectionExercise of which sampleUnitGroup is a member

@@ -3,17 +3,10 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -49,8 +42,6 @@ public class CollectionExerciseService {
 
   private final SurveySvcClient surveyService;
 
-  private final RabbitTemplate rabbitTemplate;
-
   private final StateTransitionManager<
           CollectionExerciseDTO.CollectionExerciseState,
           CollectionExerciseDTO.CollectionExerciseEvent>
@@ -64,7 +55,6 @@ public class CollectionExerciseService {
       CollectionInstrumentSvcClient collectionInstrumentSvcClient,
       SampleSvcClient sampleSvcClient,
       SurveySvcClient surveyService,
-      @Qualifier("collexTransitionTemplate") RabbitTemplate rabbitTemplate,
       @Qualifier("collectionExercise")
           StateTransitionManager<
                   CollectionExerciseDTO.CollectionExerciseState,
@@ -76,7 +66,6 @@ public class CollectionExerciseService {
     this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
     this.surveyService = surveyService;
     this.sampleSvcClient = sampleSvcClient;
-    this.rabbitTemplate = rabbitTemplate;
     this.collectionExerciseTransitionState = collectionExerciseTransitionState;
   }
 
@@ -564,7 +553,6 @@ public class CollectionExerciseService {
 
     collex.setState(newState);
     updateCollectionExercise(collex);
-    rabbitTemplate.convertAndSend(new CollectionTransitionEvent(collex.getId(), collex.getState()));
   }
 
   /**

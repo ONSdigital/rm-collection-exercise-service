@@ -15,7 +15,6 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
-import com.thoughtworks.xstream.XStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -52,10 +50,6 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
-import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageBase;
-import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageListener;
-import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.SimpleMessageSender;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.message.TestPubSubMessage;
@@ -68,7 +62,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.CollectionTransitionEvent;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
@@ -208,61 +201,9 @@ public class CollectionExerciseEndpointIT {
     UUID collectionExerciseId = createScheduledCollectionExercise();
 
     // When
-    BlockingQueue<String> queue =
-        getMessageListener()
-            .listen(
-                SimpleMessageBase.ExchangeType.Direct,
-                "collex-transition-exchange",
-                "Collex.Transition.binding");
     this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
 
     // Then
-    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
-
-    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
-    assertEquals(
-        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
-        collectionTransitionEvent.getState());
-
-    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
-    assertEquals(
-        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
-  }
-
-  @Test
-  public void shouldTransitionCollectionExerciseToReadyToReviewOnSampleSummaryActive()
-      throws Exception {
-    // Given;
-    stubSurveyServiceBusiness();
-    stubCollectionInstrumentCount();
-    stubGetPartyBySampleUnitRef();
-    SampleSummaryDTO sampleSummary = stubSampleSummaryInitThenActive();
-    UUID collectionExerciseId = createScheduledCollectionExercise();
-
-    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
-    BlockingQueue<String> queue =
-        getMessageListener()
-            .listen(
-                SimpleMessageBase.ExchangeType.Direct,
-                "collex-transition-exchange",
-                "Collex.Transition.binding");
-
-    // This will cause an exception to be thrown as there is no collection instrument service
-    // this is harmless to our purpose
-    // When
-    getMessageSender()
-        .sendMessage(
-            "sample-outbound-exchange",
-            "Sample.SampleUploadFinished.binding",
-            this.mapper.writeValueAsString(sampleSummary));
-
-    // Then
-    CollectionTransitionEvent collectionTransitionEvent = pollForReadyToReview(queue);
-
-    assertEquals(collectionExerciseId, collectionTransitionEvent.getCollectionExerciseId());
-    assertEquals(
-        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW,
-        collectionTransitionEvent.getState());
 
     CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
     assertEquals(
@@ -368,30 +309,6 @@ public class CollectionExerciseEndpointIT {
 
     client.createCollectionExerciseEvent(event);
     return event;
-  }
-
-  /**
-   * Creates a new SimpleMessageSender based on the config in AppConfig
-   *
-   * @return a new SimpleMessageSender
-   */
-  private SimpleMessageSender getMessageSender() {
-    Rabbitmq config = this.appConfig.getRabbitmq();
-
-    return new SimpleMessageSender(
-        config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
-  }
-
-  /**
-   * Creates a new SimpleMessageListener based on the config in AppConfig
-   *
-   * @return a new SimpleMessageListener
-   */
-  private SimpleMessageListener getMessageListener() {
-    Rabbitmq config = this.appConfig.getRabbitmq();
-
-    return new SimpleMessageListener(
-        config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
   }
 
   private String sampleUnitToXmlString(SampleUnit sampleUnit) throws JAXBException {
@@ -587,17 +504,5 @@ public class CollectionExerciseEndpointIT {
             });
 
     return collectionExerciseId;
-  }
-
-  private CollectionTransitionEvent pollForReadyToReview(BlockingQueue<String> queue)
-      throws InterruptedException {
-    String collexTransition = queue.take();
-    CollectionTransitionEvent collectionTransitionEvent =
-        (CollectionTransitionEvent) new XStream().fromXML(collexTransition);
-    return collectionTransitionEvent
-            .getState()
-            .equals(CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW)
-        ? collectionTransitionEvent
-        : pollForReadyToReview(queue);
   }
 }

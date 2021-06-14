@@ -4,10 +4,10 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEventPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventChangeHandler;
@@ -28,8 +28,7 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
   @Autowired private CollectionExerciseService collectionExerciseService;
 
   @Override
-  public void handleEventLifecycle(CollectionExerciseEventPublisher.MessageType change, Event event)
-      throws CTPException {
+  public void handleEventLifecycle(MessageType change, Event event) throws CTPException {
     CollectionExercise collectionExercise = event.getCollectionExercise();
     CollectionExerciseDTO.CollectionExerciseEvent ceEvent = null;
 

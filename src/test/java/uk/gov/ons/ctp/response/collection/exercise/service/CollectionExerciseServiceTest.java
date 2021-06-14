@@ -7,7 +7,6 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
@@ -56,8 +54,6 @@ public class CollectionExerciseServiceTest {
   @Mock private CollectionInstrumentSvcClient collectionInstrument;
 
   @Mock private SampleSvcClient sampleSvcClient;
-
-  @Mock private RabbitTemplate rabbitTemplate;
 
   @Spy
   private StateTransitionManager<
@@ -120,38 +116,6 @@ public class CollectionExerciseServiceTest {
     assertEquals(toUpdate.getExerciseRef(), collex.getExerciseRef());
     assertEquals(toUpdate.getUserDescription(), collex.getUserDescription());
     assertNotNull(collex.getUpdated());
-  }
-
-  @Test
-  public void testTransitionEventSentWhenTransition() throws Exception {
-    // Given
-    CollectionExercise existing =
-        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-
-    // When
-    this.collectionExerciseService.transitionCollectionExercise(
-        existing, CollectionExerciseDTO.CollectionExerciseEvent.VALIDATE);
-
-    // Then
-    CollectionTransitionEvent collectionTransitionEvent =
-        new CollectionTransitionEvent(
-            existing.getId(), CollectionExerciseDTO.CollectionExerciseState.VALIDATED);
-    verify(rabbitTemplate).convertAndSend(collectionTransitionEvent);
-  }
-
-  @Test
-  public void testTransitionEventNotSentWhenNoTransition() throws Exception {
-    // Given
-    CollectionExercise existing =
-        FixtureHelper.loadClassFixtures(CollectionExercise[].class).get(0);
-    existing.setState(CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
-
-    // When
-    this.collectionExerciseService.transitionCollectionExercise(
-        existing, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
-
-    // Then
-    verify(rabbitTemplate, never()).convertAndSend(any());
   }
 
   @Test

@@ -7,11 +7,6 @@
   http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
 
     <int:annotation-config/>
-	<import resource="case-outbound-flow.xml"/>
-    <import resource="collex-event-messager-outbound.xml"/>
-    <import resource="collex-event-messager-inbound.xml"/>
     <import resource="collection-instrument-inbound.xml"/>
-    <import resource="sample-uploaded-inbound.xml"/>
-    <import resource="collex-transition-outbound-flow.xml"/>
 
 </beans>

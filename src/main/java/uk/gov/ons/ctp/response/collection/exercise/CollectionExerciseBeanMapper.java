@@ -13,6 +13,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class CollectionExerciseBeanMapper extends ConfigurableMapper {
 
+  public enum MessageType {
+    EventElapsed,
+    EventCreated,
+    EventUpdated,
+    EventDeleted
+  }
+
   @Override
   public void configureFactoryBuilder(DefaultMapperFactory.Builder builder) {
     builder.compilerStrategy(new EclipseJdtCompilerStrategy());
