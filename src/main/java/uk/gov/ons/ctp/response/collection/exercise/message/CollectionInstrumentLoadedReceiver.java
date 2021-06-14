@@ -13,7 +13,7 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 @MessageEndpoint
 public class CollectionInstrumentLoadedReceiver {
   private static final Logger log =
-    LoggerFactory.getLogger(CollectionInstrumentLoadedReceiver.class);
+      LoggerFactory.getLogger(CollectionInstrumentLoadedReceiver.class);
 
   @Autowired private CollectionExerciseService collectionExerciseService;
 
