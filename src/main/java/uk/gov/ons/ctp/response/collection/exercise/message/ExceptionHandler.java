@@ -20,8 +20,8 @@ public class ExceptionHandler {
 
   /**
    * Service activator method that accepts a MessageHandlingException, pulls out the important bits
-   * and returns them as a map suitable for posting as a Rabbit message or logging. It pulls
-   * messages from the ciErrorChannel Spring integration channel and the results get posted to the
+   * and returns them as a map suitable for posting as a message or logging. It pulls messages from
+   * the ciErrorChannel Spring integration channel and the results get posted to the
    * ciErrorCleanChannel
    *
    * @param e a message handling exception

@@ -2,7 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.message;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -21,8 +20,8 @@ public class CollectionInstrumentLoadedReceiver {
   public void acceptSampleUnit(CollectionInstrumentMessageDTO message) throws CTPException {
     log.with(message).debug("Consumed message");
 
-    UUID collexId = message.getExerciseId();
+    // UUID collexId = message.getExerciseId();
 
-    collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(collexId);
+    // collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(collexId);
   }
 }
