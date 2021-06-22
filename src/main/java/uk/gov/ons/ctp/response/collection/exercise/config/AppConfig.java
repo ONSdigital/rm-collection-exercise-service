@@ -4,7 +4,6 @@ import lombok.Data;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import uk.gov.ons.ctp.response.collection.exercise.lib.rabbit.Rabbitmq;
 
 /**
  * The apps main holder for centralised configuration read from application.yml or environment
@@ -24,7 +23,6 @@ public class AppConfig {
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
   private SwaggerSettings swaggerSettings;
-  private Rabbitmq rabbitmq;
   private Logging logging;
   private GCP gcp;
 }

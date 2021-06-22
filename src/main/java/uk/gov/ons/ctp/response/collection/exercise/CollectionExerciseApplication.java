@@ -17,7 +17,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
@@ -52,7 +51,6 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EntityScan("uk.gov.ons.ctp.response")
 @EnableScheduling
 @EnableCaching
-@ImportResource("springintegration/main.xml")
 public class CollectionExerciseApplication {
 
   private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";

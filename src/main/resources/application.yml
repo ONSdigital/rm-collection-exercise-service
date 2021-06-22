@@ -27,7 +27,7 @@ spring:
     user: postgres
     password: postgres
     default-schema: collectionexercise
-    url: jdbc:postgresql://localhost:6432/postgres
+    url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
 
   output:
@@ -43,7 +43,7 @@ spring:
     name: ONS CollectionExerciseSvc
 
   datasource:
-    url: jdbc:postgresql://localhost:6432/postgres
+    url: jdbc:postgresql://localhost:5432/ras
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
@@ -146,20 +146,13 @@ party-svc:
     read-timeout-milli-seconds: 5000
 
 redisson-config:
-  address: localhost:7379
+  address: localhost:6379
   list-time-to-live-seconds: 300
   list-time-to-wait-seconds: 300
 
 schedules:
   # number retrieved for each collection exercise each run, distributes this number for each exercise
   distribution-schedule-retrieval-max: 1000
-
-rabbitmq:
-  username: guest
-  password: guest
-  host: localhost
-  port: 6672
-  virtualhost: /
 
 messaging:
   backoffInitial: 5000

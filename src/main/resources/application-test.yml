@@ -28,10 +28,6 @@ action-svc:
 redisson-config:
   address: localhost:17379
 
-rabbitmq:
-  host: localhost
-  port: 35672
-
 gcp:
   project: "test"
   caseNotificationTopic: "test_topic"
