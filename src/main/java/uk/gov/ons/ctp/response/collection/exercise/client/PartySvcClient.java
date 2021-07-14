@@ -17,7 +17,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.definition.SampleLinkCreationRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.SampleLinkDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 
 /** HTTP RestClient implementation for calls to the Party service */
 @Component
@@ -40,7 +39,6 @@ public class PartySvcClient {
   /**
    * Request party from the Party Service
    *
-   * @param sampleUnitType the sample unit type for which to request party
    * @param sampleUnitRef the sample unit ref for which to request party
    * @return the party object
    */
@@ -48,13 +46,11 @@ public class PartySvcClient {
       value = {RestClientException.class},
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
-  public PartyDTO requestParty(SampleUnitDTO.SampleUnitType sampleUnitType, String sampleUnitRef) {
-    log.with("sample_unit_type", sampleUnitType)
-        .with("sample_unit_ref", sampleUnitRef)
-        .debug("Retrieving party");
+  public PartyDTO requestParty(String sampleUnitRef) {
+    log.with("sample_unit_ref", sampleUnitRef).debug("Retrieving party");
     UriComponents uriComponents =
         restUtility.createUriComponents(
-            appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitType, sampleUnitRef);
+            appConfig.getPartySvc().getRequestPartyPath(), null, sampleUnitRef);
     HttpEntity<PartyDTO> httpEntity = restUtility.createHttpEntityWithAuthHeader();
     ResponseEntity<PartyDTO> responseEntity =
         restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, PartyDTO.class);

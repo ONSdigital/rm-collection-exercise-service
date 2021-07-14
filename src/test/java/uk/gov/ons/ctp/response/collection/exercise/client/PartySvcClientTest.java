@@ -27,7 +27,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.PartyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.SampleLinkDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartySvcClientTest {
@@ -59,7 +58,7 @@ public class PartySvcClientTest {
         .thenReturn(new ResponseEntity<>(HttpStatus.CREATED));
 
     // When
-    partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF);
+    partySvcClient.requestParty(SAMPLE_UNIT_REF);
 
     // Then
     verify(restTemplate, times(1))
@@ -74,7 +73,7 @@ public class PartySvcClientTest {
         .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     // When
-    partySvcClient.requestParty(SampleUnitDTO.SampleUnitType.B, SAMPLE_UNIT_REF);
+    partySvcClient.requestParty(SAMPLE_UNIT_REF);
 
     // Then
     verify(restTemplate, times(1))

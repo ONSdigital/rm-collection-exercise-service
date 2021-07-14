@@ -105,7 +105,7 @@ public class ValidateSampleUnitsTest {
     when(collectionInstrumentSvcClient.requestCollectionInstruments(any()))
         .thenReturn(collectionInstruments);
 
-    when(partySvcClient.requestParty(any(), any())).thenReturn(party);
+    when(partySvcClient.requestParty(any())).thenReturn(party);
 
     when(sampleUnitGroupState.transition(any(), any())).thenReturn(SampleUnitGroupState.VALIDATED);
 
@@ -207,7 +207,7 @@ public class ValidateSampleUnitsTest {
             eq("{\"SURVEY_ID\":\"d943344b-1ef4-4c24-b59b-23e3a0350158\",\"FORM_TYPE\":\"0666\"}")))
         .thenReturn(collectionInstrumentsTwo);
 
-    when(partySvcClient.requestParty(any(), any())).thenReturn(party);
+    when(partySvcClient.requestParty(any())).thenReturn(party);
 
     when(sampleUnitGroupState.transition(any(), any())).thenReturn(SampleUnitGroupState.VALIDATED);
 
@@ -292,7 +292,7 @@ public class ValidateSampleUnitsTest {
     when(collectionInstrumentSvcClient.requestCollectionInstruments(any()))
         .thenReturn(collectionInstruments);
 
-    when(partySvcClient.requestParty(any(), any()))
+    when(partySvcClient.requestParty(any()))
         .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error"));
 
     // When
@@ -335,7 +335,7 @@ public class ValidateSampleUnitsTest {
     when(collectionInstrumentSvcClient.requestCollectionInstruments(any()))
         .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Bad stuff happened"));
 
-    when(partySvcClient.requestParty(any(), any())).thenReturn(party);
+    when(partySvcClient.requestParty(any())).thenReturn(party);
 
     when(sampleUnitGroupState.transition(any(), any()))
         .thenReturn(SampleUnitGroupState.FAILEDVALIDATION);
@@ -445,7 +445,7 @@ public class ValidateSampleUnitsTest {
     when(collectionInstrumentSvcClient.requestCollectionInstruments(any()))
         .thenReturn(collectionInstruments);
 
-    when(partySvcClient.requestParty(any(), any()))
+    when(partySvcClient.requestParty(any()))
         .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Bad stuff happened"));
 
     when(sampleUnitGroupState.transition(any(), any()))
