@@ -412,7 +412,7 @@ public class CollectionExerciseEndpointIT {
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
     this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/parties/type/(.*)/ref/(.*)"))
+        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
@@ -422,7 +422,7 @@ public class CollectionExerciseEndpointIT {
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.PartyDTO.no-associations.json");
     this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/parties/type/B/ref/(.*)"))
+        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
@@ -432,7 +432,7 @@ public class CollectionExerciseEndpointIT {
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
     this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/parties/type/B/ref/(.*)"))
+        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
