@@ -212,8 +212,7 @@ public class SampleUnitDistributor {
    * @return True if a respondent is enrolled, false otherwise
    */
   private boolean hasActiveEnrolment(ExerciseSampleUnit sampleUnit, CollectionExercise exercise) {
-    PartyDTO businessParty =
-        partySvcClient.requestParty(sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+    PartyDTO businessParty = partySvcClient.requestParty(sampleUnit.getSampleUnitRef());
     return surveyHasEnrolledRespondent(businessParty, exercise.getSurveyId().toString());
   }
 

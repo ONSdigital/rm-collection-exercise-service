@@ -128,7 +128,7 @@ collection-instrument-svc:
     read-timeout-milli-seconds: 5000
 
 party-svc:
-  request-party-path: /party-api/v1/parties/type/{sampleUnitType}/ref/{sampleUnitRef}
+  request-party-path: /party-api/v1/businesses/ref/{sampleUnitRef}
   sample-link-path: /party-api/v1/businesses/sample/link/{sampleSummaryId}
   connection-config:
     scheme: http

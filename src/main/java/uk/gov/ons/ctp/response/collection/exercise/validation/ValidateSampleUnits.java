@@ -136,9 +136,7 @@ public class ValidateSampleUnits {
 
             if (sampleUnit.getSampleUnitType() == SampleUnitDTO.SampleUnitType.B) {
               try {
-                PartyDTO party =
-                    partySvcClient.requestParty(
-                        sampleUnit.getSampleUnitType(), sampleUnit.getSampleUnitRef());
+                PartyDTO party = partySvcClient.requestParty(sampleUnit.getSampleUnitRef());
                 sampleUnit.setPartyId(UUID.fromString(party.getId()));
               } catch (HttpClientErrorException e) {
                 if (e.getStatusCode() != HttpStatus.NOT_FOUND) {

@@ -153,7 +153,7 @@ public class SampleUnitDistributorTest {
 
     when(sampleUnitRepo.findBySampleUnitGroup(any())).thenReturn(sampleUnitParentOnly);
 
-    when(partySvcClient.requestParty(any(), any())).thenReturn(parties.get(0));
+    when(partySvcClient.requestParty(any())).thenReturn(parties.get(0));
 
     when(sampleUnitGroupRepo.countByStateFKAndCollectionExercise(
             eq(SampleUnitGroupDTO.SampleUnitGroupState.PUBLISHED), any()))
