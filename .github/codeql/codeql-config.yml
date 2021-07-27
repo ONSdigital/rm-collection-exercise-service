@@ -5,3 +5,7 @@ queries:
 # Queries from security-extended, plus maintainability and reliability queries
   - uses: security-and-quality
 
+paths:
+  - src
+ paths-ignore:
+  - dist
