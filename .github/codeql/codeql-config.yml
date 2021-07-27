@@ -1,8 +1,7 @@
 name: "CodeQL config"
 
 queries:
+# https://docs.github.com/en/code-security/secure-coding/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning
+# Queries from security-extended, plus maintainability and reliability queries
   - uses: security-and-quality
 
-# paths-ignore:
-#  - '/java/'
-#  - '/javascript/ql/test'
