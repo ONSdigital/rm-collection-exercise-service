@@ -7,5 +7,5 @@ queries:
 
 paths:
   - src
- paths-ignore:
+paths-ignore:
   - dist
