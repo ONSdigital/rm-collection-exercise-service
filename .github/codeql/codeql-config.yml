@@ -3,6 +3,6 @@ name: "CodeQL config"
 queries:
   - uses: security-and-quality
 
-paths-ignore:
+# paths-ignore:
 #  - '/java/'
 #  - '/javascript/ql/test'
