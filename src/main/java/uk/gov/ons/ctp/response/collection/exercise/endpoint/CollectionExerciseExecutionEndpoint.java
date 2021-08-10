@@ -65,17 +65,18 @@ public class CollectionExerciseExecutionEndpoint {
   public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
       throws CTPException {
     log.with("collection_exercise_id", id).debug("Entering collection exercise fetch");
-    SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
-
     if (appConfig.isSampleV2Enabled()) {
       sampleSummaryService.enrichSample(id);
+      return ResponseEntity.ok(new SampleUnitsRequestDTO());
+    } else {
+      SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
+      if (requestDTO == null) {
+        throw new CTPException(
+            CTPException.Fault.RESOURCE_NOT_FOUND,
+            String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
+      }
+      return ResponseEntity.ok(requestDTO);
     }
-
-    if (requestDTO == null) {
-      throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND, String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
-    }
-    return ResponseEntity.ok(requestDTO);
   }
 
   @RequestMapping(

@@ -188,4 +188,4 @@ gcp:
   sampleUnitReceiverSubscription: "test_subscription"
 
 sampleV2:
-  enabled: true
+  enabled: false
