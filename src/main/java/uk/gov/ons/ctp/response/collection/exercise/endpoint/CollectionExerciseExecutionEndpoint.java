@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleSummaryService;
 
 /** The REST endpoint controller for Collection Exercises. */
 @RestController
@@ -26,7 +28,11 @@ public class CollectionExerciseExecutionEndpoint {
 
   private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
 
+  @Autowired AppConfig appConfig;
+
   @Autowired private SampleService sampleService;
+
+  @Autowired private SampleSummaryService sampleSummaryService;
 
   /**
    * PUT to manually trigger the request of the sample units from the sample service for the given
@@ -60,10 +66,42 @@ public class CollectionExerciseExecutionEndpoint {
       throws CTPException {
     log.with("collection_exercise_id", id).debug("Entering collection exercise fetch");
     SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
+
+    if (appConfig.isSampleV2Enabled()) {
+      sampleSummaryService.enrichSample(id);
+    }
+
     if (requestDTO == null) {
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND, String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
     }
     return ResponseEntity.ok(requestDTO);
+  }
+
+  @RequestMapping(
+      value = "/validated/{valid}/collectionExercise/{collectionExerciseId}}",
+      method = RequestMethod.POST)
+  public ResponseEntity<String> sampleSummaryValidated(
+      @PathVariable("valid") final boolean valid,
+      @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
+    // call by sample service to tell us the summary is validated
+    if (appConfig.isSampleV2Enabled()) {
+      sampleSummaryService.validSample(valid, collectionExerciseId);
+    }
+    return ResponseEntity.status(200).build();
+  }
+
+  @RequestMapping(
+      value = "/distributed/{distributed}/collectionExercise/{collectionExerciseId}",
+      method = RequestMethod.POST)
+  public ResponseEntity<String> sampleSummaryDistributed(
+      @PathVariable("distributed") final boolean distributed,
+      @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
+    // call by sample service to tell use the summary has been distributed
+    if (appConfig.isSampleV2Enabled()) {
+      sampleSummaryService.sampleSummaryDistributed(distributed, collectionExerciseId);
+    }
+    // transition collection exercise to ready for live or live
+    return ResponseEntity.status(200).build();
   }
 }

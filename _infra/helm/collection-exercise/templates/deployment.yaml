@@ -277,5 +277,7 @@ spec:
             value: "{{ .Values.gcp.caseNotificationTopic }}"
           - name: GCP_SAMPLEUNITRECEIVERSUBSCRIPTION
             value: "{{ .Values.gcp.sampleUnitReceiverSubscription }}"
+          - name: SAMPLE_V2_ENABLED
+            value: "{{ .Values.sampleV2.enabled }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

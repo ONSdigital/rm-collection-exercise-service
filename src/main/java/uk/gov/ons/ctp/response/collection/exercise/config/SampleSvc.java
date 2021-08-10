@@ -11,4 +11,6 @@ public class SampleSvc {
   private RestUtilityConfig connectionConfig;
   private String requestSampleUnitsPath;
   private String requestSampleUnitCountPath;
+  private String enrichSampleSummary;
+  private String distributeSampleSummary;
 }

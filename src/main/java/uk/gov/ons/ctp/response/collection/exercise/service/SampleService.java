@@ -218,16 +218,6 @@ public class SampleService {
   }
 
   /**
-   * Gets a list of sample links for a given sample summary
-   *
-   * @param sampleSummaryId the id of the sample summary to find sample links for
-   * @return a list of sample links
-   */
-  public List<SampleLink> getSampleLinksForSummary(final UUID sampleSummaryId) {
-    return sampleLinkRepository.findBySampleSummaryId(sampleSummaryId);
-  }
-
-  /**
    * Method to save a sample link
    *
    * @param sampleLink the sample link to save

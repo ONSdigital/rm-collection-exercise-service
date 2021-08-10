@@ -25,4 +25,5 @@ public class AppConfig {
   private SwaggerSettings swaggerSettings;
   private Logging logging;
   private GCP gcp;
+  private boolean sampleV2Enabled;
 }

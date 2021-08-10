@@ -69,6 +69,8 @@ spring:
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
   request-sample-unit-count-path: /samples/count
+  enrich-sample-summary: /enrich/survey/{surveyId}/collection-exercise/{collectionExerciseId}/samplesummary/{sampleSummaryId}
+  distribute-sample-summary: /distribute/samplesummary/{sampleSummaryId}
   connection-config:
     scheme: http
     host: localhost
@@ -184,3 +186,6 @@ gcp:
   project: ras-rm-sandbox
   caseNotificationTopic: "test_topic"
   sampleUnitReceiverSubscription: "test_subscription"
+
+sampleV2:
+  enabled: true
