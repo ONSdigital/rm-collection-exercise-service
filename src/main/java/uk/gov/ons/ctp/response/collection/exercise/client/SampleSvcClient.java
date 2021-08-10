@@ -149,8 +149,9 @@ public class SampleSvcClient {
             sampleSummaryId);
     HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
 
+    //GET should change to POST but the sample service needs to change
     ResponseEntity<String> response =
-        restTemplate.exchange(uri.toUri(), HttpMethod.POST, httpEntity, String.class);
+        restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, String.class);
 
     return response.getStatusCode().is2xxSuccessful();
   }
@@ -162,8 +163,9 @@ public class SampleSvcClient {
             appConfig.getSampleSvc().getDistributeSampleSummary(), null, sampleSummaryId);
     HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
 
+    // as above
     ResponseEntity<String> response =
-        restTemplate.exchange(uri.toUri(), HttpMethod.POST, httpEntity, String.class);
+        restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, String.class);
 
     return response.getStatusCode().is2xxSuccessful();
   }
