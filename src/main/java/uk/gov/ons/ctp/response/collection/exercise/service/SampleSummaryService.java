@@ -41,8 +41,7 @@ public class SampleSummaryService {
     CollectionExercise collectionExercise = collectRepo.findOneById(collectionExerciseId);
 
     // first transition to executed state
-    execute(collectionExercise);
-
+    executionStarted(collectionExercise);
     UUID surveyId = collectionExercise.getSurveyId();
 
     List<SampleLink> sampleLinks =
@@ -60,6 +59,9 @@ public class SampleSummaryService {
     boolean successfulEnrichment =
         sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId);
 
+    // now transition to executed complete
+    executionCompleted(collectionExercise);
+
     // TODO change this to be pubsub
     validSample(successfulEnrichment, collectionExerciseId);
 
@@ -69,12 +71,23 @@ public class SampleSummaryService {
     return successfulEnrichment;
   }
 
-  private void execute(CollectionExercise collectionExercise) {
+  private void executionStarted(CollectionExercise collectionExercise) {
     // transition collection exercise to executed state
     try {
       log.with("collectionExerciseId", collectionExercise.getId()).info("transitioning state");
       collexService.transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
+    } catch (CTPException e) {
+      log.error("unable to transition collection exercise", e);
+    }
+  }
+
+  private void executionCompleted(CollectionExercise collectionExercise) {
+    // transition collection exercise to executed state
+    try {
+      log.with("collectionExerciseId", collectionExercise.getId()).info("transitioning state");
+      collexService.transitionCollectionExercise(
+          collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTION_COMPLETE);
     } catch (CTPException e) {
       log.error("unable to transition collection exercise", e);
     }
