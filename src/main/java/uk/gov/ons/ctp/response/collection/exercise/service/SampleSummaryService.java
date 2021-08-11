@@ -35,9 +35,14 @@ public class SampleSummaryService {
 
   @Autowired private EventRepository eventRepository;
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public boolean enrichSample(UUID collectionExerciseId) {
 
     CollectionExercise collectionExercise = collectRepo.findOneById(collectionExerciseId);
+
+    // first transition to executed state
+    execute(collectionExercise);
+
     UUID surveyId = collectionExercise.getSurveyId();
 
     List<SampleLink> sampleLinks =
@@ -62,6 +67,17 @@ public class SampleSummaryService {
         .with("sampleSummaryId", sampleSummaryId)
         .info("Enrichment complete");
     return successfulEnrichment;
+  }
+
+  private void execute(CollectionExercise collectionExercise) {
+    // transition collection exercise to executed state
+    try {
+      log.with("collectionExerciseId", collectionExercise.getId()).info("transitioning state");
+      collexService.transitionCollectionExercise(
+          collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
+    } catch (CTPException e) {
+      log.error("unable to transition collection exercise", e);
+    }
   }
 
   public boolean distributeSample(UUID collectionExerciseId) {
