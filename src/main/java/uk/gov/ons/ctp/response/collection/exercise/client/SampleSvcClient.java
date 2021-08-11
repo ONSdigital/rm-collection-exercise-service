@@ -149,7 +149,7 @@ public class SampleSvcClient {
             sampleSummaryId);
     HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
 
-    //GET should change to POST but the sample service needs to change
+    // GET should change to POST but the sample service needs to change
     ResponseEntity<String> response =
         restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, String.class);
 
