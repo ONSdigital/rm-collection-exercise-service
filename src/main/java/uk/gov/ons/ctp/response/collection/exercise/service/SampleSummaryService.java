@@ -54,6 +54,10 @@ public class SampleSummaryService {
     UUID sampleSummaryId = sampleSummaryIdList.get(0);
     boolean successfulEnrichment =
         sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId);
+
+    // TODO change this to be pubsub
+    validSample(successfulEnrichment, collectionExerciseId);
+
     log.with("successfulEnrichment", successfulEnrichment)
         .with("sampleSummaryId", sampleSummaryId)
         .info("Enrichment complete");
@@ -74,6 +78,8 @@ public class SampleSummaryService {
     // in rasrm business there can only ever be one sample summary per collection exercise
     UUID sampleSummaryId = sampleSummaryIdList.get(0);
     boolean successfulDistribution = sampleSvcClient.distributeSampleSummary(sampleSummaryId);
+    // TODO change this to be pubsub
+    sampleSummaryDistributed(successfulDistribution, collectionExerciseId);
     log.with("successfulDistribution", successfulDistribution)
         .with("sampleSummaryId", sampleSummaryId)
         .info("Distribution complete");

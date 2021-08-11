@@ -78,31 +78,4 @@ public class CollectionExerciseExecutionEndpoint {
       return ResponseEntity.ok(requestDTO);
     }
   }
-
-  @RequestMapping(
-      value = "/validated/{valid}/collectionexercise/{collectionExerciseId}}",
-      method = RequestMethod.POST)
-  public ResponseEntity<String> sampleSummaryValidated(
-      @PathVariable("valid") final boolean valid,
-      @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
-    // call by sample service to tell us the summary is validated
-    if (appConfig.isSampleV2Enabled()) {
-      sampleSummaryService.validSample(valid, collectionExerciseId);
-    }
-    return ResponseEntity.status(200).build();
-  }
-
-  @RequestMapping(
-      value = "/distributed/{distributed}/collectionexercise/{collectionExerciseId}",
-      method = RequestMethod.POST)
-  public ResponseEntity<String> sampleSummaryDistributed(
-      @PathVariable("distributed") final boolean distributed,
-      @PathVariable("collectionExerciseId") final UUID collectionExerciseId) {
-    // call by sample service to tell use the summary has been distributed
-    if (appConfig.isSampleV2Enabled()) {
-      sampleSummaryService.sampleSummaryDistributed(distributed, collectionExerciseId);
-    }
-    // transition collection exercise to ready for live or live
-    return ResponseEntity.status(200).build();
-  }
 }
