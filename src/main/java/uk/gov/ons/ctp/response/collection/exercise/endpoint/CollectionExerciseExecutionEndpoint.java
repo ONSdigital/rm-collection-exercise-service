@@ -80,7 +80,7 @@ public class CollectionExerciseExecutionEndpoint {
   }
 
   @RequestMapping(
-      value = "/validated/{valid}/collectionExercise/{collectionExerciseId}}",
+      value = "/validated/{valid}/collectionexercise/{collectionExerciseId}}",
       method = RequestMethod.POST)
   public ResponseEntity<String> sampleSummaryValidated(
       @PathVariable("valid") final boolean valid,
@@ -93,7 +93,7 @@ public class CollectionExerciseExecutionEndpoint {
   }
 
   @RequestMapping(
-      value = "/distributed/{distributed}/collectionExercise/{collectionExerciseId}",
+      value = "/distributed/{distributed}/collectionexercise/{collectionExerciseId}",
       method = RequestMethod.POST)
   public ResponseEntity<String> sampleSummaryDistributed(
       @PathVariable("distributed") final boolean distributed,
