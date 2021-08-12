@@ -102,7 +102,7 @@ public class SampleSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
-    log.with("sample_summary_id", sampleSummaryId).debug("Getting sample summary");
+    log.with("sampleSummaryId", sampleSummaryId).debug("Getting sample summary");
     UriComponents uri =
         restUtility.createUriComponents(
             "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);

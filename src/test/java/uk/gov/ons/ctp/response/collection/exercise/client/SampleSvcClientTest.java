@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -17,6 +17,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -106,5 +107,106 @@ public class SampleSvcClientTest {
 
     // Then
     assertEquals(666, actualResponse.getSampleUnitsTotal().intValue());
+  }
+
+  @Test
+  public void testEnrich() {
+    String response = "ok";
+    SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
+    ResponseEntity<String> responseEntity = Mockito.mock(ResponseEntity.class);
+
+    UUID surveyId = UUID.randomUUID();
+    UUID collectionExerciseId = UUID.randomUUID();
+    UUID sampleSummaryId = UUID.randomUUID();
+
+    // Given
+    given(appConfig.getSampleSvc()).willReturn(sampleSvc);
+    given(sampleSvc.getEnrichSampleSummary()).willReturn("test/path");
+    given(responseEntity.getStatusCode()).willReturn(HttpStatus.OK);
+    given(
+            restTemplate.exchange(
+                any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .willReturn(responseEntity);
+
+    // When
+    boolean actualResponse =
+        sampleSvcRestClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId);
+
+    // Then
+    assertTrue("enrich request successful", actualResponse);
+  }
+
+  @Test
+  public void testEnrichFails() {
+    SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
+    ResponseEntity<String> responseEntity = Mockito.mock(ResponseEntity.class);
+
+    UUID surveyId = UUID.randomUUID();
+    UUID collectionExerciseId = UUID.randomUUID();
+    UUID sampleSummaryId = UUID.randomUUID();
+
+    // Given
+    given(appConfig.getSampleSvc()).willReturn(sampleSvc);
+    given(sampleSvc.getEnrichSampleSummary()).willReturn("test/path");
+    given(responseEntity.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+    given(
+            restTemplate.exchange(
+                any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .willReturn(responseEntity);
+
+    // When
+    boolean actualResponse =
+        sampleSvcRestClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId);
+
+    // Then
+    assertFalse("enrich request unsuccessful", actualResponse);
+  }
+
+  @Test
+  public void testDistribute() {
+    SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
+    ResponseEntity<String> responseEntity = Mockito.mock(ResponseEntity.class);
+
+    UUID surveyId = UUID.randomUUID();
+    UUID collectionExerciseId = UUID.randomUUID();
+    UUID sampleSummaryId = UUID.randomUUID();
+
+    // Given
+    given(appConfig.getSampleSvc()).willReturn(sampleSvc);
+    given(sampleSvc.getDistributeSampleSummary()).willReturn("test/path");
+    given(responseEntity.getStatusCode()).willReturn(HttpStatus.OK);
+    given(
+            restTemplate.exchange(
+                any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .willReturn(responseEntity);
+
+    // When
+    boolean actualResponse = sampleSvcRestClient.distributeSampleSummary(sampleSummaryId);
+
+    // Then
+    assertTrue("distribute request successful", actualResponse);
+  }
+
+  @Test
+  public void testDistributeFails() {
+    SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
+    ResponseEntity<String> responseEntity = Mockito.mock(ResponseEntity.class);
+
+    UUID sampleSummaryId = UUID.randomUUID();
+
+    // Given
+    given(appConfig.getSampleSvc()).willReturn(sampleSvc);
+    given(sampleSvc.getDistributeSampleSummary()).willReturn("test/path");
+    given(responseEntity.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+    given(
+            restTemplate.exchange(
+                any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
+        .willReturn(responseEntity);
+
+    // When
+    boolean actualResponse = sampleSvcRestClient.distributeSampleSummary(sampleSummaryId);
+
+    // Then
+    assertFalse("distribute request unsuccessful", actualResponse);
   }
 }
