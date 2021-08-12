@@ -66,7 +66,7 @@ public class CollectionExerciseExecutionEndpoint {
       throws CTPException {
     log.with("collection_exercise_id", id).debug("Entering collection exercise fetch");
     if (appConfig.isSampleV2Enabled()) {
-      sampleSummaryService.enrichSample(id);
+      sampleSummaryService.activateSamples(id);
       return ResponseEntity.ok(new SampleUnitsRequestDTO());
     } else {
       SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
