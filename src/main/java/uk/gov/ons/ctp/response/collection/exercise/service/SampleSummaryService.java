@@ -2,8 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,7 +36,8 @@ public class SampleSummaryService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public boolean activateSamples(UUID collectionExerciseId) {
 
-    CollectionExercise collectionExercise = collectionExerciseRepository.findOneById(collectionExerciseId);
+    CollectionExercise collectionExercise =
+        collectionExerciseRepository.findOneById(collectionExerciseId);
 
     // first transition to executed state
     executionStarted(collectionExercise);
@@ -60,8 +59,8 @@ public class SampleSummaryService {
         sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId);
 
     LOG.with("successfulEnrichment", successfulEnrichment)
-      .with("sampleSummaryId", sampleSummaryId)
-      .info("Enrichment complete");
+        .with("sampleSummaryId", sampleSummaryId)
+        .info("Enrichment complete");
 
     // now transition to executed complete
     executionCompleted(collectionExercise);
@@ -128,7 +127,8 @@ public class SampleSummaryService {
    * @param collectionExerciseId the id of the collection exercise
    */
   public void validSample(boolean valid, UUID collectionExerciseId) {
-    CollectionExercise collectionExercise = collectionExerciseRepository.findOneById(collectionExerciseId);
+    CollectionExercise collectionExercise =
+        collectionExerciseRepository.findOneById(collectionExerciseId);
     CollectionExerciseDTO.CollectionExerciseEvent event;
     if (valid) {
       LOG.with("collectionExerciseId", collectionExerciseId).info("collection exercise valid");
@@ -154,7 +154,8 @@ public class SampleSummaryService {
    */
   @Transactional(propagation = Propagation.REQUIRED)
   public boolean sampleSummaryDistributed(boolean distributed, UUID collectionExerciseId) {
-    CollectionExercise collectionExercise = collectionExerciseRepository.findOneById(collectionExerciseId);
+    CollectionExercise collectionExercise =
+        collectionExerciseRepository.findOneById(collectionExerciseId);
     CollectionExerciseDTO.CollectionExerciseEvent event;
     if (distributed) {
       LOG.with("collectionExerciseId", collectionExerciseId).info("collection exercise distibuted");
