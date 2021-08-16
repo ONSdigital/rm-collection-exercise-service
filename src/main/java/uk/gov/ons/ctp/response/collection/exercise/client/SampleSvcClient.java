@@ -102,7 +102,7 @@ public class SampleSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
-    log.with("sample_summary_id").debug("Getting sample summary");
+    log.with("sampleSummaryId", sampleSummaryId).debug("Getting sample summary");
     UriComponents uri =
         restUtility.createUriComponents(
             "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);
@@ -131,5 +131,42 @@ public class SampleSvcClient {
             uriComponents.toUri(), HttpMethod.GET, httpEntity, SampleUnitsRequestDTO.class);
 
     return responseEntity.getBody();
+  }
+
+  public boolean enrichSampleSummary(
+      final UUID surveyId, final UUID collectionExerciseId, final UUID sampleSummaryId) {
+    log.with("surveyId", surveyId)
+        .with("collectionExerciseId", collectionExerciseId)
+        .with("sampleSummaryId", sampleSummaryId)
+        .debug("Enriching sample summary");
+
+    UriComponents uri =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getEnrichSampleSummary(),
+            null,
+            surveyId,
+            collectionExerciseId,
+            sampleSummaryId);
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
+
+    // GET should change to POST but the sample service needs to change
+    ResponseEntity<String> response =
+        restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, String.class);
+
+    return response.getStatusCode().is2xxSuccessful();
+  }
+
+  public boolean distributeSampleSummary(final UUID sampleSummaryId) {
+    log.with("sampleSummaryId", sampleSummaryId).debug("distribute sample summary");
+    UriComponents uri =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getDistributeSampleSummary(), null, sampleSummaryId);
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uri);
+
+    // as above
+    ResponseEntity<String> response =
+        restTemplate.exchange(uri.toUri(), HttpMethod.GET, httpEntity, String.class);
+
+    return response.getStatusCode().is2xxSuccessful();
   }
 }
