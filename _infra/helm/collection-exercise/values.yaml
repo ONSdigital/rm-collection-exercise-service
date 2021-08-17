@@ -76,8 +76,8 @@ gcp:
   project: ras-rm-sandbox
   caseNotificationTopic: "case-notification-topic"
   sampleUnitReceiverSubscription: "test_subscription"
-  sampleSummaryStatusSubscription: "sample-summary-status-subscription"
-  sampleSummaryActivationTopic: "sample-summary-activation-topic"
+  sampleSummaryActivationStatusSubscription: sample-summary-activation-status
+  sampleSummaryActivationTopic: sample-summary-activation
 
 sampleV2:
   enabled: false

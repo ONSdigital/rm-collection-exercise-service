@@ -279,8 +279,8 @@ spec:
             value: "{{ .Values.gcp.caseNotificationTopic }}"
           - name: GCP_SAMPLEUNITRECEIVERSUBSCRIPTION
             value: "{{ .Values.gcp.sampleUnitReceiverSubscription }}"
-          - name: GCP_SAMPLESUMMARYSTATUSSUBSCRIPTION
-            value: "{{ .Values.gcp.sampleSummaryStatusSubscription }}"
+          - name: GCP_SAMPLESUMMARYACTIVATIONSTATUSSUBSCRIPTION
+            value: "{{ .Values.gcp.sampleSummaryActivationStatusSubscription }}"
           - name: GCP_SAMPLESUMMARYACTIVATIONTOPIC
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
           - name: SAMPLE_V2_ENABLED
