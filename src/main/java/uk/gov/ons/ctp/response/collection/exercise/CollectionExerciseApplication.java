@@ -246,7 +246,7 @@ public class CollectionExerciseApplication {
       PubSubTemplate pubSubTemplate) {
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(
-            pubSubTemplate, appConfig.getGcp().getSampleSummaryStatusSubscription());
+            pubSubTemplate, appConfig.getGcp().getSampleSummaryActivationStatusSubscription());
     adapter.setOutputChannel(messageChannel);
     adapter.setAckMode(AckMode.MANUAL);
     adapter.setPayloadType(SampleSummaryStatusDTO.class);
