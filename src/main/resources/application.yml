@@ -66,6 +66,10 @@ spring:
     # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
     open-in-view: true
 
+  cloud:
+    gcp:
+      project-id: ras-rm-dev
+
 sample-svc:
   request-sample-units-path: /samples/sampleunitrequests
   request-sample-unit-count-path: /samples/count

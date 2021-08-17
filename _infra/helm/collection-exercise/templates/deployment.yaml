@@ -271,12 +271,18 @@ spec:
             value: "{{ .Values.tomcat.maxIdle }}"
           - name: SPRING_DATASOURCE_TOMCAT_MIN_IDLE
             value: "{{ .Values.tomcat.minIdle }}"
+          - name: SPRING_CLOUD_GCP_PROJECT-ID
+            value: "{{ .Values.gcp.project }}"
           - name: GCP_PROJECT
             value: "{{ .Values.gcp.project }}"
           - name: GCP_CASENOTIFICATIONTOPIC
             value: "{{ .Values.gcp.caseNotificationTopic }}"
           - name: GCP_SAMPLEUNITRECEIVERSUBSCRIPTION
             value: "{{ .Values.gcp.sampleUnitReceiverSubscription }}"
+          - name: GCP_SAMPLESUMMARYSTATUSSUBSCRIPTION
+            value: "{{ .Values.gcp.sampleSummaryStatusSubscription }}"
+          - name: GCP_SAMPLESUMMARYACTIVATIONTOPIC
+            value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
           - name: SAMPLE_V2_ENABLED
             value: "{{ .Values.sampleV2.enabled }}"
           resources:

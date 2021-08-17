@@ -5,6 +5,12 @@ spring:
   liquibase:
     url: jdbc:postgresql://localhost:15432/postgres
 
+  cloud:
+    gcp:
+      project-id: test
+      pubsub:
+        emulator-host: localhost:18681
+
 survey-svc:
   connection-config:
     port: 18002
