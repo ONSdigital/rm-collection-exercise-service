@@ -9,14 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.message.SampleSummaryActivationPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.SampleSummaryActivationDTO;
 
 @Service
 public class SampleSummaryService {
@@ -27,14 +28,14 @@ public class SampleSummaryService {
 
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
 
-  @Autowired private SampleSvcClient sampleSvcClient;
+  @Autowired private SampleSummaryActivationPublisher sampleSummaryActivationPublisher;
 
   @Autowired private CollectionExerciseService collectionExerciseService;
 
   @Autowired private EventRepository eventRepository;
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public boolean activateSamples(UUID collectionExerciseId) {
+  public void activateSamples(UUID collectionExerciseId) {
 
     CollectionExercise collectionExercise =
         collectionExerciseRepository.findOneById(collectionExerciseId);
@@ -55,24 +56,16 @@ public class SampleSummaryService {
     }
     // in rasrm business there can only ever be one sample summary per collection exercise
     UUID sampleSummaryId = sampleSummaryIdList.get(0);
-    boolean successfulEnrichment =
-        sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId);
 
-    LOG.with("successfulEnrichment", successfulEnrichment)
-        .with("sampleSummaryId", sampleSummaryId)
-        .info("Enrichment complete");
+    SampleSummaryActivationDTO sampleSummaryActivationDTO = new SampleSummaryActivationDTO();
+    sampleSummaryActivationDTO.setCollectionExerciseId(collectionExerciseId);
+    sampleSummaryActivationDTO.setSampleSummaryId(sampleSummaryId);
+    sampleSummaryActivationDTO.setSurveyId(surveyId);
+
+    sampleSummaryActivationPublisher.sendSampleSummaryActivation(sampleSummaryActivationDTO);
 
     // now transition to executed complete
     executionCompleted(collectionExercise);
-
-    // TODO change this to be pubsub
-    validSample(successfulEnrichment, collectionExerciseId);
-    if (successfulEnrichment) {
-      LOG.info("request distribution of sample");
-      return distributeSample(collectionExerciseId);
-    } else {
-      return false;
-    }
   }
 
   private void executionStarted(CollectionExercise collectionExercise) {
@@ -97,28 +90,6 @@ public class SampleSummaryService {
     }
   }
 
-  public boolean distributeSample(UUID collectionExerciseId) {
-    List<SampleLink> sampleLinks =
-        sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId);
-    List<UUID> sampleSummaryIdList =
-        sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
-
-    if (sampleSummaryIdList.size() > 1) {
-      LOG.with("numberOfSampleSummaries", sampleSummaryIdList.size())
-          .with("collectionExerciseId", collectionExerciseId)
-          .error("Multiple sample summaries detected during distribution phase");
-    }
-    // in rasrm business there can only ever be one sample summary per collection exercise
-    UUID sampleSummaryId = sampleSummaryIdList.get(0);
-    boolean successfulDistribution = sampleSvcClient.distributeSampleSummary(sampleSummaryId);
-    // TODO change this to be pubsub
-    boolean stateChange = sampleSummaryDistributed(successfulDistribution, collectionExerciseId);
-    LOG.with("successfulDistribution", successfulDistribution)
-        .with("sampleSummaryId", sampleSummaryId)
-        .info("Distribution complete");
-    return stateChange;
-  }
-
   /**
    * Transitions the state of a collection exercise depending on the outcome of the validation of
    * the sample summary
@@ -126,7 +97,8 @@ public class SampleSummaryService {
    * @param valid true if sample summary valid and enriched, false otherwise
    * @param collectionExerciseId the id of the collection exercise
    */
-  public void validSample(boolean valid, UUID collectionExerciseId) {
+  @Transactional(propagation = Propagation.REQUIRED)
+  public boolean validSample(boolean valid, UUID collectionExerciseId) {
     CollectionExercise collectionExercise =
         collectionExerciseRepository.findOneById(collectionExerciseId);
     CollectionExerciseDTO.CollectionExerciseEvent event;
@@ -140,8 +112,10 @@ public class SampleSummaryService {
     try {
       LOG.with("collectionExerciseId", collectionExerciseId).info("transitioning state");
       collectionExerciseService.transitionCollectionExercise(collectionExercise, event);
+      return true;
     } catch (CTPException e) {
       LOG.error("unable to transition collection exercise", e);
+      return false;
     }
   }
 

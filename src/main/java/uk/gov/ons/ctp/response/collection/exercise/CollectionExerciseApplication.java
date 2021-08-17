@@ -15,11 +15,20 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
+import org.springframework.cloud.gcp.pubsub.integration.AckMode;
+import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
+import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
+import org.springframework.integration.annotation.MessagingGateway;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.PublishSubscribeChannel;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -32,6 +41,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObje
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManagerFactory;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.SampleSummaryStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
@@ -218,6 +228,41 @@ public class CollectionExerciseApplication {
     CustomObjectMapper mapper = new CustomObjectMapper();
 
     return mapper;
+  }
+
+  /*
+   * PubSub / Spring integration configuration
+   *
+   */
+
+  @Bean(name = "sampleSummaryStatusChannel")
+  public MessageChannel inputMessageChannel() {
+    return new PublishSubscribeChannel();
+  }
+
+  @Bean
+  public PubSubInboundChannelAdapter inboundChannelAdapter(
+      @Qualifier("sampleSummaryStatusChannel") MessageChannel messageChannel,
+      PubSubTemplate pubSubTemplate) {
+    PubSubInboundChannelAdapter adapter =
+        new PubSubInboundChannelAdapter(
+            pubSubTemplate, appConfig.getGcp().getSampleSummaryStatusSubscription());
+    adapter.setOutputChannel(messageChannel);
+    adapter.setAckMode(AckMode.MANUAL);
+    adapter.setPayloadType(SampleSummaryStatusDTO.class);
+    return adapter;
+  }
+
+  @Bean
+  @ServiceActivator(inputChannel = "sampleSummaryActivationChannel")
+  public MessageHandler messageSender(PubSubTemplate pubsubTemplate) {
+    return new PubSubMessageHandler(
+        pubsubTemplate, appConfig.getGcp().getSampleSummaryActivationTopic());
+  }
+
+  @MessagingGateway(defaultRequestChannel = "sampleSummaryActivationChannel")
+  public interface PubsubOutboundGateway {
+    void sendToPubsub(String text);
   }
 
   public static final String COLLECTION_INSTRUMENT_CACHE = "collectioninstruments";
