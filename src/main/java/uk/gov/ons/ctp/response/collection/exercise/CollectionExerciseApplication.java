@@ -41,7 +41,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObje
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManagerFactory;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.SampleSummaryStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
@@ -249,7 +248,6 @@ public class CollectionExerciseApplication {
             pubSubTemplate, appConfig.getGcp().getSampleSummaryActivationStatusSubscription());
     adapter.setOutputChannel(messageChannel);
     adapter.setAckMode(AckMode.MANUAL);
-    adapter.setPayloadType(SampleSummaryStatusDTO.class);
     return adapter;
   }
 
