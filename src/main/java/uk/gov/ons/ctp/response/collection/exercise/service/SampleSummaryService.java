@@ -114,6 +114,9 @@ public class SampleSummaryService {
     try {
       LOG.with("collectionExerciseId", collectionExerciseId).info("transitioning state");
       collectionExerciseService.transitionCollectionExercise(collectionExercise, event);
+      LOG.with("collectionExerciseId", collectionExerciseId)
+          .with("valid", valid)
+          .info("collection exercise transition successful");
     } catch (CTPException e) {
       LOG.error("unable to transition collection exercise", e);
       throw new SampleSummaryValidationException(e);
@@ -155,6 +158,9 @@ public class SampleSummaryService {
       try {
         LOG.with("collectionExerciseId", collectionExerciseId).info("transitioning state");
         collectionExerciseService.transitionCollectionExercise(collectionExercise, event);
+        LOG.with("collectionExerciseId", collectionExerciseId)
+            .with("distributed", distributed)
+            .info("collection exercise transition successful");
       } catch (CTPException e) {
         LOG.error("unable to transition collection exercise", e);
         throw new SampleSummaryDistributionException(e);

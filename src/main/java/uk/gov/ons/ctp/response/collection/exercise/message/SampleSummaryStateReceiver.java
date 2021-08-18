@@ -40,31 +40,17 @@ public class SampleSummaryStateReceiver {
       if (SampleSummaryStatusDTO.Event.ENRICHED.equals(sampleSummaryStatusDTO.getEvent())) {
         sampleSummaryService.validSample(
             sampleSummaryStatusDTO.isSuccessful(), collectionExerciseId);
-        LOGGER
-            .with("collectionExerciseId", collectionExerciseId)
-            .info("collection exercise transition to valid successful");
         pubSubMsg.ack();
       } else if (SampleSummaryStatusDTO.Event.DISTRIBUTED.equals(
           sampleSummaryStatusDTO.getEvent())) {
         sampleSummaryService.sampleSummaryDistributed(
             sampleSummaryStatusDTO.isSuccessful(), collectionExerciseId);
-        LOGGER
-            .with("collectionExerciseId", collectionExerciseId)
-            .info("collection exercise transition successful");
         pubSubMsg.ack();
       } else {
         LOGGER.error("unsupported message type");
         pubSubMsg.nack();
       }
-    } catch (SampleSummaryValidationException e) {
-      LOGGER
-          .with("collectionExerciseId", collectionExerciseId)
-          .error("collection exercise transition to valid failed");
-      pubSubMsg.nack();
-    } catch (SampleSummaryDistributionException e) {
-      LOGGER
-          .with("collectionExerciseId", collectionExerciseId)
-          .error("collection exercise transition failed");
+    } catch (SampleSummaryValidationException | SampleSummaryDistributionException e) {
       pubSubMsg.nack();
     } catch (JsonProcessingException e) {
       LOGGER.error("failed to deserialize message type", e);
