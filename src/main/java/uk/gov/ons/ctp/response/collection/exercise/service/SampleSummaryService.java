@@ -17,7 +17,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleSummaryActivationDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.change.SampleSummaryDistributionException;
 
 @Service
@@ -58,12 +57,8 @@ public class SampleSummaryService {
     // in rasrm business there can only ever be one sample summary per collection exercise
     UUID sampleSummaryId = sampleSummaryIdList.get(0);
 
-    SampleSummaryActivationDTO sampleSummaryActivationDTO = new SampleSummaryActivationDTO();
-    sampleSummaryActivationDTO.setCollectionExerciseId(collectionExerciseId);
-    sampleSummaryActivationDTO.setSampleSummaryId(sampleSummaryId);
-    sampleSummaryActivationDTO.setSurveyId(surveyId);
-
-    sampleSummaryActivationPublisher.sendSampleSummaryActivation(sampleSummaryActivationDTO);
+    sampleSummaryActivationPublisher.sendSampleSummaryActivation(
+        collectionExerciseId, sampleSummaryId, surveyId);
 
     // now transition to executed complete
     executionCompleted(collectionExercise);

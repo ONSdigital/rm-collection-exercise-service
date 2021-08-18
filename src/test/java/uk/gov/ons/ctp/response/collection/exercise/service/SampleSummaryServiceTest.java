@@ -20,7 +20,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExercise
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleSummaryActivationDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SampleSummaryServiceTest {
@@ -75,7 +74,7 @@ public class SampleSummaryServiceTest {
 
     verify(collectionExerciseRepository, times(3)).findOneById(collectionExerciseId);
     verify(sampleSummaryActivationPublisher, times(1))
-        .sendSampleSummaryActivation(any(SampleSummaryActivationDTO.class));
+        .sendSampleSummaryActivation(collectionExerciseId, sampleSummaryId, surveyId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
@@ -122,7 +121,7 @@ public class SampleSummaryServiceTest {
 
     verify(collectionExerciseRepository, times(2)).findOneById(collectionExerciseId);
     verify(sampleSummaryActivationPublisher, times(1))
-        .sendSampleSummaryActivation(any(SampleSummaryActivationDTO.class));
+        .sendSampleSummaryActivation(collectionExerciseId, sampleSummaryId, surveyId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
@@ -171,7 +170,7 @@ public class SampleSummaryServiceTest {
 
     verify(collectionExerciseRepository, times(3)).findOneById(collectionExerciseId);
     verify(sampleSummaryActivationPublisher, times(1))
-        .sendSampleSummaryActivation(any(SampleSummaryActivationDTO.class));
+        .sendSampleSummaryActivation(collectionExerciseId, sampleSummaryId, surveyId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
