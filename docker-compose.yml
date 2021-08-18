@@ -16,7 +16,7 @@ services:
    ports:
      - "18681:8681"
    environment:
-     - PUBSUB_PROJECT1=test,sample_unit_topic:sample_unit_subscription
+     - PUBSUB_PROJECT1=test,sample_unit_topic:sample_unit_subscription,test_topic:test_subscription
  survey:
    container_name: survey-it
    image: eu.gcr.io/ons-rasrmbs-management/survey

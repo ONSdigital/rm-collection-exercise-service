@@ -55,6 +55,10 @@ spring:
       min-idle: 3
     initialization-mode: always
 
+  cloud:
+    gcp:
+      project-id: ras-rm-dev
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     properties:

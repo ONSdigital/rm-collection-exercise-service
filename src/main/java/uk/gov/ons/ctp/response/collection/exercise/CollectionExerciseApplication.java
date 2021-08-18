@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise;
 
 import com.godaddy.logging.LoggingConfigs;
 import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -15,11 +16,19 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
+import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
+import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
+import org.springframework.integration.annotation.MessagingGateway;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -51,6 +60,7 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EntityScan("uk.gov.ons.ctp.response")
 @EnableScheduling
 @EnableCaching
+@Slf4j
 public class CollectionExerciseApplication {
 
   private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
@@ -225,6 +235,37 @@ public class CollectionExerciseApplication {
   @Bean
   public CacheManager cacheManager() {
     return new ConcurrentMapCacheManager(COLLECTION_INSTRUMENT_CACHE);
+  }
+
+  @Bean
+  public PubSubInboundChannelAdapter sampleUnitReceiverChannelAdapter(
+      @Qualifier("sampleUnitReceiverChannel") MessageChannel inputChannel,
+      PubSubTemplate pubSubTemplate) {
+    String subscriptionName = appConfig.getGcp().getSampleUnitReceiverSubscription();
+    log.info(
+        "Application is listening for sample receiver on subscription id {}", subscriptionName);
+    PubSubInboundChannelAdapter adapter =
+        new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
+    adapter.setOutputChannel(inputChannel);
+    return adapter;
+  }
+
+  @Bean
+  public MessageChannel sampleUnitReceiverChannel() {
+    return new DirectChannel();
+  }
+
+  @Bean
+  @ServiceActivator(inputChannel = "caseCreationChannel")
+  public MessageHandler sampleUnitGroupMessageSender(PubSubTemplate pubsubTemplate) {
+    String topicId = appConfig.getGcp().getCaseNotificationTopic();
+    log.info("Application started with publisher for case notification with topic Id {}", topicId);
+    return new PubSubMessageHandler(pubsubTemplate, topicId);
+  }
+
+  @MessagingGateway(defaultRequestChannel = "caseCreationChannel")
+  public interface PubSubOutboundSampleUnitGroupGateway {
+    void sendToPubSub(String text);
   }
 
   @CacheEvict(

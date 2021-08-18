@@ -279,5 +279,7 @@ spec:
             value: "{{ .Values.gcp.sampleUnitReceiverSubscription }}"
           - name: SAMPLE_V2_ENABLED
             value: "{{ .Values.sampleV2.enabled }}"
+          - name: SPRING_CLOUD_GCP_PROJECT-ID
+            value: "{{ .Values.gcp.project }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

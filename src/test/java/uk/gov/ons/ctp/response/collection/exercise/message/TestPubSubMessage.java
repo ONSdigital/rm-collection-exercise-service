@@ -10,8 +10,8 @@ import com.google.pubsub.v1.PubsubMessage;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import uk.gov.ons.ctp.lib.common.utility.PubSubEmulator;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
-import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 
 public class TestPubSubMessage {
   private static final Logger log = LoggerFactory.getLogger(TestPubSubMessage.class);

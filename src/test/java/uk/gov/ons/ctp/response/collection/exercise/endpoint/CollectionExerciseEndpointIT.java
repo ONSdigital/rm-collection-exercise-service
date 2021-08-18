@@ -38,15 +38,16 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import uk.gov.ons.ctp.lib.common.utility.PubSubEmulator;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -63,7 +64,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 
 /** A class to contain integration tests for the collection exercise service */
@@ -71,6 +71,7 @@ import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnit
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestPropertySource(locations = "classpath:/application-test.yml")
 public class CollectionExerciseEndpointIT {
   private static final Logger log = LoggerFactory.getLogger(CollectionExerciseEndpointIT.class);
 
@@ -100,10 +101,6 @@ public class CollectionExerciseEndpointIT {
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
-
-  @ClassRule
-  public static final EnvironmentVariables environmentVariables =
-      new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
 
   @ClassRule
   public static WireMockClassRule wireMockRule =
@@ -212,7 +209,6 @@ public class CollectionExerciseEndpointIT {
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
-    pubSubEmulator.testInit();
     stubSurveyServiceBusiness();
     stubGetPartyNoAssociations();
     stubCollectionInstrumentCount();
@@ -222,12 +218,10 @@ public class CollectionExerciseEndpointIT {
     SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
     assertEquals(id, UUID.fromString(sampleUnit.getId()));
-    pubSubEmulator.testTeardown();
   }
 
   @Test
   public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
-    pubSubEmulator.testInit();
     stubSurveyServiceBusiness();
     stubGetPartyWithAssociations();
     stubCollectionInstrumentCount();
@@ -237,7 +231,6 @@ public class CollectionExerciseEndpointIT {
     SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
     assertNotNull("Party id must be not null", sampleUnit.getPartyId());
     assertEquals(id, UUID.fromString(sampleUnit.getId()));
-    pubSubEmulator.testTeardown();
   }
 
   private SampleUnitParentDTO ensureSampleUnitIdIsPropagatedHere() throws Exception {

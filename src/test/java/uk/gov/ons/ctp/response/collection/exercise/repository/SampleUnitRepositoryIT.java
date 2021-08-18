@@ -11,11 +11,11 @@ import java.util.UUID;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -29,15 +29,12 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGrou
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(locations = "classpath:/application-test.yml")
 public class SampleUnitRepositoryIT {
   private static final Logger log = LoggerFactory.getLogger(SampleUnitRepositoryIT.class);
 
   // Gubbins to make spring wire itself up
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
-
-  @ClassRule
-  public static final EnvironmentVariables environmentVariables =
-      new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 

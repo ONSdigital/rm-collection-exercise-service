@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.lib.collection.instrument.representation.CollectionInstrumentDTO;
@@ -30,6 +31,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.collection.instrument.rep
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(locations = "classpath:/application-test.yml")
 public class CachingTestIT {
 
   @Autowired private CollectionInstrumentSvcClient collectionInstrumentSvcClient;
