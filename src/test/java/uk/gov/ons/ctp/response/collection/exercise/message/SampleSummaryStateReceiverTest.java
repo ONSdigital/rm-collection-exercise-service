@@ -1,6 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.message;
 
+import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -12,18 +15,12 @@ import org.springframework.messaging.Message;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SampleSummaryStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleSummaryService;
 
-import java.util.UUID;
-
-import static org.mockito.Mockito.*;
-
 @RunWith(MockitoJUnitRunner.class)
 public class SampleSummaryStateReceiverTest {
 
-  @Mock
-  private ObjectMapper objectMapper;
+  @Mock private ObjectMapper objectMapper;
 
-  @Mock
-  private SampleSummaryService sampleSummaryService;
+  @Mock private SampleSummaryService sampleSummaryService;
 
   @InjectMocks private SampleSummaryStateReceiver sampleSummaryStateReceiver;
 
@@ -41,11 +38,13 @@ public class SampleSummaryStateReceiverTest {
 
     Message message = Mockito.mock(Message.class);
     when(message.getPayload()).thenReturn(payload.getBytes());
-    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class)).thenReturn(sampleSummaryStatusDTO);
+    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class))
+        .thenReturn(sampleSummaryStatusDTO);
 
-    BasicAcknowledgeablePubsubMessage pubSubMsg = Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+    BasicAcknowledgeablePubsubMessage pubSubMsg =
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
-    sampleSummaryStateReceiver.messageReceiver(message,  pubSubMsg);
+    sampleSummaryStateReceiver.messageReceiver(message, pubSubMsg);
 
     verify(sampleSummaryService, times(1)).sampleSummaryValidated(true, collectionExerciseId);
     verify(pubSubMsg, times(1)).ack();
@@ -65,11 +64,13 @@ public class SampleSummaryStateReceiverTest {
 
     Message message = Mockito.mock(Message.class);
     when(message.getPayload()).thenReturn(payload.getBytes());
-    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class)).thenReturn(sampleSummaryStatusDTO);
+    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class))
+        .thenReturn(sampleSummaryStatusDTO);
 
-    BasicAcknowledgeablePubsubMessage pubSubMsg = Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+    BasicAcknowledgeablePubsubMessage pubSubMsg =
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
-    sampleSummaryStateReceiver.messageReceiver(message,  pubSubMsg);
+    sampleSummaryStateReceiver.messageReceiver(message, pubSubMsg);
 
     verify(sampleSummaryService, times(1)).sampleSummaryValidated(false, collectionExerciseId);
     verify(pubSubMsg, times(1)).ack();
@@ -89,11 +90,13 @@ public class SampleSummaryStateReceiverTest {
 
     Message message = Mockito.mock(Message.class);
     when(message.getPayload()).thenReturn(payload.getBytes());
-    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class)).thenReturn(sampleSummaryStatusDTO);
+    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class))
+        .thenReturn(sampleSummaryStatusDTO);
 
-    BasicAcknowledgeablePubsubMessage pubSubMsg = Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+    BasicAcknowledgeablePubsubMessage pubSubMsg =
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
-    sampleSummaryStateReceiver.messageReceiver(message,  pubSubMsg);
+    sampleSummaryStateReceiver.messageReceiver(message, pubSubMsg);
 
     verify(sampleSummaryService, times(1)).sampleSummaryDistributed(true, collectionExerciseId);
     verify(pubSubMsg, times(1)).ack();
@@ -113,17 +116,15 @@ public class SampleSummaryStateReceiverTest {
 
     Message message = Mockito.mock(Message.class);
     when(message.getPayload()).thenReturn(payload.getBytes());
-    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class)).thenReturn(sampleSummaryStatusDTO);
+    when(objectMapper.readValue(payload, SampleSummaryStatusDTO.class))
+        .thenReturn(sampleSummaryStatusDTO);
 
-    BasicAcknowledgeablePubsubMessage pubSubMsg = Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+    BasicAcknowledgeablePubsubMessage pubSubMsg =
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
-    sampleSummaryStateReceiver.messageReceiver(message,  pubSubMsg);
+    sampleSummaryStateReceiver.messageReceiver(message, pubSubMsg);
 
     verify(sampleSummaryService, times(1)).sampleSummaryDistributed(false, collectionExerciseId);
     verify(pubSubMsg, times(1)).ack();
   }
-
-
-
-
 }

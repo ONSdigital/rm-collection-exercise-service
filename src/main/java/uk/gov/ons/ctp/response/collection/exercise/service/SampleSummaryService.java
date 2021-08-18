@@ -89,7 +89,8 @@ public class SampleSummaryService {
   /**
    * Transitions the state of a collection exercise depending on the outcome of the validation of
    * the sample summary
-   *  @param valid true if sample summary valid and enriched, false otherwise
+   *
+   * @param valid true if sample summary valid and enriched, false otherwise
    * @param collectionExerciseId the id of the collection exercise
    */
   @Transactional(propagation = Propagation.REQUIRED)
