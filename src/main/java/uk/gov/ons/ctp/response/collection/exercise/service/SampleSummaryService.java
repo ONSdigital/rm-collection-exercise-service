@@ -18,6 +18,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleSummaryActivationDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.change.SampleSummaryDistributionException;
 
 @Service
 public class SampleSummaryService {
@@ -98,7 +99,8 @@ public class SampleSummaryService {
    * @param collectionExerciseId the id of the collection exercise
    */
   @Transactional(propagation = Propagation.REQUIRED)
-  public boolean validSample(boolean valid, UUID collectionExerciseId) {
+  public void validSample(boolean valid, UUID collectionExerciseId)
+      throws SampleSummaryValidationException {
     CollectionExercise collectionExercise =
         collectionExerciseRepository.findOneById(collectionExerciseId);
     CollectionExerciseDTO.CollectionExerciseEvent event;
@@ -112,10 +114,9 @@ public class SampleSummaryService {
     try {
       LOG.with("collectionExerciseId", collectionExerciseId).info("transitioning state");
       collectionExerciseService.transitionCollectionExercise(collectionExercise, event);
-      return true;
     } catch (CTPException e) {
       LOG.error("unable to transition collection exercise", e);
-      return false;
+      throw new SampleSummaryValidationException(e);
     }
   }
 
@@ -127,7 +128,8 @@ public class SampleSummaryService {
    * @param collectionExerciseId the id of the collection exercise
    */
   @Transactional(propagation = Propagation.REQUIRED)
-  public boolean sampleSummaryDistributed(boolean distributed, UUID collectionExerciseId) {
+  public void sampleSummaryDistributed(boolean distributed, UUID collectionExerciseId)
+      throws SampleSummaryDistributionException {
     CollectionExercise collectionExercise =
         collectionExerciseRepository.findOneById(collectionExerciseId);
     CollectionExerciseDTO.CollectionExerciseEvent event;
@@ -155,13 +157,11 @@ public class SampleSummaryService {
         collectionExerciseService.transitionCollectionExercise(collectionExercise, event);
       } catch (CTPException e) {
         LOG.error("unable to transition collection exercise", e);
-        return false;
+        throw new SampleSummaryDistributionException(e);
       }
-      return true;
     } else {
       LOG.with("collectionExerciseId", collectionExerciseId)
           .warn("collection exercise failed distibution");
-      return false;
     }
   }
 }
