@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
@@ -68,7 +67,7 @@ public class SampleSummaryServiceTest {
     // first activate
     sampleSummaryService.activateSamples(collectionExerciseId);
     // then simulate successful enrich
-    sampleSummaryService.validSample(true, collectionExerciseId);
+    sampleSummaryService.sampleSummaryValidated(true, collectionExerciseId);
     // then simulate successful distribution
     sampleSummaryService.sampleSummaryDistributed(true, collectionExerciseId);
 
@@ -117,7 +116,7 @@ public class SampleSummaryServiceTest {
     // first activate
     sampleSummaryService.activateSamples(collectionExerciseId);
     // then simulate failed enrich
-    sampleSummaryService.validSample(false, collectionExerciseId);
+    sampleSummaryService.sampleSummaryValidated(false, collectionExerciseId);
 
     verify(collectionExerciseRepository, times(2)).findOneById(collectionExerciseId);
     verify(sampleSummaryActivationPublisher, times(1))
@@ -164,7 +163,7 @@ public class SampleSummaryServiceTest {
     // first activate
     sampleSummaryService.activateSamples(collectionExerciseId);
     // then simulate successful enrich
-    sampleSummaryService.validSample(true, collectionExerciseId);
+    sampleSummaryService.sampleSummaryValidated(true, collectionExerciseId);
     // then simulate failed distribution
     sampleSummaryService.sampleSummaryDistributed(false, collectionExerciseId);
 

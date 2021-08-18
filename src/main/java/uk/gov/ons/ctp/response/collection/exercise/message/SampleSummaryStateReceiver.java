@@ -38,7 +38,7 @@ public class SampleSummaryStateReceiver {
           objectMapper.readValue(payload, SampleSummaryStatusDTO.class);
       collectionExerciseId = sampleSummaryStatusDTO.getCollectionExerciseId();
       if (SampleSummaryStatusDTO.Event.ENRICHED.equals(sampleSummaryStatusDTO.getEvent())) {
-        sampleSummaryService.validSample(
+        sampleSummaryService.sampleSummaryValidated(
             sampleSummaryStatusDTO.isSuccessful(), collectionExerciseId);
         pubSubMsg.ack();
       } else if (SampleSummaryStatusDTO.Event.DISTRIBUTED.equals(
