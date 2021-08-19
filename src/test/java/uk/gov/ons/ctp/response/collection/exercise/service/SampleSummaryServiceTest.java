@@ -53,7 +53,7 @@ public class SampleSummaryServiceTest {
     collectionExercise.setSurveyId(surveyId);
 
     Event event = new Event();
-    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    event.setTimestamp(new Timestamp(System.currentTimeMillis() - 1000L));
 
     when(collectionExerciseRepository.findOneById(collectionExerciseId))
         .thenReturn(collectionExercise);
@@ -106,7 +106,7 @@ public class SampleSummaryServiceTest {
     collectionExercise.setSurveyId(surveyId);
 
     Event event = new Event();
-    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    event.setTimestamp(new Timestamp(System.currentTimeMillis() - 1000L));
 
     when(collectionExerciseRepository.findOneById(collectionExerciseId))
         .thenReturn(collectionExercise);
@@ -153,7 +153,7 @@ public class SampleSummaryServiceTest {
     collectionExercise.setSurveyId(surveyId);
 
     Event event = new Event();
-    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    event.setTimestamp(new Timestamp(System.currentTimeMillis() - 1000L));
 
     when(collectionExerciseRepository.findOneById(collectionExerciseId))
         .thenReturn(collectionExercise);
