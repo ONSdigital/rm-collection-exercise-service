@@ -252,12 +252,12 @@ public class CollectionExerciseApplication {
 
   @Bean
   @InboundChannelAdapter(
-    channel = "sampleUnitReceiverChannel",
-    poller = @Poller(fixedDelay = "100"))
+      channel = "sampleUnitReceiverChannel",
+      poller = @Poller(fixedDelay = "100"))
   public MessageSource<Object> pubsubAdapter(PubSubTemplate pubSubTemplate) {
     PubSubMessageSource messageSource =
-      new PubSubMessageSource(
-        pubSubTemplate, appConfig.getGcp().getSampleUnitReceiverSubscription());
+        new PubSubMessageSource(
+            pubSubTemplate, appConfig.getGcp().getSampleUnitReceiverSubscription());
     messageSource.setBlockOnPull(true);
     return messageSource;
   }
