@@ -18,15 +18,15 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
+import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubMessageSource;
 import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.integration.annotation.IntegrationComponentScan;
-import org.springframework.integration.annotation.MessagingGateway;
-import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.annotation.*;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.core.MessageSource;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -248,6 +248,18 @@ public class CollectionExerciseApplication {
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(inputChannel);
     return adapter;
+  }
+
+  @Bean
+  @InboundChannelAdapter(
+    channel = "sampleUnitReceiverChannel",
+    poller = @Poller(fixedDelay = "100"))
+  public MessageSource<Object> pubsubAdapter(PubSubTemplate pubSubTemplate) {
+    PubSubMessageSource messageSource =
+      new PubSubMessageSource(
+        pubSubTemplate, appConfig.getGcp().getSampleUnitReceiverSubscription());
+    messageSource.setBlockOnPull(true);
+    return messageSource;
   }
 
   @Bean

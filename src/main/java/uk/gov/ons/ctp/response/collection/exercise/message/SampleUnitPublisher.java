@@ -32,9 +32,11 @@ public class SampleUnitPublisher {
         .debug("Entering sendSampleUnit");
     try {
       String message = objectMapper.writeValueAsString(sampleUnit);
-      log.info("Publishing message to PubSub");
+      log.with("collectionExerciseId", sampleUnit.getCollectionExerciseId())
+        .info("Publishing message to PubSub");
       publisher.sendToPubSub(message);
-      log.info("SampleUnit publish sent successfully");
+      log.with("collectionExerciseId", sampleUnit.getCollectionExerciseId())
+        .info("SampleUnit publish sent successfully");
     } catch (JsonProcessingException e) {
       log.with("sampleUnit", sampleUnit).error("Error while sampleUnit can not be parsed.");
       throw new RuntimeException(e);
