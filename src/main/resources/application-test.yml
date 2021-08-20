@@ -38,3 +38,5 @@ gcp:
   project: "test"
   caseNotificationTopic: "test_topic"
   sampleUnitReceiverSubscription: "sample_unit_subscription"
+  sampleSummaryActivationStatusSubscription: "sample-summary-activation-status"
+  sampleSummaryActivationTopic: "sample-summary-activation"

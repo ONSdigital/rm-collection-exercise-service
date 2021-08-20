@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
@@ -12,10 +11,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.message.SampleSummaryActivationPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -28,7 +27,7 @@ public class SampleSummaryServiceTest {
 
   @Mock private CollectionExerciseRepository collectionExerciseRepository;
 
-  @Mock private SampleSvcClient sampleSvcClient;
+  @Mock private SampleSummaryActivationPublisher sampleSummaryActivationPublisher;
 
   @Mock private CollectionExerciseService collectionExerciseService;
 
@@ -54,24 +53,27 @@ public class SampleSummaryServiceTest {
     collectionExercise.setSurveyId(surveyId);
 
     Event event = new Event();
-    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    event.setTimestamp(new Timestamp(System.currentTimeMillis() - 1000L));
 
     when(collectionExerciseRepository.findOneById(collectionExerciseId))
         .thenReturn(collectionExercise);
     when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId))
         .thenReturn(sampleLinks);
-    when(sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId))
-        .thenReturn(true);
-    when(sampleSvcClient.distributeSampleSummary(sampleSummaryId)).thenReturn(true);
+
     when(eventRepository.findOneByCollectionExerciseAndTag(
             collectionExercise, EventService.Tag.go_live.name()))
         .thenReturn(event);
 
-    assertTrue(
-        "samples processed successfully",
-        sampleSummaryService.activateSamples(collectionExerciseId));
+    // first activate
+    sampleSummaryService.activateSamples(collectionExerciseId);
+    // then simulate successful enrich
+    sampleSummaryService.sampleSummaryValidated(true, collectionExerciseId);
+    // then simulate successful distribution
+    sampleSummaryService.sampleSummaryDistributed(true, collectionExerciseId);
 
     verify(collectionExerciseRepository, times(3)).findOneById(collectionExerciseId);
+    verify(sampleSummaryActivationPublisher, times(1))
+        .sendSampleSummaryActivation(collectionExerciseId, sampleSummaryId, surveyId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
@@ -104,18 +106,21 @@ public class SampleSummaryServiceTest {
     collectionExercise.setSurveyId(surveyId);
 
     Event event = new Event();
-    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    event.setTimestamp(new Timestamp(System.currentTimeMillis() - 1000L));
 
     when(collectionExerciseRepository.findOneById(collectionExerciseId))
         .thenReturn(collectionExercise);
     when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId))
         .thenReturn(sampleLinks);
-    when(sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId))
-        .thenReturn(false);
 
-    assertFalse(sampleSummaryService.activateSamples(collectionExerciseId));
+    // first activate
+    sampleSummaryService.activateSamples(collectionExerciseId);
+    // then simulate failed enrich
+    sampleSummaryService.sampleSummaryValidated(false, collectionExerciseId);
 
     verify(collectionExerciseRepository, times(2)).findOneById(collectionExerciseId);
+    verify(sampleSummaryActivationPublisher, times(1))
+        .sendSampleSummaryActivation(collectionExerciseId, sampleSummaryId, surveyId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);
@@ -148,19 +153,23 @@ public class SampleSummaryServiceTest {
     collectionExercise.setSurveyId(surveyId);
 
     Event event = new Event();
-    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    event.setTimestamp(new Timestamp(System.currentTimeMillis() - 1000L));
 
     when(collectionExerciseRepository.findOneById(collectionExerciseId))
         .thenReturn(collectionExercise);
     when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId))
         .thenReturn(sampleLinks);
-    when(sampleSvcClient.enrichSampleSummary(surveyId, collectionExerciseId, sampleSummaryId))
-        .thenReturn(true);
-    when(sampleSvcClient.distributeSampleSummary(sampleSummaryId)).thenReturn(false);
 
-    assertFalse(sampleSummaryService.activateSamples(collectionExerciseId));
+    // first activate
+    sampleSummaryService.activateSamples(collectionExerciseId);
+    // then simulate successful enrich
+    sampleSummaryService.sampleSummaryValidated(true, collectionExerciseId);
+    // then simulate failed distribution
+    sampleSummaryService.sampleSummaryDistributed(false, collectionExerciseId);
 
     verify(collectionExerciseRepository, times(3)).findOneById(collectionExerciseId);
+    verify(sampleSummaryActivationPublisher, times(1))
+        .sendSampleSummaryActivation(collectionExerciseId, sampleSummaryId, surveyId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTE);

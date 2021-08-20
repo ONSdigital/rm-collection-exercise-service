@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.*;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.core.MessageSource;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -229,6 +230,40 @@ public class CollectionExerciseApplication {
     CustomObjectMapper mapper = new CustomObjectMapper();
 
     return mapper;
+  }
+
+  /*
+   * PubSub / Spring integration configuration
+   *
+   */
+
+  @Bean(name = "sampleSummaryStatusChannel")
+  public MessageChannel inputMessageChannel() {
+    return new PublishSubscribeChannel();
+  }
+
+  @Bean
+  public PubSubInboundChannelAdapter inboundChannelAdapter(
+      @Qualifier("sampleSummaryStatusChannel") MessageChannel messageChannel,
+      PubSubTemplate pubSubTemplate) {
+    PubSubInboundChannelAdapter adapter =
+        new PubSubInboundChannelAdapter(
+            pubSubTemplate, appConfig.getGcp().getSampleSummaryActivationStatusSubscription());
+    adapter.setOutputChannel(messageChannel);
+    adapter.setAckMode(AckMode.MANUAL);
+    return adapter;
+  }
+
+  @Bean
+  @ServiceActivator(inputChannel = "sampleSummaryActivationChannel")
+  public MessageHandler messageSender(PubSubTemplate pubsubTemplate) {
+    return new PubSubMessageHandler(
+        pubsubTemplate, appConfig.getGcp().getSampleSummaryActivationTopic());
+  }
+
+  @MessagingGateway(defaultRequestChannel = "sampleSummaryActivationChannel")
+  public interface PubsubOutboundGateway {
+    void sendToPubsub(String text);
   }
 
   public static final String COLLECTION_INSTRUMENT_CACHE = "collectioninstruments";
