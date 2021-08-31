@@ -24,7 +24,6 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRep
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
-import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 
 /** The implementation of the SampleService */
 @Service
@@ -46,8 +45,6 @@ public class SampleService {
   @Autowired private SampleSvcClient sampleSvcClient;
 
   @Autowired private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
-
-  @Autowired private ValidateSampleUnits validate;
 
   @Autowired private SampleUnitDistributor distributor;
 
@@ -133,12 +130,6 @@ public class SampleService {
 
     return exerciseSampleUnit;
   }
-
-  /** Validate SampleUnits */
-  public void validateSampleUnits() {
-    validate.validateSampleUnits();
-  }
-
   /**
    * Distribute Sample Units for a CollectionExercise
    *

@@ -299,7 +299,5 @@ spec:
             value: "{{ .Values.gcp.sampleSummaryActivationStatusSubscription }}"
           - name: GCP_SAMPLESUMMARYACTIVATIONTOPIC
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
-          - name: SAMPLE_V2_ENABLED
-            value: "{{ .Values.sampleV2.enabled }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

@@ -34,10 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,9 +61,11 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventD
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
-import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
+import uk.gov.ons.ctp.response.collection.exercise.validation.CollectionInstrumentClassifierTypesTest;
 
 /** A class to contain integration tests for the collection exercise service */
+// TODO do we need this test anymore
+@Ignore
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -354,9 +353,12 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void createCollectionInstrumentStub() throws IOException {
+
+    // TODO change this resource loading stuff it's weird
     String json =
         loadResourceAsString(
-            ValidateSampleUnits.class, "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
+            CollectionInstrumentClassifierTypesTest.class,
+            "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
