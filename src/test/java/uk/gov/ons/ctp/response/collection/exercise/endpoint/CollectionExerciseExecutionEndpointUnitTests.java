@@ -2,7 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.lib.common.MvcHelper.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
@@ -68,8 +67,6 @@ public class CollectionExerciseExecutionEndpointUnitTests {
    */
   @Test
   public void requestSampleUnits() throws Exception {
-    when(sampleService.requestSampleUnits(COLLECTIONEXERCISE_ID1))
-        .thenReturn(sampleUnitsRequestDTOResults.get(0));
 
     ResultActions actions =
         mockCollectionExerciseExecutionMvc.perform(

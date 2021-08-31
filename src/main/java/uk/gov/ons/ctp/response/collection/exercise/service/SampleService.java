@@ -5,7 +5,6 @@ import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +15,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -78,49 +75,6 @@ public class SampleService {
     dto.setErrors(errorArray);
 
     return dto;
-  }
-
-  /**
-   * Request the delivery of sample units from the Sample Service via a message queue.
-   *
-   * @param id the Collection Exercise Id for which to request sample units.
-   * @return the total number of sample units in the collection exercise.
-   * @throws CTPException when collection exercise state transition error
-   */
-  public SampleUnitsRequestDTO requestSampleUnits(final UUID id) throws CTPException {
-    CollectionExercise collectionExercise = collectRepo.findOneById(id);
-
-    if (collectionExercise == null) {
-      throw new IllegalArgumentException(String.format("Collection exercise %s not found", id));
-    }
-
-    List<SampleLink> sampleLinks = sampleLinkRepository.findByCollectionExerciseId(id);
-    List<UUID> sampleSummaryIdList =
-        sampleLinks.stream().map(SampleLink::getSampleSummaryId).collect(Collectors.toList());
-
-    // Pre-grab and save the total number of sample units we expect to receive from the sample
-    // service BEFORE it starts to send them, to ensure no race condition.
-    // Also set the state of the collex to EXECUTION_STARTED so that it's in the right state
-    // if the samples get processed really quickly and the state needs to be transitioned to
-    // EXECUTION_COMPLETED.
-    // All these steps are about readiness, so that we avoid race conditions because we are using
-    // mix-and-match of synchronous (i.e. RESTful) and asynchrnous (i.e. message-driven) design
-    // which ain't good and we need to overhaul the whole way that the system hangs together.
-    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitCount(sampleSummaryIdList);
-    collexSampleUnitReceiptPreparer.prepareCollexToAcceptSampleUnits(
-        id, responseDTO.getSampleUnitsTotal());
-
-    // Request the sample units. They'll start arriving as soon as this line executes. Be ready!
-    SampleUnitsRequestDTO replyDTO = sampleSvcClient.requestSampleUnits(collectionExercise);
-
-    if (replyDTO != null && replyDTO.getSampleUnitsTotal() > 0) {
-      for (SampleLink samplelink : sampleLinks) {
-        partySvcClient.linkSampleSummaryId(
-            samplelink.getSampleSummaryId().toString(), collectionExercise.getId().toString());
-      }
-    }
-
-    return replyDTO;
   }
 
   /**
