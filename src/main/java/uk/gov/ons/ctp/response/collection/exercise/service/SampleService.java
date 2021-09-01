@@ -10,12 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.distribution.SampleUnitDistributor;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
-import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
@@ -43,10 +40,6 @@ public class SampleService {
   @Autowired private CollectionExerciseRepository collectRepo;
 
   @Autowired private SampleSvcClient sampleSvcClient;
-
-  @Autowired private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
-
-  @Autowired private SampleUnitDistributor distributor;
 
   /**
    * Method to get all the validation errors for a sample unit
@@ -130,14 +123,6 @@ public class SampleService {
 
     return exerciseSampleUnit;
   }
-  /**
-   * Distribute Sample Units for a CollectionExercise
-   *
-   * @param exercise for which to distribute SampleUnits.
-   */
-  public void distributeSampleUnits(CollectionExercise exercise) {
-    distributor.distributeSampleUnits(exercise);
-  }
 
   /**
    * Get the sample unit validation errors for a given collection exercise
@@ -174,19 +159,5 @@ public class SampleService {
         .filter(validTest)
         .map(SampleService::validateSampleUnit)
         .toArray(SampleUnitValidationErrorDTO[]::new);
-  }
-
-  /**
-   * Method to save a sample link
-   *
-   * @param sampleLink the sample link to save
-   * @return the updated sample link
-   */
-  public SampleLink saveSampleLink(final SampleLink sampleLink) {
-    return sampleLinkRepository.saveAndFlush(sampleLink);
-  }
-
-  public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
-    return sampleSvcClient.getSampleSummary(sampleSummaryId);
   }
 }
