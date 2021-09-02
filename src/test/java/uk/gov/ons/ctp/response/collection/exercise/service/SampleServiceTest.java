@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -45,8 +44,6 @@ public class SampleServiceTest {
   @Mock private SampleSvcClient sampleSvcClient;
 
   @Mock private CollexSampleUnitReceiptPreparer collexSampleUnitReceiptPreparer;
-
-  @Mock private PartySvcClient partySvcClient;
 
   @Mock
   private StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>

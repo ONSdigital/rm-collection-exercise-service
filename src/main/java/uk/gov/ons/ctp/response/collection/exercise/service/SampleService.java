@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ctp.response.collection.exercise.client.PartySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
@@ -28,8 +27,6 @@ public class SampleService {
   private static final Logger log = LoggerFactory.getLogger(SampleService.class);
 
   private static final int TRANSACTION_TIMEOUT = 60;
-
-  @Autowired private PartySvcClient partySvcClient;
 
   @Autowired private SampleLinkRepository sampleLinkRepository;
 
