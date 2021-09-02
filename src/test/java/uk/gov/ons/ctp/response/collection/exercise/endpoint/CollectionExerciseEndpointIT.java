@@ -59,9 +59,9 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
-import uk.gov.ons.ctp.response.collection.exercise.validation.CollectionInstrumentClassifierTypesTest;
 
 /** A class to contain integration tests for the collection exercise service */
 // TODO do we need this test anymore
@@ -357,7 +357,7 @@ public class CollectionExerciseEndpointIT {
     // TODO change this resource loading stuff it's weird
     String json =
         loadResourceAsString(
-            CollectionInstrumentClassifierTypesTest.class,
+            CollectionExerciseService.class,
             "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
