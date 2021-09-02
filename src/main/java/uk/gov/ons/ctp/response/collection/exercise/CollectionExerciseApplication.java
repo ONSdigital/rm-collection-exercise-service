@@ -123,17 +123,6 @@ public class CollectionExerciseApplication {
   }
 
   /**
-   * The RestUtility bean for the Party service
-   *
-   * @return the RestUtility bean for the Party service
-   */
-  @Bean
-  @Qualifier("partyRestUtility")
-  public RestUtility partyRestUtility() {
-    return new RestUtility(appConfig.getPartySvc().getConnectionConfig());
-  }
-
-  /**
    * The RestUtility bean for the Sample service
    *
    * @return the RestUtility bean for the Sample service
