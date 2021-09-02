@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -54,52 +53,6 @@ public class CollectionInstrumentSvcClientTest {
     MockitoAnnotations.initMocks(this);
     CollectionInstrumentSvc collectionInstrumentSvc = new CollectionInstrumentSvc();
     when(appConfig.getCollectionInstrumentSvc()).thenReturn(collectionInstrumentSvc);
-  }
-
-  @Test
-  public void getCollectionInstruments_200Response() {
-    // Given
-    ResponseEntity<List<CollectionInstrumentDTO>> responseEntity =
-        new ResponseEntity<>(collectionInstruments, HttpStatus.CREATED);
-    when(restTemplate.exchange(
-            any(URI.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {})))
-        .thenReturn(responseEntity);
-
-    // When
-    collectionInstrumentSvcClient.requestCollectionInstruments(SEARCH_STRING);
-
-    // Then
-    verify(restTemplate, times(1))
-        .exchange(
-            any(URI.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {}));
-  }
-
-  @Test(expected = HttpClientErrorException.class)
-  public void getCollectionInstruments_500Response() {
-    // Given
-    when(restTemplate.exchange(
-            any(URI.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {})))
-        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-    // When
-    collectionInstrumentSvcClient.requestCollectionInstruments(SEARCH_STRING);
-
-    // Then
-    verify(restTemplate, times(1))
-        .exchange(
-            any(URI.class),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            eq(new ParameterizedTypeReference<List<CollectionInstrumentDTO>>() {}));
   }
 
   @Test
