@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 
 /** The REST endpoint controller for ActionDistributor. */
 @RestController
@@ -19,16 +18,11 @@ public class CronJobEndpoint {
   private static final Logger log = LoggerFactory.getLogger(CronJobEndpoint.class);
 
   private final CollectionExerciseRepository collectRepo;
-  private final SampleService sampleService;
   private final EventService eventService;
 
   @Autowired
-  public CronJobEndpoint(
-      CollectionExerciseRepository collectRepo,
-      SampleService sampleService,
-      EventService eventService) {
+  public CronJobEndpoint(CollectionExerciseRepository collectRepo, EventService eventService) {
     this.collectRepo = collectRepo;
-    this.sampleService = sampleService;
     this.eventService = eventService;
   }
 

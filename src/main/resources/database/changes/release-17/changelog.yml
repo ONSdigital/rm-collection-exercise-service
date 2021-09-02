@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 17.1
+      author: Warren Bailey
+      changes:
+        - sqlFile:
+            comment: Dropping tables that are no longer used
+            path: drop_unused_tables.sql
+            relativeToChangelogFile: true
+            splitStatements: false

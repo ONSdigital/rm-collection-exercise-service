@@ -59,7 +59,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 
 /** Collection Exercise Endpoint Unit tests */
 public class CollectionExerciseEndpointUnitTests {
@@ -92,8 +91,6 @@ public class CollectionExerciseEndpointUnitTests {
   private static final UUID PARTY_ID_1 = UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
 
   @InjectMocks private CollectionExerciseEndpoint colectionExerciseEndpoint;
-
-  @Mock private SampleService sampleService;
 
   @Mock private CollectionExerciseRepository collectionExerciseRepository;
 

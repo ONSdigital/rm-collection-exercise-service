@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleSummaryService;
 
 /** The REST endpoint controller for Collection Exercises. */
@@ -28,8 +27,6 @@ public class CollectionExerciseExecutionEndpoint {
   private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
 
   @Autowired AppConfig appConfig;
-
-  @Autowired private SampleService sampleService;
 
   @Autowired private SampleSummaryService sampleSummaryService;
 
