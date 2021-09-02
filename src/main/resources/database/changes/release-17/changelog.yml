@@ -8,4 +8,4 @@ databaseChangeLog:
             comment: Dropping tables that are no longer used
             path: drop_unused_tables.sql
             relativeToChangelogFile: true
-            splitStatements: false
+            splitStatements: true
