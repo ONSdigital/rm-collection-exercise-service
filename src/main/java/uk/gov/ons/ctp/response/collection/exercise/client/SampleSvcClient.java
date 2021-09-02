@@ -59,7 +59,7 @@ public class SampleSvcClient {
     return sampleSummary;
   }
 
-  public SampleUnitsRequestDTO getSampleUnitCount(List<UUID> sampleSummaryIdList) {
+  public SampleUnitsRequestDTO src/main/java/uk/gov/ons/ctp/response/collection/exercise/client/SampleSvcClient.javagetSampleUnitCount(List<UUID> sampleSummaryIdList) {
 
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     sampleSummaryIdList.forEach(id -> queryParams.add("sampleSummaryId", id.toString()));

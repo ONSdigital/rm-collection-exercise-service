@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManager;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -76,32 +78,6 @@ public class SampleServiceTest {
     verify(sampleUnitGroupRepo, never()).saveAndFlush(any());
     verify(sampleUnitRepo, never()).saveAndFlush(any());
     verify(collectRepo, never()).saveAndFlush(any());
-  }
-
-  @Test
-  public void requestSampleUnitsHappyPath() throws CTPException {
-    UUID collexId = UUID.randomUUID();
-    UUID sampleSummaryId = UUID.randomUUID();
-    CollectionExercise collectionExercise = new CollectionExercise();
-    collectionExercise.setId(collexId);
-    SampleLink sampleLink = new SampleLink();
-    sampleLink.setSampleSummaryId(sampleSummaryId);
-    List<SampleLink> sampleLinks = Collections.singletonList(sampleLink);
-    SampleUnitsRequestDTO sampleUnitsRequestDTO = new SampleUnitsRequestDTO();
-    sampleUnitsRequestDTO.setSampleUnitsTotal(666);
-
-    // Given
-    when(collectRepo.findOneById(eq(collexId))).thenReturn(collectionExercise);
-    when(sampleLinkRepo.findByCollectionExerciseId(any())).thenReturn(sampleLinks);
-    when(sampleSvcClient.getSampleUnitCount(any())).thenReturn(sampleUnitsRequestDTO);
-    when(sampleSvcClient.requestSampleUnits(any())).thenReturn(sampleUnitsRequestDTO);
-
-    // When
-    sampleService.requestSampleUnits(collexId);
-
-    // Then
-    verify(collexSampleUnitReceiptPreparer).prepareCollexToAcceptSampleUnits(eq(collexId), eq(666));
-    verify(partySvcClient).linkSampleSummaryId(any(), any());
   }
 
   @Test
@@ -244,5 +220,4 @@ public class SampleServiceTest {
     // then
     assertEquals(validationErrors.length, 0);
   }
-
 }
