@@ -13,7 +13,6 @@ import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.config.CaseSvc;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -343,33 +342,40 @@ public class EventService {
       if (isExerciseActive && isEventInThePast) {
         log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
+        /* There is a situation where sample could still be sending messages to case to get cases created whilst
+         * the go_live event happens.  If we set it to LIVE whilst this is happening, then action will attempt
+         * to create print files and other things without all the case information being present, resulting in
+         * potentially missing entries in the printfiles and actions not being taken.
+         *
+         * By not changing the state until they match, we can guarantee case (and action by extension) will have all
+         * the cases created before action tries to do anything.
+         */
+        Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
+        boolean casesMatchSampleSize =
+            Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()));
+        if (!casesMatchSampleSize) {
+          log.with("collection_exercise_id", exercise.getId())
+              .with("number_of_cases", numberOfCases)
+              .with("sample_size", exercise.getSampleSize())
+              .info(
+                  "Number of cases does not match the expected"
+                      + "size.  Sample could still be sending entries to case.  Will attempt to set to live on the next pass.");
+          continue;
+        }
+
         // If the event is go_live we need to transition the state of the collection exercise
         Tag tag = EventService.Tag.valueOf(event.getTag());
         if (tag == EventService.Tag.go_live) {
-
-          /* There is a situation where sample could still be sending messages to case to get cases created whilst
-           * the go_live event happens.  If we set it to LIVE whilst this is happening, then action will attempt
-           * to create print files and other things without all the case information being present, resulting in
-           * potentially missing entries in the printfiles and actions not being taken.
-           *
-           * By not changing the state until it's equal, we can guarantee case (and action by extension) will have all
-           * the cases created
-           */
-          Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
-          if (!Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()))) {
-            log.with("collection_exercise_id", exercise.getId()).info("Number of cases does not match the expected" +
-              "size.  Sample could still be sending entries to case.  Will attempt to set to live on the next pass.");
-          }
-            try {
-              collectionExerciseService.transitionCollectionExercise(
+          try {
+            collectionExerciseService.transitionCollectionExercise(
                 event.getCollectionExercise(),
                 CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-              log.with("collection_exercise_id", event.getCollectionExercise().getId())
+            log.with("collection_exercise_id", event.getCollectionExercise().getId())
                 .info("Set collection exercise to LIVE state");
-            } catch (CTPException e) {
-              log.with("collection_exercise_id", event.getCollectionExercise().getId())
+          } catch (CTPException e) {
+            log.with("collection_exercise_id", event.getCollectionExercise().getId())
                 .error("Failed to set collection exercise to LIVE state", e);
-            }
+          }
         }
 
         if (tag.isActionable()) {
