@@ -74,6 +74,9 @@ public class CollectionExerciseDTO {
 
   private Boolean deleted;
 
+  // TODO this is needed as response operations looks for it
+  private SampleUnitValidationErrorDTO[] validationErrors;
+
   private List<EventDTO> events;
 
   /** Empty interface to use as a marker for validation of POST requests */
