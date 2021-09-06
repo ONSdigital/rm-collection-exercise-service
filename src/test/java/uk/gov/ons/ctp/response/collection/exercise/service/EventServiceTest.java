@@ -524,9 +524,9 @@ public class EventServiceTest {
     verify(actionSvcClient, atMost(1)).processEvent(any(), any());
     try {
       verify(collectionExerciseService, never())
-        .transitionCollectionExercise(
-          any(CollectionExercise.class),
-          any(CollectionExerciseDTO.CollectionExerciseEvent.class));
+          .transitionCollectionExercise(
+              any(CollectionExercise.class),
+              any(CollectionExerciseDTO.CollectionExerciseEvent.class));
     } catch (CTPException e) {
       fail();
     }
