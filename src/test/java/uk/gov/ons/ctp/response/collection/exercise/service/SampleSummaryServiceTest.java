@@ -11,9 +11,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleSummaryActivationPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -33,6 +35,8 @@ public class SampleSummaryServiceTest {
 
   @Mock private EventRepository eventRepository;
 
+  @Mock private SampleSvcClient sampleSvcClient;
+
   @InjectMocks private SampleSummaryService sampleSummaryService;
 
   @Test
@@ -40,6 +44,11 @@ public class SampleSummaryServiceTest {
     UUID collectionExerciseId = UUID.randomUUID();
     UUID surveyId = UUID.randomUUID();
     UUID sampleSummaryId = UUID.randomUUID();
+
+    List<UUID> sampleSummaryIds = new ArrayList<>();
+    sampleSummaryIds.add(sampleSummaryId);
+    SampleUnitsRequestDTO sampleUnitsRequestDTO = new SampleUnitsRequestDTO();
+    sampleUnitsRequestDTO.setSampleUnitsTotal(sampleSummaryIds.size());
 
     SampleLink sampleLink = new SampleLink();
     sampleLink.setSampleSummaryId(sampleSummaryId);
@@ -59,6 +68,7 @@ public class SampleSummaryServiceTest {
         .thenReturn(collectionExercise);
     when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId))
         .thenReturn(sampleLinks);
+    when(sampleSvcClient.getSampleUnitCount(sampleSummaryIds)).thenReturn(sampleUnitsRequestDTO);
 
     when(eventRepository.findOneByCollectionExerciseAndTag(
             collectionExercise, EventService.Tag.go_live.name()))
@@ -94,6 +104,11 @@ public class SampleSummaryServiceTest {
     UUID surveyId = UUID.randomUUID();
     UUID sampleSummaryId = UUID.randomUUID();
 
+    List<UUID> sampleSummaryIds = new ArrayList<>();
+    sampleSummaryIds.add(sampleSummaryId);
+    SampleUnitsRequestDTO sampleUnitsRequestDTO = new SampleUnitsRequestDTO();
+    sampleUnitsRequestDTO.setSampleUnitsTotal(sampleSummaryIds.size());
+
     SampleLink sampleLink = new SampleLink();
     sampleLink.setSampleSummaryId(sampleSummaryId);
     sampleLink.setCollectionExerciseId(collectionExerciseId);
@@ -112,6 +127,7 @@ public class SampleSummaryServiceTest {
         .thenReturn(collectionExercise);
     when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId))
         .thenReturn(sampleLinks);
+    when(sampleSvcClient.getSampleUnitCount(sampleSummaryIds)).thenReturn(sampleUnitsRequestDTO);
 
     // first activate
     sampleSummaryService.activateSamples(collectionExerciseId);
@@ -141,6 +157,11 @@ public class SampleSummaryServiceTest {
     UUID surveyId = UUID.randomUUID();
     UUID sampleSummaryId = UUID.randomUUID();
 
+    List<UUID> sampleSummaryIds = new ArrayList<>();
+    sampleSummaryIds.add(sampleSummaryId);
+    SampleUnitsRequestDTO sampleUnitsRequestDTO = new SampleUnitsRequestDTO();
+    sampleUnitsRequestDTO.setSampleUnitsTotal(sampleSummaryIds.size());
+
     SampleLink sampleLink = new SampleLink();
     sampleLink.setSampleSummaryId(sampleSummaryId);
     sampleLink.setCollectionExerciseId(collectionExerciseId);
@@ -159,6 +180,7 @@ public class SampleSummaryServiceTest {
         .thenReturn(collectionExercise);
     when(sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId))
         .thenReturn(sampleLinks);
+    when(sampleSvcClient.getSampleUnitCount(sampleSummaryIds)).thenReturn(sampleUnitsRequestDTO);
 
     // first activate
     sampleSummaryService.activateSamples(collectionExerciseId);
