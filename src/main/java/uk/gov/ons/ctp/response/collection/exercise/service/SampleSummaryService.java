@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.SampleSummaryActivationPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -33,6 +35,8 @@ public class SampleSummaryService {
   @Autowired private CollectionExerciseService collectionExerciseService;
 
   @Autowired private EventRepository eventRepository;
+
+  @Autowired private SampleSvcClient sampleSvcClient;
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void activateSamples(UUID collectionExerciseId) {
@@ -57,11 +61,22 @@ public class SampleSummaryService {
     // in rasrm business there can only ever be one sample summary per collection exercise
     UUID sampleSummaryId = sampleSummaryIdList.get(0);
 
+    setSampleUnitCount(collectionExercise, sampleSummaryIdList);
+
     sampleSummaryActivationPublisher.sendSampleSummaryActivation(
         collectionExerciseId, sampleSummaryId, surveyId);
 
     // now transition to executed complete
     executionCompleted(collectionExercise);
+  }
+
+  private void setSampleUnitCount(
+      CollectionExercise collectionExercise, List<UUID> sampleSummaryIdList) {
+    SampleUnitsRequestDTO responseDTO = sampleSvcClient.getSampleUnitCount(sampleSummaryIdList);
+
+    Integer sampleUnitCount = responseDTO.getSampleUnitsTotal();
+    collectionExercise.setSampleSize(sampleUnitCount);
+    collectionExerciseRepository.saveAndFlush(collectionExercise);
   }
 
   private void executionStarted(CollectionExercise collectionExercise) {
