@@ -345,12 +345,16 @@ public class EventService {
         /* There is a situation where sample could still be sending messages to case to get cases created whilst
          * the go_live event happens.  If we set it to LIVE whilst this is happening, then action will attempt
          * to create print files and other things without all the case information being present, resulting in
-         * potentially missing entries in the printfiles and actions not being taken.
+         * potentially missing entries in the print files and actions not being taken.
          *
          * By not changing the state until they match, we can guarantee case (and action by extension) will have all
          * the cases created before action tries to do anything.
          */
         Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
+        log.with("collection_exercise_id", exercise.getId())
+            .with("number_of_cases", numberOfCases)
+            .with("sample_size", exercise.getSampleSize())
+            .info("About to case has every sample in this exercise before processing this event");
         boolean casesMatchSampleSize =
             Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()));
         if (!casesMatchSampleSize) {
