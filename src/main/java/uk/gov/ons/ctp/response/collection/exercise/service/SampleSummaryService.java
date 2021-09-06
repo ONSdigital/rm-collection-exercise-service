@@ -76,7 +76,9 @@ public class SampleSummaryService {
 
     Integer sampleUnitCount = responseDTO.getSampleUnitsTotal();
     collectionExercise.setSampleSize(sampleUnitCount);
-    LOG.with("collectionExerciseId", collectionExercise.getId()).with("sampleUnitCount", sampleUnitCount).info("Sample Unit count received ");
+    LOG.with("collectionExerciseId", collectionExercise.getId())
+        .with("sampleUnitCount", sampleUnitCount)
+        .info("Sample Unit count received ");
     collectionExerciseRepository.saveAndFlush(collectionExercise);
   }
 
