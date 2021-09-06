@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -43,6 +44,8 @@ public class EventServiceTest {
   private static final int EXERCISE_PK = 6433;
 
   @Mock private ActionSvcClient actionSvcClient;
+
+  @Mock private CaseSvcClient caseSvcClient;
 
   @Mock private SurveySvcClient surveySvcClient;
 
@@ -475,10 +478,12 @@ public class EventServiceTest {
     List<Event> list = new ArrayList<>();
     Event event = createEvent(Tag.go_live);
     CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSampleSize(1);
     collectionExercise.setState(CollectionExerciseState.LIVE);
     event.setCollectionExercise(collectionExercise);
     list.add(event);
 
+    when(caseSvcClient.getNumberOfCases(any())).thenReturn(1L);
     when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
 
     // When
@@ -492,6 +497,36 @@ public class EventServiceTest {
           .transitionCollectionExercise(
               any(CollectionExercise.class),
               any(CollectionExerciseDTO.CollectionExerciseEvent.class));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testProcessEventsTransitionGoLiveMismatchedCases() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.go_live);
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSampleSize(10);
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+
+    when(caseSvcClient.getNumberOfCases(any())).thenReturn(9L);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, atMost(1)).processEvent(any(), any());
+    try {
+      verify(collectionExerciseService, never())
+        .transitionCollectionExercise(
+          any(CollectionExercise.class),
+          any(CollectionExerciseDTO.CollectionExerciseEvent.class));
     } catch (CTPException e) {
       fail();
     }
