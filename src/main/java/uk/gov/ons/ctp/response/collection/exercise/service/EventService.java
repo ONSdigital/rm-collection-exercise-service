@@ -354,7 +354,7 @@ public class EventService {
         log.with("collection_exercise_id", exercise.getId())
             .with("number_of_cases", numberOfCases)
             .with("sample_size", exercise.getSampleSize())
-            .info("About to case has every sample in this exercise before processing this event");
+            .info("About to check that case has every sample in this exercise before processing this event");
         boolean casesMatchSampleSize =
             Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()));
         if (!casesMatchSampleSize) {
