@@ -117,6 +117,23 @@ action-svc:
     username: admin
     password: secret
 
+case-svc:
+  number-of-cases-path: /casegroups/cases/{collectionExerciseId}
+  connection-config:
+    scheme: http
+    host: localhost
+    port: 8171
+    username: admin
+    password: secret
+    # how many times should we attempt connection on failure
+    retry-attempts: 10
+    # sleep between retries
+    retry-pause-milli-seconds: 5000
+    # time to estab connection
+    connect-timeout-milli-seconds: 5000
+    # time to read response
+    read-timeout-milli-seconds: 5000
+
 collection-instrument-svc:
   request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   request-collection-instruments-count: /collection-instrument-api/1.0.2/collectioninstrument/count

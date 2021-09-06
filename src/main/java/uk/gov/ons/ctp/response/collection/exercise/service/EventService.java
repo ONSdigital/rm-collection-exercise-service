@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.config.CaseSvc;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -110,6 +112,8 @@ public class EventService {
   @Autowired private List<EventValidator> eventValidators;
 
   @Autowired private ActionSvcClient actionSvcClient;
+
+  @Autowired private CaseSvcClient caseSvcClient;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -342,21 +346,34 @@ public class EventService {
         // If the event is go_live we need to transition the state of the collection exercise
         Tag tag = EventService.Tag.valueOf(event.getTag());
         if (tag == EventService.Tag.go_live) {
-          try {
-            collectionExerciseService.transitionCollectionExercise(
+
+          /* There is a situation where sample could still be sending messages to case to get cases created whilst
+           * the go_live event happens.  If we set it to LIVE whilst this is happening, then action will attempt
+           * to create print files and other things without all the case information being present, resulting in
+           * potentially missing entries in the printfiles and actions not being taken.
+           *
+           * By not changing the state until it's equal, we can guarantee case (and action by extension) will have all
+           * the cases created
+           */
+          Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
+          if (!Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()))) {
+            log.with("collection_exercise_id", exercise.getId()).info("Number of cases does not match the expected" +
+              "size.  Sample could still be sending entries to case.  Will attempt to set to live on the next pass.");
+          }
+            try {
+              collectionExerciseService.transitionCollectionExercise(
                 event.getCollectionExercise(),
                 CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-            log.with("collection_exercise_id", event.getCollectionExercise().getId())
+              log.with("collection_exercise_id", event.getCollectionExercise().getId())
                 .info("Set collection exercise to LIVE state");
-          } catch (CTPException e) {
-            log.with("collection_exercise_id", event.getCollectionExercise().getId())
+            } catch (CTPException e) {
+              log.with("collection_exercise_id", event.getCollectionExercise().getId())
                 .error("Failed to set collection exercise to LIVE state", e);
-          }
+            }
         }
 
         if (tag.isActionable()) {
           log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
-          // Hard code response until endpoint exists.
           boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
           if (success) {
             log.info("Event processing succeeded, setting to PROCESSED state");
