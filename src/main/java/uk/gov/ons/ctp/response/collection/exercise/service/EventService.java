@@ -354,7 +354,8 @@ public class EventService {
         log.with("collection_exercise_id", exercise.getId())
             .with("number_of_cases", numberOfCases)
             .with("sample_size", exercise.getSampleSize())
-            .info("About to check that case has every sample in this exercise before processing this event");
+            .info(
+                "About to check that case has every sample in this exercise before processing this event");
         boolean casesMatchSampleSize =
             Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()));
         if (!casesMatchSampleSize) {
@@ -362,8 +363,7 @@ public class EventService {
               .with("number_of_cases", numberOfCases)
               .with("sample_size", exercise.getSampleSize())
               .info(
-                  "Number of cases does not match the expected"
-                      + "size.  Sample could still be sending entries to case.  Will attempt to set to live on the next pass.");
+                  "Number of cases does not match the expected size.  Sample could still be sending entries to case.");
           continue;
         }
 
