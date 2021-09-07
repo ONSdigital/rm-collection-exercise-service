@@ -32,10 +32,7 @@ EXECUTION_STARTED --> EXECUTED : execution_complete
 EXECUTED --> VALIDATED : validate
 EXECUTED --> FAILEDVALIDATION : invalidate
 VALIDATED --> READY_FOR_LIVE<<Changed>> : publish
-note left of READY_FOR_LIVE: this used to be PUBLISHED
-note right of READY_FOR_LIVE #PaleTurquoise
-    states this colour have been renamed
-end note
+VALIDATED  --> LIVE : go_live
 READY_FOR_LIVE --> LIVE<<New>> : go_live
 FAILEDVALIDATION --> EXECUTION_STARTED : execute
 @enduml
