@@ -343,7 +343,7 @@ public class CollectionExerciseService {
     collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
     collectionExercise.setCreated(new Timestamp(new Date().getTime()));
     collectionExercise.setId(UUID.randomUUID());
-    collectionExercise.setEQVersion(collex.getEQVersion());
+    collectionExercise.setEqVersion(collex.getEqVersion());
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise from DTO");
     return collectionExercise;

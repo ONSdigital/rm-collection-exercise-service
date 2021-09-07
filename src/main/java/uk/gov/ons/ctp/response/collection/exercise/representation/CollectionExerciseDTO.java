@@ -53,7 +53,7 @@ public class CollectionExerciseDTO {
 
   private String executedBy;
 
-  private String eQVersion;
+  private String eqVersion;
 
   private CollectionExerciseDTO.CollectionExerciseState state;
 

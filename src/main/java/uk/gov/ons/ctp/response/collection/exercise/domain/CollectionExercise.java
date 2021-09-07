@@ -92,5 +92,5 @@ public class CollectionExercise {
   private UUID surveyId;
 
   @Column(name = "eq_version")
-  private String eQVersion;
+  private String eqVersion;
 }
