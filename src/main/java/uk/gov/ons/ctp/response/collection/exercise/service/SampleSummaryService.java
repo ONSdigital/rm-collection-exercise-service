@@ -152,9 +152,11 @@ public class SampleSummaryService {
     if (distributed) {
 
       try {
-        LOG.with("collectionExerciseId", collectionExerciseId).info("collection exercise distributed, transitioning to READY_FOR_LIVE");
+        LOG.with("collectionExerciseId", collectionExerciseId)
+            .info("collection exercise distributed, transitioning to READY_FOR_LIVE");
         // All sample units published, set exercise state to READY_FOR_LIVE
-        collectionExerciseService.transitionCollectionExercise(collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH);
+        collectionExerciseService.transitionCollectionExercise(
+            collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH);
         LOG.with("collectionExerciseId", collectionExerciseId)
             .info("collection exercise transitioned to READY_FOR_LIVE successfully");
       } catch (CTPException e) {
