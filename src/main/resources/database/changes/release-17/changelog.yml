@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 17.1
+      author: Amit Sinha
+      changes:
+        - sqlFile:
+            comment: add new eq version column to collection_exercise
+            path: add_eq_version_collection_exercise.sql
+            relativeToChangelogFile: true
+            splitStatements: false
