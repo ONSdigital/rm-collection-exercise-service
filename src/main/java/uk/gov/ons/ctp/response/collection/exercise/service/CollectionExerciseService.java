@@ -400,6 +400,16 @@ public class CollectionExerciseService {
         collex.setScheduledStartDateTime(
             new Timestamp(patchData.getScheduledStartDateTime().getTime()));
       }
+      if (patchData.getEqVersion() != null) {
+        String eqVersion = patchData.getEqVersion();
+        if (eqVersion.equals("v2") || eqVersion.equals("v3")) {
+          collex.setEqVersion(patchData.getEqVersion());
+        } else {
+          throw new CTPException(
+              CTPException.Fault.BAD_REQUEST,
+              String.format("eQ version %s not supported", eqVersion));
+        }
+      }
       collex.setUpdated(new Timestamp(new Date().getTime()));
       return updateCollectionExercise(collex);
     }
