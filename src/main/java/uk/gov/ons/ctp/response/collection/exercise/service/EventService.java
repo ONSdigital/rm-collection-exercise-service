@@ -343,11 +343,11 @@ public class EventService {
         log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
         /* There is a situation where sample could still be sending messages to case to get cases created whilst
-         * the go_live event happens.  If we set it to LIVE whilst this is happening, then action will attempt
-         * to create print files and other things without all the case information being present, resulting in
-         * potentially missing entries in the print files and actions not being taken.
+         * an event happens if the exercise going live and an event time are very close together.
+         * If we send the event to action before case has all the data it needs, it can result in potentially missing
+         * entries in the print files and actions not being taken.
          *
-         * By not changing the state until they match, we can guarantee case (and action by extension) will have all
+         * By not handling the event until they match, we can guarantee case (and action by extension) will have all
          * the cases created before action tries to do anything.
          */
         Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
