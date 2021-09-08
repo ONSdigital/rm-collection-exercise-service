@@ -144,7 +144,7 @@ public class SampleSvcClient {
       queryParams.add("state", SampleUnitDTO.SampleUnitState.FAILED.name());
     }
 
-    log.with("sampleSummaryId", sampleSummaryId).debug("Getting sample summary");
+    log.with("sampleSummaryId", sampleSummaryId).debug("request sample units for sample summary");
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSampleSvc().getRequestSampleUnitsForSampleSummaryPath(),
