@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 
-/** HTTP RestClient implementation for calls to the Action service. */
+/** HTTP RestClient implementation for calls to the Case service. */
 @Component
 public class CaseSvcClient {
   private static final Logger log = LoggerFactory.getLogger(CaseSvcClient.class);

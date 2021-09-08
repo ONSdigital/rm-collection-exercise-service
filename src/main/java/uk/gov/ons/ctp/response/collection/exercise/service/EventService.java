@@ -342,13 +342,14 @@ public class EventService {
       if (isExerciseActive && isEventInThePast) {
         log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
-        /* There is a situation where sample could still be sending messages to case to get cases created whilst
-         * an event happens if the exercise going live and an event time are very close together.
+        /* There is a situation where case could still be processing messages from sample while an event happens if the
+         * ready for live button is pressed shortly before an event is meant to trigger.
+         *
          * If we send the event to action before case has all the data it needs, it can result in potentially missing
          * entries in the print files and actions not being taken.
          *
-         * By not handling the event until they match, we can guarantee case (and action by extension) will have all
-         * the cases created before action tries to do anything.
+         * By not handling the event until the case service has a number of cases equal to the expected sample size
+         * we can guarantee case (and action by extension) will have everything set up before anything else happens.
          */
         Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
         log.with("collection_exercise_id", exercise.getId())
@@ -363,7 +364,7 @@ public class EventService {
               .with("number_of_cases", numberOfCases)
               .with("sample_size", exercise.getSampleSize())
               .info(
-                  "Number of cases does not match the expected size.  Sample could still be sending entries to case.");
+                  "Number of cases does not match the sample size.  Case may still be processing messages from sample");
           continue;
         }
 
