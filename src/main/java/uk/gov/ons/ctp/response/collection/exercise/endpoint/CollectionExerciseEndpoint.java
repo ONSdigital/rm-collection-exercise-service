@@ -54,6 +54,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 
 /** The REST endpoint controller for Collection Exercises. */
 @RestController
@@ -69,6 +70,7 @@ public class CollectionExerciseEndpoint {
 
   private CollectionExerciseService collectionExerciseService;
   private EventService eventService;
+  private SampleService sampleService;
   private SurveySvcClient surveyService;
 
   private MapperFacade mapperFacade;
@@ -79,10 +81,12 @@ public class CollectionExerciseEndpoint {
   public CollectionExerciseEndpoint(
       CollectionExerciseService collectionExerciseService,
       SurveySvcClient surveyService,
+      SampleService sampleService,
       EventService eventService,
       @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade) {
     this.collectionExerciseService = collectionExerciseService;
     this.surveyService = surveyService;
+    this.sampleService = sampleService;
     this.eventService = eventService;
     this.mapperFacade = mapperFacade;
   }
@@ -965,6 +969,18 @@ public class CollectionExerciseEndpoint {
     // the survey id
     // is not validated and passed on verbatim
     collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyId().toString());
+
+    // If we are in the failed validation state, then there should be validation error so go look
+    // them up.
+    // We don't do this for all the states as this is a non-trivial database operation.
+    // Note: this code here will suppress any validation errors that are present in the other states
+    // (shouldn't happen but ...)
+    if (collectionExercise.getState()
+        == CollectionExerciseDTO.CollectionExerciseState.FAILEDVALIDATION) {
+      SampleUnitValidationErrorDTO[] errors = sampleService.getValidationErrors(collectionExercise);
+
+      collectionExerciseDTO.setValidationErrors(errors);
+    }
 
     try {
       List<EventDTO> eventList =

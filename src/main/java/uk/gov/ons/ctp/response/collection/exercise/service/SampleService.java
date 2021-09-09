@@ -2,24 +2,18 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnit;
-import uk.gov.ons.ctp.response.collection.exercise.domain.ExerciseSampleUnitGroup;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitValidationErrorDTO;
 
 /** The implementation of the SampleService */
@@ -27,15 +21,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitVali
 public class SampleService {
   private static final Logger log = LoggerFactory.getLogger(SampleService.class);
 
-  private static final int TRANSACTION_TIMEOUT = 60;
-
   @Autowired private SampleLinkRepository sampleLinkRepository;
-
-  @Autowired private SampleUnitRepository sampleUnitRepo;
-
-  @Autowired private SampleUnitGroupRepository sampleUnitGroupRepo;
-
-  @Autowired private CollectionExerciseRepository collectRepo;
 
   @Autowired private SampleSvcClient sampleSvcClient;
 
@@ -63,63 +49,6 @@ public class SampleService {
     dto.setErrors(errorArray);
 
     return dto;
-  }
-
-  /**
-   * Accepts the sample unit from the sample service. This checks that this is dealing with the
-   * initial creation of the sample, no additions of sample units to a sample unit group, no updates
-   * to a sample unit.
-   *
-   * @param sampleUnit the sample unit from the message.
-   * @return the saved sample unit.
-   */
-  @Transactional
-  public ExerciseSampleUnit acceptSampleUnit(final SampleUnit sampleUnit) {
-    log.with("sample_unit", sampleUnit).debug("Processing sample unit");
-    ExerciseSampleUnit exerciseSampleUnit = null;
-
-    CollectionExercise collectionExercise =
-        collectRepo.findOneById(UUID.fromString(sampleUnit.getCollectionExerciseId()));
-
-    // Check collection exercise exists
-    if (collectionExercise != null) {
-      // Check Sample Unit doesn't already exist for collection exercise
-      if (!sampleUnitRepo
-          .existsBySampleUnitRefAndSampleUnitTypeAndSampleUnitGroupCollectionExercise(
-              sampleUnit.getSampleUnitRef(),
-              SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()),
-              collectionExercise)) {
-
-        ExerciseSampleUnitGroup sampleUnitGroup = new ExerciseSampleUnitGroup();
-        sampleUnitGroup.setCollectionExercise(collectionExercise);
-        sampleUnitGroup.setFormType(sampleUnit.getFormType());
-        sampleUnitGroup.setStateFK(SampleUnitGroupState.INIT);
-        sampleUnitGroup.setCreatedDateTime(new Timestamp(new Date().getTime()));
-        sampleUnitGroup = sampleUnitGroupRepo.saveAndFlush(sampleUnitGroup);
-
-        exerciseSampleUnit = new ExerciseSampleUnit();
-        exerciseSampleUnit.setSampleUnitGroup(sampleUnitGroup);
-        exerciseSampleUnit.setSampleUnitRef(sampleUnit.getSampleUnitRef());
-        exerciseSampleUnit.setSampleUnitId(UUID.fromString(sampleUnit.getId()));
-        exerciseSampleUnit.setSampleUnitType(
-            SampleUnitDTO.SampleUnitType.valueOf(sampleUnit.getSampleUnitType()));
-
-        sampleUnitRepo.saveAndFlush(exerciseSampleUnit);
-      } else {
-        log.with("sample_unit_type_fk", sampleUnit.getSampleUnitType())
-            .with("sample_unit_ref", sampleUnit.getSampleUnitRef())
-            .with("collection_exercise_id", sampleUnit.getCollectionExerciseId())
-            .warn("SampleUnitRef with SampleUnitType already exists for CollectionExercise");
-      }
-    } else {
-      log.with("sample_unit_type_fk", sampleUnit.getSampleUnitType())
-          .with("sample_unit_ref", sampleUnit.getSampleUnitRef())
-          .with("collection_exercise_id", sampleUnit.getCollectionExerciseId())
-          .with("form_type", sampleUnit.getFormType())
-          .error("No CollectionExercise");
-    }
-
-    return exerciseSampleUnit;
   }
 
   /**
