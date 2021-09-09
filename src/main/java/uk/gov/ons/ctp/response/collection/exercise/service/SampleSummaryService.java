@@ -150,37 +150,22 @@ public class SampleSummaryService {
         collectionExerciseRepository.findOneById(collectionExerciseId);
     CollectionExerciseDTO.CollectionExerciseEvent event;
     if (distributed) {
-      LOG.with("collectionExerciseId", collectionExerciseId).info("collection exercise distibuted");
-      // Check if go_live date is in the past
-      if ((eventRepository
-              .findOneByCollectionExerciseAndTag(
-                  collectionExercise, EventService.Tag.go_live.name())
-              .getTimestamp()
-              .getTime())
-          < System.currentTimeMillis()) {
-        LOG.with("collectionExerciseId", collectionExerciseId)
-            .debug("Attempting to transition collection exercise to Live");
-        // All sample units published and go live date in past, set exercise state to LIVE
-        event = CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE;
-      } else {
-        // All sample units published, set exercise state to READY_FOR_LIVE
-        LOG.with("collection_exercise_id", collectionExerciseId)
-            .debug("Attempting to transition collection exercise to Ready for Live");
-        event = CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH;
-      }
+
       try {
-        LOG.with("collectionExerciseId", collectionExerciseId).info("transitioning state");
-        collectionExerciseService.transitionCollectionExercise(collectionExercise, event);
         LOG.with("collectionExerciseId", collectionExerciseId)
-            .with("distributed", distributed)
-            .info("collection exercise transition successful");
+            .info("collection exercise distributed, transitioning to READY_FOR_LIVE");
+        // All sample units published, set exercise state to READY_FOR_LIVE
+        collectionExerciseService.transitionCollectionExercise(
+            collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH);
+        LOG.with("collectionExerciseId", collectionExerciseId)
+            .info("collection exercise transitioned to READY_FOR_LIVE successfully");
       } catch (CTPException e) {
-        LOG.error("unable to transition collection exercise", e);
+        LOG.error("Failed to transition collection exercise to READY_FOR_LIVE", e);
         throw new SampleSummaryDistributionException(e);
       }
     } else {
       LOG.with("collectionExerciseId", collectionExerciseId)
-          .warn("collection exercise failed distibution");
+          .error("collection exercise failed distribution.  Manual intervention required");
     }
   }
 }
