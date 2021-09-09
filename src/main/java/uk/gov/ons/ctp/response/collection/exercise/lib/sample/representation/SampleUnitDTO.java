@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -82,4 +83,10 @@ public class SampleUnitDTO {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private SampleAttributesDTO sampleAttributes;
+
+  private UUID partyId;
+
+  private boolean activeEnrolment;
+
+  private UUID collectionInstrumentId;
 }
