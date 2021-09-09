@@ -357,50 +357,47 @@ public class EventService {
             .with("sample_size", exercise.getSampleSize())
             .info(
                 "About to check that case has every sample in this exercise before processing this event");
-        boolean casesMatchSampleSize =
-            Objects.equals(numberOfCases, Long.valueOf(exercise.getSampleSize()));
-        if (!casesMatchSampleSize) {
+        boolean casesMatchSampleSize = numberOfCases.longValue() == exercise.getSampleSize();
+        if (casesMatchSampleSize) {
+          // If the event is go_live we need to transition the state of the collection exercise
+          Tag tag = EventService.Tag.valueOf(event.getTag());
+          if (tag == EventService.Tag.go_live) {
+            try {
+              collectionExerciseService.transitionCollectionExercise(
+                  event.getCollectionExercise(),
+                  CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+              log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                  .info("Set collection exercise to LIVE state");
+            } catch (CTPException e) {
+              log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                  .error("Failed to set collection exercise to LIVE state", e);
+            }
+          }
+
+          if (tag.isActionable()) {
+            log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
+            boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
+            if (success) {
+              log.info("Event processing succeeded, setting to PROCESSED state");
+              event.setStatus(EventDTO.Status.PROCESSED);
+              event.setMessageSent(Timestamp.from(Instant.now()));
+            } else {
+              log.error("Event processing failed, setting to FAILED state");
+              event.setStatus(EventDTO.Status.FAILED);
+            }
+          } else {
+            log.with("tag", event.getTag())
+                .debug("Event is not actionable, setting to PROCESSED state");
+            event.setStatus(EventDTO.Status.PROCESSED);
+          }
+          eventRepository.saveAndFlush(event);
+        } else {
           log.with("collection_exercise_id", exercise.getId())
               .with("number_of_cases", numberOfCases)
               .with("sample_size", exercise.getSampleSize())
               .info(
                   "Number of cases does not match the sample size.  Case may still be processing messages from sample");
-          continue;
         }
-
-        // If the event is go_live we need to transition the state of the collection exercise
-        Tag tag = EventService.Tag.valueOf(event.getTag());
-        if (tag == EventService.Tag.go_live) {
-          try {
-            collectionExerciseService.transitionCollectionExercise(
-                event.getCollectionExercise(),
-                CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-            log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                .info("Set collection exercise to LIVE state");
-          } catch (CTPException e) {
-            log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                .error("Failed to set collection exercise to LIVE state", e);
-          }
-        }
-
-        if (tag.isActionable()) {
-          log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
-          boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
-          if (success) {
-            log.info("Event processing succeeded, setting to PROCESSED state");
-            event.setStatus(EventDTO.Status.PROCESSED);
-            event.setMessageSent(Timestamp.from(Instant.now()));
-          } else {
-            log.error("Event processing failed, setting to FAILED state");
-            event.setStatus(EventDTO.Status.FAILED);
-          }
-        } else {
-          log.with("tag", event.getTag())
-              .debug("Event is not actionable, setting to PROCESSED state");
-          event.setStatus(EventDTO.Status.PROCESSED);
-        }
-        eventRepository.saveAndFlush(event);
-
       } else {
         log.with("id", event.getId())
             .with("tag", event.getTag())
