@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.repository;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -18,7 +19,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
 
   List<Event> findByCollectionExerciseIdIn(List<UUID> collexId);
 
-  List<Event> findByStatus(EventDTO.Status status);
+  Stream<Event> findByStatus(EventDTO.Status status);
 
   /**
    * Find events where elapsed message has not been sent
