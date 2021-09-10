@@ -58,8 +58,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 
 /** A class to contain integration tests for the collection exercise service */
-// TODO do we need this test anymore
-@Ignore
 @ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
