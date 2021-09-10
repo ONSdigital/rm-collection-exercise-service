@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
@@ -333,6 +334,7 @@ public class EventService {
   }
 
   /** Get all the scheduled events and send them to action to be acted on. */
+  @Transactional
   public void processEvents() {
     Stream<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
     eventList.forEach(
