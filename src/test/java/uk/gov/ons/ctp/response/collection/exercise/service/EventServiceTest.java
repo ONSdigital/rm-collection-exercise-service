@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -442,7 +443,8 @@ public class EventServiceTest {
   public void testProcessEventsNoScheduledEvents() {
     // Given
     List<Event> emptyList = Collections.emptyList();
-    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(emptyList);
+    Stream<Event> eventStream = emptyList.stream();
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
 
     // When
     eventService.processEvents();
@@ -461,8 +463,9 @@ public class EventServiceTest {
     collectionExercise.setState(CollectionExerciseState.LIVE);
     event.setCollectionExercise(collectionExercise);
     list.add(event);
+    Stream<Event> eventStream = list.stream();
 
-    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
 
     // When
     eventService.processEvents();
@@ -482,9 +485,10 @@ public class EventServiceTest {
     collectionExercise.setState(CollectionExerciseState.LIVE);
     event.setCollectionExercise(collectionExercise);
     list.add(event);
+    Stream<Event> eventStream = list.stream();
 
     when(caseSvcClient.getNumberOfCases(any())).thenReturn(1L);
-    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
 
     // When
     eventService.processEvents();
@@ -505,6 +509,7 @@ public class EventServiceTest {
   @Test
   public void testProcessEventsTransitionGoLiveMismatchedCases() {
     // Given
+
     List<Event> list = new ArrayList<>();
     Event event = createEvent(Tag.go_live);
     CollectionExercise collectionExercise = new CollectionExercise();
@@ -512,9 +517,10 @@ public class EventServiceTest {
     collectionExercise.setState(CollectionExerciseState.LIVE);
     event.setCollectionExercise(collectionExercise);
     list.add(event);
+    Stream<Event> eventStream = list.stream();
 
     when(caseSvcClient.getNumberOfCases(any())).thenReturn(9L);
-    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(list);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
 
     // When
     eventService.processEvents();

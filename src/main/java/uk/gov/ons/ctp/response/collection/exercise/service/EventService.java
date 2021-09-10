@@ -5,10 +5,13 @@ import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
@@ -332,78 +335,82 @@ public class EventService {
   }
 
   /** Get all the scheduled events and send them to action to be acted on. */
+  @Transactional
   public void processEvents() {
-    List<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
-    log.info("Found [" + eventList.size() + "] events in the SCHEDULED state");
-    for (Event event : eventList) {
-      CollectionExercise exercise = event.getCollectionExercise();
-      boolean isExerciseActive = isCollectionExerciseActive(exercise);
-      boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
-      if (isExerciseActive && isEventInThePast) {
-        log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
+    Stream<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
+    AtomicInteger counter = new AtomicInteger();
+    eventList.forEach(
+        event -> {
+          counter.getAndIncrement();
+          CollectionExercise exercise = event.getCollectionExercise();
+          boolean isExerciseActive = isCollectionExerciseActive(exercise);
+          boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
+          if (isExerciseActive && isEventInThePast) {
+            log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
-        /* There is a situation where case could still be processing messages from sample while an event happens if the
-         * ready for live button is pressed shortly before an event is meant to trigger.
-         *
-         * If we send the event to action before case has all the data it needs, it can result in potentially missing
-         * entries in the print files and actions not being taken.
-         *
-         * By not handling the event until the case service has a number of cases equal to the expected sample size
-         * we can guarantee case (and action by extension) will have everything set up before anything else happens.
-         */
-        Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
-        log.with("collection_exercise_id", exercise.getId())
-            .with("number_of_cases", numberOfCases)
-            .with("sample_size", exercise.getSampleSize())
-            .info(
-                "About to check that case has every sample in this exercise before processing this event");
-        boolean casesMatchSampleSize = numberOfCases.longValue() == exercise.getSampleSize();
-        if (casesMatchSampleSize) {
-          // If the event is go_live we need to transition the state of the collection exercise
-          Tag tag = EventService.Tag.valueOf(event.getTag());
-          if (tag == EventService.Tag.go_live) {
-            try {
-              collectionExerciseService.transitionCollectionExercise(
-                  event.getCollectionExercise(),
-                  CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-              log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                  .info("Set collection exercise to LIVE state");
-            } catch (CTPException e) {
-              log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                  .error("Failed to set collection exercise to LIVE state", e);
-            }
-          }
+            /* There is a situation where case could still be processing messages from sample while an event happens if the
+             * ready for live button is pressed shortly before an event is meant to trigger.
+             *
+             * If we send the event to action before case has all the data it needs, it can result in potentially missing
+             * entries in the print files and actions not being taken.
+             *
+             * By not handling the event until the case service has a number of cases equal to the expected sample size
+             * we can guarantee case (and action by extension) will have everything set up before anything else happens.
+             */
+            Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
+            log.with("collection_exercise_id", exercise.getId())
+                .with("number_of_cases", numberOfCases)
+                .with("sample_size", exercise.getSampleSize())
+                .info(
+                    "About to check that case has every sample in this exercise before processing this event");
+            boolean casesMatchSampleSize = numberOfCases.longValue() == exercise.getSampleSize();
+            if (casesMatchSampleSize) {
+              // If the event is go_live we need to transition the state of the collection exercise
+              Tag tag = EventService.Tag.valueOf(event.getTag());
+              if (tag == EventService.Tag.go_live) {
+                try {
+                  collectionExerciseService.transitionCollectionExercise(
+                      event.getCollectionExercise(),
+                      CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                      .info("Set collection exercise to LIVE state");
+                } catch (CTPException e) {
+                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                      .error("Failed to set collection exercise to LIVE state", e);
+                }
+              }
 
-          if (tag.isActionable()) {
-            log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
-            boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
-            if (success) {
-              log.info("Event processing succeeded, setting to PROCESSED state");
-              event.setStatus(EventDTO.Status.PROCESSED);
-              event.setMessageSent(Timestamp.from(Instant.now()));
+              if (tag.isActionable()) {
+                log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
+                boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
+                if (success) {
+                  log.info("Event processing succeeded, setting to PROCESSED state");
+                  event.setStatus(EventDTO.Status.PROCESSED);
+                  event.setMessageSent(Timestamp.from(Instant.now()));
+                } else {
+                  log.error("Event processing failed, setting to FAILED state");
+                  event.setStatus(EventDTO.Status.FAILED);
+                }
+              } else {
+                log.with("tag", event.getTag())
+                    .debug("Event is not actionable, setting to PROCESSED state");
+                event.setStatus(EventDTO.Status.PROCESSED);
+              }
+              eventRepository.saveAndFlush(event);
             } else {
-              log.error("Event processing failed, setting to FAILED state");
-              event.setStatus(EventDTO.Status.FAILED);
+              log.with("collection_exercise_id", exercise.getId())
+                  .with("number_of_cases", numberOfCases)
+                  .with("sample_size", exercise.getSampleSize())
+                  .info(
+                      "Number of cases does not match the sample size.  Case may still be processing messages from sample");
             }
           } else {
-            log.with("tag", event.getTag())
-                .debug("Event is not actionable, setting to PROCESSED state");
-            event.setStatus(EventDTO.Status.PROCESSED);
+            log.with("id", event.getId())
+                .with("tag", event.getTag())
+                .debug("Event not ready to be processed");
           }
-          eventRepository.saveAndFlush(event);
-        } else {
-          log.with("collection_exercise_id", exercise.getId())
-              .with("number_of_cases", numberOfCases)
-              .with("sample_size", exercise.getSampleSize())
-              .info(
-                  "Number of cases does not match the sample size.  Case may still be processing messages from sample");
-        }
-      } else {
-        log.with("id", event.getId())
-            .with("tag", event.getTag())
-            .debug("Event not ready to be processed");
-      }
-    }
+        });
+    log.info("Found [" + counter + "] events in the SCHEDULED state");
   }
 
   private List<Event> filterExistingNudgeEmails(
