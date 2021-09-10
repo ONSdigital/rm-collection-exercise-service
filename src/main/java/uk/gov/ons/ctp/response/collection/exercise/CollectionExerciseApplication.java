@@ -248,24 +248,6 @@ public class CollectionExerciseApplication {
     void sendToPubsub(String text);
   }
 
-  public static final String COLLECTION_INSTRUMENT_CACHE = "collectioninstruments";
-
-  @Bean
-  public CacheManager cacheManager() {
-    return new ConcurrentMapCacheManager(COLLECTION_INSTRUMENT_CACHE);
-  }
-
-  @CacheEvict(
-      allEntries = true,
-      cacheNames = {COLLECTION_INSTRUMENT_CACHE})
-  @Scheduled(fixedDelay = 60000)
-  public void cacheEvict() {
-    /* This is getting rid of the cached entries in case anything's been changed. We imagine
-    that
-        * the maximum of a 1 minute delay to seeing changes reflected in the collection
-        * exercise service will not cause any issues*/
-  }
-
   /**
    * Spring boot start-up
    *
