@@ -58,9 +58,9 @@ public class CollectionExerciseExecutionEndpoint {
             content = @Content(examples = {}))
       })
   @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-  public ResponseEntity<Void> requestSampleUnits(@PathVariable("id") final UUID id)
+  public ResponseEntity<Void> setReadyForLive(@PathVariable("id") final UUID id)
       throws CTPException {
-    log.with("collection_exercise_id", id).debug("Entering collection exercise fetch");
+    log.with("collection_exercise_id", id).debug("About to set collection exercise to live");
 
     sampleSummaryService.activateSamples(id);
     return ResponseEntity.ok().build();
