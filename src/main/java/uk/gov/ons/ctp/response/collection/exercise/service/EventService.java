@@ -5,6 +5,7 @@ import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -337,8 +338,10 @@ public class EventService {
   @Transactional
   public void processEvents() {
     Stream<Event> eventList = eventRepository.findByStatus(EventDTO.Status.SCHEDULED);
+    AtomicInteger counter = new AtomicInteger();
     eventList.forEach(
         event -> {
+          counter.getAndIncrement();
           CollectionExercise exercise = event.getCollectionExercise();
           boolean isExerciseActive = isCollectionExerciseActive(exercise);
           boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
@@ -407,6 +410,7 @@ public class EventService {
                 .debug("Event not ready to be processed");
           }
         });
+    log.info("Found [" + counter + "] events in the SCHEDULED state");
   }
 
   private List<Event> filterExistingNudgeEmails(
