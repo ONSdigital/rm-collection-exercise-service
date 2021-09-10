@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
   private ActionSvc actionSvc;
+  private CaseSvc caseSvc;
   private SampleSvc sampleSvc;
   private SurveySvc surveySvc;
   private CollectionInstrumentSvc collectionInstrumentSvc;

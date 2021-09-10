@@ -3,10 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +60,7 @@ public class SampleService {
    * @param su a sample unit
    * @return a dto containing all the validation errors
    */
-  private static SampleUnitValidationErrorDTO validateSampleUnit(final ExerciseSampleUnit su) {
+  private static SampleUnitValidationErrorDTO validateSampleUnit(final SampleUnitDTO su) {
     SampleUnitValidationErrorDTO dto = new SampleUnitValidationErrorDTO();
 
     dto.setSampleUnitRef(su.getSampleUnitRef());
@@ -205,10 +202,27 @@ public class SampleService {
    */
   public SampleUnitValidationErrorDTO[] getValidationErrors(
       final CollectionExercise collectionExercise) {
-    List<ExerciseSampleUnit> sampleUnits =
-        sampleUnitRepo.findBySampleUnitGroupCollectionExerciseAndSampleUnitGroupStateFK(
-            collectionExercise, SampleUnitGroupState.FAILEDVALIDATION);
-    Predicate<ExerciseSampleUnit> validTest =
+
+    // first find the sample summary id
+    List<SampleLink> sampleLinks =
+        sampleLinkRepository.findByCollectionExerciseId(collectionExercise.getId());
+
+    if (sampleLinks.isEmpty()) {
+      return new SampleUnitValidationErrorDTO[] {};
+    }
+    if (sampleLinks.size() > 1) {
+      log.warn("More than one sample summary found whilst collecting validation errors");
+    }
+    SampleLink sampleLink = sampleLinks.get(0);
+    UUID sampleSummaryId = sampleLink.getSampleSummaryId();
+
+    // now ask sample service for all samples in a failed state
+    SampleUnitDTO[] sampleUnitDTOs =
+        sampleSvcClient.requestSampleUnitsForSampleSummary(sampleSummaryId, true);
+
+    List<SampleUnitDTO> sampleUnits = Arrays.asList(sampleUnitDTOs);
+
+    Predicate<SampleUnitDTO> validTest =
         su -> su.getPartyId() == null || su.getCollectionInstrumentId() == null;
     return sampleUnits
         .stream()

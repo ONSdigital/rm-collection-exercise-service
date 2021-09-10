@@ -25,6 +25,7 @@ import uk.gov.ons.ctp.response.collection.exercise.config.SampleSvc;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -106,5 +107,36 @@ public class SampleSvcClientTest {
 
     // Then
     assertEquals(666, actualResponse.getSampleUnitsTotal().intValue());
+  }
+
+  @Test
+  public void testRequestSampleUnitsForSampleSummary() {
+    SampleUnitDTO sampleUnitDTO = new SampleUnitDTO();
+    sampleUnitDTO.setState(SampleUnitDTO.SampleUnitState.FAILED);
+
+    SampleUnitDTO[] response = new SampleUnitDTO[] {sampleUnitDTO};
+
+    SampleSvc sampleSvc = Mockito.mock(SampleSvc.class);
+    ResponseEntity<SampleUnitDTO[]> responseEntity = Mockito.mock(ResponseEntity.class);
+
+    // Given
+    given(appConfig.getSampleSvc()).willReturn(sampleSvc);
+    given(sampleSvc.getRequestSampleUnitsForSampleSummaryPath()).willReturn("test/path");
+    given(responseEntity.getBody()).willReturn(response);
+    given(
+            restTemplate.exchange(
+                any(URI.class),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(SampleUnitDTO[].class)))
+        .willReturn(responseEntity);
+
+    // When
+    SampleUnitDTO[] actualResponse =
+        sampleSvcRestClient.requestSampleUnitsForSampleSummary(UUID.randomUUID(), true);
+
+    // Then
+    assertEquals(actualResponse.length, 1);
+    assertEquals(actualResponse[0], sampleUnitDTO);
   }
 }

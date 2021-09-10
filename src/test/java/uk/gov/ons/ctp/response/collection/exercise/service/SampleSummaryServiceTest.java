@@ -70,10 +70,6 @@ public class SampleSummaryServiceTest {
         .thenReturn(sampleLinks);
     when(sampleSvcClient.getSampleUnitCount(sampleSummaryIds)).thenReturn(sampleUnitsRequestDTO);
 
-    when(eventRepository.findOneByCollectionExerciseAndTag(
-            collectionExercise, EventService.Tag.go_live.name()))
-        .thenReturn(event);
-
     // first activate
     sampleSummaryService.activateSamples(collectionExerciseId);
     // then simulate successful enrich
@@ -95,7 +91,7 @@ public class SampleSummaryServiceTest {
             collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.EXECUTION_COMPLETE);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(
-            collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
+            collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.PUBLISH);
   }
 
   @Test

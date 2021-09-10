@@ -25,6 +25,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.CollectionExerciseJobCreationRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
+import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -129,6 +130,32 @@ public class SampleSvcClient {
     ResponseEntity<SampleUnitsRequestDTO> responseEntity =
         restTemplate.exchange(
             uriComponents.toUri(), HttpMethod.GET, httpEntity, SampleUnitsRequestDTO.class);
+
+    return responseEntity.getBody();
+  }
+
+  @Retryable(
+      value = {RestClientException.class},
+      maxAttemptsExpression = "#{${retries.maxAttempts}}",
+      backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
+  public SampleUnitDTO[] requestSampleUnitsForSampleSummary(UUID sampleSummaryId, boolean failed) {
+    MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    if (failed) {
+      queryParams.add("state", SampleUnitDTO.SampleUnitState.FAILED.name());
+    }
+
+    log.with("sampleSummaryId", sampleSummaryId).debug("request sample units for sample summary");
+    UriComponents uriComponents =
+        restUtility.createUriComponents(
+            appConfig.getSampleSvc().getRequestSampleUnitsForSampleSummaryPath(),
+            queryParams,
+            sampleSummaryId);
+
+    HttpEntity<UriComponents> httpEntity = restUtility.createHttpEntity(uriComponents);
+
+    ResponseEntity<SampleUnitDTO[]> responseEntity =
+        restTemplate.exchange(
+            uriComponents.toUri(), HttpMethod.GET, httpEntity, SampleUnitDTO[].class);
 
     return responseEntity.getBody();
   }
