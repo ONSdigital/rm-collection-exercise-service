@@ -88,7 +88,7 @@ public class EventServiceTest {
   }
 
   @Test
-  public void givenCollectionExcerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown() {
+  public void givenCollectionExerciseDoesNotExistWhenEventIsCreatedThenExceptionIsThrown() {
     EventDTO eventDto = new EventDTO();
     UUID collexUuid = UUID.randomUUID();
     eventDto.setCollectionExerciseId(collexUuid);
@@ -450,7 +450,7 @@ public class EventServiceTest {
     eventService.processEvents();
 
     // Then
-    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
     verify(actionSvcClient, never()).processEvent(any(), any());
   }
 
@@ -471,7 +471,7 @@ public class EventServiceTest {
     eventService.processEvents();
 
     // Then
-    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
     verify(actionSvcClient, never()).processEvent(any(), any());
   }
 
@@ -494,10 +494,41 @@ public class EventServiceTest {
     eventService.processEvents();
 
     // Then
-    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, atMost(1)).processEvent(any(), any());
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, times(1)).processEvent(any(), any());
     try {
-      verify(collectionExerciseService, atMost(1))
+      verify(collectionExerciseService, times(1))
+          .transitionCollectionExercise(
+              any(CollectionExercise.class),
+              any(CollectionExerciseDTO.CollectionExerciseEvent.class));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testProcessEventsTransitionGoLiveNullSampleSize() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.go_live);
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSampleSize(null);
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(caseSvcClient.getNumberOfCases(any())).thenReturn(1L);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, never()).processEvent(any(), any());
+    try {
+      verify(collectionExerciseService, never())
           .transitionCollectionExercise(
               any(CollectionExercise.class),
               any(CollectionExerciseDTO.CollectionExerciseEvent.class));
@@ -526,8 +557,8 @@ public class EventServiceTest {
     eventService.processEvents();
 
     // Then
-    verify(eventRepository, atMost(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, atMost(1)).processEvent(any(), any());
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    verify(actionSvcClient, never()).processEvent(any(), any());
     try {
       verify(collectionExerciseService, never())
           .transitionCollectionExercise(
@@ -545,81 +576,81 @@ public class EventServiceTest {
 
   @Test
   public void testTagShouldHaveGoLiveAsIsAnActionableTag() {
-    assertThat(Tag.go_live.isActionable(), Matchers.is(true));
+    assertTrue(Tag.go_live.isActionable());
   }
 
   @Test
   public void testTagShouldHaveExerciseEndAsNotIsAnActionableTag() {
-    assertThat(Tag.exercise_end.isActionable(), Matchers.is(false));
+    assertFalse(Tag.exercise_end.isActionable());
   }
 
   @Test
   public void testTagShouldHaveReminderAsAnActionableTag() {
-    assertThat(Tag.reminder.isActionable(), Matchers.is(true));
+    assertTrue(Tag.reminder.isActionable());
   }
 
   @Test
   public void testTagShouldHaveReminder2AsAnActionableTag() {
-    assertThat(Tag.reminder2.isActionable(), Matchers.is(true));
+    assertTrue(Tag.reminder2.isActionable());
   }
 
   @Test
   public void testTagShouldHaveReminder3AsAnActionableTag() {
-    assertThat(Tag.reminder3.isActionable(), Matchers.is(true));
+    assertTrue(Tag.reminder3.isActionable());
   }
 
   @Test
   public void testTagShouldHaveNudge0AsAnActionableTag() {
-    assertThat(Tag.nudge_email_0.isActionable(), Matchers.is(true));
+    assertTrue(Tag.nudge_email_0.isActionable());
   }
 
   @Test
   public void testTagShouldHaveNudge1AsAnActionableTag() {
-    assertThat(Tag.nudge_email_1.isActionable(), Matchers.is(true));
+    assertTrue(Tag.nudge_email_1.isActionable());
   }
 
   @Test
   public void testTagShouldHaveNudge2AsAnActionableTag() {
-    assertThat(Tag.nudge_email_2.isActionable(), Matchers.is(true));
+    assertTrue(Tag.nudge_email_2.isActionable());
   }
 
   @Test
   public void testTagShouldHaveNudge3AsAnActionableTag() {
-    assertThat(Tag.nudge_email_3.isActionable(), Matchers.is(true));
+    assertTrue(Tag.nudge_email_3.isActionable());
   }
 
   @Test
   public void testTagShouldHaveNudge4AsAnActionableTag() {
-    assertThat(Tag.nudge_email_4.isActionable(), Matchers.is(true));
+    assertTrue(Tag.nudge_email_4.isActionable());
   }
 
   @Test
   public void testCompareTagToItsName() {
-    assertThat(Tag.mps.hasName("mps"), Matchers.is(true));
+    assertTrue(Tag.mps.hasName("mps"));
   }
 
   @Test
   public void testCompareTagToRandomString() {
-    assertThat(Tag.mps.hasName("asdadfgsfgth"), Matchers.is(false));
+    assertFalse(Tag.mps.hasName("asdadfgsfgth"));
   }
 
   @Test
   public void testTagShouldHaveReminderAsIsReminder() {
-    assertThat(Tag.reminder.isReminder(), Matchers.is(true));
+    assertTrue(Tag.reminder.isReminder());
   }
 
   @Test
   public void testTagShouldHaveReminder2AsIsReminder() {
-    assertThat(Tag.reminder2.isReminder(), Matchers.is(true));
+    assertTrue(Tag.reminder2.isReminder());
   }
 
   @Test
   public void testTagShouldHaveReminder3AsIsReminder() {
-    assertThat(Tag.reminder3.isReminder(), Matchers.is(true));
+    assertTrue(Tag.reminder3.isReminder());
   }
 
   @Test
   public void testTagShouldHaveMPSAsIsNotReminder() {
-    assertThat(Tag.mps.isReminder(), Matchers.is(false));
+    assertFalse(Tag.mps.isReminder());
   }
 }

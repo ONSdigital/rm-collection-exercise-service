@@ -348,11 +348,11 @@ public class EventService {
           if (isExerciseActive && isEventInThePast) {
             log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
 
-            /* There is a situation where case could still be processing messages from sample while an event happens if the
-             * ready for live button is pressed shortly before an event is meant to trigger.
+            /* There is a situation where case could still be processing messages from sample while an event happens
+             * if the ready for live button is pressed shortly before an event is meant to trigger.
              *
-             * If we send the event to action before case has all the data it needs, it can result in potentially missing
-             * entries in the print files and actions not being taken.
+             * If we send the event to action before case has all the data it needs, it can result in potentially
+             * missing entries in the print files and actions not being taken.
              *
              * By not handling the event until the case service has a number of cases equal to the expected sample size
              * we can guarantee case (and action by extension) will have everything set up before anything else happens.
@@ -363,7 +363,15 @@ public class EventService {
                 .with("sample_size", exercise.getSampleSize())
                 .info(
                     "About to check that case has every sample in this exercise before processing this event");
-            boolean casesMatchSampleSize = numberOfCases.longValue() == exercise.getSampleSize();
+            boolean casesMatchSampleSize;
+            if (exercise.getSampleSize() == null) {
+              log.with("collection_exercise_id", exercise.getId())
+                  .info(
+                      "Collection exercise has null value for sample. Setting the match to false");
+              casesMatchSampleSize = false;
+            } else {
+              casesMatchSampleSize = numberOfCases.longValue() == exercise.getSampleSize();
+            }
             if (casesMatchSampleSize) {
               // If the event is go_live we need to transition the state of the collection exercise
               Tag tag = EventService.Tag.valueOf(event.getTag());
