@@ -2,10 +2,10 @@ databaseChangeLog:
 
   - changeSet:
       id: 17.1
-      author: Warren Bailey
+      author: Amit Sinha
       changes:
         - sqlFile:
-            comment: Dropping tables that are no longer used
-            path: drop_unused_tables.sql
+            comment: add new eq version column to collection_exercise
+            path: add_eq_version_collection_exercise.sql
             relativeToChangelogFile: true
-            splitStatements: true
+            splitStatements: false

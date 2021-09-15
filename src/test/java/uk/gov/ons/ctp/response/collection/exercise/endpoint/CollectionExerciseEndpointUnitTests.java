@@ -611,6 +611,33 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   @Test
+  public void testPatchCollectionExerciseEQVersion() throws Exception {
+    UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
+    String newEQVersion = "v3";
+    MockHttpServletRequestBuilder builder =
+        put(String.format("/collectionexercises/%s/eqVersion", uuid.toString()), new Object[0])
+            .content(newEQVersion)
+            .contentType(MediaType.TEXT_PLAIN);
+
+    ResultActions actions = this.textPlainMock.perform(builder);
+
+    actions.andExpect(status().isOk());
+
+    ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
+    ArgumentCaptor<CollectionExerciseDTO> dtoCaptor =
+        ArgumentCaptor.forClass(CollectionExerciseDTO.class);
+    verify(this.collectionExerciseService)
+        .patchCollectionExercise(uuidCaptor.capture(), dtoCaptor.capture());
+
+    assertEquals(uuid, uuidCaptor.getValue());
+    CollectionExerciseDTO collexDto = dtoCaptor.getValue();
+    assertEquals(newEQVersion, collexDto.getEqVersion());
+    assertNull(collexDto.getName());
+    assertNull(collexDto.getUserDescription());
+    assertNull(collexDto.getSurveyId());
+  }
+
+  @Test
   public void testPatchCollectionExerciseName() throws Exception {
     UUID uuid = UUID.fromString("3ec82e0e-18ff-4886-8703-5b83442041ba");
     String newName = "New Collex Name";

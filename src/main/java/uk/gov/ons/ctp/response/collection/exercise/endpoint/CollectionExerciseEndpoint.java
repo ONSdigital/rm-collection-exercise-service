@@ -585,6 +585,26 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
+   * PUT request to update a collection exercise eq version
+   *
+   * @param id Collection exercise Id to update
+   * @param eqVersion new value for eq version
+   * @return 200 if all is ok, 400 for bad request, 409 for conflict
+   * @throws CTPException on resource not found
+   */
+  @RequestMapping(value = "/{id}/eqVersion", method = RequestMethod.PUT, consumes = "text/plain")
+  public ResponseEntity<?> patchCollectionExerciseEqVersion(
+      @PathVariable("id") final UUID id, final @RequestBody String eqVersion) throws CTPException {
+    log.with("collection_exercise_id", id)
+        .with("eq_version", eqVersion)
+        .debug("Updating collection exercise, setting eqVersion");
+    CollectionExerciseDTO collexDto = new CollectionExerciseDTO();
+    collexDto.setEqVersion(eqVersion);
+
+    return patchCollectionExercise(id, collexDto);
+  }
+
+  /**
    * PUT request to update a collection exercise surveyId
    *
    * @param id Collection exercise Id to update
