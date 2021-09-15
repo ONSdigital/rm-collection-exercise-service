@@ -11,6 +11,5 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityCo
 @Data
 public class CollectionInstrumentSvc {
   private RestUtilityConfig connectionConfig;
-  private String requestCollectionInstruments;
   private String requestCollectionInstrumentsCount;
 }
