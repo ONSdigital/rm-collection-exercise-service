@@ -119,7 +119,7 @@ action-svc:
     password: secret
 
 case-svc:
-  number-of-cases-path: /casegroups/cases/{collectionExerciseId}
+  number-of-cases-path: /casegroups/cases/{collectionExerciseId}/all
   connection-config:
     scheme: http
     host: localhost
