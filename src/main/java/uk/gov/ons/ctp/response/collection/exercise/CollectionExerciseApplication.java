@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.cloud.gcp.pubsub.integration.AckMode;
 import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
@@ -30,7 +27,6 @@ import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
@@ -43,8 +39,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransit
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 
 /**
@@ -123,17 +117,6 @@ public class CollectionExerciseApplication {
   }
 
   /**
-   * The RestUtility bean for the Party service
-   *
-   * @return the RestUtility bean for the Party service
-   */
-  @Bean
-  @Qualifier("partyRestUtility")
-  public RestUtility partyRestUtility() {
-    return new RestUtility(appConfig.getPartySvc().getConnectionConfig());
-  }
-
-  /**
    * The RestUtility bean for the Sample service
    *
    * @return the RestUtility bean for the Sample service
@@ -166,19 +149,6 @@ public class CollectionExerciseApplication {
       collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory.getStateTransitionManager(
         CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
-  }
-
-  /**
-   * Bean to allow controlled state transitions of SampleUnitGroups.
-   *
-   * @return the state transition manager specifically for SampleUnitGroups.
-   */
-  @Bean
-  @Qualifier("sampleUnitGroup")
-  public StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent>
-      sampleUnitGroupStateTransitionManager() {
-    return collectionExerciseStateTransitionManagerFactory.getStateTransitionManager(
-        CollectionExerciseStateTransitionManagerFactory.SAMPLEUNITGROUP_ENTITY);
   }
 
   /**
@@ -272,24 +242,6 @@ public class CollectionExerciseApplication {
   @MessagingGateway(defaultRequestChannel = "sampleSummaryActivationChannel")
   public interface PubsubOutboundGateway {
     void sendToPubsub(String text);
-  }
-
-  public static final String COLLECTION_INSTRUMENT_CACHE = "collectioninstruments";
-
-  @Bean
-  public CacheManager cacheManager() {
-    return new ConcurrentMapCacheManager(COLLECTION_INSTRUMENT_CACHE);
-  }
-
-  @CacheEvict(
-      allEntries = true,
-      cacheNames = {COLLECTION_INSTRUMENT_CACHE})
-  @Scheduled(fixedDelay = 60000)
-  public void cacheEvict() {
-    /* This is getting rid of the cached entries in case anything's been changed. We imagine
-    that
-        * the maximum of a 1 minute delay to seeing changes reflected in the collection
-        * exercise service will not cause any issues*/
   }
 
   /**

@@ -2,7 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.lib.common.MvcHelper.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
@@ -14,7 +13,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +22,6 @@ import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 
 /** Collection Exercise Endpoint Unit tests */
 public class CollectionExerciseExecutionEndpointUnitTests {
@@ -36,8 +33,6 @@ public class CollectionExerciseExecutionEndpointUnitTests {
   private static final int SAMPLEUNITSTOTAL = 500;
 
   @InjectMocks private CollectionExerciseExecutionEndpoint collectionExerciseExecutionEndpoint;
-
-  @Mock private SampleService sampleService;
 
   private MockMvc mockCollectionExerciseExecutionMvc;
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
@@ -68,8 +63,6 @@ public class CollectionExerciseExecutionEndpointUnitTests {
    */
   @Test
   public void requestSampleUnits() throws Exception {
-    when(sampleService.requestSampleUnits(COLLECTIONEXERCISE_ID1))
-        .thenReturn(sampleUnitsRequestDTOResults.get(0));
 
     ResultActions actions =
         mockCollectionExerciseExecutionMvc.perform(

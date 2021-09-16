@@ -8,8 +8,6 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransit
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.state.StateTransitionManagerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupEvent;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitGroupDTO.SampleUnitGroupState;
 
 /** State transition manager factory for the collection exercise service. */
 @Component
@@ -32,10 +30,6 @@ public class CollectionExerciseStateTransitionManagerFactory
     StateTransitionManager<CollectionExerciseState, CollectionExerciseEvent>
         collectionExerciseStateTransitionManager = createCollectionExerciseStateTransitionManager();
     managers.put(COLLLECTIONEXERCISE_ENTITY, collectionExerciseStateTransitionManager);
-
-    StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent>
-        sampleUnitGroupStateTransitionManager = createSampleUnitGroupStateTransitionManager();
-    managers.put(SAMPLEUNITGROUP_ENTITY, sampleUnitGroupStateTransitionManager);
   }
 
   /**
@@ -120,35 +114,6 @@ public class CollectionExerciseStateTransitionManagerFactory
     transitions.put(CollectionExerciseState.READY_FOR_LIVE, transitionForReadyForLive);
 
     return new BasicStateTransitionManager<>(transitions);
-  }
-
-  /**
-   * Create and initialise the factory with the concrete StateTransitionManager for the
-   * SampleUnitGroup entity
-   *
-   * @return StateTransitionManager
-   */
-  private StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent>
-      createSampleUnitGroupStateTransitionManager() {
-
-    Map<SampleUnitGroupState, Map<SampleUnitGroupEvent, SampleUnitGroupState>> transitions =
-        new HashMap<>();
-
-    // INIT
-    Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForInit = new HashMap<>();
-    transitionForInit.put(SampleUnitGroupEvent.VALIDATE, SampleUnitGroupState.VALIDATED);
-    transitionForInit.put(SampleUnitGroupEvent.INVALIDATE, SampleUnitGroupState.FAILEDVALIDATION);
-    transitions.put(SampleUnitGroupState.INIT, transitionForInit);
-
-    // VALIDATED
-    Map<SampleUnitGroupEvent, SampleUnitGroupState> transitionForValidated = new HashMap<>();
-    transitionForValidated.put(SampleUnitGroupEvent.PUBLISH, SampleUnitGroupState.PUBLISHED);
-    transitions.put(SampleUnitGroupState.VALIDATED, transitionForValidated);
-
-    StateTransitionManager<SampleUnitGroupState, SampleUnitGroupEvent> sampleUnitTransitionManager =
-        new BasicStateTransitionManager<>(transitions);
-
-    return sampleUnitTransitionManager;
   }
 
   @SuppressWarnings("unchecked")

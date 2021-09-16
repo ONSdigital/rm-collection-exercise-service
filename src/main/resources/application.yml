@@ -71,7 +71,6 @@ spring:
       project-id: ras-rm-dev
 
 sample-svc:
-  request-sample-units-path: /samples/sampleunitrequests
   request-sample-unit-count-path: /samples/count
   request-sample-units-for-sample-summary-path: /samples/{sampleSummaryId}/sampleunits
   connection-config:
@@ -136,7 +135,6 @@ case-svc:
     read-timeout-milli-seconds: 5000
 
 collection-instrument-svc:
-  request-collection-instruments: /collection-instrument-api/1.0.2/collectioninstrument
   request-collection-instruments-count: /collection-instrument-api/1.0.2/collectioninstrument/count
   connection-config:
     scheme: http
@@ -147,24 +145,6 @@ collection-instrument-svc:
     retry-attempts: 5
     retry-pause-milli-seconds: 5000
     connect-timeout-milli-seconds: 5000
-    read-timeout-milli-seconds: 5000
-
-party-svc:
-  request-party-path: /party-api/v1/businesses/ref/{sampleUnitRef}
-  sample-link-path: /party-api/v1/businesses/sample/link/{sampleSummaryId}
-  connection-config:
-    scheme: http
-    host: localhost
-    port: 8081
-    username: admin
-    password: secret
-    # how many times should we attempt connection on failure
-    retry-attempts: 5
-    # sleep between retries
-    retry-pause-milli-seconds: 5000
-    # time to estab connection
-    connect-timeout-milli-seconds: 5000
-    # time to read response
     read-timeout-milli-seconds: 5000
 
 redisson-config:
@@ -208,6 +188,3 @@ gcp:
   sampleUnitReceiverSubscription: "test_subscription"
   sampleSummaryActivationStatusSubscription: "sample-summary-activation-status"
   sampleSummaryActivationTopic: "sample-summary-activation"
-
-sampleV2:
-  enabled: false

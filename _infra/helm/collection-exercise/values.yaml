@@ -8,14 +8,6 @@ image:
   pullPolicy: Always
 
 crons:
-  distributeSampleUnit:
-    name: collection-exercise-sample-unit-distribution
-    cron: "* * * * *"
-    target: "cron/sample-unit-distribution"
-  validateSampleUnit:
-    name: collection-exercise-sample-unit-validation
-    cron: "* * * * *"
-    target: "cron/sample-unit-validation"
   processEvents:
     name: collection-exercise-process-events
     cron: "* * * * *"
@@ -78,6 +70,3 @@ gcp:
   sampleUnitReceiverSubscription: "test_subscription"
   sampleSummaryActivationStatusSubscription: sample-summary-activation-status
   sampleSummaryActivationTopic: sample-summary-activation
-
-sampleV2:
-  enabled: false

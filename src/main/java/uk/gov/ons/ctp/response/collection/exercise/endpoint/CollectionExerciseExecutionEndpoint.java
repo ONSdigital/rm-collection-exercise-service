@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
-import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleSummaryService;
 
 /** The REST endpoint controller for Collection Exercises. */
@@ -29,8 +27,6 @@ public class CollectionExerciseExecutionEndpoint {
   private static final String RETURN_SAMPLENOTFOUND = "Sample not found for collection exercise Id";
 
   @Autowired AppConfig appConfig;
-
-  @Autowired private SampleService sampleService;
 
   @Autowired private SampleSummaryService sampleSummaryService;
 
@@ -62,20 +58,11 @@ public class CollectionExerciseExecutionEndpoint {
             content = @Content(examples = {}))
       })
   @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-  public ResponseEntity<SampleUnitsRequestDTO> requestSampleUnits(@PathVariable("id") final UUID id)
+  public ResponseEntity<Void> setReadyForLive(@PathVariable("id") final UUID id)
       throws CTPException {
-    log.with("collection_exercise_id", id).debug("Entering collection exercise fetch");
-    if (appConfig.isSampleV2Enabled()) {
-      sampleSummaryService.activateSamples(id);
-      return ResponseEntity.ok(new SampleUnitsRequestDTO());
-    } else {
-      SampleUnitsRequestDTO requestDTO = sampleService.requestSampleUnits(id);
-      if (requestDTO == null) {
-        throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND,
-            String.format("%s %s", RETURN_SAMPLENOTFOUND, id));
-      }
-      return ResponseEntity.ok(requestDTO);
-    }
+    log.with("collection_exercise_id", id).debug("About to set collection exercise to live");
+
+    sampleSummaryService.activateSamples(id);
+    return ResponseEntity.ok().build();
   }
 }

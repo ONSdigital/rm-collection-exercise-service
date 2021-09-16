@@ -20,11 +20,9 @@ public class AppConfig {
   private SampleSvc sampleSvc;
   private SurveySvc surveySvc;
   private CollectionInstrumentSvc collectionInstrumentSvc;
-  private PartySvc partySvc;
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
   private SwaggerSettings swaggerSettings;
   private Logging logging;
   private GCP gcp;
-  private boolean sampleV2Enabled;
 }

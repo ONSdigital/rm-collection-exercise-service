@@ -14,7 +14,6 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -34,10 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,23 +44,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
-import uk.gov.ons.ctp.response.collection.exercise.message.TestPubSubMessage;
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitGroupRepository;
-import uk.gov.ons.ctp.response.collection.exercise.repository.SampleUnitRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleUnitParentDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
-import uk.gov.ons.ctp.response.collection.exercise.validation.ValidateSampleUnits;
 
 /** A class to contain integration tests for the collection exercise service */
 @ContextConfiguration
@@ -88,10 +79,6 @@ public class CollectionExerciseEndpointIT {
   @Autowired private AppConfig appConfig;
 
   @Autowired private CollectionExerciseRepository collectionExerciseRepository;
-
-  @Autowired private SampleUnitRepository sampleUnitRepository;
-
-  @Autowired private SampleUnitGroupRepository sampleUnitGroupRepository;
 
   @Autowired private SampleLinkRepository sampleLinkRepository;
 
@@ -119,10 +106,8 @@ public class CollectionExerciseEndpointIT {
   public void setUp() {
     wireMockRule.resetAll();
 
-    sampleUnitRepository.deleteAllInBatch();
     sampleLinkRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
-    sampleUnitGroupRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
 
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
@@ -210,94 +195,6 @@ public class CollectionExerciseEndpointIT {
         CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
   }
 
-  @Test
-  public void ensureSampleUnitIdIsPropagatedHereBusiness() throws Exception {
-    pubSubEmulator.testInit();
-    stubSurveyServiceBusiness();
-    stubGetPartyNoAssociations();
-    stubCollectionInstrumentCount();
-    UUID id = publishMockSampleUnit("B");
-    Thread.sleep(20000); // Provided a sleep, as by the time emulator publishes the message,
-    // ensureSampleUnitIdIsPropagatedHere() gets kicked in and fails.
-    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
-    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
-    assertEquals(id, UUID.fromString(sampleUnit.getId()));
-    pubSubEmulator.testTeardown();
-  }
-
-  @Test
-  public void ensureSampleUnitIdIsPropagatedHereBusinessWithExistingEnrolments() throws Exception {
-    pubSubEmulator.testInit();
-    stubSurveyServiceBusiness();
-    stubGetPartyWithAssociations();
-    stubCollectionInstrumentCount();
-    UUID id = publishMockSampleUnit("B");
-    Thread.sleep(20000); // Provided a sleep, as by the time emulator publishes the message,
-    // ensureSampleUnitIdIsPropagatedHere() gets kicked in and fails.
-    SampleUnitParentDTO sampleUnit = ensureSampleUnitIdIsPropagatedHere();
-    assertNotNull("Party id must be not null", sampleUnit.getPartyId());
-    assertEquals(id, UUID.fromString(sampleUnit.getId()));
-    pubSubEmulator.testTeardown();
-  }
-
-  private SampleUnitParentDTO ensureSampleUnitIdIsPropagatedHere() throws Exception {
-    TestPubSubMessage message = new TestPubSubMessage();
-    //// When PlanScheduler and ActionDistributor runs
-    final int threadPort = this.port;
-    Thread thread =
-        new Thread(
-            () -> {
-              //// When PlanScheduler and ActionDistributor runs
-              try {
-                for (int i = 0; i < 3; i++) {
-                  HttpResponse<String> distributeResponse =
-                      Unirest.get("http://localhost:" + threadPort + "/cron/sample-unit-validation")
-                          .basicAuth("admin", "secret")
-                          .header("accept", "application/json")
-                          .asString();
-                  HttpResponse<String> response =
-                      Unirest.get(
-                              "http://localhost:" + threadPort + "/cron/sample-unit-distribution")
-                          .basicAuth("admin", "secret")
-                          .header("accept", "application/json")
-                          .asString();
-                }
-              } catch (Exception e) {
-                log.error("exception in thread", e);
-              }
-            });
-    thread.start();
-    SampleUnitParentDTO sampleUnitMessage = message.getPubSubSampleUnitMessage();
-    log.info("message = " + message);
-    assertNotNull("Timeout waiting for message to arrive in Case.CaseDelivery", sampleUnitMessage);
-    return sampleUnitMessage;
-  }
-
-  private UUID publishMockSampleUnit(String type) throws IOException, CTPException {
-    createCollectionInstrumentStub();
-
-    SampleUnit sampleUnit = new SampleUnit();
-    UUID id = UUID.randomUUID();
-
-    CollectionExerciseDTO collex = createCollectionExercise(getRandomRef());
-
-    sampleUnit.setId(id.toString());
-    sampleUnit.setSampleUnitRef("LMS0001");
-    sampleUnit.setCollectionExerciseId(collex.getId().toString());
-    sampleUnit.setSampleUnitType(type);
-
-    if (type.equalsIgnoreCase("B") || type.equalsIgnoreCase("BI")) {
-      sampleUnit.setFormType("");
-    }
-    setSampleSize(collex, 1);
-    setState(collex, CollectionExerciseDTO.CollectionExerciseState.EXECUTION_STARTED);
-    PubSubEmulator pubSubEmulator = new PubSubEmulator();
-    ObjectMapper objectMapper = new ObjectMapper();
-    String publishMessage = objectMapper.writeValueAsString(sampleUnit);
-    pubSubEmulator.publishMessage(publishMessage, "sample_unit_topic");
-    return id;
-  }
-
   private EventDTO createEventDTO(
       final CollectionExerciseDTO collectionExercise,
       final EventService.Tag tag,
@@ -318,32 +215,9 @@ public class CollectionExerciseEndpointIT {
     return stringWriter.toString();
   }
 
-  private CollectionExerciseDTO createCollectionExercise(String exerciseRef) throws CTPException {
-    Pair<Integer, String> result =
-        this.client.createCollectionExercise(
-            CollectionExerciseEndpointIT.TEST_SURVEY_ID, exerciseRef, "Test description");
-
-    assertEquals(201, (int) result.getLeft());
-
-    return this.client.getCollectionExercise(result.getRight());
-  }
-
-  private void setSampleSize(CollectionExerciseDTO collex, int sampleSize) {
-    CollectionExercise c = collexRepository.findOneById(collex.getId());
-    c.setSampleSize(sampleSize);
-    collexRepository.saveAndFlush(c);
-  }
-
   private String getRandomRef() {
     Random r = new Random();
     return String.valueOf(r.nextInt(1_000_000));
-  }
-
-  private void setState(
-      CollectionExerciseDTO collex, CollectionExerciseDTO.CollectionExerciseState state) {
-    CollectionExercise c = collexRepository.findOneById(collex.getId());
-    c.setState(state);
-    collexRepository.saveAndFlush(c);
   }
 
   private String loadResourceAsString(Class clazz, String resourceName) throws IOException {
@@ -354,9 +228,12 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void createCollectionInstrumentStub() throws IOException {
+
+    // TODO change this resource loading stuff it's weird
     String json =
         loadResourceAsString(
-            ValidateSampleUnits.class, "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
+            CollectionExerciseService.class,
+            "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
