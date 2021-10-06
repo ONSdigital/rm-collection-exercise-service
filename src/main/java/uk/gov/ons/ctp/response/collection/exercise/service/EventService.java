@@ -390,13 +390,13 @@ public class EventService {
               if (tag == EventService.Tag.exercise_end) {
                 try {
                   collectionExerciseService.transitionCollectionExercise(
-                    event.getCollectionExercise(),
-                    CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE);
+                      event.getCollectionExercise(),
+                      CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE);
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                    .info("Set collection exercise to ENDED state");
+                      .info("Set collection exercise to ENDED state");
                 } catch (CTPException e) {
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                    .error("Failed to set collection exercise to ENDED state", e);
+                      .error("Failed to set collection exercise to ENDED state", e);
                 }
               }
 
