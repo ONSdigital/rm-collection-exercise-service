@@ -29,6 +29,7 @@ spring:
     default-schema: collectionexercise
     url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
+    enabled: false
 
   output:
     ansi:
@@ -42,25 +43,21 @@ spring:
   application:
     name: ONS CollectionExerciseSvc
 
+  sql.init.mode: always
+  sql.init.continue-on-error: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/ras
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
-    continue-on-error: true
-    tomcat:
-      initial-size: 5
-      max-active: 10
-      max-idle: 5
-      min-idle: 3
-    initialization-mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
-    properties:
-      hibernate:
-        ddl-auto: update
-        default_schema: collectionexercise
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+      default_schema: collectionexercise
 
     # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true and we weren't setting
     # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.

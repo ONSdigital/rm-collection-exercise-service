@@ -1,4 +1,6 @@
+
+
 CREATE USER collectionexercisesvc PASSWORD 'collectionexercisesvc'
   NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION INHERIT LOGIN;
 
-CREATE SCHEMA collectionexercise;
+CREATE SCHEMA IF NOT EXISTS collectionexercise;
