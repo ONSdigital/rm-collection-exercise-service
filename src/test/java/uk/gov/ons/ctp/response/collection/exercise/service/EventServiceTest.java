@@ -528,9 +528,9 @@ public class EventServiceTest {
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
     try {
       verify(collectionExerciseService, times(1))
-        .transitionCollectionExercise(
-          any(CollectionExercise.class),
-          eq(CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE));
+          .transitionCollectionExercise(
+              any(CollectionExercise.class),
+              eq(CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE));
     } catch (CTPException e) {
       fail();
     }
