@@ -1,0 +1,12 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 19.1
+      author: Adam Mann
+      changes:
+        - sqlFile:
+            comment: Add new collection exercise state
+            path: add_ended_state.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+
