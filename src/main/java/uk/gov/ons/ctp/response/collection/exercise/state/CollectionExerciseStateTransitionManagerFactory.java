@@ -113,8 +113,7 @@ public class CollectionExerciseStateTransitionManagerFactory
 
     // LIVE
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionLive = new HashMap<>();
-    transitionLive.put(
-        CollectionExerciseEvent.END_EXERCISE, CollectionExerciseState.ENDED);
+    transitionLive.put(CollectionExerciseEvent.END_EXERCISE, CollectionExerciseState.ENDED);
     transitions.put(CollectionExerciseState.LIVE, transitionLive);
 
     return new BasicStateTransitionManager<>(transitions);
