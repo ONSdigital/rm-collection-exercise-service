@@ -67,6 +67,5 @@ dns:
 gcp:
   project: ras-rm-sandbox
   caseNotificationTopic: "case-notification-topic"
-  sampleUnitReceiverSubscription: "test_subscription"
   sampleSummaryActivationStatusSubscription: sample-summary-activation-status
   sampleSummaryActivationTopic: sample-summary-activation
