@@ -1,33 +1,26 @@
 @startuml
-skinparam state {
-    BackgroundColor HoneyDew
-    BackgroundColor<<New>> MistyRose
-    BackgroundColor<<Changed>> PaleTurquoise
-}
-skinparam note {
-    BackgroundColor<<New>> MistyRose
-    BackgroundColor<<Changed>> PaleTurquoise
-}
 
 [*] --> CREATED
-CREATED<<Changed>> --> CREATED : ci_sample_added
-CREATED<<Changed>> --> CREATED : ci_sample_deleted
-CREATED<<Changed>> --> CREATED : events_deleted
-CREATED<<Changed>> --> SCHEDULED : events_added
+CREATED --> CREATED : ci_sample_added
+CREATED --> CREATED : ci_sample_deleted
+CREATED --> CREATED : events_deleted
+CREATED --> SCHEDULED : events_added
 CREATED --> EXECUTION_STARTED : execute
-SCHEDULED<<New>> --> SCHEDULED : events_added
-SCHEDULED<<New>> --> SCHEDULED : ci_sample_deleted
-SCHEDULED<<New>> --> READY_FOR_REVIEW : ci_sample_added
-READY_FOR_REVIEW<<New>> --> SCHEDULED : ci_sample_deleted
-READY_FOR_REVIEW<<New>> --> CREATED : events_deleted
-SCHEDULED<<New>> --> CREATED : events_deleted
-READY_FOR_REVIEW<<New>> --> EXECUTION_STARTED : execute
-EXECUTION_STARTED<<Changed>> --> EXECUTION_STARTED : execute
+SCHEDULED --> SCHEDULED : events_added
+SCHEDULED --> SCHEDULED : ci_sample_deleted
+SCHEDULED --> READY_FOR_REVIEW : ci_sample_added
+READY_FOR_REVIEW --> SCHEDULED : ci_sample_deleted
+READY_FOR_REVIEW --> CREATED : events_deleted
+SCHEDULED --> CREATED : events_deleted
+READY_FOR_REVIEW --> EXECUTION_STARTED : execute
+EXECUTION_STARTED --> EXECUTION_STARTED : execute
 EXECUTION_STARTED --> EXECUTED : execution_complete
+FAILEDVALIDATION --> EXECUTION_STARTED : execute
 EXECUTED --> VALIDATED : validate
 EXECUTED --> FAILEDVALIDATION : invalidate
-VALIDATED --> READY_FOR_LIVE<<Changed>> : publish
-VALIDATED  --> LIVE : go_live
-READY_FOR_LIVE --> LIVE<<New>> : go_live
-FAILEDVALIDATION --> EXECUTION_STARTED : execute
+VALIDATED --> READY_FOR_LIVE : publish
+VALIDATED --> LIVE : go_live
+READY_FOR_LIVE --> LIVE : go_live
+LIVE --> ENDED : end_exercise
+
 @enduml

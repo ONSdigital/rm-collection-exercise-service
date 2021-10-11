@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 19.1
+      author: Adam Mann
+      changes:
+        - sqlFile:
+            comment: Add new collection exercise state
+            path: add_ended_state.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+
+  - changeSet:
+      id: 19.2
+      author: Adam Mann
+      changes:
+        - sqlFile:
+            comment: Updates Live exercises that have ended to have the new ENDED state.
+            path: update_ended_ce_states.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+

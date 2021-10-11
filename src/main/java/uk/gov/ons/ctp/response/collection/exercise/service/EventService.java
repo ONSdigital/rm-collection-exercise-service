@@ -387,6 +387,18 @@ public class EventService {
                       .error("Failed to set collection exercise to LIVE state", e);
                 }
               }
+              if (tag == EventService.Tag.exercise_end) {
+                try {
+                  collectionExerciseService.transitionCollectionExercise(
+                      event.getCollectionExercise(),
+                      CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE);
+                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                      .info("Set collection exercise to ENDED state");
+                } catch (CTPException e) {
+                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                      .error("Failed to set collection exercise to ENDED state", e);
+                }
+              }
 
               if (tag.isActionable()) {
                 log.with("tag", event.getTag()).info("Event is actionable, beginning processing");

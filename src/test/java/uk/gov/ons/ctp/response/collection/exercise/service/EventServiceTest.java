@@ -500,7 +500,37 @@ public class EventServiceTest {
       verify(collectionExerciseService, times(1))
           .transitionCollectionExercise(
               any(CollectionExercise.class),
-              any(CollectionExerciseDTO.CollectionExerciseEvent.class));
+              eq(CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testProcessEventsTransitionEnded() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.exercise_end);
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSampleSize(1);
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(caseSvcClient.getNumberOfCases(any())).thenReturn(1L);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    try {
+      verify(collectionExerciseService, times(1))
+          .transitionCollectionExercise(
+              any(CollectionExercise.class),
+              eq(CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE));
     } catch (CTPException e) {
       fail();
     }

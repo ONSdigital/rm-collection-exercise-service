@@ -99,7 +99,8 @@ public class CollectionExerciseDTO {
     EXECUTED,
     VALIDATED,
     FAILEDVALIDATION,
-    LIVE
+    LIVE,
+    ENDED
   }
 
   /** enum for collection exercise event */
@@ -114,7 +115,8 @@ public class CollectionExerciseDTO {
     VALIDATE,
     INVALIDATE,
     PUBLISH,
-    GO_LIVE
+    GO_LIVE,
+    END_EXERCISE
   }
 
   @JsonIgnore
