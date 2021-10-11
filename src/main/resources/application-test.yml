@@ -37,4 +37,3 @@ redisson-config:
 gcp:
   project: "test"
   caseNotificationTopic: "test_topic"
-  sampleUnitReceiverSubscription: "test_subscription"
