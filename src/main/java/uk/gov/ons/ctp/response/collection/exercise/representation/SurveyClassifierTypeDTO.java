@@ -1,4 +1,4 @@
-package uk.gov.ons.response.survey.representation;
+package uk.gov.ons.ctp.response.collection.exercise.representation;
 
 import java.util.List;
 import lombok.AccessLevel;
