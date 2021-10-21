@@ -244,6 +244,18 @@ public class CollectionExerciseApplication {
     void sendToPubsub(String text);
   }
 
+  @Bean
+  @ServiceActivator(inputChannel = "collectionExerciseEndChannel")
+  public MessageHandler collectionExerciseEndMessageSender(PubSubTemplate pubsubTemplate) {
+    return new PubSubMessageHandler(
+        pubsubTemplate, appConfig.getGcp().getCollectionExerciseEndTopic());
+  }
+
+  @MessagingGateway(defaultRequestChannel = "collectionExerciseEndChannel")
+  public interface CollectionExerciseEndOutboundGateway {
+    void sendToPubsub(String text);
+  }
+
   /**
    * Spring boot start-up
    *
