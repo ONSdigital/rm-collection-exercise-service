@@ -12,8 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.PubsubOutboundGateway;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-import uk.gov.ons.ctp.response.collection.exercise.representation.SampleSummaryActivationDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollectionExerciseEndPublisherTest {
@@ -31,11 +29,12 @@ public class CollectionExerciseEndPublisherTest {
     ObjectMapper mapper = new ObjectMapper();
     String payload =
         mapper.writeValueAsString(new CollectionExerciseEndEventDTO(collectionExerciseId));
-    when(objectMapper.writeValueAsString(any(CollectionExerciseDTO.class))).thenReturn(payload);
+    when(objectMapper.writeValueAsString(any(CollectionExerciseEndEventDTO.class)))
+        .thenReturn(payload);
 
     collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExerciseId);
 
-    verify(objectMapper, times(1)).writeValueAsString(any(SampleSummaryActivationDTO.class));
+    verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
     verify(messagingGateway, times(1)).sendToPubsub(payload);
   }
 }
