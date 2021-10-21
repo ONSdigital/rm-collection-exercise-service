@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.CollectionExerciseEndOutboundGateway;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
 
 @Component
@@ -18,7 +18,7 @@ public class CollectionExerciseEndPublisher {
 
   @Autowired private ObjectMapper objectMapper;
 
-  @Autowired private CollectionExerciseApplication.CollectionExerciseEndOutboundGateway messagingGateway;
+  @Autowired private CollectionExerciseEndOutboundGateway messagingGateway;
 
   public void sendCollectionExerciseEnd(UUID collectionExerciseId) {
     CollectionExerciseEndEventDTO collectionExerciseEndEventDTO =
