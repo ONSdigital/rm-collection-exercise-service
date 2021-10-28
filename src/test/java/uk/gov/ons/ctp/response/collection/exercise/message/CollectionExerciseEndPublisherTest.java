@@ -10,13 +10,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.PubsubOutboundGateway;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollectionExerciseEndPublisherTest {
 
-  @Mock private PubsubOutboundGateway messagingGateway;
+  @Mock private CollectionExerciseApplication.CollectionExerciseEndOutboundGateway messagingGateway;
 
   @Mock private ObjectMapper objectMapper;
 
