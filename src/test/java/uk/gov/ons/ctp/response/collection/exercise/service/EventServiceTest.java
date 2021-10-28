@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -50,6 +53,8 @@ public class EventServiceTest {
 
   @Mock private SurveySvcClient surveySvcClient;
 
+  @Mock private AppConfig mockAppConfig;
+
   @Mock private CollectionExerciseService collectionExerciseService;
 
   @Mock private EventValidator eventValidator;
@@ -59,6 +64,13 @@ public class EventServiceTest {
   @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
   @InjectMocks private EventService eventService;
+
+  @Before
+  public void setActionDeprecatedFalse() {
+    ActionSvc actionSvc = new ActionSvc();
+    actionSvc.setDeprecated(false);
+    when(mockAppConfig.getActionSvc()).thenReturn(actionSvc);
+  }
 
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());

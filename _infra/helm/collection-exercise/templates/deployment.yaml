@@ -281,5 +281,7 @@ spec:
             value: "{{ .Values.gcp.sampleSummaryActivationStatusSubscription }}"
           - name: GCP_SAMPLESUMMARYACTIVATIONTOPIC
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
+          - name: ACTION_SVC_DEPRECATED
+            value: "{{ .Values.deprecateAction }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

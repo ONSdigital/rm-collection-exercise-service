@@ -402,7 +402,14 @@ public class EventService {
 
               if (tag.isActionable()) {
                 log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
-                boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
+                boolean success;
+                // feature toggled based on if action is deprecated
+                if (appConfig.getActionSvc().isDeprecated()) {
+                  success = caseSvcClient.processEvent(event.getTag(), exercise.getId());
+                } else {
+                  success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
+                }
+
                 if (success) {
                   log.info("Event processing succeeded, setting to PROCESSED state");
                   event.setStatus(EventDTO.Status.PROCESSED);

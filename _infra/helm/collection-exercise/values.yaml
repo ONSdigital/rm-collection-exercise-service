@@ -22,6 +22,8 @@ database:
     nameKey: db-name
   managedRedis: false
 
+deprecateAction: true
+
 container:
   port: 8080
 service:
