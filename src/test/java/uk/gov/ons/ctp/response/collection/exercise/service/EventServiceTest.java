@@ -35,6 +35,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -60,6 +61,8 @@ public class EventServiceTest {
   @Mock private EventValidator eventValidator;
 
   @Mock private EventRepository eventRepository;
+
+  @Mock private CollectionExerciseEndPublisher collectionExerciseEndPublisher;
 
   @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
