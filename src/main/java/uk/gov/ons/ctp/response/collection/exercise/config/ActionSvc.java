@@ -10,4 +10,5 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtilityCo
 public class ActionSvc {
   private RestUtilityConfig connectionConfig;
   private String processEventPath;
+  private boolean deprecated;
 }

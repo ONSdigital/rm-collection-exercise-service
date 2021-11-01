@@ -17,6 +17,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+import uk.gov.ons.ctp.response.collection.exercise.lib.action.representation.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
 
 /** HTTP RestClient implementation for calls to the Case service. */
@@ -65,5 +66,19 @@ public class CaseSvcClient {
       }
     }
     return result;
+  }
+
+  public boolean processEvent(final String tag, final UUID collectionExerciseId)
+      throws RestClientException {
+    final UriComponents uriComponents =
+        restUtility.createUriComponents(appConfig.getCaseSvc().getProcessEventPath(), null);
+
+    final Event event = new Event();
+    event.setCollectionExerciseID(collectionExerciseId);
+    event.setTag(Event.EventTag.valueOf(tag));
+    final HttpEntity<Event> httpEntity = restUtility.createHttpEntity(event);
+    final ResponseEntity<String> response =
+        restTemplate.postForEntity(uriComponents.toUri(), httpEntity, String.class);
+    return response.getStatusCode().is2xxSuccessful();
   }
 }
