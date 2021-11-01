@@ -281,5 +281,8 @@ spec:
             value: "{{ .Values.gcp.sampleSummaryActivationStatusSubscription }}"
           - name: GCP_SAMPLESUMMARYACTIVATIONTOPIC
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
+          - name: GCP_COLLECTIONEXERCISEENDTOPIC
+            value: "{{ .Values.gcp.collectionExerciseEndTopic }}"
+
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

@@ -7,17 +7,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.PubsubOutboundGateway;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleSummaryActivationDTO;
 
 @Component
 public class SampleSummaryActivationPublisher {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SampleSummaryActivationDTO.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(SampleSummaryActivationPublisher.class);
 
   @Autowired private ObjectMapper objectMapper;
 
-  @Autowired private CollectionExerciseApplication.PubsubOutboundGateway messagingGateway;
+  @Autowired private PubsubOutboundGateway messagingGateway;
 
   public void sendSampleSummaryActivation(
       UUID collectionExerciseId, UUID sampleSummaryId, UUID surveyId) {

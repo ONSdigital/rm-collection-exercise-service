@@ -20,6 +20,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -116,6 +117,8 @@ public class EventService {
   @Autowired private ActionSvcClient actionSvcClient;
 
   @Autowired private CaseSvcClient caseSvcClient;
+
+  @Autowired private CollectionExerciseEndPublisher collectionExerciseEndPublisher;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -394,6 +397,8 @@ public class EventService {
                       CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE);
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
                       .info("Set collection exercise to ENDED state");
+                  collectionExerciseEndPublisher.sendCollectionExerciseEnd(
+                      event.getCollectionExercise().getId());
                 } catch (CTPException e) {
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
                       .error("Failed to set collection exercise to ENDED state", e);
