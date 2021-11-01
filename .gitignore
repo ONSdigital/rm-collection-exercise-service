@@ -65,3 +65,5 @@ diagrams/*.svg
 
 # Mac
 *.DS_Store
+
+.editorconfig
