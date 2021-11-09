@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import com.mashape.unirest.http.HttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -18,10 +17,7 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -31,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseClient;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseEndpointIT;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -40,6 +37,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkReposito
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 
 @ContextConfiguration
 @ActiveProfiles("test")
@@ -54,6 +52,8 @@ public class CaseActionEventStatusReceiverIT {
       UUID.fromString("c23bb1c1-5202-43bb-8357-7a07c844308f");
   private static final String TEST_USERNAME = "admin";
   private static final String TEST_PASSWORD = "secret";
+  private static PubSubEmulator PUBSUBEMULATOR;
+  private static final String PUBSUB_TOPIC = "event_status_topic";
 
   @LocalServerPort private int port;
 
@@ -90,7 +90,8 @@ public class CaseActionEventStatusReceiverIT {
   }
 
   @Test
-  public void shouldUpdateEventDate() throws IOException, CTPException, InterruptedException {
+  public void shouldUpdateEventStatus() throws IOException, CTPException, InterruptedException {
+    PUBSUBEMULATOR = new PubSubEmulator();
     stubCollectionInstrumentCount();
     stubSurveyServiceBusiness();
     String exerciseRef = "899990";
@@ -109,7 +110,24 @@ public class CaseActionEventStatusReceiverIT {
     Date newDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
 
     mps.setTimestamp(newDate);
-    HttpResponse res = client.updateEvent(mps);
+    client.updateEvent(mps);
+    Event initialEvent =
+        eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
+    Assert.assertEquals(EventDTO.Status.SCHEDULED, initialEvent.getStatus());
+    String eventStatusUpdate =
+        String.format(
+            "{"
+                + "\"collectionExerciseID\": \"%s\","
+                + "\"tag\": \"mps\","
+                + "\"status\":"
+                + "\"INPROGRESS\""
+                + "}",
+            collectionExercise.getId());
+    PUBSUBEMULATOR.publishMessage(eventStatusUpdate, PUBSUB_TOPIC);
+    Thread.sleep(5000);
+    Event finalEvent =
+        eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
+    Assert.assertEquals(EventDTO.Status.INPROGRESS, finalEvent.getStatus());
   }
 
   private EventDTO createEventDTO(
