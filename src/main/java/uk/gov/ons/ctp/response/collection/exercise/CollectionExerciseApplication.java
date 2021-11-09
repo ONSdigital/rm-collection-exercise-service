@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise;
 
 import com.godaddy.logging.LoggingConfigs;
 import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -54,6 +55,7 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EntityScan("uk.gov.ons.ctp.response")
 @EnableScheduling
 @EnableCaching
+@Slf4j
 public class CollectionExerciseApplication {
 
   private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
@@ -270,5 +272,26 @@ public class CollectionExerciseApplication {
     if (appConfig.getLogging().isUseJson()) {
       LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
     }
+  }
+
+  @Bean
+  public PubSubInboundChannelAdapter eventStatusUpdateChannelAdapter(
+      @Qualifier("collectionExerciseEventStatusUpdateChannel") MessageChannel inputChannel,
+      PubSubTemplate pubSubTemplate) {
+    String subscriptionName =
+        appConfig.getGcp().getCollectionExerciseEventStatusUpdateSubscription();
+    log.info(
+        "Application is listening for case event status update on subscription id {}",
+        subscriptionName);
+    PubSubInboundChannelAdapter adapter =
+        new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
+    adapter.setOutputChannel(inputChannel);
+    adapter.setAckMode(AckMode.MANUAL);
+    return adapter;
+  }
+
+  @Bean
+  public MessageChannel collectionExerciseEventStatusUpdateChannel() {
+    return new PublishSubscribeChannel();
   }
 }

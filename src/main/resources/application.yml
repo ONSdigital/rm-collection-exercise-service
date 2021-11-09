@@ -190,3 +190,4 @@ gcp:
   sampleSummaryActivationStatusSubscription: "sample-summary-activation-status"
   sampleSummaryActivationTopic: "sample-summary-activation"
   collectionExerciseEndTopic: "collect-exercise-end"
+  collectionExerciseEventStatusUpdateSubscription: "test-subscription"

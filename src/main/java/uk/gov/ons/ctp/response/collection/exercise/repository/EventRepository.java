@@ -15,6 +15,8 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
 
   Event findOneByCollectionExerciseAndTag(CollectionExercise collex, String tag);
 
+  Event findOneByCollectionExerciseIdAndTag(UUID collexId, String tag);
+
   List<Event> findByCollectionExerciseId(UUID collexId);
 
   List<Event> findByCollectionExerciseIdIn(List<UUID> collexId);
