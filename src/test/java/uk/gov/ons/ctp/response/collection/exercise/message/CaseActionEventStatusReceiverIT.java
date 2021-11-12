@@ -120,14 +120,14 @@ public class CaseActionEventStatusReceiverIT {
                 + "\"collectionExerciseID\": \"%s\","
                 + "\"tag\": \"mps\","
                 + "\"status\":"
-                + "\"COMPLETED\""
+                + "\"PROCESSED\""
                 + "}",
             collectionExercise.getId());
     PUBSUBEMULATOR.publishMessage(eventStatusUpdate, PUBSUB_TOPIC);
     Thread.sleep(5000);
     Event finalEvent =
         eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
-    Assert.assertEquals(EventDTO.Status.COMPLETED, finalEvent.getStatus());
+    Assert.assertEquals(EventDTO.Status.PROCESSED, finalEvent.getStatus());
   }
 
   private EventDTO createEventDTO(
