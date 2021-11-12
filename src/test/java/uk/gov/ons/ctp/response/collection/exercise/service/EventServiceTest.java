@@ -36,6 +36,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.CaseActionEventStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -488,6 +489,60 @@ public class EventServiceTest {
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
     verify(actionSvcClient, never()).processEvent(any(), any());
+  }
+
+  @Test
+  public void testEventStatusNothingToUpdate() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.mps, "31/12/2999");
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(eventRepository.findOneByCollectionExerciseIdAndTag(any(UUID.class), anyString()))
+        .thenReturn(null);
+    UUID collectionExerciseId = UUID.randomUUID();
+    CaseActionEventStatusDTO eventStatusDTO = new CaseActionEventStatusDTO();
+    eventStatusDTO.setStatus(EventDTO.Status.COMPLETED);
+    eventStatusDTO.setTag(CaseActionEventStatusDTO.EventTag.mps);
+    eventStatusDTO.setCollectionExerciseID(collectionExerciseId);
+    // When
+    eventService.updateEventStatus(eventStatusDTO);
+
+    // Then
+    verify(eventRepository, times(1))
+        .findOneByCollectionExerciseIdAndTag(collectionExerciseId, "mps");
+    verify(eventRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  public void testEventStatusUpdate() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.mps, "31/12/2999");
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(eventRepository.findOneByCollectionExerciseIdAndTag(any(UUID.class), anyString()))
+        .thenReturn(event);
+    UUID collectionExerciseId = UUID.randomUUID();
+    CaseActionEventStatusDTO eventStatusDTO = new CaseActionEventStatusDTO();
+    eventStatusDTO.setStatus(EventDTO.Status.COMPLETED);
+    eventStatusDTO.setTag(CaseActionEventStatusDTO.EventTag.mps);
+    eventStatusDTO.setCollectionExerciseID(collectionExerciseId);
+    // When
+    eventService.updateEventStatus(eventStatusDTO);
+
+    // Then
+    verify(eventRepository, times(1))
+        .findOneByCollectionExerciseIdAndTag(collectionExerciseId, "mps");
+    verify(eventRepository, times(1)).saveAndFlush(any());
   }
 
   @Test

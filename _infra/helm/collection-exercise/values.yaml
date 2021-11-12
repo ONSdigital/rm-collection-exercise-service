@@ -72,3 +72,4 @@ gcp:
   sampleSummaryActivationStatusSubscription: sample-summary-activation-status
   sampleSummaryActivationTopic: sample-summary-activation
   collectionExerciseEndTopic: collection-exercise-end
+  collectionExerciseEventStatusUpdateSubscription: collection-exercise-event-update

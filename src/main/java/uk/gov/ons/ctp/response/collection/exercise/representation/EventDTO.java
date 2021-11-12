@@ -27,7 +27,9 @@ public class EventDTO {
   @Nullable
   public enum Status {
     SCHEDULED,
-    PROCESSED,
-    FAILED
+    COMPLETED,
+    FAILED,
+    RETRY,
+    PROCESSING
   }
 }

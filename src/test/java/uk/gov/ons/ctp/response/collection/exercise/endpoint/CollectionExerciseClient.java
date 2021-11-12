@@ -27,7 +27,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventD
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 
 /** A class to wrap the collection exercise REST API in Java using Unirest */
-class CollectionExerciseClient {
+public class CollectionExerciseClient {
 
   private ObjectMapper jacksonMapper;
   private int port;
@@ -42,7 +42,7 @@ class CollectionExerciseClient {
    * @param aPassword collection exercise API password
    * @param aMapper an object mapper
    */
-  CollectionExerciseClient(
+  public CollectionExerciseClient(
       final int aPort, final String aUsername, final String aPassword, final ObjectMapper aMapper) {
     this.port = aPort;
     this.jacksonMapper = aMapper;
@@ -52,7 +52,7 @@ class CollectionExerciseClient {
     UnirestInitialiser.initialise(jacksonMapper);
   }
 
-  List<EventDTO> getEvents(final UUID collexId) throws CTPException {
+  public List<EventDTO> getEvents(final UUID collexId) throws CTPException {
     try {
       return new ArrayList<>(
           Arrays.asList(
@@ -70,7 +70,7 @@ class CollectionExerciseClient {
     }
   }
 
-  HttpResponse updateEvent(final EventDTO event) {
+  public HttpResponse updateEvent(final EventDTO event) {
     final OffsetDateTime offsetDateTime =
         OffsetDateTime.ofInstant(event.getTimestamp().toInstant(), ZoneOffset.systemDefault());
     final String date = DateTimeFormatter.ISO_DATE_TIME.format(offsetDateTime);
@@ -112,7 +112,7 @@ class CollectionExerciseClient {
    *     has been created
    * @throws CTPException thrown if an error occurred creating the collection exercise
    */
-  Pair<Integer, String> createCollectionExercise(
+  public Pair<Integer, String> createCollectionExercise(
       final UUID surveyId, final String exerciseRef, final String userDescription)
       throws CTPException {
     CollectionExerciseDTO inputDto = new CollectionExerciseDTO();
@@ -170,7 +170,7 @@ class CollectionExerciseClient {
    * @return a representation of the collection exercise
    * @throws CTPException thrown if there was an error retrieving the collection exercise
    */
-  CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
+  public CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
     try {
       return Unirest.get(uriStr)
           .basicAuth(this.username, this.password)
@@ -254,7 +254,7 @@ class CollectionExerciseClient {
     }
   }
 
-  void createCollectionExerciseEvent(EventDTO event) {
+  public void createCollectionExerciseEvent(EventDTO event) {
     HttpResponse<String> response = null;
     try {
       response =

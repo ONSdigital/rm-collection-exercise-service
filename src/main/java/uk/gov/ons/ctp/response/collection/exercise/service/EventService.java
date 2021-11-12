@@ -21,6 +21,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.CaseActionEventStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -337,6 +338,21 @@ public class EventService {
         >= numberOfMandatoryEvents;
   }
 
+  @Transactional
+  public void updateEventStatus(CaseActionEventStatusDTO eventStatus) {
+    Event eventToBeUpdated =
+        eventRepository.findOneByCollectionExerciseIdAndTag(
+            eventStatus.getCollectionExerciseID(), eventStatus.getTag().toString());
+    if (null == eventToBeUpdated) {
+      log.with("collectionExerciseId", eventStatus.getCollectionExerciseID().toString())
+          .with("eventTag", eventStatus.getTag().toString())
+          .error("Unable to find an event for the matching combination.");
+      return;
+    }
+    eventToBeUpdated.setStatus(eventStatus.getStatus());
+    eventRepository.saveAndFlush(eventToBeUpdated);
+  }
+
   /** Get all the scheduled events and send them to action to be acted on. */
   @Transactional
   public void processEvents() {
@@ -416,17 +432,18 @@ public class EventService {
                 }
 
                 if (success) {
-                  log.info("Event processing succeeded, setting to PROCESSED state");
-                  event.setStatus(EventDTO.Status.PROCESSED);
+                  log.info("Event processing succeeded, setting to PROCESSING state");
+                  event.setStatus(EventDTO.Status.PROCESSING);
                   event.setMessageSent(Timestamp.from(Instant.now()));
                 } else {
-                  log.error("Event processing failed, setting to FAILED state");
-                  event.setStatus(EventDTO.Status.FAILED);
+                  log.error(
+                      "Event processing failed, due to service call hence keeping SCHEDULED state");
+                  event.setStatus(EventDTO.Status.SCHEDULED);
                 }
               } else {
                 log.with("tag", event.getTag())
-                    .debug("Event is not actionable, setting to PROCESSED state");
-                event.setStatus(EventDTO.Status.PROCESSED);
+                    .debug("Event is not actionable, setting to COMPLETED state");
+                event.setStatus(EventDTO.Status.COMPLETED);
               }
               eventRepository.saveAndFlush(event);
             } else {
