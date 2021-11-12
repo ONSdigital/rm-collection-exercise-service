@@ -506,7 +506,7 @@ public class EventServiceTest {
         .thenReturn(null);
     UUID collectionExerciseId = UUID.randomUUID();
     CaseActionEventStatusDTO eventStatusDTO = new CaseActionEventStatusDTO();
-    eventStatusDTO.setStatus(EventDTO.Status.COMPLETED);
+    eventStatusDTO.setStatus(EventDTO.Status.PROCESSED);
     eventStatusDTO.setTag(CaseActionEventStatusDTO.EventTag.mps);
     eventStatusDTO.setCollectionExerciseID(collectionExerciseId);
     // When
@@ -533,7 +533,7 @@ public class EventServiceTest {
         .thenReturn(event);
     UUID collectionExerciseId = UUID.randomUUID();
     CaseActionEventStatusDTO eventStatusDTO = new CaseActionEventStatusDTO();
-    eventStatusDTO.setStatus(EventDTO.Status.COMPLETED);
+    eventStatusDTO.setStatus(EventDTO.Status.PROCESSED);
     eventStatusDTO.setTag(CaseActionEventStatusDTO.EventTag.mps);
     eventStatusDTO.setCollectionExerciseID(collectionExerciseId);
     // When
