@@ -1206,7 +1206,7 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * DELETE request to delete a collection exercise event
+   * POST request to delete a collection exercise event
    *
    * @param id Collection exercise Id
    * @param tag collection exercise event tag
