@@ -9,9 +9,9 @@ CREATED --> EXECUTION_STARTED : execute
 SCHEDULED --> SCHEDULED : events_added
 SCHEDULED --> SCHEDULED : ci_sample_deleted
 SCHEDULED --> READY_FOR_REVIEW : ci_sample_added
+SCHEDULED --> CREATED : events_deleted
 READY_FOR_REVIEW --> SCHEDULED : ci_sample_deleted
 READY_FOR_REVIEW --> CREATED : events_deleted
-SCHEDULED --> CREATED : events_deleted
 READY_FOR_REVIEW --> EXECUTION_STARTED : execute
 EXECUTION_STARTED --> EXECUTION_STARTED : execute
 EXECUTION_STARTED --> EXECUTED : execution_complete
