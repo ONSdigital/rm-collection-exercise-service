@@ -16,7 +16,7 @@ There are two ways of running this service
     ```
 
 # API
-See [API.md](https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/API.md) for API documentation.
+See [openapi.yml](https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/openapi.yml) for API documentation.
 
 # Swagger Specification
 To view the swagger Specification for the Collection Exercise service, run the service and navigate to http://localhost:8145/swagger-ui.html.
