@@ -109,7 +109,6 @@ survey-svc:
     read-timeout-milli-seconds: 5000
 
 action-svc:
-  deprecated: false
   process-event-path: /process-event
   connection-config:
     scheme: http
