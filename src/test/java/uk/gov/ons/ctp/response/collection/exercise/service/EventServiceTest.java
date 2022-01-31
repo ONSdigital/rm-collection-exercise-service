@@ -69,6 +69,12 @@ public class EventServiceTest {
 
   @InjectMocks private EventService eventService;
 
+  @Before
+  public void setUpActionService() {
+    ActionSvc actionSvc = new ActionSvc();
+    when(mockAppConfig.getActionSvc()).thenReturn(actionSvc);
+  }
+
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());
     Event event = new Event();
