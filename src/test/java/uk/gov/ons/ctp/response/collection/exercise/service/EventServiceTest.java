@@ -72,7 +72,6 @@ public class EventServiceTest {
   @Before
   public void setUpActionService() {
     ActionSvc actionSvc = new ActionSvc();
-    when(mockAppConfig.getActionSvc()).thenReturn(actionSvc);
   }
 
   private static Event createEvent(Tag tag) {
