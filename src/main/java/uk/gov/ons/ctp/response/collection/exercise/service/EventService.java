@@ -424,19 +424,11 @@ public class EventService {
               if (tag.isActionable()) {
                 log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
                 boolean success;
-                // feature toggled based on if action is deprecated
-                boolean isActionDeprecated = appConfig.getActionSvc().isDeprecated();
-                if (isActionDeprecated) {
-                  success = caseSvcClient.processEvent(event.getTag(), exercise.getId());
-                } else {
-                  success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
-                }
+                success = caseSvcClient.processEvent(event.getTag(), exercise.getId());
 
                 if (success) {
                   log.info("Event processing succeeded, setting to PROCESSING state");
-                  // feature toggled based on if action is deprecated
-                  EventDTO.Status status =
-                      isActionDeprecated ? EventDTO.Status.PROCESSING : EventDTO.Status.PROCESSED;
+                  EventDTO.Status status = EventDTO.Status.PROCESSING;
                   event.setStatus(status);
                   event.setMessageSent(Timestamp.from(Instant.now()));
                 } else {

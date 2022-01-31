@@ -70,10 +70,8 @@ public class EventServiceTest {
   @InjectMocks private EventService eventService;
 
   @Before
-  public void setActionDeprecatedFalse() {
+  public void setUpActionService() {
     ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    when(mockAppConfig.getActionSvc()).thenReturn(actionSvc);
   }
 
   private static Event createEvent(Tag tag) {
@@ -565,7 +563,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, times(1)).processEvent(any(), any());
+    verify(caseSvcClient, times(1)).processEvent(any(), any());
     try {
       verify(collectionExerciseService, times(1))
           .transitionCollectionExercise(

@@ -286,7 +286,5 @@ spec:
           - name: GCP_COLLECTIONEXERCISEENDTOPIC
             value: "{{ .Values.gcp.collectionExerciseEndTopic }}"
 
-          - name: ACTION_SVC_DEPRECATED
-            value: "{{ .Values.deprecateAction }}"
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}
