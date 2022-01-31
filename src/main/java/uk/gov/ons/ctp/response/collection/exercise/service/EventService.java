@@ -428,7 +428,6 @@ public class EventService {
 
                 if (success) {
                   log.info("Event processing succeeded, setting to PROCESSING state");
-                  // feature toggled based on if action is deprecated
                   EventDTO.Status status = EventDTO.Status.PROCESSING;
                   event.setStatus(status);
                   event.setMessageSent(Timestamp.from(Instant.now()));

@@ -565,7 +565,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, times(1)).processEvent(any(), any());
+    verify(caseSvcClient, times(1)).processEvent(any(), any());
     try {
       verify(collectionExerciseService, times(1))
           .transitionCollectionExercise(
