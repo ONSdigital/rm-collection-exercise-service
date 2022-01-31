@@ -69,13 +69,6 @@ public class EventServiceTest {
 
   @InjectMocks private EventService eventService;
 
-  @Before
-  public void setActionDeprecatedFalse() {
-    ActionSvc actionSvc = new ActionSvc();
-    actionSvc.setDeprecated(false);
-    when(mockAppConfig.getActionSvc()).thenReturn(actionSvc);
-  }
-
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());
     Event event = new Event();
