@@ -449,10 +449,6 @@ public class EventService {
                   .info(
                       "Number of cases does not match the sample size.  Case may still be processing messages from sample");
             }
-          } else {
-            log.with("id", event.getId())
-                .with("tag", event.getTag())
-                .debug("Event not ready to be processed");
           }
         });
     log.info("Found [" + counter + "] events in the SCHEDULED state");
