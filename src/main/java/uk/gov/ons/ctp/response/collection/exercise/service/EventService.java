@@ -101,6 +101,7 @@ public class EventService {
     dto.setId(event.getId());
     dto.setTag(event.getTag());
     dto.setTimestamp(event.getTimestamp());
+    dto.setEventStatus(event.getStatus());
 
     return dto;
   }
