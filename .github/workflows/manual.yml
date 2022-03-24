@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: gcloud setup
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.GCR_KEY }}
         # Configure docker to use the gcloud command-line tool as a credential helper
