@@ -35,6 +35,12 @@ spring:
     ansi:
       enabled: never
 
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info
+
   security:
     user:
       name: admin
