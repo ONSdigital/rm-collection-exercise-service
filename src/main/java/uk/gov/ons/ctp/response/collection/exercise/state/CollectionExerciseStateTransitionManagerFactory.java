@@ -16,8 +16,6 @@ public class CollectionExerciseStateTransitionManagerFactory
 
   public static final String COLLLECTIONEXERCISE_ENTITY = "CollectionExercise";
 
-  public static final String SAMPLEUNITGROUP_ENTITY = "SampleUnitGroup";
-
   private Map<String, StateTransitionManager<?, ?>> managers;
 
   /**
@@ -112,6 +110,11 @@ public class CollectionExerciseStateTransitionManagerFactory
         new HashMap<>();
     transitionForReadyForLive.put(CollectionExerciseEvent.GO_LIVE, CollectionExerciseState.LIVE);
     transitions.put(CollectionExerciseState.READY_FOR_LIVE, transitionForReadyForLive);
+
+    // LIVE
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionLive = new HashMap<>();
+    transitionLive.put(CollectionExerciseEvent.END_EXERCISE, CollectionExerciseState.ENDED);
+    transitions.put(CollectionExerciseState.LIVE, transitionLive);
 
     return new BasicStateTransitionManager<>(transitions);
   }

@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: gcloud setup
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.GCR_KEY }}
         # Configure docker to use the gcloud command-line tool as a credential helper
@@ -70,7 +70,7 @@ jobs:
       - name: Build Docker Image
         if: github.ref != 'refs/heads/main'
         run: |
-          docker build -t "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":${{ steps.tag.outputs.pr_number }} .
+          docker build -f _infra/docker/Dockerfile -t "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":${{ steps.tag.outputs.pr_number }} .
       - name: Push dev image
         if: github.ref != 'refs/heads/main'
         run: |
@@ -159,7 +159,7 @@ jobs:
       - name: Build Release Image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":latest -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }} .
+          docker build -f _infra/docker/Dockerfile -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":latest -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ steps.release.outputs.version }} .
       - name: Push Release image
         if: github.ref == 'refs/heads/main'
         run: |

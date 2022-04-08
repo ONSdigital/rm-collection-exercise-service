@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,10 +29,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
+import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.CaseActionEventStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
@@ -50,15 +55,24 @@ public class EventServiceTest {
 
   @Mock private SurveySvcClient surveySvcClient;
 
+  @Mock private AppConfig mockAppConfig;
+
   @Mock private CollectionExerciseService collectionExerciseService;
 
   @Mock private EventValidator eventValidator;
 
   @Mock private EventRepository eventRepository;
 
+  @Mock private CollectionExerciseEndPublisher collectionExerciseEndPublisher;
+
   @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
   @InjectMocks private EventService eventService;
+
+  @Before
+  public void setUpActionService() {
+    ActionSvc actionSvc = new ActionSvc();
+  }
 
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());
@@ -476,6 +490,60 @@ public class EventServiceTest {
   }
 
   @Test
+  public void testEventStatusNothingToUpdate() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.mps, "31/12/2999");
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(eventRepository.findOneByCollectionExerciseIdAndTag(any(UUID.class), anyString()))
+        .thenReturn(null);
+    UUID collectionExerciseId = UUID.randomUUID();
+    CaseActionEventStatusDTO eventStatusDTO = new CaseActionEventStatusDTO();
+    eventStatusDTO.setStatus(EventDTO.Status.PROCESSED);
+    eventStatusDTO.setTag(CaseActionEventStatusDTO.EventTag.mps);
+    eventStatusDTO.setCollectionExerciseID(collectionExerciseId);
+    // When
+    eventService.updateEventStatus(eventStatusDTO);
+
+    // Then
+    verify(eventRepository, times(1))
+        .findOneByCollectionExerciseIdAndTag(collectionExerciseId, "mps");
+    verify(eventRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  public void testEventStatusUpdate() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.mps, "31/12/2999");
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(eventRepository.findOneByCollectionExerciseIdAndTag(any(UUID.class), anyString()))
+        .thenReturn(event);
+    UUID collectionExerciseId = UUID.randomUUID();
+    CaseActionEventStatusDTO eventStatusDTO = new CaseActionEventStatusDTO();
+    eventStatusDTO.setStatus(EventDTO.Status.PROCESSED);
+    eventStatusDTO.setTag(CaseActionEventStatusDTO.EventTag.mps);
+    eventStatusDTO.setCollectionExerciseID(collectionExerciseId);
+    // When
+    eventService.updateEventStatus(eventStatusDTO);
+
+    // Then
+    verify(eventRepository, times(1))
+        .findOneByCollectionExerciseIdAndTag(collectionExerciseId, "mps");
+    verify(eventRepository, times(1)).saveAndFlush(any());
+  }
+
+  @Test
   public void testProcessEventsTransitionGoLive() {
     // Given
     List<Event> list = new ArrayList<>();
@@ -495,12 +563,42 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, times(1)).processEvent(any(), any());
+    verify(caseSvcClient, times(1)).processEvent(any(), any());
     try {
       verify(collectionExerciseService, times(1))
           .transitionCollectionExercise(
               any(CollectionExercise.class),
-              any(CollectionExerciseDTO.CollectionExerciseEvent.class));
+              eq(CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE));
+    } catch (CTPException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testProcessEventsTransitionEnded() {
+    // Given
+    List<Event> list = new ArrayList<>();
+    Event event = createEvent(Tag.exercise_end);
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setSampleSize(1);
+    collectionExercise.setState(CollectionExerciseState.LIVE);
+    event.setCollectionExercise(collectionExercise);
+    list.add(event);
+    Stream<Event> eventStream = list.stream();
+
+    when(caseSvcClient.getNumberOfCases(any())).thenReturn(1L);
+    when(eventRepository.findByStatus(EventDTO.Status.SCHEDULED)).thenReturn(eventStream);
+
+    // When
+    eventService.processEvents();
+
+    // Then
+    verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
+    try {
+      verify(collectionExerciseService, times(1))
+          .transitionCollectionExercise(
+              any(CollectionExercise.class),
+              eq(CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE));
     } catch (CTPException e) {
       fail();
     }

@@ -277,11 +277,14 @@ spec:
             value: "{{ .Values.gcp.project }}"
           - name: GCP_CASENOTIFICATIONTOPIC
             value: "{{ .Values.gcp.caseNotificationTopic }}"
-          - name: GCP_SAMPLEUNITRECEIVERSUBSCRIPTION
-            value: "{{ .Values.gcp.sampleUnitReceiverSubscription }}"
           - name: GCP_SAMPLESUMMARYACTIVATIONSTATUSSUBSCRIPTION
             value: "{{ .Values.gcp.sampleSummaryActivationStatusSubscription }}"
+          - name: GCP_COLLECTIONEXERCISEEVENTSTATUSUPDATESUBSCRIPTION
+            value: "{{ .Values.gcp.collectionExerciseEventStatusUpdateSubscription }}"
           - name: GCP_SAMPLESUMMARYACTIVATIONTOPIC
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
+          - name: GCP_COLLECTIONEXERCISEENDTOPIC
+            value: "{{ .Values.gcp.collectionExerciseEndTopic }}"
+
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

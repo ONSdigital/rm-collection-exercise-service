@@ -8,6 +8,7 @@ There are two ways of running this service
 
 * The easiest way is via docker (https://github.com/ONSdigital/ras-rm-docker-dev)
 * Alternatively running the service up in isolation
+* gcloud auth configure-docker when running locally
     ```bash
     cp .maven.settings.xml ~/.m2/settings.xml  # This only needs to be done once to set up mavens settings file
     mvn clean install
@@ -15,7 +16,7 @@ There are two ways of running this service
     ```
 
 # API
-See [API.md](https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/API.md) for API documentation.
+See [openapi.yml](https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/openapi.yml) for API documentation.
 
 # Swagger Specification
 To view the swagger Specification for the Collection Exercise service, run the service and navigate to http://localhost:8145/swagger-ui.html.

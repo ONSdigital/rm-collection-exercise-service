@@ -24,10 +24,14 @@ public class EventDTO {
 
   @NotNull private Date timestamp;
 
+  @Nullable private Status eventStatus;
+
   @Nullable
   public enum Status {
     SCHEDULED,
     PROCESSED,
-    FAILED
+    FAILED,
+    RETRY,
+    PROCESSING
   }
 }

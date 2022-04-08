@@ -54,8 +54,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CollectionExerciseDTO"
-        404:
-          description: Resource Not Found
     put:
       tags:
         - collection-exercise-endpoint
@@ -141,6 +139,8 @@ paths:
                 $ref: "#/components/schemas/Event"
         404:
           description: Resource Not Found
+        400:
+          description: Bad Request
     put:
       tags:
         - collection-exercise-endpoint

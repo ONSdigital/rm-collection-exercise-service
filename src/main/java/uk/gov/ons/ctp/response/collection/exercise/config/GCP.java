@@ -7,7 +7,8 @@ import lombok.Data;
 public class GCP {
   String project;
   String caseNotificationTopic;
-  String sampleUnitReceiverSubscription;
   String sampleSummaryActivationStatusSubscription;
   String sampleSummaryActivationTopic;
+  String collectionExerciseEndTopic;
+  String collectionExerciseEventStatusUpdateSubscription;
 }

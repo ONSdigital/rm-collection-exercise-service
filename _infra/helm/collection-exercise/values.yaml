@@ -31,10 +31,10 @@ resources:
   application:
     requests:
       memory: "500Mi"
-      cpu: "35m"
+      cpu: "200m"
     limits:
-      memory: "2000Mi"
-      cpu: "1000m"
+      memory: "750Mi"
+      cpu: "650m"
   proxy:
     requests:
       memory: "25Mi"
@@ -67,6 +67,7 @@ dns:
 gcp:
   project: ras-rm-sandbox
   caseNotificationTopic: "case-notification-topic"
-  sampleUnitReceiverSubscription: "test_subscription"
   sampleSummaryActivationStatusSubscription: sample-summary-activation-status
   sampleSummaryActivationTopic: sample-summary-activation
+  collectionExerciseEndTopic: collection-exercise-end
+  collectionExerciseEventStatusUpdateSubscription: collection-exercise-event-update

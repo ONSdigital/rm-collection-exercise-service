@@ -20,6 +20,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
+import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.CaseActionEventStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
@@ -99,6 +101,7 @@ public class EventService {
     dto.setId(event.getId());
     dto.setTag(event.getTag());
     dto.setTimestamp(event.getTimestamp());
+    dto.setEventStatus(event.getStatus());
 
     return dto;
   }
@@ -116,6 +119,8 @@ public class EventService {
   @Autowired private ActionSvcClient actionSvcClient;
 
   @Autowired private CaseSvcClient caseSvcClient;
+
+  @Autowired private CollectionExerciseEndPublisher collectionExerciseEndPublisher;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -334,6 +339,21 @@ public class EventService {
         >= numberOfMandatoryEvents;
   }
 
+  @Transactional
+  public void updateEventStatus(CaseActionEventStatusDTO eventStatus) {
+    Event eventToBeUpdated =
+        eventRepository.findOneByCollectionExerciseIdAndTag(
+            eventStatus.getCollectionExerciseID(), eventStatus.getTag().toString());
+    if (null == eventToBeUpdated) {
+      log.with("collectionExerciseId", eventStatus.getCollectionExerciseID().toString())
+          .with("eventTag", eventStatus.getTag().toString())
+          .error("Unable to find an event for the matching combination.");
+      return;
+    }
+    eventToBeUpdated.setStatus(eventStatus.getStatus());
+    eventRepository.saveAndFlush(eventToBeUpdated);
+  }
+
   /** Get all the scheduled events and send them to action to be acted on. */
   @Transactional
   public void processEvents() {
@@ -387,21 +407,39 @@ public class EventService {
                       .error("Failed to set collection exercise to LIVE state", e);
                 }
               }
+              if (tag == EventService.Tag.exercise_end) {
+                try {
+                  collectionExerciseService.transitionCollectionExercise(
+                      event.getCollectionExercise(),
+                      CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE);
+                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                      .info("Set collection exercise to ENDED state");
+                  collectionExerciseEndPublisher.sendCollectionExerciseEnd(
+                      event.getCollectionExercise().getId());
+                } catch (CTPException e) {
+                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
+                      .error("Failed to set collection exercise to ENDED state", e);
+                }
+              }
 
               if (tag.isActionable()) {
                 log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
-                boolean success = actionSvcClient.processEvent(event.getTag(), exercise.getId());
+                boolean success;
+                success = caseSvcClient.processEvent(event.getTag(), exercise.getId());
+
                 if (success) {
-                  log.info("Event processing succeeded, setting to PROCESSED state");
-                  event.setStatus(EventDTO.Status.PROCESSED);
+                  log.info("Event processing succeeded, setting to PROCESSING state");
+                  EventDTO.Status status = EventDTO.Status.PROCESSING;
+                  event.setStatus(status);
                   event.setMessageSent(Timestamp.from(Instant.now()));
                 } else {
-                  log.error("Event processing failed, setting to FAILED state");
-                  event.setStatus(EventDTO.Status.FAILED);
+                  log.error(
+                      "Event processing failed, due to service call hence keeping SCHEDULED state");
+                  event.setStatus(EventDTO.Status.SCHEDULED);
                 }
               } else {
                 log.with("tag", event.getTag())
-                    .debug("Event is not actionable, setting to PROCESSED state");
+                    .debug("Event is not actionable, setting to COMPLETED state");
                 event.setStatus(EventDTO.Status.PROCESSED);
               }
               eventRepository.saveAndFlush(event);
@@ -412,10 +450,6 @@ public class EventService {
                   .info(
                       "Number of cases does not match the sample size.  Case may still be processing messages from sample");
             }
-          } else {
-            log.with("id", event.getId())
-                .with("tag", event.getTag())
-                .debug("Event not ready to be processed");
           }
         });
     log.info("Found [" + counter + "] events in the SCHEDULED state");
