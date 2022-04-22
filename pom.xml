@@ -10,9 +10,9 @@
     <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>2.5.5</springboot.version>
+        <springboot.version>2.6.6</springboot.version>
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
-        <jackson.version>2.13.0</jackson.version>
+        <jackson.version>2.13.2</jackson.version>
         <java.version>11</java.version>
         <orika.version>1.5.4</orika.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
