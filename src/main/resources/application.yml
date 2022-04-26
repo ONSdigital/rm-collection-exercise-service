@@ -18,6 +18,12 @@ logging:
 server:
   port: 8145
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   main:
     # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
@@ -34,12 +40,6 @@ spring:
   output:
     ansi:
       enabled: never
-
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: health,info
 
   security:
     user:
