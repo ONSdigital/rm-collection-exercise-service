@@ -18,9 +18,15 @@ logging:
 server:
   port: 8145
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   main:
-    # Added as part of upgrade to 2.1 to quiet a an error where the 'restExceptionHandler' bean is defined twice.
+    # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
     allow-bean-definition-overriding: true
 
   liquibase:
@@ -29,6 +35,7 @@ spring:
     default-schema: collectionexercise
     url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
+    enabled: false
 
   output:
     ansi:
@@ -42,27 +49,25 @@ spring:
   application:
     name: ONS CollectionExerciseSvc
 
+  # In spring boot 2.5, schema.sql isn't run on startup anymore.  Because the schema isn't created in the first liquibase
+  # patch; we're overriding how it's handled, so it can be created if it's not there.
+  sql.init.mode: always
+  sql.init.continue-on-error: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/ras
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
-    continue-on-error: true
-    tomcat:
-      initial-size: 5
-      max-active: 10
-      max-idle: 5
-      min-idle: 3
-    initialization-mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
-    properties:
-      hibernate:
-        ddl-auto: update
-        default_schema: collectionexercise
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+      default_schema: collectionexercise
 
-    # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true and we weren't setting
+    # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true, and we weren't setting
     # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
     open-in-view: true
 
