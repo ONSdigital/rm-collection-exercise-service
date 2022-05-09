@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
