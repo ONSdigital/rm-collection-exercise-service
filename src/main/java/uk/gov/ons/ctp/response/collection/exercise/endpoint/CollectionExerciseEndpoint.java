@@ -4,10 +4,6 @@ import static java.util.stream.Collectors.joining;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -108,21 +104,6 @@ public class CollectionExerciseEndpoint {
    * @return list of collection exercises associated to survey
    * @throws CTPException on resource not found
    */
-  @Operation(summary = "GET request to find collection exercises for the given survey Id.")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successful retrieval of collection exercises for surveyId"),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized",
-            content = @Content(examples = {})),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Resource Not Found",
-            content = @Content(examples = {}))
-      })
   @RequestMapping(value = "/survey/{id}", method = RequestMethod.GET)
   public ResponseEntity<List<CollectionExerciseDTO>> getCollectionExercisesForSurvey(
       @PathVariable("id") final UUID id, @RequestParam("liveOnly") Optional<Boolean> liveOnly)

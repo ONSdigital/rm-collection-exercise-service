@@ -2,10 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,25 +34,6 @@ public class CollectionExerciseExecutionEndpoint {
    * @return total sample units to be delivered.
    * @throws CTPException on resource not found
    */
-  @Operation(
-      summary =
-          "POST request to manually trigger the request of the sample units for the collection exercise Id.")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "201", description = "Successful Operation"),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Bad Request",
-            content = @Content(examples = {})),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized",
-            content = @Content(examples = {})),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Resource Not Found",
-            content = @Content(examples = {}))
-      })
   @RequestMapping(value = "/{id}", method = RequestMethod.POST)
   public ResponseEntity<Void> setReadyForLive(@PathVariable("id") final UUID id)
       throws CTPException {
