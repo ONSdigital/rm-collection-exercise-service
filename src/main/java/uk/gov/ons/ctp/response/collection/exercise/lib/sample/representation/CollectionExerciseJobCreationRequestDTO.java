@@ -15,15 +15,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class CollectionExerciseJobCreationRequestDTO {
 
-  @NotNull
-  private UUID collectionExerciseId;
+  @NotNull private UUID collectionExerciseId;
 
-  @NotNull
-  private String surveyRef;
+  @NotNull private String surveyRef;
 
-  @NotNull
-  private Date exerciseDateTime;
+  @NotNull private Date exerciseDateTime;
 
-  @NotNull
-  private List<UUID> sampleSummaryUUIDList;
+  @NotNull private List<UUID> sampleSummaryUUIDList;
 }
