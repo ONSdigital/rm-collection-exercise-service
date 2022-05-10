@@ -13,7 +13,7 @@ DROP ROLE IF EXISTS collectionexercisesvc;
 CREATE USER collectionexercisesvc PASSWORD 'collectionexercisesvc'
   NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION INHERIT LOGIN;
 
-CREATE SCHEMA collectionexercise AUTHORIZATION collectionexercisesvc;
+CREATE SCHEMA IF NOT EXISTS collectionexercise AUTHORIZATION collectionexercisesvc;
 
 REVOKE ALL ON ALL TABLES IN SCHEMA collectionexercise FROM PUBLIC;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA collectionexercise FROM PUBLIC;
