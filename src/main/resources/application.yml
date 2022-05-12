@@ -28,6 +28,7 @@ spring:
   main:
     # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
     allow-bean-definition-overriding: true
+    allow-circular-references: true
 
   liquibase:
     user: postgres
