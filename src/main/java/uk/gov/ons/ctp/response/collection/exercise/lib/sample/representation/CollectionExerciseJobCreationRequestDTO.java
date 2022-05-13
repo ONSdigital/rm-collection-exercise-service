@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -16,19 +15,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class CollectionExerciseJobCreationRequestDTO {
 
-  @NotNull
-  @Schema(required = true)
-  private UUID collectionExerciseId;
+  @NotNull private UUID collectionExerciseId;
 
-  @NotNull
-  @Schema(required = true)
-  private String surveyRef;
+  @NotNull private String surveyRef;
 
-  @NotNull
-  @Schema(required = true)
-  private Date exerciseDateTime;
+  @NotNull private Date exerciseDateTime;
 
-  @NotNull
-  @Schema(required = true)
-  private List<UUID> sampleSummaryUUIDList;
+  @NotNull private List<UUID> sampleSummaryUUIDList;
 }

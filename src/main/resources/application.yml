@@ -28,6 +28,7 @@ spring:
   main:
     # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
     allow-bean-definition-overriding: true
+    allow-circular-references: true
 
   liquibase:
     user: postgres
@@ -172,20 +173,9 @@ messaging:
   prefetchCount: 10
   txSize: 1
 
-swagger-settings:
-  swagger-ui-active: true
-  group-name: collectionexerciseservice-api
-  title: Collection Exercise Service API
-  description: API for ${project.artifactId}
-  version: ${project.version}
-
 springdoc:
   api-docs:
     path: /api-docs
-    enabled: false
-  swagger-ui:
-    path: /api-doc.html
-    operationsSorter: method
     enabled: false
 
 gcp:

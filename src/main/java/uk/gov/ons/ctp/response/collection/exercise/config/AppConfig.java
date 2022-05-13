@@ -22,7 +22,6 @@ public class AppConfig {
   private CollectionInstrumentSvc collectionInstrumentSvc;
   private RedissonConfig redissonConfig;
   private ScheduleSettings schedules;
-  private SwaggerSettings swaggerSettings;
   private Logging logging;
   private GCP gcp;
 }

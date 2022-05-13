@@ -1,1 +1,1 @@
-CREATE SCHEMA collectionexercise;
+CREATE SCHEMA IF NOT EXISTS collectionexercise;
