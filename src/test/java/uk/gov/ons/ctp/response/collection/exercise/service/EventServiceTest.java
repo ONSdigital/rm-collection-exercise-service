@@ -26,7 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
@@ -48,8 +47,6 @@ import uk.gov.ons.ctp.response.collection.exercise.service.EventService.Tag;
 public class EventServiceTest {
   private static final UUID COLLEX_UUID = UUID.fromString("f03206ee-137d-41e3-af5c-2dea393bb360");
   private static final int EXERCISE_PK = 6433;
-
-  @Mock private ActionSvcClient actionSvcClient;
 
   @Mock private CaseSvcClient caseSvcClient;
 
@@ -465,7 +462,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
   }
 
   @Test
@@ -486,7 +483,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
   }
 
   @Test
@@ -624,7 +621,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
     try {
       verify(collectionExerciseService, never())
           .transitionCollectionExercise(
@@ -656,7 +653,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
     try {
       verify(collectionExerciseService, never())
           .transitionCollectionExercise(
