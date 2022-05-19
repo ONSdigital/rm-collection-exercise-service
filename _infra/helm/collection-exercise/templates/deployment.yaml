@@ -171,22 +171,6 @@ spec:
             value: "$(REDIS_HOST):$(REDIS_PORT)"
           - name: DATA_GRID_ADDRESS
             value: "$(REDIS_HOST):$(REDIS_PORT)"
-          - name: ACTION_SVC_CONNECTION_CONFIG_HOST
-            {{- if .Values.dns.enabled }}
-            value: "action.{{ .Values.namespace }}.svc.cluster.local"
-            {{- else }}
-            value: "$(ACTION_SERVICE_HOST)"
-            {{- end }}
-          - name: ACTION_SVC_CONNECTION_CONFIG_PORT
-            {{- if .Values.dns.enabled }}
-            value: "{{ .Values.dns.wellKnownPort }}"
-            {{- else }}
-            value: "$(ACTION_SERVICE_PORT)"
-            {{- end }}
-          - name: ACTION_SVC_CONNECTION_CONFIG_USERNAME
-            value: "$(SECURITY_USER_NAME)"
-          - name: ACTION_SVC_CONNECTION_CONFIG_PASSWORD
-            value: "$(SECURITY_USER_PASSWORD)"
           - name: CASE_SVC_CONNECTION_CONFIG_HOST
             {{- if .Values.dns.enabled }}
             value: "case.{{ .Values.namespace }}.svc.cluster.local"

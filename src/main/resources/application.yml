@@ -114,15 +114,6 @@ survey-svc:
     # time to read response
     read-timeout-milli-seconds: 5000
 
-action-svc:
-  process-event-path: /process-event
-  connection-config:
-    scheme: http
-    host: localhost
-    port: 8151
-    username: admin
-    password: secret
-
 case-svc:
   number-of-cases-path: /casegroups/cases/{collectionExerciseId}/all
   process-event-path: /process-event

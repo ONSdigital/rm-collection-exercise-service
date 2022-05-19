@@ -6,11 +6,10 @@
    
    This is a busy service interacting with multiple microservices to carry out its functions. Collection Exercise 
    (rm-collection-exercise-service) interacts with the following microservices :
-   * action-svc
-   * collection-instrument-svc
-   * sample-svc
-   * survey-svc
-   * party-svc
+   * ras-collection-instrument
+   * rm-sample-service
+   * rm-survey-service
+   * ras-party
    
    There are multiple functions carried out by this microservice, and the resources is exposed via rest endpoints. 
    This rest service mainly deals with collection exercises and its association. The service follows a defined
@@ -84,7 +83,7 @@
    * `sampleUnitTransformed` - channel responsible for receipt of sample units. At this point the records are populated
    in `sampleunit` and `sampleunitgroup` tables and sampleUnit message is published to the case service.
    
-   ## [data base](rm-collection-exercise-svc-db.png)
+   ## [Database](rm-collection-exercise-svc-db.png)
    #### `collectionexercisestate`
    This table holds allowed collection exercise transition states.
    #### `collectionexercise`
@@ -113,7 +112,5 @@
    * DB structure need to be improved to provide more viable link and relationship between tables.
    * Remove `sampleunittype` as it can easily be removed by a static value. 
    * Remove the use of XML/XSD and replace with JSON.
-   * Improving service to propagate the changes to action for any changes. Few of the function does not seem to propagate
-   correctly to action svc.
    * we can reduce the complexity of the service by redesigning the service and delegating few of the 
    functions to another microservice.
