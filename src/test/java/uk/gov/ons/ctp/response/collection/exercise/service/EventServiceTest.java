@@ -19,17 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
-import uk.gov.ons.ctp.response.collection.exercise.config.ActionSvc;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
@@ -49,8 +46,6 @@ public class EventServiceTest {
   private static final UUID COLLEX_UUID = UUID.fromString("f03206ee-137d-41e3-af5c-2dea393bb360");
   private static final int EXERCISE_PK = 6433;
 
-  @Mock private ActionSvcClient actionSvcClient;
-
   @Mock private CaseSvcClient caseSvcClient;
 
   @Mock private SurveySvcClient surveySvcClient;
@@ -68,11 +63,6 @@ public class EventServiceTest {
   @Spy private List<EventValidator> eventValidators = new ArrayList<>();
 
   @InjectMocks private EventService eventService;
-
-  @Before
-  public void setUpActionService() {
-    ActionSvc actionSvc = new ActionSvc();
-  }
 
   private static Event createEvent(Tag tag) {
     Timestamp eventTime = new Timestamp(new Date().getTime());
@@ -297,7 +287,7 @@ public class EventServiceTest {
   }
 
   @Test
-  public void givenReminderEmailIsDeletedItGetsPropagatedToActionSVC() throws CTPException {
+  public void givenReminderEmailIsDeletedItGetsPropagatedToCase() throws CTPException {
 
     final CollectionExercise collex = new CollectionExercise();
     collex.setId(COLLEX_UUID);
@@ -465,7 +455,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
   }
 
   @Test
@@ -486,7 +476,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
   }
 
   @Test
@@ -624,7 +614,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
     try {
       verify(collectionExerciseService, never())
           .transitionCollectionExercise(
@@ -656,7 +646,7 @@ public class EventServiceTest {
 
     // Then
     verify(eventRepository, times(1)).findByStatus(EventDTO.Status.SCHEDULED);
-    verify(actionSvcClient, never()).processEvent(any(), any());
+    verify(caseSvcClient, never()).processEvent(any(), any());
     try {
       verify(collectionExerciseService, never())
           .transitionCollectionExercise(

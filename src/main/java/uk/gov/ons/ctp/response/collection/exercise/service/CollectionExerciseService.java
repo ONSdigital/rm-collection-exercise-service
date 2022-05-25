@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.ctp.response.collection.exercise.client.ActionSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.CollectionInstrumentSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SampleSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
@@ -32,8 +31,6 @@ public class CollectionExerciseService {
 
   private final CollectionExerciseRepository collectRepo;
 
-  private final ActionSvcClient actionSvcClient;
-
   private final CollectionInstrumentSvcClient collectionInstrumentSvcClient;
 
   private final SampleLinkRepository sampleLinkRepository;
@@ -51,7 +48,6 @@ public class CollectionExerciseService {
   public CollectionExerciseService(
       CollectionExerciseRepository collectRepo,
       SampleLinkRepository sampleLinkRepository,
-      ActionSvcClient actionSvcClient,
       CollectionInstrumentSvcClient collectionInstrumentSvcClient,
       SampleSvcClient sampleSvcClient,
       SurveySvcClient surveyService,
@@ -62,7 +58,6 @@ public class CollectionExerciseService {
               collectionExerciseTransitionState) {
     this.collectRepo = collectRepo;
     this.sampleLinkRepository = sampleLinkRepository;
-    this.actionSvcClient = actionSvcClient;
     this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
     this.surveyService = surveyService;
     this.sampleSvcClient = sampleSvcClient;

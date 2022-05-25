@@ -127,17 +127,6 @@ public class CollectionExerciseApplication {
   }
 
   /**
-   * The RestUtility bean for the Action service
-   *
-   * @return the RestUtility bean for the Action service
-   */
-  @Bean
-  @Qualifier("actionRestUtility")
-  public RestUtility actionRestUtility() {
-    return new RestUtility(appConfig.getActionSvc().getConnectionConfig());
-  }
-
-  /**
    * The RestUtility bean for the Case service
    *
    * @return the RestUtility bean for the Case service
