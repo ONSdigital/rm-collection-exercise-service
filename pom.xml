@@ -14,7 +14,7 @@
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.13.2</jackson.version>
         <jackson.databind.version>2.13.2.2</jackson.databind.version>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <orika.version>1.5.4</orika.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>5.5.2</version>
+            <version>5.7.1</version>
         </dependency>
 
         <dependency>
@@ -129,13 +129,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>1.18.24</version>
         </dependency>
 
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.2.0</version>
+            <version>3.17.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.cache</groupId>
@@ -153,6 +153,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+            <version>4.11.0</version>
         </dependency>
 
         <dependency>
@@ -169,7 +170,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.11</version>
+            <version>1.6.9</version>
         </dependency>
 
         <dependency>
@@ -275,7 +276,7 @@
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
-                                <version>1.16.22</version>
+                                <version>1.18.24</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
