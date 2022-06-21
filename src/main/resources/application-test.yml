@@ -28,7 +28,7 @@ party-svc:
         port: 18002
 
 redisson-config:
-  address: redis://localhost:17379
+  address: localhost:17379
 
 gcp:
   project: "test"
