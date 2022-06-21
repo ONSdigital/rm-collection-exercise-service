@@ -22,10 +22,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
-import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
@@ -69,8 +67,6 @@ public class CollectionExerciseEndpoint {
   private SampleService sampleService;
   private SurveySvcClient surveyService;
 
-  private MapperFacade mapperFacade;
-
   @Autowired private AppConfig appConfig;
 
   @Autowired
@@ -78,13 +74,11 @@ public class CollectionExerciseEndpoint {
       CollectionExerciseService collectionExerciseService,
       SurveySvcClient surveyService,
       SampleService sampleService,
-      EventService eventService,
-      @Qualifier("collectionExerciseBeanMapper") MapperFacade mapperFacade) {
+      EventService eventService) {
     this.collectionExerciseService = collectionExerciseService;
     this.surveyService = surveyService;
     this.sampleService = sampleService;
     this.eventService = eventService;
-    this.mapperFacade = mapperFacade;
   }
 
   /**
@@ -617,7 +611,7 @@ public class CollectionExerciseEndpoint {
         .debug("Getting linked sample summaries");
     List<SampleLink> sampleLinks =
         collectionExerciseService.findLinkedSampleSummaries(collectionExerciseId);
-    List<SampleLinkDTO> sampleLinkList = mapperFacade.mapAsList(sampleLinks, SampleLinkDTO.class);
+    List<SampleLinkDTO> sampleLinkList = ObjectConverter.sampleLinkDTO(sampleLinks);
 
     return ResponseEntity.ok(sampleLinkList);
   }
@@ -703,7 +697,8 @@ public class CollectionExerciseEndpoint {
         .debug("Populating data for requested collection exercise");
 
     CollectionExerciseDTO collectionExerciseDTO =
-        mapperFacade.map(collectionExercise, CollectionExerciseDTO.class);
+        ObjectConverter.collectionExerciseDTO(collectionExercise);
+
     // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now
     // the survey id
     // is not validated and passed on verbatim

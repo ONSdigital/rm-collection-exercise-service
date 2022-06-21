@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import ma.glasnost.orika.MapperFacade;
 import org.hamcrest.core.Is;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -42,7 +41,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.lib.common.matcher.DateMatcher;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
@@ -100,7 +98,7 @@ public class CollectionExerciseEndpointUnitTests {
 
   @Mock private EventService eventService;
 
-  @Spy private MapperFacade mapperFacade = new CollectionExerciseBeanMapper();
+  //  @Spy private MapperFacade mapperFacade = new CollectionExerciseBeanMapper();
 
   private MockMvc mockCollectionExerciseMvc;
   private MockMvc textPlainMock;

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseMessageType.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.client.CaseSvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;

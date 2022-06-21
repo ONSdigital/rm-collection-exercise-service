@@ -4,7 +4,7 @@ import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseMessageType.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;

@@ -146,7 +146,7 @@ collection-instrument-svc:
     read-timeout-milli-seconds: 5000
 
 redisson-config:
-  address: localhost:6379
+  address: redis://localhost:6379
   list-time-to-live-seconds: 300
   list-time-to-wait-seconds: 300
 

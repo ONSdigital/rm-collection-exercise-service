@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseMessageType.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 

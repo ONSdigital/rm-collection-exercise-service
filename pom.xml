@@ -15,7 +15,6 @@
         <jackson.version>2.13.2</jackson.version>
         <jackson.databind.version>2.13.2.2</jackson.databind.version>
         <java.version>17</java.version>
-        <orika.version>1.5.4</orika.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -115,18 +114,6 @@
         <!-- third party libraries -->
 
         <dependency>
-            <groupId>ma.glasnost.orika</groupId>
-            <artifactId>orika-core</artifactId>
-            <version>${orika.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ma.glasnost.orika</groupId>
-            <artifactId>orika-eclipse-tools</artifactId>
-            <version>${orika.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
@@ -213,12 +200,13 @@
 
         <!-- Testing -->
 
-        <!-- Added because of mockito errors. It's explained more here
-        https://dev.to/scottshipp/how-to-fix-a-mockito-cannot-mock-this-class-exception-in-a-spring-boot-app-457e -->
+        <!-- Added because of mockito errors. mockito-core was causing null pointer exceptiosn. This is caused by the
+          migration to Java 17. After reading documentations, core needs to be swapped to mockito-inline-->
+
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.0.0</version>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
 
