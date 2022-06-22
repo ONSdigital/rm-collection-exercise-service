@@ -213,10 +213,6 @@ spec:
             value: "$(SECURITY_USER_NAME)"
           - name: COLLECTION_INSTRUMENT_SVC_CONNECTION_CONFIG_PASSWORD
             value: "$(SECURITY_USER_PASSWORD)"
-          - name: SCHEDULES_VALIDATION_SCHEDULE_DELAY_MILLI_SECONDS
-            value: "1000"
-          - name: SCHEDULES_DISTRIBUTION_SCHEDULE_DELAY_MILLI_SECONDS
-            value: "1000"
           - name: SPRING_LIQUIBASE_USER
             value: "$(DB_USERNAME)"
           - name: SPRING_LIQUIBASE_PASSWORD

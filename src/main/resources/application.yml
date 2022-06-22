@@ -145,20 +145,6 @@ collection-instrument-svc:
     connect-timeout-milli-seconds: 5000
     read-timeout-milli-seconds: 5000
 
-schedules:
-  # number retrieved for each collection exercise each run, distributes this number for each exercise
-  distribution-schedule-retrieval-max: 1000
-
-messaging:
-  backoffInitial: 5000
-  backoffMultiplier: 3
-  backoffMax: 45000
-  consumingThreads: 1
-  pubMaxAttempts: 3
-  conMaxAttempts: 1
-  prefetchCount: 10
-  txSize: 1
-
 springdoc:
   api-docs:
     path: /api-docs
