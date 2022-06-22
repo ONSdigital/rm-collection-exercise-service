@@ -140,7 +140,6 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.11.0</version>
         </dependency>
 
         <dependency>
@@ -200,7 +199,7 @@
 
         <!-- Testing -->
 
-        <!-- Added because of mockito errors. mockito-core was causing null pointer exceptiosn. This is caused by the
+        <!-- Added because of mockito errors. mockito-core was causing null pointer exception. This is caused by the
           migration to Java 17. After reading documentations, core needs to be swapped to mockito-inline-->
 
         <dependency>

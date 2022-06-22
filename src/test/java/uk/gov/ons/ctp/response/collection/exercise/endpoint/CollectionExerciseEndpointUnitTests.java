@@ -98,8 +98,6 @@ public class CollectionExerciseEndpointUnitTests {
 
   @Mock private EventService eventService;
 
-  //  @Spy private MapperFacade mapperFacade = new CollectionExerciseBeanMapper();
-
   private MockMvc mockCollectionExerciseMvc;
   private MockMvc textPlainMock;
   private List<SurveyDTO> surveyDtoResults;

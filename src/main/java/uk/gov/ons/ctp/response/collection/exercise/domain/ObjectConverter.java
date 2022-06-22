@@ -1,9 +1,7 @@
-package uk.gov.ons.ctp.response.collection.exercise.endpoint;
+package uk.gov.ons.ctp.response.collection.exercise.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
-import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 
