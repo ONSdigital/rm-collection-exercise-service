@@ -20,7 +20,6 @@ database:
     usernameKey: username
     passwordKey: password
     nameKey: db-name
-  managedRedis: false
 
 container:
   port: 8080
