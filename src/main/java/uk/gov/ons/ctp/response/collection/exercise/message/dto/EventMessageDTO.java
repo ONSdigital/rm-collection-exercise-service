@@ -1,7 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.dto;
 
 import lombok.Data;
-import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseBeanMapper.MessageType;
+import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseMessageType.MessageType;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 
 @Data

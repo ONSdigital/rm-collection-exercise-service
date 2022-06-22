@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.*;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -87,10 +86,6 @@ public class CollectionExerciseEndpointIT {
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
-
-  @ClassRule
-  public static final EnvironmentVariables environmentVariables =
-      new EnvironmentVariables().set("PUBSUB_EMULATOR_HOST", "127.0.0.1:18681");
 
   @ClassRule
   public static WireMockClassRule wireMockRule =

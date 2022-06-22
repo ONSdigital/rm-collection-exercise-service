@@ -14,8 +14,7 @@
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.13.2</jackson.version>
         <jackson.databind.version>2.13.2.2</jackson.databind.version>
-        <java.version>11</java.version>
-        <orika.version>1.5.4</orika.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -96,7 +95,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>5.5.2</version>
+            <version>5.7.1</version>
         </dependency>
 
         <dependency>
@@ -115,21 +114,9 @@
         <!-- third party libraries -->
 
         <dependency>
-            <groupId>ma.glasnost.orika</groupId>
-            <artifactId>orika-core</artifactId>
-            <version>${orika.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ma.glasnost.orika</groupId>
-            <artifactId>orika-eclipse-tools</artifactId>
-            <version>${orika.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>1.18.24</version>
         </dependency>
 
         <dependency>
@@ -153,6 +140,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+            <version>4.11.0</version>
         </dependency>
 
         <dependency>
@@ -169,7 +157,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.11</version>
+            <version>1.6.9</version>
         </dependency>
 
         <dependency>
@@ -212,12 +200,13 @@
 
         <!-- Testing -->
 
-        <!-- Added because of mockito errors. It's explained more here
-        https://dev.to/scottshipp/how-to-fix-a-mockito-cannot-mock-this-class-exception-in-a-spring-boot-app-457e -->
+        <!-- Added because of mockito errors. mockito-core was causing null pointer exception. This is caused by the
+          migration to Java 17. After reading documentations, core needs to be swapped to mockito-inline-->
+
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.0.0</version>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -275,7 +264,7 @@
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
-                                <version>1.16.22</version>
+                                <version>1.18.24</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
