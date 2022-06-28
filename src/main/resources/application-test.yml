@@ -27,9 +27,6 @@ party-svc:
     connection-config:
         port: 18002
 
-redisson-config:
-  address: localhost:17379
-
 gcp:
   project: "test"
   caseNotificationTopic: "test_topic"

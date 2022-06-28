@@ -5,11 +5,6 @@ services:
   image: sdcplatform/ras-rm-docker-postgres
   ports:
    - "15432:5432"
- redis:
-  container_name: redis-it
-  image: redis:3.2.9
-  ports:
-   - "17379:6379"
  pubsub-emulator:
    container_name: pubsub-emulator-it
    image: eu.gcr.io/ons-rasrmbs-management/pubsub-emulator

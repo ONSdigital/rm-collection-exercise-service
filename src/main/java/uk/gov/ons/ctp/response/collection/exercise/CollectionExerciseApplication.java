@@ -6,9 +6,6 @@ import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.cobertura.CoverageIgnore;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -37,8 +34,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.DistributedListManager;
-import uk.gov.ons.ctp.response.collection.exercise.lib.common.distributed.DistributedListManagerRedissonImpl;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.rest.RestUtility;
@@ -63,9 +58,6 @@ import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseState
 @EnableCaching
 @Slf4j
 public class CollectionExerciseApplication {
-
-  private static final String VALIDATION_LIST = "collectionexercisesvc.sample.validation";
-  private static final String DISTRIBUTION_LIST = "collectionexercisesvc.sample.distribution";
 
   @Autowired private AppConfig appConfig;
 
@@ -181,52 +173,6 @@ public class CollectionExerciseApplication {
       collectionExerciseStateTransitionManager() {
     return collectionExerciseStateTransitionManagerFactory.getStateTransitionManager(
         CollectionExerciseStateTransitionManagerFactory.COLLLECTIONEXERCISE_ENTITY);
-  }
-
-  /**
-   * The DistributedListManager for sampleUnitGroup validation.
-   *
-   * @param redissonClient the redissonClient.
-   * @return the DistributedListManager.
-   */
-  @Bean
-  @Qualifier("validation")
-  public DistributedListManager<Integer> sampleValidationListManager(
-      RedissonClient redissonClient) {
-    return new DistributedListManagerRedissonImpl<Integer>(
-        VALIDATION_LIST,
-        redissonClient,
-        appConfig.getRedissonConfig().getListTimeToWaitSeconds(),
-        appConfig.getRedissonConfig().getListTimeToLiveSeconds());
-  }
-
-  /**
-   * The DistributedListManager for sampleUnitGroup distribution.
-   *
-   * @param redissonClient the redissonClient.
-   * @return the DistributedListManager.
-   */
-  @Bean
-  @Qualifier("distribution")
-  public DistributedListManager<Integer> sampleDistributionListManager(
-      RedissonClient redissonClient) {
-    return new DistributedListManagerRedissonImpl<Integer>(
-        DISTRIBUTION_LIST,
-        redissonClient,
-        appConfig.getRedissonConfig().getListTimeToWaitSeconds(),
-        appConfig.getRedissonConfig().getListTimeToLiveSeconds());
-  }
-
-  /**
-   * Bean for access to all Redisson distributed objects.
-   *
-   * @return RedissonClient
-   */
-  @Bean
-  public RedissonClient redissonClient() {
-    Config config = new Config();
-    config.useSingleServer().setAddress(appConfig.getRedissonConfig().getAddress());
-    return Redisson.create(config);
   }
 
   /**

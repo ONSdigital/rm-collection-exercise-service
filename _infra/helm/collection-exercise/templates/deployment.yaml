@@ -149,28 +149,6 @@ spec:
             {{- end }}
           - name: SPRING_LIQUIBASE_URL
             value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
-          - name: REDIS_HOST
-            {{- if .Values.database.managedRedis }}
-            valueFrom:
-              configMapKeyRef:
-                name: redis-config
-                key: redis-host
-            {{- else }}
-            value: "$(REDIS_MASTER_SERVICE_HOST)"
-            {{- end }}
-          - name: REDIS_PORT
-            {{- if .Values.database.managedRedis }}
-            valueFrom:
-              configMapKeyRef:
-                name: redis-config
-                key: redis-port
-            {{- else }}
-            value: "$(REDIS_MASTER_SERVICE_PORT)"
-            {{- end}}
-          - name: REDISSON_CONFIG_ADDRESS
-            value: "$(REDIS_HOST):$(REDIS_PORT)"
-          - name: DATA_GRID_ADDRESS
-            value: "$(REDIS_HOST):$(REDIS_PORT)"
           - name: CASE_SVC_CONNECTION_CONFIG_HOST
             {{- if .Values.dns.enabled }}
             value: "case.{{ .Values.namespace }}.svc.cluster.local"
@@ -235,10 +213,6 @@ spec:
             value: "$(SECURITY_USER_NAME)"
           - name: COLLECTION_INSTRUMENT_SVC_CONNECTION_CONFIG_PASSWORD
             value: "$(SECURITY_USER_PASSWORD)"
-          - name: SCHEDULES_VALIDATION_SCHEDULE_DELAY_MILLI_SECONDS
-            value: "1000"
-          - name: SCHEDULES_DISTRIBUTION_SCHEDULE_DELAY_MILLI_SECONDS
-            value: "1000"
           - name: SPRING_LIQUIBASE_USER
             value: "$(DB_USERNAME)"
           - name: SPRING_LIQUIBASE_PASSWORD
