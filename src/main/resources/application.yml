@@ -33,7 +33,7 @@ spring:
   liquibase:
     user: postgres
     password: postgres
-    default-schema: collectionexercise
+    liquibase-schema: collectionexercise
     url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
     enabled: false
