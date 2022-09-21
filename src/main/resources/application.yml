@@ -71,6 +71,8 @@ spring:
       default_schema: collectionexercise
     properties:
       hibernate:
+        hbm2ddl:
+          schema_filter_provider: uk.gov.ons.ctp.response.collection.exercise.CustomProvider
         id:
           new_generator_mappings: false
     # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true, and we weren't setting
