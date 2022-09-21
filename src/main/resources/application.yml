@@ -69,7 +69,10 @@ spring:
     hibernate:
       ddl-auto: update
       default_schema: collectionexercise
-
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: false
     # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true, and we weren't setting
     # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
     open-in-view: true
