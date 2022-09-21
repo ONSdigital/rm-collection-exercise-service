@@ -52,8 +52,10 @@ spring:
 
   # In spring boot 2.5, schema.sql isn't run on startup anymore.  Because the schema isn't created in the first liquibase
   # patch; we're overriding how it's handled, so it can be created if it's not there.
-  sql.init.mode: always
-  sql.init.continue-on-error: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
 
   datasource:
     url: jdbc:postgresql://localhost:5432/ras
