@@ -135,7 +135,7 @@ public class CollectionExerciseEndpoint {
       }
     }
 
-    log.with("survey_id", id).debug("Sucessfully retrieved collection exercises for surveyId");
+    log.with("survey_id", id).debug("Successfully retrieved collection exercises for surveyId");
     return ResponseEntity.ok(collectionExerciseSummaryDTOList);
   }
 
