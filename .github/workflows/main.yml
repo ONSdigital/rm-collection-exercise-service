@@ -155,6 +155,7 @@ jobs:
       - name: Publish dev Chart
         if: github.ref != 'refs/heads/main'
         run: |
+          cp $IMAGE-${{ env.HELM_VERSION }}.tgz $IMAGE-latest.tgz
           mv $IMAGE-${{ env.HELM_VERSION }}.tgz $IMAGE-${{ steps.tag.outputs.pr_number }}.tgz
           gsutil cp $IMAGE-*.tgz gs://$ARTIFACT_BUCKET/$IMAGE/
 
