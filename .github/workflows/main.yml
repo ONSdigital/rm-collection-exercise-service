@@ -53,6 +53,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v0
       - name: Configure GCR
         run: |
+          openssl version
           gcloud auth configure-docker
 
       - name: Run Tests
