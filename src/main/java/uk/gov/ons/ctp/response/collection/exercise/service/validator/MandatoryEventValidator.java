@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.validator;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,13 +29,6 @@ public class MandatoryEventValidator implements EventValidator {
       return;
     }
 
-    if (isCollectionExerciseLockedState(collectionExerciseState)) {
-      throw new CTPException(
-          CTPException.Fault.BAD_REQUEST,
-          "Mandatory events cannot be changed if collection exercise "
-              + "is set to live, executed, validated or locked");
-    }
-
     final Map<String, Event> existingEventsMap =
         existingEvents.stream().collect(Collectors.toMap(Event::getTag, Function.identity()));
 
@@ -51,18 +43,6 @@ public class MandatoryEventValidator implements EventValidator {
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST, "Collection exercise events must be set sequentially");
     }
-  }
-
-  private boolean isCollectionExerciseLockedState(CollectionExerciseState collectionExerciseState) {
-    final List<CollectionExerciseState> lockedStates =
-        Arrays.asList(
-            CollectionExerciseState.EXECUTION_STARTED,
-            CollectionExerciseState.VALIDATED,
-            CollectionExerciseState.EXECUTED,
-            CollectionExerciseState.READY_FOR_LIVE,
-            CollectionExerciseState.LIVE);
-
-    return lockedStates.contains(collectionExerciseState);
   }
 
   private Event getEventByTag(
