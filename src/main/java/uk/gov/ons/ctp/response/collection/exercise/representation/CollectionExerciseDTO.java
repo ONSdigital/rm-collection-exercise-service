@@ -21,7 +21,7 @@ public class CollectionExerciseDTO {
 
   private UUID id;
 
-  @NotNull(groups = { PutValidation.class })
+  @NotNull(groups = {PutValidation.class})
   private String surveyId;
 
   // When creating a collection exercise (PostValidation), the survey can either
@@ -31,7 +31,10 @@ public class CollectionExerciseDTO {
   // (input field only)
   private String surveyRef;
 
-  @Size(max = 20, min = 1, groups = { PostValidation.class, PutValidation.class, PatchValidation.class })
+  @Size(
+      max = 20,
+      min = 1,
+      groups = {PostValidation.class, PutValidation.class, PatchValidation.class})
   private String name;
 
   private Date actualExecutionDateTime;
@@ -56,11 +59,16 @@ public class CollectionExerciseDTO {
 
   private CollectionExerciseDTO.CollectionExerciseState state;
 
-  @NotNull(groups = { PostValidation.class, PutValidation.class })
-  @Pattern(regexp = "^[0-9]{1,6}$", groups = { PostValidation.class, PutValidation.class, PatchValidation.class })
+  @NotNull(groups = {PostValidation.class, PutValidation.class})
+  @Pattern(
+      regexp = "^[0-9]{1,6}$",
+      groups = {PostValidation.class, PutValidation.class, PatchValidation.class})
   private String exerciseRef;
 
-  @Size(max = 50, min = 1, groups = { PostValidation.class, PutValidation.class, PatchValidation.class })
+  @Size(
+      max = 50,
+      min = 1,
+      groups = {PostValidation.class, PutValidation.class, PatchValidation.class})
   private String userDescription;
 
   private Date created;
@@ -74,19 +82,13 @@ public class CollectionExerciseDTO {
   private List<EventDTO> events;
 
   /** Empty interface to use as a marker for validation of POST requests */
-  public interface PostValidation {
-  }
+  public interface PostValidation {}
 
   /** Empty interface to use as a marker for validation of PUT requests */
-  public interface PutValidation {
-  }
+  public interface PutValidation {}
 
-  /**
-   * Empty interface to use as a marker for validation of PUT sub-resource
-   * requests
-   */
-  public interface PatchValidation {
-  }
+  /** Empty interface to use as a marker for validation of PUT sub-resource requests */
+  public interface PatchValidation {}
 
   /** enum for collection exercise state */
   public enum CollectionExerciseState {
