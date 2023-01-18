@@ -24,9 +24,11 @@ public class CollectionExerciseDTO {
   @NotNull(groups = {PutValidation.class})
   private String surveyId;
 
-  // When creating a collection exercise (PostValidation), the survey can either be specified by the
+  // When creating a collection exercise (PostValidation), the survey can either
+  // be specified by the
   // surveyId or
-  // surveyRef.  This field will not be set when returning collection exercises (input field only)
+  // surveyRef. This field will not be set when returning collection exercises
+  // (input field only)
   private String surveyRef;
 
   @Size(
@@ -63,7 +65,6 @@ public class CollectionExerciseDTO {
       groups = {PostValidation.class, PutValidation.class, PatchValidation.class})
   private String exerciseRef;
 
-  @NotNull(groups = {PostValidation.class, PutValidation.class})
   @Size(
       max = 50,
       min = 1,
