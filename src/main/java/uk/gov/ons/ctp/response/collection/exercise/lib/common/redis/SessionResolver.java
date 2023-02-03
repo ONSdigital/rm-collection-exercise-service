@@ -18,9 +18,17 @@ public class SessionResolver {
 
   public void removeActiveSession(String surveyId) {
     String key = REDIS_KEY_PREFIX + surveyId;
-    if (redisUtil.doesKeyExist(key) == TRUE) {
-      redisUtil.deleteValue(key);
-      log.with("survey_id", surveyId).info("Cache invalidated");
+    try {
+      if (redisUtil.doesKeyExist(key) == TRUE) {
+        redisUtil.deleteValue(key);
+        log.with("survey_id", surveyId).info("Cache invalidated");
+      }
+    } catch (Exception e) {
+      System.out.println("EXCEPTION");
+      System.out.println("EXCEPTION");
+      System.out.println(e);
+      System.out.println("EXCEPTION");
+      System.out.println("EXCEPTION");
     }
   }
 }
