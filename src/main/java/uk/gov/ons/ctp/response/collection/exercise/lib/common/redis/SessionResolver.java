@@ -6,11 +6,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class SessionResolver {
 
-  @Autowired
-  private RedisUtil<Object> redisUtil;
+  @Autowired private RedisUtil<Object> redisUtil;
 
   public void removeActivesSession(String exerciseId) {
     redisUtil.deleteValue(exerciseId);
   }
-
 }

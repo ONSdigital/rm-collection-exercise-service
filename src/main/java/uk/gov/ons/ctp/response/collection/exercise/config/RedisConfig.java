@@ -4,40 +4,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
 
   @Bean
-  JedisConnectionFactory jedisConnectionFactory() {
-    RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration("localhost", 6379);
-    configuration.setDatabase(1);
-    JedisClientConfiguration jedisClientConfiguration = JedisClientConfiguration.builder().usePooling().build();
-    JedisConnectionFactory factory = new JedisConnectionFactory(configuration, jedisClientConfiguration);
-    factory.afterPropertiesSet();
-    return factory;
+  public LettuceConnectionFactory redisConnectionFactory() {
+    return new LettuceConnectionFactory(new RedisStandaloneConfiguration("localhost", 6379));
   }
 
   @Bean
-  public RedisTemplate<String, Object> redisTemplate() {
-    RedisTemplate<String, Object> template = new RedisTemplate<>();
-    template.setDefaultSerializer(new StringRedisSerializer());
-    template.setKeySerializer(new StringRedisSerializer());
-    template.setHashKeySerializer(new GenericToStringSerializer<>(Object.class));
-    template.setHashValueSerializer(new JdkSerializationRedisSerializer());
-    template.setValueSerializer(new JdkSerializationRedisSerializer());
-    template.setConnectionFactory(jedisConnectionFactory());
+  RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    RedisTemplate<String, String> template = new RedisTemplate<>();
+    template.setConnectionFactory(redisConnectionFactory);
     return template;
-  }
-
-  @Bean
-  public RedisConnectionFactory redisConnectionFactory() {
-    return jedisConnectionFactory();
   }
 }
