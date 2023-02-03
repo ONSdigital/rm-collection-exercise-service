@@ -1,11 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.redis;
 
+import static java.lang.Boolean.TRUE;
+
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static java.lang.Boolean.TRUE;
 
 @Component
 public class SessionResolver {
