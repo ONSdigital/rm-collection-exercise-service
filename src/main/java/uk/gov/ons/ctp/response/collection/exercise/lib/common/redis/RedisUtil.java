@@ -9,7 +9,19 @@ public class RedisUtil<Object> {
 
   @Autowired private RedisTemplate<String, String> redisTemplate;
 
+  public Boolean doesKeyExist(String key) {
+    System.out.println("CHECKING KEY !!");
+    System.out.println("CHECKING KEY !!");
+    System.out.println("CHECKING KEY !!");
+    System.out.println("CHECKING KEY !!");
+    return redisTemplate.hasKey(key);
+  }
+
   public void deleteValue(String key) {
     redisTemplate.delete(key);
+    System.out.println("DELETE KEY !!!");
+    System.out.println("DELETE KEY !!!");
+    System.out.println("DELETE KEY !!!");
+    System.out.println("DELETE KEY !!!");
   }
 }

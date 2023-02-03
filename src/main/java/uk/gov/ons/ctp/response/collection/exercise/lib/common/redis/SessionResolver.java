@@ -5,6 +5,8 @@ import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static java.lang.Boolean.TRUE;
+
 @Component
 public class SessionResolver {
 
@@ -15,7 +17,10 @@ public class SessionResolver {
   @Autowired private RedisUtil<Object> redisUtil;
 
   public void removeActiveSession(String surveyId) {
-    redisUtil.deleteValue(REDIS_KEY_PREFIX + surveyId);
-    log.with("survey_id", surveyId).info("Cache invalidated");
+    String key = REDIS_KEY_PREFIX + surveyId;
+    if (redisUtil.doesKeyExist(key) == TRUE) {
+      redisUtil.deleteValue(key);
+      log.with("survey_id", surveyId).info("Cache invalidated");
+    }
   }
 }

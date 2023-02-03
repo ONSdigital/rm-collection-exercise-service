@@ -402,6 +402,10 @@ public class EventService {
                       CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
                   sessionResolver.removeActiveSession(
                       String.valueOf(event.getCollectionExercise().getSurveyId()));
+                  System.out.println("GOT OUT KEY !!");
+                  System.out.println("GOT OUT KEY !!");
+                  System.out.println("GOT OUT KEY !!");
+                  System.out.println("GOT OUT KEY !!");
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
                       .info("Set collection exercise to LIVE state");
                 } catch (CTPException e) {
