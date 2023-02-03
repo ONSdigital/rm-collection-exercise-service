@@ -6,9 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SessionResolver {
 
+  private static final String REDIS_KEY_PREFIX = "frontstage:collection-exercise-by-survey-id:";
+
+
   @Autowired private RedisUtil<Object> redisUtil;
 
-  public void removeActivesSession(String exerciseId) {
-    redisUtil.deleteValue(exerciseId);
+  public void removeActiveSession(String surveyId) {
+    redisUtil.deleteValue(REDIS_KEY_PREFIX + surveyId);
   }
 }

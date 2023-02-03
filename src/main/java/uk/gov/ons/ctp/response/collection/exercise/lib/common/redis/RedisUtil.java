@@ -7,8 +7,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Configuration
 public class RedisUtil<Object> {
 
-  private static final String REDIS_KEY_PREFIX = "frontstage:collection-exercise-by-survey-id:";
-
   @Autowired private RedisTemplate<String, String> redisTemplate;
 
   public void deleteValue(String key) {
