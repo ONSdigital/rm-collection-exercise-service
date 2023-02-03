@@ -400,7 +400,8 @@ public class EventService {
                   collectionExerciseService.transitionCollectionExercise(
                       event.getCollectionExercise(),
                       CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-                      sessionResolver.removeActiveSession(String.valueOf(event.getCollectionExercise().getSurveyId()));
+                  sessionResolver.removeActiveSession(
+                      String.valueOf(event.getCollectionExercise().getSurveyId()));
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
                       .info("Set collection exercise to LIVE state");
                 } catch (CTPException e) {
