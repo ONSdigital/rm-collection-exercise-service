@@ -40,7 +40,7 @@ public class AppConfig {
     return factory;
   }
 
-  @Bean(name = "redisTemplate")
+  @Bean
   public RedisTemplate<String, Object> redisTemplate(
       JedisConnectionFactory jedisConnectionFactory) {
     final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();

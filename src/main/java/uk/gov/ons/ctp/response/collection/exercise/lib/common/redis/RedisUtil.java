@@ -1,13 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.redis;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
 public class RedisUtil<Object> {
 
-  @Autowired private RedisTemplate<String, String> redisTemplate;
+  private final RedisTemplate<String, String> redisTemplate;
+
+  public RedisUtil(RedisTemplate<String, String> redisTemplate) {
+    this.redisTemplate = redisTemplate;
+  }
 
   public Boolean doesKeyExist(String key) {
     System.out.println("CHECKING KEY !!");
