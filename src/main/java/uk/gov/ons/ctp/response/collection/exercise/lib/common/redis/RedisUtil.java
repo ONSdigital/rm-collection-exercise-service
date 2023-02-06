@@ -6,13 +6,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RedisUtil<Object> {
+public class RedisUtil<o> {
 
   @Autowired
   @Qualifier("redisTemplate")
-  private RedisTemplate<String, String> redisTemplate;
+  private RedisTemplate<String, Object> redisTemplate;
 
-  public RedisUtil(RedisTemplate<String, String> redisTemplate) {
+  public RedisUtil(RedisTemplate<String, Object> redisTemplate) {
     this.redisTemplate = redisTemplate;
   }
 
