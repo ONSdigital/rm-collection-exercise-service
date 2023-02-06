@@ -26,7 +26,7 @@ public class SessionResolver {
     } catch (Exception e) {
       System.out.println("EXCEPTION");
       System.out.println("EXCEPTION");
-      System.out.println(e);
+      System.out.println(e.getMessage());
       System.out.println("EXCEPTION");
       System.out.println("EXCEPTION");
     }

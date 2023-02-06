@@ -12,11 +12,12 @@ public class RedisConfig {
 
   @Bean
   public LettuceConnectionFactory redisConnectionFactory() {
-    RedisStandaloneConfiguration redisStandaloneConfiguration =
-        new RedisStandaloneConfiguration("localhost", 6379);
-    // this is 3 in dev will need to confirm in other envs
-    redisStandaloneConfiguration.setDatabase(3);
-    return new LettuceConnectionFactory(redisStandaloneConfiguration);
+//    RedisStandaloneConfiguration redisStandaloneConfiguration =
+//        new RedisStandaloneConfiguration("localhost", 6379);
+//    // this is 3 in dev will need to confirm in other envs
+//    redisStandaloneConfiguration.setDatabase(3);
+//    return new LettuceConnectionFactory(redisStandaloneConfiguration);
+    return new LettuceConnectionFactory();
   }
 
   @Bean
