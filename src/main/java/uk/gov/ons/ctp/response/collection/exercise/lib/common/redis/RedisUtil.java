@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RedisUtil<Object> {
 
+  @Autowired
   @Qualifier("redisTemplate")
   private RedisTemplate<String, String> redisTemplate;
 
-  @Autowired
   public RedisUtil(RedisTemplate<String, String> redisTemplate) {
     this.redisTemplate = redisTemplate;
   }

@@ -84,9 +84,9 @@ public class CollectionExerciseApplication {
   }
 
   @Bean(name = "redisTemplate")
-  public RedisTemplate<String, Object> redisTemplate(
+  public RedisTemplate<String, String> redisTemplate(
       JedisConnectionFactory jedisConnectionFactory) {
-    final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    final RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
     redisTemplate.setConnectionFactory(jedisConnectionFactory);
     return redisTemplate;
   }
