@@ -16,19 +16,7 @@ public class RedisUtil<o> {
     this.redisTemplate = redisTemplate;
   }
 
-  public Boolean doesKeyExist(String key) {
-    System.out.println("CHECKING KEY !!");
-    System.out.println("CHECKING KEY !!" + key);
-    System.out.println("CHECKING KEY !!");
-    System.out.println("CHECKING KEY !!");
-    return redisTemplate.hasKey(key);
-  }
-
   public void deleteValue(String key) {
     redisTemplate.delete(key);
-    System.out.println("DELETE KEY !!!");
-    System.out.println("DELETE KEY !!!" + key);
-    System.out.println("DELETE KEY !!!");
-    System.out.println("DELETE KEY !!!");
   }
 }
