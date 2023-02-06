@@ -1,7 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
