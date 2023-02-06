@@ -73,7 +73,7 @@ public class CollectionExerciseApplication {
   @Bean(name = "jedisConnectionFactory")
   public JedisConnectionFactory jedisConnectionFactory() {
     RedisStandaloneConfiguration configuration =
-        new RedisStandaloneConfiguration("localhost", 6379);
+        new RedisStandaloneConfiguration("redis-master", 6379);
     configuration.setDatabase(3);
     JedisClientConfiguration jedisClientConfiguration =
         JedisClientConfiguration.builder().usePooling().build();
