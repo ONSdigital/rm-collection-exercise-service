@@ -52,5 +52,4 @@ public class AppConfig {
   public RedisConnectionFactory redisConnectionFactory() {
     return jedisConnectionFactory();
   }
-
 }
