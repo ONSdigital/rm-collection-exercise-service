@@ -61,6 +61,11 @@ spring:
     password: postgres
     driverClassName: org.postgresql.Driver
 
+  redis:
+    port: 6379
+    host: "localhost"
+    database: 3
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     defer-datasource-initialization: true
