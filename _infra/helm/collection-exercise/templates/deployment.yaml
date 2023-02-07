@@ -159,7 +159,7 @@ spec:
               value: "$(REDIS_MASTER_SERVICE_HOST)"
               {{- end }}
           - name: REDIS_PORT
-            {{ - if .Values.database.managedRedis }}
+            {{- if .Values.database.managedRedis }}
             valueFrom:
               configMapKeyRef:
                 name: redis-config
