@@ -8,6 +8,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
@@ -41,7 +42,8 @@ public class RedisConfig {
   @Bean(name = "redisTemplate")
   public RedisTemplate<String, Object> redisTemplate(
       JedisConnectionFactory jedisConnectionFactory) {
-    final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    redisTemplate.setKeySerializer(new StringRedisSerializer());
     redisTemplate.setConnectionFactory(jedisConnectionFactory);
     return redisTemplate;
   }
