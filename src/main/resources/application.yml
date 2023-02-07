@@ -61,11 +61,6 @@ spring:
     password: postgres
     driverClassName: org.postgresql.Driver
 
-  redis:
-    port: 6379
-    host: "localhost"
-    database: 3
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     defer-datasource-initialization: true
@@ -82,9 +77,9 @@ spring:
       project-id: ras-rm-dev
 
 redis:
-  host: "localhost"
+  host: "redis-master"
   port: 6379
-  database: 1
+  database: 3
 
 sample-svc:
   request-sample-unit-count-path: /samples/count

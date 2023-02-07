@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -11,11 +12,23 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Configuration
 public class RedisConfig {
 
+  private final String redisHostname;
+  private final int redisPort;
+  private final int redisDB;
+
+  public RedisConfig(@Value("${redis.host}") String redisHostname,
+      @Value("${redis.port}") int redisPort,
+      @Value("${redis.database}") int redisDB) {
+    this.redisHostname = redisHostname;
+    this.redisPort = redisPort;
+    this.redisDB = redisDB;
+  }
+
   @Bean(name = "jedisConnectionFactory")
   public JedisConnectionFactory jedisConnectionFactory() {
     RedisStandaloneConfiguration configuration =
-        new RedisStandaloneConfiguration("redis-master", 6379);
-    configuration.setDatabase(3);
+        new RedisStandaloneConfiguration(redisHostname, redisPort);
+    configuration.setDatabase(redisDB);
     JedisClientConfiguration jedisClientConfiguration =
         JedisClientConfiguration.builder().usePooling().build();
     JedisConnectionFactory factory =
