@@ -16,7 +16,7 @@ public class RedisUtil<o> {
     this.redisTemplate = redisTemplate;
   }
 
-  public void deleteValue(String key) {
-    redisTemplate.delete(key);
+  public Boolean deleteValue(String key) {
+    return redisTemplate.delete(key);
   }
 }

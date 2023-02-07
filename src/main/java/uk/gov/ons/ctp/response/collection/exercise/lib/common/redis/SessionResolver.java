@@ -16,7 +16,9 @@ public class SessionResolver {
 
   public void removeActiveSession(String surveyId) {
     String key = REDIS_KEY_PREFIX + surveyId;
-    redisUtil.deleteValue(key);
-    log.with("survey_id", surveyId).info("Cache invalidated");
+    Boolean cacheInvalidated = redisUtil.deleteValue(key);
+    if (Boolean.TRUE.equals(cacheInvalidated)) {
+      log.with("survey_id", surveyId).info("Cache invalidated");
+    }
   }
 }
