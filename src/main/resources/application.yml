@@ -79,7 +79,7 @@ spring:
 redis:
   host: "redis-master"
   port: 6379
-  database: 3
+  db: 3
 
 sample-svc:
   request-sample-unit-count-path: /samples/count
