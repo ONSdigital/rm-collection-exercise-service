@@ -20,7 +20,7 @@ public class RedisConfig {
   public RedisConfig(
       @Value("${redis.host}") String redisHostname,
       @Value("${redis.port}") int redisPort,
-      @Value("${redis.database}") int redisDB) {
+      @Value("${redis.db}") int redisDB) {
     this.redisHostname = redisHostname;
     this.redisPort = redisPort;
     this.redisDB = redisDB;
