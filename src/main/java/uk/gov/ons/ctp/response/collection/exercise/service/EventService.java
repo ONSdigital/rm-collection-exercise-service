@@ -19,7 +19,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
-import uk.gov.ons.ctp.response.collection.exercise.lib.common.redis.SessionResolver;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.redis.EndpointCacheDataDeleter;
 import uk.gov.ons.ctp.response.collection.exercise.message.CollectionExerciseEndPublisher;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CaseActionEventStatusDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
@@ -120,7 +120,7 @@ public class EventService {
 
   @Autowired private CollectionExerciseEndPublisher collectionExerciseEndPublisher;
 
-  @Autowired private SessionResolver sessionResolver;
+  @Autowired private EndpointCacheDataDeleter endpointCacheDataDeleter;
 
   public Event createEvent(EventDTO eventDto) throws CTPException {
     UUID collexId = eventDto.getCollectionExerciseId();
@@ -400,7 +400,7 @@ public class EventService {
                   collectionExerciseService.transitionCollectionExercise(
                       event.getCollectionExercise(),
                       CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
-                  sessionResolver.removeActiveSession(
+                  endpointCacheDataDeleter.deleteFrontstageExerciseByIdKey(
                       String.valueOf(event.getCollectionExercise().getSurveyId()));
                   log.with("collection_exercise_id", event.getCollectionExercise().getId())
                       .info("Set collection exercise to LIVE state");
