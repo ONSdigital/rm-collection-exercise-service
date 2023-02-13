@@ -17,6 +17,7 @@ public class EndpointCacheDataDeleter {
 
   @Autowired private RedisUtil<Object> redisUtil;
 
+  // catch exception to prevent errors from redis preventing go live
   public void deleteFrontstageExerciseByIdKey(String surveyId) {
     String key = REDIS_KEY_PREFIX + surveyId;
     try {
