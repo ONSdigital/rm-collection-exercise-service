@@ -76,6 +76,11 @@ spring:
     gcp:
       project-id: ras-rm-dev
 
+redis:
+  host: "redis-master"
+  port: 6379
+  db: 3
+
 sample-svc:
   request-sample-unit-count-path: /samples/count
   request-sample-units-for-sample-summary-path: /samples/{sampleSummaryId}/sampleunits
