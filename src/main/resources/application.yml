@@ -65,7 +65,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
       default_schema: collectionexercise
 
     # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true, and we weren't setting
