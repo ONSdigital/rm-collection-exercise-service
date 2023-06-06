@@ -13,7 +13,7 @@
         <springboot.version>2.6.6</springboot.version>
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.13.2</jackson.version>
-        <jackson.databind.version>2.13.2.2</jackson.databind.version>
+        <jackson.databind.version>2.13.4.2</jackson.databind.version>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
