@@ -33,7 +33,7 @@ public class ExceptionHandlerTests {
   public void setUp() {
     this.exceptionHandler = new ExceptionHandler();
     this.ctpException = new CTPException(EXCEPTION_FAULT, EXCEPTION_MESSAGE);
-    this.messageDto = new CollectionInstrumentMessageDTO(COLLECTION_EXERCISE_ID.toString());
+    this.messageDto = new CollectionInstrumentMessageDTO("ADD", COLLECTION_EXERCISE_ID.toString());
   }
 
   /** Given null exception When handleException Then empty response */
