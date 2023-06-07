@@ -13,7 +13,7 @@ public class CollectionInstrumentMessageDTO {
   @JsonCreator
   public CollectionInstrumentMessageDTO(
       @JsonProperty("action") String action,
-      @JsonProperty("exercise_id") String exerciseId{
+      @JsonProperty("exercise_id") String exerciseId){
     this.action = action;
     this.exerciseId = UUID.fromString(exerciseId);
   }
