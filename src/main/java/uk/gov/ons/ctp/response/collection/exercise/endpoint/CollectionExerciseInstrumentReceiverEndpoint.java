@@ -31,7 +31,7 @@ public class CollectionExerciseInstrumentReceiverEndpoint {
   public ResponseEntity<?> collectionInstrumentLink(
       final @RequestBody @Valid CollectionInstrumentMessageDTO collectionInstrumentMessageDTO)
       throws CTPException {
-    log.with(collectionInstrumentMessageDTO.getExerciseId()).info("Consumed message");
+    log.with(collectionInstrumentMessageDTO.getExerciseId()).info("Collection instruments updated");
 
     UUID collectionExerciseId = collectionInstrumentMessageDTO.getExerciseId();
 
