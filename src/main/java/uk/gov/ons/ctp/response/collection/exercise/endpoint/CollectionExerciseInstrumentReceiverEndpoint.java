@@ -32,7 +32,7 @@ public class CollectionExerciseInstrumentReceiverEndpoint {
       final @RequestBody @Valid CollectionInstrumentMessageDTO collectionInstrumentMessageDTO)
       throws CTPException {
     log.with(collectionInstrumentMessageDTO.getExerciseId())
-        .info("Collection instruments changed for exercise");
+        .info("Consumed message");
 
     UUID collectionExerciseId = collectionInstrumentMessageDTO.getExerciseId();
 

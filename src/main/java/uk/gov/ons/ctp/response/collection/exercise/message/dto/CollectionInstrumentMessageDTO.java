@@ -9,15 +9,12 @@ import lombok.Data;
 public class CollectionInstrumentMessageDTO {
   private String action;
   private UUID exerciseId;
-  private UUID instrumentId;
 
   @JsonCreator
   public CollectionInstrumentMessageDTO(
       @JsonProperty("action") String action,
-      @JsonProperty("exercise_id") String exerciseId,
-      @JsonProperty("instrument_id") String instrumentId) {
+      @JsonProperty("exercise_id") String exerciseId{
     this.action = action;
     this.exerciseId = UUID.fromString(exerciseId);
-    this.instrumentId = UUID.fromString(instrumentId);
   }
 }
