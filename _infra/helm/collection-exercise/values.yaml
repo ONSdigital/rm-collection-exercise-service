@@ -71,3 +71,5 @@ gcp:
   sampleSummaryActivationTopic: sample-summary-activation
   collectionExerciseEndTopic: collection-exercise-end
   collectionExerciseEventStatusUpdateSubscription: collection-exercise-event-update
+  supplementaryDataServiceTopic: supplementary-data-service-topic
+  supplementaryDataServiceSubscription: supplementary-data-service-subscription

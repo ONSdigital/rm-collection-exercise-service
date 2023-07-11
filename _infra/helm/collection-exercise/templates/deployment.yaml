@@ -243,6 +243,10 @@ spec:
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
           - name: GCP_COLLECTIONEXERCISEENDTOPIC
             value: "{{ .Values.gcp.collectionExerciseEndTopic }}"
+          - name: GCP_SUPPLEMENTARYDATASERVICETOPIC
+            value: "{{ .Values.gcp.supplementaryDataServiceSubscription }}"
+          - name: GCP_SUPPLEMENTARYDATASERVICESUBSCRIPTION
+            value: "{{ .Values.gcp.supplementaryDataServiceTopic }}"
           - name: REDIS_HOST
             {{- if .Values.database.managedRedis }}
             valueFrom:
