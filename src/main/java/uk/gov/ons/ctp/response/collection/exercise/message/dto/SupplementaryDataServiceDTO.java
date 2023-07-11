@@ -1,12 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.message.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,5 +22,4 @@ public class SupplementaryDataServiceDTO {
   String schemaVersion;
   String filename;
   List<String> formTypes;
-
 }

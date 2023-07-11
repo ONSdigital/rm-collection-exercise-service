@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.message;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
@@ -12,8 +14,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDataServiceDTO;
-
-import static net.logstash.logback.argument.StructuredArguments.kv;
 
 @Component
 public class SupplementaryDataServiceReceiver {

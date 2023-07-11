@@ -275,11 +275,9 @@ public class CollectionExerciseApplication {
   public PubSubInboundChannelAdapter supplementaryDataServiceInboundChannelAdapter(
       @Qualifier("supplementaryDataServiceMessageChannel") MessageChannel inputChannel,
       PubSubTemplate pubSubTemplate) {
-    String subscriptionName =
-        appConfig.getGcp().getSupplementaryDataServiceSubscription();
+    String subscriptionName = appConfig.getGcp().getSupplementaryDataServiceSubscription();
     log.info(
-        "Application is listening for Supplementary Data Service requests {}",
-        subscriptionName);
+        "Application is listening for Supplementary Data Service requests {}", subscriptionName);
     PubSubInboundChannelAdapter adapter =
         new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
     adapter.setOutputChannel(inputChannel);
