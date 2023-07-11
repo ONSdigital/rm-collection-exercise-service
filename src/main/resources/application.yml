@@ -162,3 +162,5 @@ gcp:
   sampleSummaryActivationTopic: "sample-summary-activation"
   collectionExerciseEndTopic: "collect-exercise-end"
   collectionExerciseEventStatusUpdateSubscription: "event_status_subscription"
+  supplementaryDataServiceTopic: "supplementary-data-service-topic"
+  supplementaryDataServiceSubscription: "supplementary-data-service-subscription"
