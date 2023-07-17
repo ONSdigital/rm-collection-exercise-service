@@ -18,9 +18,10 @@ import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryData
 @Component
 public class SupplementaryDataServiceReceiver {
   private static final Logger log = LoggerFactory.getLogger(SupplementaryDataServiceReceiver.class);
+
   @Autowired private ObjectMapper objectMapper;
 
-  @ServiceActivator(inputChannel = "collectionExerciseEventStatusUpdateChannel")
+  @ServiceActivator(inputChannel = "supplementaryDataServiceMessageChannel")
   public void messageReceiver(
       Message message,
       @Header(GcpPubSubHeaders.ORIGINAL_MESSAGE) BasicAcknowledgeablePubsubMessage pubSubMsg) {
