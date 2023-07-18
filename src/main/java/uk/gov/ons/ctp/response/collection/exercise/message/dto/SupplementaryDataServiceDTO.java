@@ -29,7 +29,7 @@ public class SupplementaryDataServiceDTO {
   String title;
 
   @JsonProperty("sds_published_at") // "sds_published_at": "2023-07-17T14:46:36Z"
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
   Date sdsPublishedAt;
 
   @JsonProperty("total_reporting_units") // "total_reporting_units": 2
