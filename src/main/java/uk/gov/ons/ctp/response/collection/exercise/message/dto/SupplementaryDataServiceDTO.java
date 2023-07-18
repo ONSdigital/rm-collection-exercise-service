@@ -3,14 +3,13 @@ package uk.gov.ons.ctp.response.collection.exercise.message.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
