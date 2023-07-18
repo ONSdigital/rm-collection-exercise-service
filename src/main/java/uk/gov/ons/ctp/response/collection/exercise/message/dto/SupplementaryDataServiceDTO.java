@@ -3,12 +3,14 @@ package uk.gov.ons.ctp.response.collection.exercise.message.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Date;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -45,5 +47,5 @@ public class SupplementaryDataServiceDTO {
   String filename;
 
   @JsonProperty("dataset_id") // "dataset_id": "b9a87999-fcc0-4085-979f-06390fb5dddd"
-  String datasetId;
+  UUID datasetId;
 }
