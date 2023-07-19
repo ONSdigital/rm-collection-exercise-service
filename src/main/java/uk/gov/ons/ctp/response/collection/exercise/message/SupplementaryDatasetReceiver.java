@@ -29,17 +29,17 @@ public class SupplementaryDatasetReceiver {
         "Receiving message ID from PubSub {}",
         kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
     String payload = new String((byte[]) message.getPayload());
-    log.with("payload", payload).info("New request for Supplementary Data Service");
+    log.with("payload", payload).info("New message from Supplementary Data Service");
     try {
-      log.info("Mapping payload to Supplementary Data Service object");
+      log.info("Mapping payload to Supplementary Dataset object");
       SupplementaryDatasetDTO supplementaryDatasetDTO =
           objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
-      log.info("Mapping successful {}", supplementaryDatasetDTO);
+      log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (JsonProcessingException e) {
       log.with(e)
           .error(
-              "Something went wrong while processing message received from PubSub for updating action event status",
+              "Error processing message from Supplementary Data Service",
               e);
       pubSubMsg.nack();
     }
