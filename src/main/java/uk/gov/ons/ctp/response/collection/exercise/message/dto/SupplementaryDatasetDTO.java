@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SupplementaryDataServiceDTO {
+public class SupplementaryDatasetDTO {
 
   @JsonProperty("survey_id") // "survey_id": "012"
   String surveyId;

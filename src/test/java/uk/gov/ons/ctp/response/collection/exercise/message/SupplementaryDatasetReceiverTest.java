@@ -16,12 +16,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.messaging.Message;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDataServiceDTO;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SupplementaryDataServiceReceiverTest {
+public class SupplementaryDatasetReceiverTest {
   @Mock private ObjectMapper objectMapper;
-  @InjectMocks private SupplementaryDataServiceReceiver supplementaryDataServiceReceiver;
+  @InjectMocks private SupplementaryDatasetReceiver supplementaryDatasetReceiver;
 
   @Test
   public void testMessageAcked() throws Exception {
@@ -30,21 +30,21 @@ public class SupplementaryDataServiceReceiverTest {
     String periodId = "2023";
     List<String> formTypes = Arrays.asList("0017", "0023", "0099");
 
-    SupplementaryDataServiceDTO supplementaryDataServiceDTO = new SupplementaryDataServiceDTO();
+    SupplementaryDatasetDTO supplementaryDatasetDTO = new SupplementaryDatasetDTO();
 
-    supplementaryDataServiceDTO.setDatasetId(datasetId);
-    supplementaryDataServiceDTO.setSurveyId(surveyId);
-    supplementaryDataServiceDTO.setPeriodId(periodId);
-    supplementaryDataServiceDTO.setFormTypes(formTypes);
+    supplementaryDatasetDTO.setDatasetId(datasetId);
+    supplementaryDatasetDTO.setSurveyId(surveyId);
+    supplementaryDatasetDTO.setPeriodId(periodId);
+    supplementaryDatasetDTO.setFormTypes(formTypes);
 
     ObjectMapper mapper = new ObjectMapper();
-    String payload = mapper.writeValueAsString(supplementaryDataServiceDTO);
+    String payload = mapper.writeValueAsString(supplementaryDatasetDTO);
 
     Message message = Mockito.mock(Message.class);
 
     when(message.getPayload()).thenReturn(payload.getBytes());
-    when(objectMapper.readValue(payload, SupplementaryDataServiceDTO.class))
-        .thenReturn(supplementaryDataServiceDTO);
+    when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
+        .thenReturn(supplementaryDatasetDTO);
 
     BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
         Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
@@ -55,7 +55,7 @@ public class SupplementaryDataServiceReceiverTest {
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
 
-    supplementaryDataServiceReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
+    supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
 
     verify(basicAcknowledgeablePubsubMessage, times(1)).ack();
   }
@@ -67,20 +67,20 @@ public class SupplementaryDataServiceReceiverTest {
     String periodId = "2023";
     List<String> formTypes = Arrays.asList("0017", "0023", "0099");
 
-    SupplementaryDataServiceDTO supplementaryDataServiceDTO = new SupplementaryDataServiceDTO();
+    SupplementaryDatasetDTO supplementaryDatasetDTO = new SupplementaryDatasetDTO();
 
-    supplementaryDataServiceDTO.setDatasetId(datasetId);
-    supplementaryDataServiceDTO.setSurveyId(surveyId);
-    supplementaryDataServiceDTO.setPeriodId(periodId);
-    supplementaryDataServiceDTO.setFormTypes(formTypes);
+    supplementaryDatasetDTO.setDatasetId(datasetId);
+    supplementaryDatasetDTO.setSurveyId(surveyId);
+    supplementaryDatasetDTO.setPeriodId(periodId);
+    supplementaryDatasetDTO.setFormTypes(formTypes);
 
     ObjectMapper mapper = new ObjectMapper();
-    String payload = mapper.writeValueAsString(supplementaryDataServiceDTO);
+    String payload = mapper.writeValueAsString(supplementaryDatasetDTO);
 
     Message message = Mockito.mock(Message.class);
 
     when(message.getPayload()).thenReturn(payload.getBytes());
-    when(objectMapper.readValue(payload, SupplementaryDataServiceDTO.class))
+    when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
         .thenThrow(new JsonProcessingException("Error occurred") {});
 
     BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
@@ -92,7 +92,7 @@ public class SupplementaryDataServiceReceiverTest {
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
 
-    supplementaryDataServiceReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
+    supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
 
     verify(basicAcknowledgeablePubsubMessage, times(1)).nack();
   }

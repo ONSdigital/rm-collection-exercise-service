@@ -13,11 +13,11 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDataServiceDTO;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 
 @Component
-public class SupplementaryDataServiceReceiver {
-  private static final Logger log = LoggerFactory.getLogger(SupplementaryDataServiceReceiver.class);
+public class SupplementaryDatasetReceiver {
+  private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetReceiver.class);
 
   @Autowired private ObjectMapper objectMapper;
 
@@ -32,9 +32,9 @@ public class SupplementaryDataServiceReceiver {
     log.with("payload", payload).info("New request for Supplementary Data Service");
     try {
       log.info("Mapping payload to Supplementary Data Service object");
-      SupplementaryDataServiceDTO supplementaryDataServiceDTO =
-          objectMapper.readValue(payload, SupplementaryDataServiceDTO.class);
-      log.info("Mapping successful {}", supplementaryDataServiceDTO);
+      SupplementaryDatasetDTO supplementaryDatasetDTO =
+          objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
+      log.info("Mapping successful {}", supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (JsonProcessingException e) {
       log.with(e)
