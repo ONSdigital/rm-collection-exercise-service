@@ -37,10 +37,7 @@ public class SupplementaryDatasetReceiver {
       log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (JsonProcessingException e) {
-      log.with(e)
-          .error(
-              "Error processing message from Supplementary Data Service",
-              e);
+      log.with(e).error("Error processing message from Supplementary Data Service", e);
       pubSubMsg.nack();
     }
   }
