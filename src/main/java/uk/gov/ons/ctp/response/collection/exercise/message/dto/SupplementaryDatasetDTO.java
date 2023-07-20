@@ -17,34 +17,34 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SupplementaryDatasetDTO {
 
-  @JsonProperty("survey_id") // "survey_id": "012"
+  @JsonProperty("survey_id")
   String surveyId;
 
-  @JsonProperty("period_id") // "period_id": "2013"
+  @JsonProperty("period_id")
   String periodId;
 
-  @JsonProperty("form_types") // "form_types": ["0017","0123","0001"]
+  @JsonProperty("form_types")
   List<String> formTypes;
 
-  @JsonProperty("title") // "title": "A dataset version 4 for survey 2012 period 2013"
+  @JsonProperty("title")
   String title;
 
-  @JsonProperty("sds_published_at") // "sds_published_at": "2023-07-17T14:46:36Z"
+  @JsonProperty("sds_published_at")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
   Date sdsPublishedAt;
 
-  @JsonProperty("total_reporting_units") // "total_reporting_units": 2
+  @JsonProperty("total_reporting_units")
   int totalReportingUnits;
 
-  @JsonProperty("schema_version") // "schema_version": "v1.0.0"
+  @JsonProperty("schema_version")
   String schemaVersion;
 
-  @JsonProperty("sds_dataset_version") // "sds_dataset_version": 4
+  @JsonProperty("sds_dataset_version")
   int sdsDatasetVersion;
 
-  @JsonProperty("filename") // "filename": "373d9a77-2ee5-4c1f-a6dd-8d07b0ea9793.json"
+  @JsonProperty("filename")
   String filename;
 
-  @JsonProperty("dataset_id") // "dataset_id": "b9a87999-fcc0-4085-979f-06390fb5dddd"
+  @JsonProperty("dataset_id")
   UUID datasetId;
 }
