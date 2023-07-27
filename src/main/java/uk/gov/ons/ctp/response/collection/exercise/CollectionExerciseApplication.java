@@ -270,4 +270,23 @@ public class CollectionExerciseApplication {
   public MessageChannel collectionExerciseEventStatusUpdateChannel() {
     return new PublishSubscribeChannel();
   }
+
+  @Bean
+  public PubSubInboundChannelAdapter supplementaryDataServiceInboundChannelAdapter(
+      @Qualifier("supplementaryDataServiceMessageChannel") MessageChannel inputChannel,
+      PubSubTemplate pubSubTemplate) {
+    String subscriptionName = appConfig.getGcp().getSupplementaryDataServiceSubscription();
+    log.info(
+        "Application is listening for Supplementary Data Service requests {}", subscriptionName);
+    PubSubInboundChannelAdapter adapter =
+        new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
+    adapter.setOutputChannel(inputChannel);
+    adapter.setAckMode(AckMode.MANUAL);
+    return adapter;
+  }
+
+  @Bean
+  public MessageChannel supplementaryDataServiceMessageChannel() {
+    return new PublishSubscribeChannel();
+  }
 }
