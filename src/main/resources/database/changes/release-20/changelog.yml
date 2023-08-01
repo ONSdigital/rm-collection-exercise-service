@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 20.1
+      author: Jacob Harrison
+      changes:
+        - sqlFile:
+            comment: Add supplementary table
+            path: supplementary_dataset_table.sql
+            relativeToChangelogFile: true
+            splitStatements: true
