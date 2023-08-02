@@ -9,8 +9,7 @@ import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatas
 @Service
 public class SupplementaryDatasetService {
 
-  @Autowired
-  private SupplementaryDatasetRepository supplementaryDatasetRepository;
+  @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
 
   private void addSupplementaryDatasetEntity(SupplementaryDatasetDTO supplementaryDatasetDTO) {
 
@@ -20,7 +19,5 @@ public class SupplementaryDatasetService {
     supplementaryDatasetEntity.setFormTypes(supplementaryDatasetDTO.getFormTypes());
 
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
-
   }
-
 }

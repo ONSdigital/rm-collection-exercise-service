@@ -1,17 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
-import java.util.List;
-import java.util.UUID;
 
 /** Domain model object. */
 @Entity
@@ -26,8 +23,8 @@ public class SupplementaryDatasetEntity {
       name = "eventseq_gen",
       strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
       parameters = {
-          @Parameter(name = "sequence_name", value = "collectionexercise.supplementarydatasetidseq"),
-          @Parameter(name = "increment_size", value = "1")
+        @Parameter(name = "sequence_name", value = "collectionexercise.supplementarydatasetidseq"),
+        @Parameter(name = "increment_size", value = "1")
       })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventseq_gen")
   @Column(name = "id")
@@ -42,5 +39,4 @@ public class SupplementaryDatasetEntity {
   @Type(type = "jsonb")
   @Column(name = "attributes")
   List<String> formTypes;
-
 }
