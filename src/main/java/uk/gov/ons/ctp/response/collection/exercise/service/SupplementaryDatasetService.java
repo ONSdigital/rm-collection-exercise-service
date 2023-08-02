@@ -16,7 +16,7 @@ public class SupplementaryDatasetService {
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
 
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
-    supplementaryDatasetEntity.setFormTypes(supplementaryDatasetDTO.getFormTypes());
+    supplementaryDatasetEntity.setFormTypes(supplementaryDatasetDTO.getFormTypes().toString());
 
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
   }

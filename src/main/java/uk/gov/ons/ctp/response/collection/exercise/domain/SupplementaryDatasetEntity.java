@@ -1,16 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.util.List;
 import java.util.UUID;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.sourceforge.cobertura.CoverageIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 
 /** Domain model object. */
+@CoverageIgnore
 @Entity
 @Data
 @AllArgsConstructor
@@ -36,7 +36,6 @@ public class SupplementaryDatasetEntity {
   @Column(name = "supplementary_dataset_id")
   UUID supplementaryDatasetId;
 
-  @Type(type = "jsonb")
   @Column(name = "attributes")
-  List<String> formTypes;
+  String formTypes;
 }
