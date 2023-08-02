@@ -1,18 +1,41 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import java.util.stream.Collectors;
+
+import com.godaddy.logging.Logger;
+import com.godaddy.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
+import uk.gov.ons.ctp.response.collection.exercise.message.SupplementaryDatasetReceiver;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
+
+import javax.transaction.Transactional;
 
 @Service
 public class SupplementaryDatasetService {
 
+  @Autowired private CollectionExerciseService collectionExerciseService;
   @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
 
+  private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetReceiver.class);
+
+  @Transactional
   public SupplementaryDatasetEntity addSupplementaryDatasetEntity(SupplementaryDatasetDTO supplementaryDatasetDTO) {
+
+    int collectionExercisePk = collectionExerciseService.findCollectionExercise(supplementaryDatasetDTO.getPeriodId(),
+        supplementaryDatasetDTO.getSurveyId()).getExercisePK();
+
+    if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
+      log.info("A supplementary dataset with exerciseFk has been found.");
+      log.info("Deleting supplementary dataset.");
+
+      supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
+
+      log.info("Supplementary dataset has been removed.");
+    }
 
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
 

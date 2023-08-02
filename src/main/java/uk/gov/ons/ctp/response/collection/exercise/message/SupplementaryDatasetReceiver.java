@@ -14,12 +14,15 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
 @Component
 public class SupplementaryDatasetReceiver {
   private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetReceiver.class);
 
   @Autowired private ObjectMapper objectMapper;
+
+  @Autowired private SupplementaryDatasetService supplementaryDatasetService;
 
   @ServiceActivator(inputChannel = "supplementaryDataServiceMessageChannel")
   public void messageReceiver(
@@ -35,6 +38,7 @@ public class SupplementaryDatasetReceiver {
       SupplementaryDatasetDTO supplementaryDatasetDTO =
           objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
       log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
+      supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (JsonProcessingException e) {
       log.with(e).error("Error processing message from Supplementary Data Service", e);
