@@ -12,7 +12,8 @@ public class SupplementaryDatasetService {
 
   @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
 
-  public SupplementaryDatasetEntity addSupplementaryDatasetEntity(SupplementaryDatasetDTO supplementaryDatasetDTO) {
+  public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
+      SupplementaryDatasetDTO supplementaryDatasetDTO) {
 
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
 
