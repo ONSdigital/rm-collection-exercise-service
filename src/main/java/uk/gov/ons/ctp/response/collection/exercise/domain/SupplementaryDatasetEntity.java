@@ -17,7 +17,7 @@ import org.hibernate.annotations.Type;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "supplementarydataset", schema = "supplementarydataset")
+@Table(name = "supplementarydataset", schema = "collectionexercise")
 public class SupplementaryDatasetEntity {
 
   @Id
