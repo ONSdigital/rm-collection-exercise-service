@@ -9,7 +9,7 @@ CREATE TABLE supplementarydataset
 );
 
 -- -- Add foreign key
-ALTER TABLE ONLY supplementarydataset ADD CONSTRAINT exercise_FK_fkey FOREIGN KEY (exercise_FK) REFERENCES collectionexercise(exercise_PK);
+-- ALTER TABLE ONLY supplementarydataset ADD CONSTRAINT exercise_FK_fkey FOREIGN KEY (exercise_FK) REFERENCES collectionexercise(exercise_PK);
 
 -- Add index
 ALTER TABLE supplementarydataset ADD CONSTRAINT supplementarydataset_id_uuid_key UNIQUE (id);

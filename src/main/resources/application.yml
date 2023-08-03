@@ -39,6 +39,7 @@ spring:
     liquibase-schema: collectionexercise
     url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
+    default-schema: collectionexercise
     enabled: false
 
   security:
@@ -51,8 +52,10 @@ spring:
 
   # In spring boot 2.5, schema.sql isn't run on startup anymore.  Because the schema isn't created in the first liquibase
   # patch; we're overriding how it's handled, so it can be created if it's not there.
-  sql.init.mode: always
-  sql.init.continue-on-error: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
 
   datasource:
     url: jdbc:postgresql://localhost:5432/ras
@@ -61,16 +64,13 @@ spring:
     driverClassName: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
-    open-in-view: true
-    show-sql: false
     defer-datasource-initialization: true
+    open-in-view: true
     hibernate:
-      ddl-auto: update
-      default_schema: collectionexercise
+      ddl-auto: none
+      default_schema: sample
     properties:
       hibernate:
-        hbm2ddl:
-          schema_filter_provider: uk.gov.ons.ctp.response.collection.exercise.CustomProvider
         id:
           new_generator_mappings: false
 

@@ -99,12 +99,13 @@ public class CollectionExerciseApplication {
     liquibase.setChangeLog(liquibaseProperties.getChangeLog());
     liquibase.setContexts(liquibaseProperties.getContexts());
     liquibase.setDataSource(getDataSource(liquibaseProperties));
-    liquibase.setDefaultSchema(liquibaseProperties.getDefaultSchema());
     liquibase.setDropFirst(liquibaseProperties.isDropFirst());
     liquibase.setShouldRun(true);
     liquibase.setLabels(liquibaseProperties.getLabels());
     liquibase.setChangeLogParameters(liquibaseProperties.getParameters());
     liquibase.setLiquibaseSchema(liquibaseProperties.getLiquibaseSchema());
+    liquibase.setDatabaseChangeLogLockTable(liquibaseProperties.getDatabaseChangeLogLockTable());
+    liquibase.setDatabaseChangeLogTable(liquibaseProperties.getDatabaseChangeLogTable());
     return new CustomSpringLiquibase(liquibase);
   }
 
