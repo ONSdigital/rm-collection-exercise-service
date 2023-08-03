@@ -1,13 +1,13 @@
 Set schema 'collectionexercise';
 
 -- Sequence: supplementarydatasetidseq
-DROP SEQUENCE supplementarydatasetidseq;
-CREATE SEQUENCE IF NOT EXISTS supplementarydatasetidseq
-  INCREMENT 1
-  MINVALUE 1
-  MAXVALUE 999999999999
-  START 1
-  CACHE 1;
+-- DROP SEQUENCE supplementarydatasetidseq;
+-- CREATE SEQUENCE IF NOT EXISTS supplementarydatasetidseq
+--   INCREMENT 1
+--   MINVALUE 1
+--   MAXVALUE 999999999999
+--   START 1
+--   CACHE 1;
 
 -- Table: supplementarydataset
 CREATE TABLE supplementarydataset
@@ -17,7 +17,7 @@ CREATE TABLE supplementarydataset
   attributes character varying(100) NOT NULL
 );
 
--- Add foreign key
+-- -- Add foreign key
 ALTER TABLE ONLY supplementarydataset ADD CONSTRAINT exercise_FK_fkey FOREIGN KEY (exercise_FK) REFERENCES collectionexercise(exercise_PK);
 
 -- Add index
