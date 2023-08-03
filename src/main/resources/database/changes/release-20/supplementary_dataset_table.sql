@@ -1,8 +1,8 @@
 Set schema 'collectionexercise';
 
 -- Sequence: supplementarydatasetidseq
--- DROP SEQUENCE supplementarydatasetidseq;
-CREATE SEQUENCE supplementarydatasetidseq
+DROP SEQUENCE supplementarydatasetidseq;
+CREATE SEQUENCE IF NOT EXISTS supplementarydatasetidseq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 999999999999
@@ -22,3 +22,9 @@ ALTER TABLE ONLY supplementarydataset ADD CONSTRAINT exercise_FK_fkey FOREIGN KE
 
 -- Add index
 ALTER TABLE supplementarydataset ADD CONSTRAINT supplementarydataset_id_uuid_key UNIQUE (id);
+
+-- unique supplementary_dataset_id
+ALTER TABLE supplementarydataset ADD CONSTRAINT supplementary_dataset_id_unique UNIQUE (supplementary_dataset_id);
+
+-- unique exercise_FK
+ALTER TABLE supplementarydataset ADD CONSTRAINT exercise_FK_unique UNIQUE (exercise_FK);

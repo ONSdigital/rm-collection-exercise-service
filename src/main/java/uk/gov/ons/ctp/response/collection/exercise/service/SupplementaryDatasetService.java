@@ -7,7 +7,6 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
-import uk.gov.ons.ctp.response.collection.exercise.message.SupplementaryDatasetReceiver;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
 
@@ -17,7 +16,7 @@ public class SupplementaryDatasetService {
   @Autowired private CollectionExerciseService collectionExerciseService;
   @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
 
-  private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetReceiver.class);
+  private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetService.class);
 
   @Transactional
   public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
@@ -40,6 +39,8 @@ public class SupplementaryDatasetService {
 
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
 
+
+    supplementaryDatasetEntity.setExerciseFK(collectionExercisePk);
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
     supplementaryDatasetEntity.setFormTypes(
         supplementaryDatasetDTO

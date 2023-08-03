@@ -26,21 +26,20 @@ management:
 
 spring:
   main:
-    # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
     allow-bean-definition-overriding: true
     allow-circular-references: true
+  output:
+    ansi:
+      enabled: never
+    # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
 
   liquibase:
     user: postgres
     password: postgres
-    default-schema: collectionexercise
+    liquibase-schema: collectionexercise
     url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
     enabled: false
-
-  output:
-    ansi:
-      enabled: never
 
   security:
     user:
@@ -60,17 +59,20 @@ spring:
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+    open-in-view: true
+    show-sql: false
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
       default_schema: collectionexercise
-
-    # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true, and we weren't setting
-    # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
-    open-in-view: true
+    properties:
+      hibernate:
+        hbm2ddl:
+          schema_filter_provider: uk.gov.ons.ctp.response.collection.exercise.CustomProvider
+        id:
+          new_generator_mappings: false
 
   cloud:
     gcp:

@@ -104,6 +104,7 @@ public class CollectionExerciseApplication {
     liquibase.setShouldRun(true);
     liquibase.setLabels(liquibaseProperties.getLabels());
     liquibase.setChangeLogParameters(liquibaseProperties.getParameters());
+    liquibase.setLiquibaseSchema(liquibaseProperties.getLiquibaseSchema());
     return new CustomSpringLiquibase(liquibase);
   }
 
