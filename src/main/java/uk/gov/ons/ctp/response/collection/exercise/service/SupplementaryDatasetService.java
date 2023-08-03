@@ -1,17 +1,15 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import java.util.stream.Collectors;
-
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.message.SupplementaryDatasetReceiver;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
-
-import javax.transaction.Transactional;
 
 @Service
 public class SupplementaryDatasetService {
@@ -22,10 +20,14 @@ public class SupplementaryDatasetService {
   private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetReceiver.class);
 
   @Transactional
-  public SupplementaryDatasetEntity addSupplementaryDatasetEntity(SupplementaryDatasetDTO supplementaryDatasetDTO) {
+  public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
+      SupplementaryDatasetDTO supplementaryDatasetDTO) {
 
-    int collectionExercisePk = collectionExerciseService.findCollectionExercise(supplementaryDatasetDTO.getPeriodId(),
-        supplementaryDatasetDTO.getSurveyId()).getExercisePK();
+    int collectionExercisePk =
+        collectionExerciseService
+            .findCollectionExercise(
+                supplementaryDatasetDTO.getPeriodId(), supplementaryDatasetDTO.getSurveyId())
+            .getExercisePK();
 
     if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
       log.info("A supplementary dataset with exerciseFk has been found.");
