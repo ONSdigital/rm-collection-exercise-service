@@ -39,7 +39,6 @@ public class SupplementaryDatasetService {
 
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
 
-
     supplementaryDatasetEntity.setExerciseFK(collectionExercisePk);
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
     supplementaryDatasetEntity.setFormTypes(
