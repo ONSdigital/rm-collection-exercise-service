@@ -22,13 +22,13 @@ public class SupplementaryDatasetEntity {
 
   @Id
   @GenericGenerator(
-      name = "eventseq_gen",
+      name = "supplementarydatasetid_seq",
       strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
       parameters = {
         @Parameter(name = "sequence_name", value = "collectionexercise.supplementarydatasetidseq"),
         @Parameter(name = "increment_size", value = "1")
       })
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventseq_gen")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "supplementarydatasetid_seq")
   @Column(name = "id")
   private Integer id;
 
