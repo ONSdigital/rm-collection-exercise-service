@@ -13,6 +13,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
@@ -42,6 +43,9 @@ public class SupplementaryDatasetReceiver {
       pubSubMsg.ack();
     } catch (JsonProcessingException e) {
       log.with(e).error("Error processing message from Supplementary Data Service", e);
+      pubSubMsg.nack();
+    } catch (CTPException e) {
+      log.with(e).error("Error proccessing message from Collecction Exercise Service", e);
       pubSubMsg.nack();
     }
   }

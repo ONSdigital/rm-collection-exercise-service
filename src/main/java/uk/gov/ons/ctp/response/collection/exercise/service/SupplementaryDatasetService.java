@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
 
@@ -20,21 +22,32 @@ public class SupplementaryDatasetService {
 
   @Transactional
   public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
-      SupplementaryDatasetDTO supplementaryDatasetDTO) {
+      SupplementaryDatasetDTO supplementaryDatasetDTO) throws CTPException {
 
-    log.info("SurveyId = " + supplementaryDatasetDTO.getSurveyId());
-    log.info("PeriodId = " + supplementaryDatasetDTO.getPeriodId());
-    int collectionExercisePk =
-        collectionExerciseService
-            .findCollectionExercise(
-                supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId())
-            .getExercisePK();
+    CollectionExercise collectionExercise =
+        collectionExerciseService.findCollectionExercise(
+            supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId());
+
+    if (collectionExercise == null) {
+      throw new CTPException(
+          CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "Cannot find collection exercise for surveyRef={} and period={}",
+              supplementaryDatasetDTO.getSurveyId(),
+              supplementaryDatasetDTO.getPeriodId()));
+    }
+
+    int collectionExercisePk = collectionExercise.getExercisePK();
 
     if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
       log.info("A supplementary dataset with exerciseFk has been found.");
       log.info("Deleting supplementary dataset.");
 
-      supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
+      try {
+        supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
+      } catch (Exception e) {
+        log.error("Exception thrown: " + e.getMessage());
+      }
 
       log.info("Supplementary dataset has been removed.");
     }
