@@ -1,5 +1,5 @@
 -- Sequence: supplementarydatasetidseq
-CREATE SEQUENCE supplementarydatasetidseq
+CREATE SEQUENCE collectionexercise.supplementarydatasetidseq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
