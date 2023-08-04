@@ -46,9 +46,13 @@ public class SupplementaryDatasetService {
       try {
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
       } catch (Exception e) {
-        log.error("Exception thrown: " + e.getMessage());
+        throw new CTPException(
+            CTPException.Fault.RESOURCE_NOT_FOUND,
+            String.format(
+                "Cannot find supplementary data link in database for surveyRef={} and period={}. Unable to delete",
+                supplementaryDatasetDTO.getSurveyId(),
+                supplementaryDatasetDTO.getPeriodId()));
       }
-
       log.info("Supplementary dataset has been removed.");
     }
 
