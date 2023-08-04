@@ -9,3 +9,13 @@ databaseChangeLog:
             path: supplementary_dataset_table.sql
             relativeToChangelogFile: true
             splitStatements: true
+
+  - changeSet:
+      id: 20.2
+      author: Steve Scorfield
+      changes:
+        - sqlFile:
+            comment: Add sequence to table
+            path: suplementary_data_set_seq.sql
+            relativeToChangelogFile: true
+            splitStatements: true
