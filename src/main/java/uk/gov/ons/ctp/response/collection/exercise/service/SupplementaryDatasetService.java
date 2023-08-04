@@ -22,10 +22,12 @@ public class SupplementaryDatasetService {
   public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
       SupplementaryDatasetDTO supplementaryDatasetDTO) {
 
+    log.info("SurveyId = " + supplementaryDatasetDTO.getSurveyId());
+    log.info("PeriodId = " + supplementaryDatasetDTO.getPeriodId());
     int collectionExercisePk =
         collectionExerciseService
             .findCollectionExercise(
-                supplementaryDatasetDTO.getPeriodId(), supplementaryDatasetDTO.getSurveyId())
+                supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId())
             .getExercisePK();
 
     if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
