@@ -42,16 +42,11 @@ public class SupplementaryDatasetService {
     if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
       log.info("A supplementary dataset with exerciseFk has been found.");
       log.info("Deleting supplementary dataset.");
-
+      log.info("CollectionExercisePk is " + collectionExercisePk);
       try {
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
       } catch (Exception e) {
-        throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND,
-            String.format(
-                "Cannot find supplementary data link in database for surveyRef={} and period={}. Unable to delete",
-                supplementaryDatasetDTO.getSurveyId(),
-                supplementaryDatasetDTO.getPeriodId()));
+        log.error(e.getMessage());
       }
       log.info("Supplementary dataset has been removed.");
     }
