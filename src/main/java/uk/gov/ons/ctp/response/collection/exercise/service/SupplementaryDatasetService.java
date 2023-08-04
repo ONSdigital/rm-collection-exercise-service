@@ -43,11 +43,9 @@ public class SupplementaryDatasetService {
       log.info("A supplementary dataset with exerciseFk has been found.");
       log.info("Deleting supplementary dataset.");
       log.info("CollectionExercisePk is " + collectionExercisePk);
-      try {
-        supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
-      } catch (Exception e) {
-        log.error(e.getMessage());
-      }
+
+      supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
+
       log.info("Supplementary dataset has been removed.");
     }
 
