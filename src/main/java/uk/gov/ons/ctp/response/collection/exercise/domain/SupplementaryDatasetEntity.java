@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sourceforge.cobertura.CoverageIgnore;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Parameter;
 
 /** Domain model object. */
 @CoverageIgnore
@@ -19,15 +21,14 @@ import org.hibernate.annotations.Type;
 public class SupplementaryDatasetEntity {
 
   @Id
-  //  @GenericGenerator(
-  //      name = "eventseq_gen",
-  //      strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-  //      parameters = {
-  //        @Parameter(name = "sequence_name", value =
-  // "collectionexercise.supplementarydatasetidseq"),
-  //        @Parameter(name = "increment_size", value = "1")
-  //      })
-  //  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventseq_gen")
+  @GenericGenerator(
+      name = "eventseq_gen",
+      strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+      parameters = {
+        @Parameter(name = "sequence_name", value = "collectionexercise.supplementarydatasetidseq"),
+        @Parameter(name = "increment_size", value = "1")
+      })
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventseq_gen")
   @Column(name = "id")
   private Integer id;
 
