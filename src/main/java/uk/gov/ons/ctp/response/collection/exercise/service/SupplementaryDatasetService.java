@@ -32,7 +32,7 @@ public class SupplementaryDatasetService {
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format(
-              "Cannot find collection exercise for surveyRef=%s and period=%s",
+              "Cannot find collection exercise for surveyRef={} and period={}",
               supplementaryDatasetDTO.getSurveyId(),
               supplementaryDatasetDTO.getPeriodId()));
     }
