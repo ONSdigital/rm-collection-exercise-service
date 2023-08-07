@@ -32,7 +32,7 @@ public class SupplementaryDatasetService {
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format(
-              "Cannot find collection exercise for surveyRef={} and period={}",
+              "Cannot find collection exercise for surveyRef=%s and period=%s",
               supplementaryDatasetDTO.getSurveyId(),
               supplementaryDatasetDTO.getPeriodId()));
     }
@@ -42,7 +42,6 @@ public class SupplementaryDatasetService {
     if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
       log.info("A supplementary dataset with exerciseFk has been found.");
       log.info("Deleting supplementary dataset.");
-      log.info("CollectionExercisePk is " + collectionExercisePk);
 
       supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
 
@@ -61,6 +60,8 @@ public class SupplementaryDatasetService {
             .collect(Collectors.toMap(s -> s, s -> s)));
 
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
+
+    log.info("Successfully saved the supplementary dataset to the database");
 
     return supplementaryDatasetEntity;
   }
