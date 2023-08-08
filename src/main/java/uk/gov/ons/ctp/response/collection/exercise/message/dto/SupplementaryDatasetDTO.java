@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class SupplementaryDatasetDTO {
   String periodId;
 
   @JsonProperty("form_types")
-  List<String> formTypes;
+  Map<String, String> formTypes;
 
   @JsonProperty("title")
   String title;
