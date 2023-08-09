@@ -1,12 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.util.HashMap;
-import java.util.Map;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,8 +21,7 @@ public class SupplementaryDatasetService {
 
   @Transactional
   public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
-      SupplementaryDatasetDTO supplementaryDatasetDTO)
-      throws CTPException, JsonProcessingException {
+      SupplementaryDatasetDTO supplementaryDatasetDTO) throws CTPException {
 
     CollectionExercise collectionExercise =
         collectionExerciseService.findCollectionExercise(
@@ -57,19 +51,14 @@ public class SupplementaryDatasetService {
 
     supplementaryDatasetEntity.setExerciseFK(collectionExercisePk);
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
-    ObjectMapper mapper = new ObjectMapper();
-    TypeReference<HashMap<String, String>> typeRef =
-        new TypeReference<HashMap<String, String>>() {};
-    Map<String, String> formTypes =
-        mapper.readValue(supplementaryDatasetDTO.getFormTypes().toString(), typeRef);
-
-    supplementaryDatasetEntity.setFormTypes(formTypes);
-    //    supplementaryDatasetEntity.setFormTypes(
-    //        supplementaryDatasetDTO
-    //            .getFormTypes()
-    //            .stream()
-    //            .distinct()
-    //            .collect(Collectors.toMap(s -> s, s -> s)));
+    supplementaryDatasetEntity.setFormTypes(supplementaryDatasetDTO.getFormTypes());
+    //    supplementaryDatasetEntity.setFormTypes(formTypes);
+    //        supplementaryDatasetEntity.setFormTypes(
+    //            supplementaryDatasetDTO
+    //                .getFormTypes()
+    //                .stream()
+    //                .distinct()
+    //                .collect(Collectors.toMap(s -> s, s -> s)));
 
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
 

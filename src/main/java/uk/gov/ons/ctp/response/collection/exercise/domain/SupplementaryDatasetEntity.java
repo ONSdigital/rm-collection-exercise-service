@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,5 +40,5 @@ public class SupplementaryDatasetEntity {
 
   @Column(name = "attributes")
   @Type(type = "jsonb")
-  private Map<String, String> formTypes;
+  private List<String> formTypes;
 }
