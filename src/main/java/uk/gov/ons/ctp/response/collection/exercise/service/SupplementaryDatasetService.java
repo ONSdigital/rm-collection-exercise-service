@@ -51,7 +51,7 @@ public class SupplementaryDatasetService {
 
     supplementaryDatasetEntity.setExerciseFK(collectionExercisePk);
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
-    supplementaryDatasetEntity.setFormTypes(supplementaryDatasetDTO.getFormTypes());
+    supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
     //    supplementaryDatasetEntity.setFormTypes(formTypes);
     //        supplementaryDatasetEntity.setFormTypes(
     //            supplementaryDatasetDTO
