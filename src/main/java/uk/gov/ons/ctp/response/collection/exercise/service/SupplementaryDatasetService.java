@@ -20,43 +20,38 @@ public class SupplementaryDatasetService {
   private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetService.class);
 
   @Transactional
-  public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
-      SupplementaryDatasetDTO supplementaryDatasetDTO) throws CTPException {
+  public void addSupplementaryDatasetEntity(SupplementaryDatasetDTO supplementaryDatasetDTO)
+      throws CTPException {
 
     CollectionExercise collectionExercise =
         collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId());
 
-    if (collectionExercise == null) {
+    try {
+      if (collectionExercise != null) {
+        if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK())) {
+          log.info("A supplementary dataset with exerciseFk has been found.");
+          supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
+          log.info("Supplementary dataset has been removed.");
+          saveNewSupplementaryDataset(collectionExercise, supplementaryDatasetDTO);
+        } else {
+          saveNewSupplementaryDataset(collectionExercise, supplementaryDatasetDTO);
+        }
+      }
+    } catch (Exception e) {
       throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format(
-              "Cannot find collection exercise for surveyRef={} and period={}",
-              supplementaryDatasetDTO.getSurveyId(),
-              supplementaryDatasetDTO.getPeriodId()));
+          CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset {}", e);
     }
+  }
 
-    int collectionExercisePk = collectionExercise.getExercisePK();
-
-    if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercisePk)) {
-      log.info("A supplementary dataset with exerciseFk has been found.");
-      log.info("Deleting supplementary dataset.");
-
-      supplementaryDatasetRepository.deleteByExerciseFK(collectionExercisePk);
-
-      log.info("Supplementary dataset has been removed.");
-    }
-
+  private void saveNewSupplementaryDataset(
+      CollectionExercise collectionExercise, SupplementaryDatasetDTO supplementaryDatasetDTO) {
+    // do we want to update rather than deleting old record
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
-
-    supplementaryDatasetEntity.setExerciseFK(collectionExercisePk);
+    supplementaryDatasetEntity.setExerciseFK(collectionExercise.getExercisePK());
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
     supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
-
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
-
     log.info("Successfully saved the supplementary dataset to the database");
-
-    return supplementaryDatasetEntity;
   }
 }
