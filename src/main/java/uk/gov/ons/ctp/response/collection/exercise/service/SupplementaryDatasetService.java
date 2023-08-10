@@ -20,31 +20,27 @@ public class SupplementaryDatasetService {
   private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetService.class);
 
   @Transactional
-  public void addSupplementaryDatasetEntity(SupplementaryDatasetDTO supplementaryDatasetDTO)
-      throws CTPException {
+  public SupplementaryDatasetEntity addSupplementaryDatasetEntity(
+      SupplementaryDatasetDTO supplementaryDatasetDTO) throws CTPException {
 
     CollectionExercise collectionExercise =
         collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId());
 
     try {
-      if (collectionExercise != null) {
-        if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK())) {
-          log.info("A supplementary dataset with exerciseFk has been found.");
-          supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
-          log.info("Supplementary dataset has been removed.");
-          saveNewSupplementaryDataset(collectionExercise, supplementaryDatasetDTO);
-        } else {
-          saveNewSupplementaryDataset(collectionExercise, supplementaryDatasetDTO);
-        }
+      if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK())) {
+        log.info("A supplementary dataset with exerciseFk has been found.");
+        supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
+        log.info("Supplementary dataset has been removed.");
       }
+      return saveNewSupplementaryDataset(collectionExercise, supplementaryDatasetDTO);
     } catch (Exception e) {
       throw new CTPException(
           CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset {}", e);
     }
   }
 
-  private void saveNewSupplementaryDataset(
+  private SupplementaryDatasetEntity saveNewSupplementaryDataset(
       CollectionExercise collectionExercise, SupplementaryDatasetDTO supplementaryDatasetDTO) {
     // do we want to update rather than deleting old record
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
@@ -53,5 +49,6 @@ public class SupplementaryDatasetService {
     supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
     log.info("Successfully saved the supplementary dataset to the database");
+    return supplementaryDatasetEntity;
   }
 }

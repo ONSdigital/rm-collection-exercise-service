@@ -64,8 +64,7 @@ public class SupplementaryDatasetServiceTest {
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(null);
 
-    SupplementaryDatasetEntity supplementaryDatasetEntity =
-        supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+    supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
   }
 
   private SupplementaryDatasetDTO createSupplementaryDataSet() {

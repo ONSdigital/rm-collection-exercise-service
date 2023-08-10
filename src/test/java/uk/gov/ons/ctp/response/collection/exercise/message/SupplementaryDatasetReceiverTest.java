@@ -65,9 +65,6 @@ public class SupplementaryDatasetReceiverTest {
 
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
 
-    when(supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO))
-        .thenReturn(supplementaryDatasetEntity);
-
     supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
 
     verify(basicAcknowledgeablePubsubMessage, times(1)).ack();
