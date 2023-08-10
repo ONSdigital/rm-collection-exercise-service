@@ -5,7 +5,7 @@ CREATE TABLE supplementarydataset
 ( id         int NOT NULL,
   exercise_FK int NOT NULL,
   supplementary_dataset_id  uuid NOT NULL,
-  attributes character varying(100) NOT NULL
+  attributes character varying(10000) NOT NULL
 );
 
 -- -- Add foreign key
