@@ -36,8 +36,8 @@ public class SupplementaryDatasetServiceTest {
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(collectionExercise);
 
-    SupplementaryDatasetEntity supplementaryDatasetEntity =
-        supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+    SupplementaryDatasetEntity supplementaryDatasetEntity = createSupplementaryDatasetEntity();
+    supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
 
     verify(supplementaryDatasetRepository, times(1)).save(supplementaryDatasetEntity);
   }
@@ -50,8 +50,9 @@ public class SupplementaryDatasetServiceTest {
     when(supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK()))
         .thenReturn(true);
 
-    SupplementaryDatasetEntity supplementaryDatasetEntity =
-        supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+    SupplementaryDatasetEntity supplementaryDatasetEntity = createSupplementaryDatasetEntity();
+
+    supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
 
     verify(supplementaryDatasetRepository, times(1))
         .deleteByExerciseFK(collectionExercise.getExercisePK());
@@ -93,5 +94,14 @@ public class SupplementaryDatasetServiceTest {
     collectionExercise.setExercisePK(1);
 
     return collectionExercise;
+  }
+
+  private SupplementaryDatasetEntity createSupplementaryDatasetEntity() {
+    // do we want to update rather than deleting old record
+    SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
+    supplementaryDatasetEntity.setExerciseFK(collectionExercise.getExercisePK());
+    supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
+    supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
+    return supplementaryDatasetEntity;
   }
 }
