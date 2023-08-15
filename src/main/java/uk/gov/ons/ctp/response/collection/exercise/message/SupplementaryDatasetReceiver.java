@@ -40,7 +40,7 @@ public class SupplementaryDatasetReceiver {
       supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (CTPException e) {
-      log.error("Error processing message from Collection Exercise Service", e);
+      log.error("Error processing message from Supplementary Dataset Service", e);
       pubSubMsg.nack();
     }
   }
