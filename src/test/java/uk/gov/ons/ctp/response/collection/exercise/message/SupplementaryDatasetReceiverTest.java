@@ -47,7 +47,7 @@ public class SupplementaryDatasetReceiverTest {
     supplementaryDatasetEntity.setSupplementaryDatasetId(datasetId);
     ObjectMapper mapper = new ObjectMapper();
     String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
-    supplementaryDatasetEntity.setEntireMessage(
+    supplementaryDatasetEntity.setSupplementaryDatasetJson(
         Map.of(
             supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
             supplementaryDatasetJson));

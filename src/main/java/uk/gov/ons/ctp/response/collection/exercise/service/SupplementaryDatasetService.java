@@ -53,7 +53,7 @@ public class SupplementaryDatasetService {
 
     try {
       String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
-      supplementaryDatasetEntity.setEntireMessage(
+      supplementaryDatasetEntity.setSupplementaryDatasetJson(
           Map.of(
               supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
               supplementaryDatasetJson));

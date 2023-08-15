@@ -106,7 +106,7 @@ public class SupplementaryDatasetServiceTest {
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
     ObjectMapper mapper = new ObjectMapper();
     String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
-    supplementaryDatasetEntity.setEntireMessage(
+    supplementaryDatasetEntity.setSupplementaryDatasetJson(
         Map.of(
             supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
             supplementaryDatasetJson));

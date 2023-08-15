@@ -40,5 +40,5 @@ public class SupplementaryDatasetEntity {
 
   @Column(name = "attributes")
   @Type(type = "io.hypersistence.utils.hibernate.type.json.JsonType")
-  private Map<String, String> entireMessage;
+  private Map<String, String> supplementaryDatasetJson;
 }
