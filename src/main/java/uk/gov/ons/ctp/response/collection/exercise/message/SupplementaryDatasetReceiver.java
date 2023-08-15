@@ -36,17 +36,25 @@ public class SupplementaryDatasetReceiver {
     log.with("payload", payload).info("New message from Supplementary Data Service");
     try {
       log.info("Mapping payload to Supplementary Dataset object");
-      SupplementaryDatasetDTO supplementaryDatasetDTO =
-          objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
-      log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
+      SupplementaryDatasetDTO supplementaryDatasetDTO = createSupplementaryDatasetDTO(payload);
       supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
       pubSubMsg.ack();
-    } catch (JsonProcessingException e) {
-      log.with(e).error("Error processing message from Supplementary Data Service", e);
-      pubSubMsg.nack();
     } catch (CTPException e) {
-      log.with(e).error("Error processing message from Collection Exercise Service", e);
+      log.error("Error processing message from Collection Exercise Service", e);
       pubSubMsg.nack();
     }
+  }
+
+  private SupplementaryDatasetDTO createSupplementaryDatasetDTO(String payload)
+      throws CTPException {
+    SupplementaryDatasetDTO supplementaryDatasetDTO;
+    try {
+      supplementaryDatasetDTO = objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
+    } catch (JsonProcessingException e) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST, "Could not map message to Supplementary Dataset DTO");
+    }
+    log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
+    return supplementaryDatasetDTO;
   }
 }

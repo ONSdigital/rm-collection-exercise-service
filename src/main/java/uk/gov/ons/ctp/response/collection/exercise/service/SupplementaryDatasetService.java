@@ -31,18 +31,23 @@ public class SupplementaryDatasetService {
 
     try {
       if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK())) {
-        log.info("A supplementary dataset with exerciseFk has been found.");
+        log.info(
+            "Supplementary dataset with exerciseFk {} has been found.",
+            collectionExercise.getExercisePK());
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
         log.info("Supplementary dataset has been removed.");
       }
-      saveNewSupplementaryDataset(collectionExercise, supplementaryDatasetDTO);
+      SupplementaryDatasetEntity supplementaryDatasetEntity =
+          createSupplementaryDatasetEntity(collectionExercise, supplementaryDatasetDTO);
+      supplementaryDatasetRepository.save(supplementaryDatasetEntity);
+      log.info("Successfully saved the supplementary dataset to the database");
     } catch (Exception e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset {}", e);
+          CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset", e);
     }
   }
 
-  private void saveNewSupplementaryDataset(
+  private SupplementaryDatasetEntity createSupplementaryDatasetEntity(
       CollectionExercise collectionExercise, SupplementaryDatasetDTO supplementaryDatasetDTO)
       throws CTPException {
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
@@ -53,11 +58,12 @@ public class SupplementaryDatasetService {
     try {
       String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
       supplementaryDatasetEntity.setSupplementaryDatasetJson(supplementaryDatasetJson);
+      return supplementaryDatasetEntity;
     } catch (JsonProcessingException e) {
       throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset {}", e);
+          CTPException.Fault.SYSTEM_ERROR,
+          "Something went wrong deserializing Supplementary Dataset",
+          e);
     }
-    supplementaryDatasetRepository.save(supplementaryDatasetEntity);
-    log.info("Successfully saved the supplementary dataset to the database");
   }
 }
