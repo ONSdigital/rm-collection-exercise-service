@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import java.util.Map;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,10 +52,7 @@ public class SupplementaryDatasetService {
 
     try {
       String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
-      supplementaryDatasetEntity.setSupplementaryDatasetJson(
-          Map.of(
-              supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
-              supplementaryDatasetJson));
+      supplementaryDatasetEntity.setSupplementaryDatasetJson(supplementaryDatasetJson);
     } catch (JsonProcessingException e) {
       throw new CTPException(
           CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset {}", e);

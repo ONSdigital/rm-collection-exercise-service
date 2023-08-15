@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,10 +105,7 @@ public class SupplementaryDatasetServiceTest {
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
     ObjectMapper mapper = new ObjectMapper();
     String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
-    supplementaryDatasetEntity.setSupplementaryDatasetJson(
-        Map.of(
-            supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
-            supplementaryDatasetJson));
+    supplementaryDatasetEntity.setSupplementaryDatasetJson(supplementaryDatasetJson);
     return supplementaryDatasetEntity;
   }
 }
