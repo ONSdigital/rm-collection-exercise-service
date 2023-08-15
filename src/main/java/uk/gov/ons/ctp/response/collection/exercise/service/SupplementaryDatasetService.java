@@ -42,13 +42,11 @@ public class SupplementaryDatasetService {
 
   private void saveNewSupplementaryDataset(
       CollectionExercise collectionExercise, SupplementaryDatasetDTO supplementaryDatasetDTO) {
-    // do we want to update rather than deleting old record
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
     supplementaryDatasetEntity.setExerciseFK(collectionExercise.getExercisePK());
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
     supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
     log.info("Successfully saved the supplementary dataset to the database");
-    //    return supplementaryDatasetEntity;
   }
 }
