@@ -45,7 +45,7 @@ public class SupplementaryDatasetReceiver {
       log.with(e).error("Error processing message from Supplementary Data Service", e);
       pubSubMsg.nack();
     } catch (CTPException e) {
-      log.with(e).error("Error proccessing message from Collecction Exercise Service", e);
+      log.with(e).error("Error processing message from Collection Exercise Service", e);
       pubSubMsg.nack();
     }
   }

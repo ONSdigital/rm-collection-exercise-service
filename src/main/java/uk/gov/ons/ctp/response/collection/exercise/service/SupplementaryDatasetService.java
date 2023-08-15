@@ -1,7 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import java.util.Map;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,11 +44,23 @@ public class SupplementaryDatasetService {
   }
 
   private void saveNewSupplementaryDataset(
-      CollectionExercise collectionExercise, SupplementaryDatasetDTO supplementaryDatasetDTO) {
+      CollectionExercise collectionExercise, SupplementaryDatasetDTO supplementaryDatasetDTO)
+      throws CTPException {
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
     supplementaryDatasetEntity.setExerciseFK(collectionExercise.getExercisePK());
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
-    supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
+    ObjectMapper mapper = new ObjectMapper();
+
+    try {
+      String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
+      supplementaryDatasetEntity.setEntireMessage(
+          Map.of(
+              supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
+              supplementaryDatasetJson));
+    } catch (JsonProcessingException e) {
+      throw new CTPException(
+          CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset {}", e);
+    }
     supplementaryDatasetRepository.save(supplementaryDatasetEntity);
     log.info("Successfully saved the supplementary dataset to the database");
   }

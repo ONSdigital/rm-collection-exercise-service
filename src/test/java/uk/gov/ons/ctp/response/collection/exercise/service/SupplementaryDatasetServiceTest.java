@@ -4,7 +4,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +34,7 @@ public class SupplementaryDatasetServiceTest {
   SupplementaryDatasetDTO supplementaryDatasetDTO = createSupplementaryDataSet();
 
   @Test
-  public void testSaveSupplementaryDataset() throws CTPException {
+  public void testSaveSupplementaryDataset() throws CTPException, JsonProcessingException {
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(collectionExercise);
@@ -43,7 +46,7 @@ public class SupplementaryDatasetServiceTest {
   }
 
   @Test
-  public void testDeleteAndSaveSupplementaryDataset() throws CTPException {
+  public void testDeleteAndSaveSupplementaryDataset() throws CTPException, JsonProcessingException {
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(collectionExercise);
@@ -96,12 +99,17 @@ public class SupplementaryDatasetServiceTest {
     return collectionExercise;
   }
 
-  private SupplementaryDatasetEntity createSupplementaryDatasetEntity() {
-    // do we want to update rather than deleting old record
+  private SupplementaryDatasetEntity createSupplementaryDatasetEntity()
+      throws JsonProcessingException {
     SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
     supplementaryDatasetEntity.setExerciseFK(collectionExercise.getExercisePK());
     supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetDTO.getDatasetId());
-    supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
+    ObjectMapper mapper = new ObjectMapper();
+    String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
+    supplementaryDatasetEntity.setEntireMessage(
+        Map.of(
+            supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
+            supplementaryDatasetJson));
     return supplementaryDatasetEntity;
   }
 }

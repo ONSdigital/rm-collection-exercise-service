@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.pubsub.v1.PubsubMessage;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,9 +45,13 @@ public class SupplementaryDatasetReceiverTest {
 
     supplementaryDatasetEntity.setId(1);
     supplementaryDatasetEntity.setSupplementaryDatasetId(datasetId);
-    supplementaryDatasetEntity.setEntireMessage(supplementaryDatasetDTO);
-
     ObjectMapper mapper = new ObjectMapper();
+    String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
+    supplementaryDatasetEntity.setEntireMessage(
+        Map.of(
+            supplementaryDatasetEntity.getSupplementaryDatasetId().toString(),
+            supplementaryDatasetJson));
+
     String payload = mapper.writeValueAsString(supplementaryDatasetDTO);
 
     Message message = Mockito.mock(Message.class);
