@@ -12,7 +12,7 @@
     <properties>
         <springboot.version>2.6.6</springboot.version>
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
-        <jackson.version>2.13.2</jackson.version>
+        <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -202,6 +202,11 @@
             <version>6.1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <version>3.5.0</version>
+        </dependency>
 
         <!-- Third party end -->
 

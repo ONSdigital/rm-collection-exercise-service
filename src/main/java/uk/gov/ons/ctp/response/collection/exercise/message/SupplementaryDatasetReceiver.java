@@ -13,13 +13,17 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
 @Component
 public class SupplementaryDatasetReceiver {
   private static final Logger log = LoggerFactory.getLogger(SupplementaryDatasetReceiver.class);
 
   @Autowired private ObjectMapper objectMapper;
+
+  @Autowired private SupplementaryDatasetService supplementaryDatasetService;
 
   @ServiceActivator(inputChannel = "supplementaryDataServiceMessageChannel")
   public void messageReceiver(
@@ -32,13 +36,25 @@ public class SupplementaryDatasetReceiver {
     log.with("payload", payload).info("New message from Supplementary Data Service");
     try {
       log.info("Mapping payload to Supplementary Dataset object");
-      SupplementaryDatasetDTO supplementaryDatasetDTO =
-          objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
-      log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
+      SupplementaryDatasetDTO supplementaryDatasetDTO = createSupplementaryDatasetDTO(payload);
+      supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
       pubSubMsg.ack();
-    } catch (JsonProcessingException e) {
-      log.with(e).error("Error processing message from Supplementary Data Service", e);
+    } catch (CTPException e) {
+      log.error("Error processing message from Supplementary Dataset Service", e);
       pubSubMsg.nack();
     }
+  }
+
+  private SupplementaryDatasetDTO createSupplementaryDatasetDTO(String payload)
+      throws CTPException {
+    SupplementaryDatasetDTO supplementaryDatasetDTO;
+    try {
+      supplementaryDatasetDTO = objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
+    } catch (JsonProcessingException e) {
+      throw new CTPException(
+          CTPException.Fault.BAD_REQUEST, "Could not map message to Supplementary Dataset DTO");
+    }
+    log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
+    return supplementaryDatasetDTO;
   }
 }

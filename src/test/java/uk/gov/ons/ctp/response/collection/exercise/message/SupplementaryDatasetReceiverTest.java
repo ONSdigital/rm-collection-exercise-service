@@ -16,12 +16,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.messaging.Message;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SupplementaryDatasetReceiverTest {
   @Mock private ObjectMapper objectMapper;
   @InjectMocks private SupplementaryDatasetReceiver supplementaryDatasetReceiver;
+  @Mock private SupplementaryDatasetService supplementaryDatasetService;
 
   @Test
   public void testMessageAcked() throws Exception {
@@ -37,7 +40,14 @@ public class SupplementaryDatasetReceiverTest {
     supplementaryDatasetDTO.setPeriodId(periodId);
     supplementaryDatasetDTO.setFormTypes(formTypes);
 
+    SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
+
+    supplementaryDatasetEntity.setId(1);
+    supplementaryDatasetEntity.setSupplementaryDatasetId(datasetId);
     ObjectMapper mapper = new ObjectMapper();
+    String supplementaryDatasetJson = mapper.writeValueAsString(supplementaryDatasetDTO);
+    supplementaryDatasetEntity.setSupplementaryDatasetJson(supplementaryDatasetJson);
+
     String payload = mapper.writeValueAsString(supplementaryDatasetDTO);
 
     Message message = Mockito.mock(Message.class);
@@ -53,6 +63,7 @@ public class SupplementaryDatasetReceiverTest {
 
     String messageId = "123";
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
+
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
 
     supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
@@ -90,6 +101,7 @@ public class SupplementaryDatasetReceiverTest {
 
     String messageId = "123";
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
+
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
 
     supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
