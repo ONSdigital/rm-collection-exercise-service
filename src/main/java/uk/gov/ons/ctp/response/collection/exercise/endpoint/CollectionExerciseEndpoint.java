@@ -68,7 +68,6 @@ public class CollectionExerciseEndpoint {
   private CollectionExerciseService collectionExerciseService;
   private EventService eventService;
   private SampleService sampleService;
-
   private SupplementaryDatasetService supplementaryDatasetService;
   private SurveySvcClient surveyService;
 
@@ -79,11 +78,12 @@ public class CollectionExerciseEndpoint {
       CollectionExerciseService collectionExerciseService,
       SurveySvcClient surveyService,
       SampleService sampleService,
-      EventService eventService) {
+      EventService eventService, SupplementaryDatasetService supplementaryDatasetService) {
     this.collectionExerciseService = collectionExerciseService;
     this.surveyService = surveyService;
     this.sampleService = sampleService;
     this.eventService = eventService;
+    this.supplementaryDatasetService = supplementaryDatasetService;
   }
 
   /**
@@ -735,10 +735,10 @@ public class CollectionExerciseEndpoint {
           .error("Error retrieving events for collection exercise Id", e);
     }
 
-    if (supplementaryDatasetService.existsByExerciseFK(collectionExercise.getExercisePK())) {
-      SupplementaryDatasetEntity supplementaryDatasetEntity =
-          supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
+    SupplementaryDatasetEntity supplementaryDatasetEntity =
+        supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
 
+    if (supplementaryDatasetEntity != null) {
       collectionExerciseDTO.setSupplementaryDatasetJson(
           supplementaryDatasetEntity.getSupplementaryDatasetJson());
     }
