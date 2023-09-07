@@ -41,6 +41,7 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ObjectConverter;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateFormat;
@@ -50,6 +51,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
 /** The REST endpoint controller for Collection Exercises. */
 @RestController
@@ -66,6 +68,8 @@ public class CollectionExerciseEndpoint {
   private CollectionExerciseService collectionExerciseService;
   private EventService eventService;
   private SampleService sampleService;
+
+  private SupplementaryDatasetService supplementaryDatasetService;
   private SurveySvcClient surveyService;
 
   @Autowired private AppConfig appConfig;
@@ -729,6 +733,14 @@ public class CollectionExerciseEndpoint {
     } catch (CTPException e) {
       log.with("collection_exercise_id", collectionExercise.getId())
           .error("Error retrieving events for collection exercise Id", e);
+    }
+
+    SupplementaryDatasetEntity supplementaryDatasetEntity =
+        supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
+
+    if (supplementaryDatasetEntity != null) {
+      collectionExerciseDTO.setSupplementaryDatasetJson(
+          supplementaryDatasetEntity.getSupplementaryDatasetJson());
     }
 
     return collectionExerciseDTO;

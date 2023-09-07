@@ -66,4 +66,8 @@ public class SupplementaryDatasetService {
           e);
     }
   }
+
+  public SupplementaryDatasetEntity findSupplementaryDataset(int exercise_pk) {
+    return supplementaryDatasetRepository.findByExerciseFK(exercise_pk);
+  }
 }
