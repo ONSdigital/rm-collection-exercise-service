@@ -735,10 +735,10 @@ public class CollectionExerciseEndpoint {
           .error("Error retrieving events for collection exercise Id", e);
     }
 
-    SupplementaryDatasetEntity supplementaryDatasetEntity =
-        supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
+    if (supplementaryDatasetService.existsByExerciseFK(collectionExercise.getExercisePK())) {
+      SupplementaryDatasetEntity supplementaryDatasetEntity =
+          supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
 
-    if (supplementaryDatasetEntity != null) {
       collectionExerciseDTO.setSupplementaryDatasetJson(
           supplementaryDatasetEntity.getSupplementaryDatasetJson());
     }
