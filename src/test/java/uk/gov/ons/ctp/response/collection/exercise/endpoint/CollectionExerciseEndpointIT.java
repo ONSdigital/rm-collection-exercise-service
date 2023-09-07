@@ -1,67 +1,67 @@
-//package uk.gov.ons.ctp.response.collection.exercise.endpoint;
+// package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 //
-//import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-//import static com.github.tomakehurst.wiremock.client.WireMock.get;
-//import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-//import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-//import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-//import static org.hamcrest.CoreMatchers.is;
-//import static org.junit.Assert.*;
+// import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+// import static com.github.tomakehurst.wiremock.client.WireMock.get;
+// import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+// import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+// import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+// import static org.hamcrest.CoreMatchers.is;
+// import static org.junit.Assert.*;
 //
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
-//import com.github.tomakehurst.wiremock.stubbing.Scenario;
-//import com.godaddy.logging.Logger;
-//import com.godaddy.logging.LoggerFactory;
-//import com.mashape.unirest.http.HttpResponse;
-//import java.io.IOException;
-//import java.io.InputStream;
-//import java.io.StringWriter;
-//import java.nio.charset.StandardCharsets;
-//import java.time.Instant;
-//import java.time.temporal.ChronoUnit;
-//import java.util.Arrays;
-//import java.util.Calendar;
-//import java.util.Date;
-//import java.util.List;
-//import java.util.Random;
-//import java.util.UUID;
-//import java.util.stream.Collectors;
-//import javax.xml.bind.JAXBContext;
-//import javax.xml.bind.JAXBException;
-//import org.apache.commons.io.IOUtils;
-//import org.apache.commons.lang3.StringUtils;
-//import org.apache.commons.lang3.time.DateUtils;
-//import org.apache.commons.lang3.tuple.Pair;
-//import org.junit.*;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.web.server.LocalServerPort;
-//import org.springframework.test.annotation.DirtiesContext;
-//import org.springframework.test.context.ActiveProfiles;
-//import org.springframework.test.context.ContextConfiguration;
-//import org.springframework.test.context.junit4.rules.SpringClassRule;
-//import org.springframework.test.context.junit4.rules.SpringMethodRule;
-//import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
-//import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-//import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
-//import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
-//import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
-//import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
-//import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
-//import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
-//import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
-//import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
-//import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
-//import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
-//import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+// import com.github.tomakehurst.wiremock.stubbing.Scenario;
+// import com.godaddy.logging.Logger;
+// import com.godaddy.logging.LoggerFactory;
+// import com.mashape.unirest.http.HttpResponse;
+// import java.io.IOException;
+// import java.io.InputStream;
+// import java.io.StringWriter;
+// import java.nio.charset.StandardCharsets;
+// import java.time.Instant;
+// import java.time.temporal.ChronoUnit;
+// import java.util.Arrays;
+// import java.util.Calendar;
+// import java.util.Date;
+// import java.util.List;
+// import java.util.Random;
+// import java.util.UUID;
+// import java.util.stream.Collectors;
+// import javax.xml.bind.JAXBContext;
+// import javax.xml.bind.JAXBException;
+// import org.apache.commons.io.IOUtils;
+// import org.apache.commons.lang3.StringUtils;
+// import org.apache.commons.lang3.time.DateUtils;
+// import org.apache.commons.lang3.tuple.Pair;
+// import org.junit.*;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.context.SpringBootTest;
+// import org.springframework.boot.web.server.LocalServerPort;
+// import org.springframework.test.annotation.DirtiesContext;
+// import org.springframework.test.context.ActiveProfiles;
+// import org.springframework.test.context.ContextConfiguration;
+// import org.springframework.test.context.junit4.rules.SpringClassRule;
+// import org.springframework.test.context.junit4.rules.SpringMethodRule;
+// import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
+// import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
+// import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleSummaryDTO;
+// import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.SampleUnit;
+// import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+// import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+// import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+// import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+// import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
+// import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
+// import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
+// import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+// import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 //
-///** A class to contain integration tests for the collection exercise service */
-//@ContextConfiguration
-//@ActiveProfiles("test")
-//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-//public class CollectionExerciseEndpointIT {
+/// ** A class to contain integration tests for the collection exercise service */
+// @ContextConfiguration
+// @ActiveProfiles("test")
+// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+// public class CollectionExerciseEndpointIT {
 //  private static final Logger log = LoggerFactory.getLogger(CollectionExerciseEndpointIT.class);
 //
 //  private static final UUID TEST_SURVEY_ID =
@@ -109,7 +109,8 @@
 //  }
 //
 //  /**
-//   * Method to test construction of a collection exercise via the API - Create a collection exercise
+//   * Method to test construction of a collection exercise via the API - Create a collection
+// exercise
 //   * - Get the collection exercise from the returned Location header - Assert the collection
 //   * exercise fields match those expected
 //   *
@@ -231,7 +232,8 @@
 //            "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
 //    this.wireMockRule.stubFor(
 //        get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private SampleSummaryDTO stubSampleSummary() throws IOException {
@@ -285,7 +287,8 @@
 //            "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
 //    this.wireMockRule.stubFor(
 //        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private void stubGetPartyNoAssociations() throws IOException {
@@ -295,7 +298,8 @@
 //            "CollectionExerciseEndpointIT.PartyDTO.no-associations.json");
 //    this.wireMockRule.stubFor(
 //        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private void stubGetPartyWithAssociations() throws IOException {
@@ -305,7 +309,8 @@
 //            "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
 //    this.wireMockRule.stubFor(
 //        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private void createSurveyServiceClassifierStubs() throws IOException {
@@ -317,7 +322,8 @@
 //        get(urlPathMatching(
 //                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
 //                    + "/classifiertypeselectors"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //    json =
 //        loadResourceAsString(
 //            CollectionExerciseEndpointIT.class,
@@ -327,7 +333,8 @@
 //                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
 //                    + "/classifiertypeselectors/"
 //                    + "([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private void stubGetSurvey() throws IOException {
@@ -340,7 +347,8 @@
 //    this.wireMockRule.stubFor(
 //        get(urlPathMatching(
 //                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private void stubSurveyServiceBusiness() throws IOException {
@@ -353,7 +361,8 @@
 //    this.wireMockRule.stubFor(
 //        get(urlPathMatching(
 //                "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
-//            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+//            .willReturn(aResponse().withHeader("Content-Type",
+// "application/json").withBody(json)));
 //  }
 //
 //  private UUID createScheduledCollectionExercise() throws CTPException, IOException {
@@ -377,4 +386,4 @@
 //
 //    return collectionExerciseId;
 //  }
-//}
+// }
