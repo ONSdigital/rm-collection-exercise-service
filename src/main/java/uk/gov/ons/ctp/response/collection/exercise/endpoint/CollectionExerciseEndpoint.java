@@ -78,7 +78,8 @@ public class CollectionExerciseEndpoint {
       CollectionExerciseService collectionExerciseService,
       SurveySvcClient surveyService,
       SampleService sampleService,
-      EventService eventService, SupplementaryDatasetService supplementaryDatasetService) {
+      EventService eventService,
+      SupplementaryDatasetService supplementaryDatasetService) {
     this.collectionExerciseService = collectionExerciseService;
     this.surveyService = surveyService;
     this.sampleService = sampleService;
