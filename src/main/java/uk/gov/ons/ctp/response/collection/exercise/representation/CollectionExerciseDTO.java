@@ -12,7 +12,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 
 /** CollectionExercise API representation. */
 @Data
@@ -82,7 +82,7 @@ public class CollectionExerciseDTO {
 
   private List<EventDTO> events;
 
-  private SupplementaryDatasetDTO supplementaryDatasetDTO;
+  private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
   //  private UUID supplementaryDatasetId;
   //
