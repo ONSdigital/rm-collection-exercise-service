@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 
 /** CollectionExercise API representation. */
 @Data
@@ -81,9 +82,11 @@ public class CollectionExerciseDTO {
 
   private List<EventDTO> events;
 
-  private UUID supplementaryDatasetId;
+  private SupplementaryDatasetDTO supplementaryDatasetDTO;
 
-  private List<String> supplementaryDatasetFormTypes;
+  //  private UUID supplementaryDatasetId;
+  //
+  //  private List<String> supplementaryDatasetFormTypes;
 
   /** Empty interface to use as a marker for validation of POST requests */
   public interface PostValidation {}

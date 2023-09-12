@@ -2,8 +2,6 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static java.util.stream.Collectors.joining;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.net.URI;
@@ -43,12 +41,10 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.domain.ObjectConverter;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
-import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
-import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -738,27 +734,28 @@ public class CollectionExerciseEndpoint {
       log.with("collection_exercise_id", collectionExercise.getId())
           .error("Error retrieving events for collection exercise Id", e);
     }
-
-    SupplementaryDatasetEntity supplementaryDatasetEntity =
-        supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
-
-    if (supplementaryDatasetEntity != null) {
-      ObjectMapper objectMapper = new ObjectMapper();
-      try {
-        SupplementaryDatasetDTO supplementaryDatasetDTO =
-            objectMapper.readValue(
-                supplementaryDatasetEntity.getSupplementaryDatasetJson(),
-                SupplementaryDatasetDTO.class);
-
-        collectionExerciseDTO.setSupplementaryDatasetFormTypes(
-            supplementaryDatasetDTO.getFormTypes());
-        collectionExerciseDTO.setSupplementaryDatasetId(
-            supplementaryDatasetEntity.getSupplementaryDatasetId());
-      } catch (JsonProcessingException e) {
-        log.with("collection_exercise_id", collectionExercise.getId())
-            .error("Unable to map supplementary dataset", e);
-      }
-    }
+    //
+    //    SupplementaryDatasetEntity supplementaryDatasetEntity =
+    //
+    // supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
+    //
+    //    if (supplementaryDatasetEntity != null) {
+    //      ObjectMapper objectMapper = new ObjectMapper();
+    //      try {
+    //        SupplementaryDatasetDTO supplementaryDatasetDTO =
+    //            objectMapper.readValue(
+    //                supplementaryDatasetEntity.getSupplementaryDatasetJson(),
+    //                SupplementaryDatasetDTO.class);
+    //
+    //        collectionExerciseDTO.setSupplementaryDatasetFormTypes(
+    //            supplementaryDatasetDTO.getFormTypes());
+    //        collectionExerciseDTO.setSupplementaryDatasetId(
+    //            supplementaryDatasetEntity.getSupplementaryDatasetId());
+    //      } catch (JsonProcessingException e) {
+    //        log.with("collection_exercise_id", collectionExercise.getId())
+    //            .error("Unable to map supplementary dataset", e);
+    //      }
+    //    }
 
     return collectionExerciseDTO;
   }

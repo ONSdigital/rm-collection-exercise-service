@@ -9,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -93,4 +95,9 @@ public class CollectionExercise {
 
   @Column(name = "eq_version")
   private String eqVersion;
+
+  // @OneToOne(optional = true) is true by default
+  @OneToOne
+  @JoinColumn(name = "exercise_PK")
+  private SupplementaryDatasetEntity supplementaryDatasetEntity;
 }
