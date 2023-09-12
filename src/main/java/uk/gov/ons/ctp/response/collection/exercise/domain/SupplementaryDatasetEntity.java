@@ -40,4 +40,8 @@ public class SupplementaryDatasetEntity {
   @Column(name = "attributes")
   @Type(type = "io.hypersistence.utils.hibernate.type.json.JsonType")
   private String supplementaryDatasetJson;
+
+  @OneToOne(mappedBy = "supplementaryDatasetEntity")
+  private CollectionExercise collectionExercise;
+
 }
