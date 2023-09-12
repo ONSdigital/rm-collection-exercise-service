@@ -25,8 +25,6 @@ import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -748,10 +746,14 @@ public class CollectionExerciseEndpoint {
       ObjectMapper objectMapper = new ObjectMapper();
       try {
         SupplementaryDatasetDTO supplementaryDatasetDTO =
-            objectMapper.readValue(supplementaryDatasetEntity.getSupplementaryDatasetJson(), SupplementaryDatasetDTO.class);
+            objectMapper.readValue(
+                supplementaryDatasetEntity.getSupplementaryDatasetJson(),
+                SupplementaryDatasetDTO.class);
 
-        collectionExerciseDTO.setSupplementaryDatasetFormTypes(supplementaryDatasetDTO.getFormTypes());
-        collectionExerciseDTO.setSupplementaryDatasetId(supplementaryDatasetEntity.getSupplementaryDatasetId());
+        collectionExerciseDTO.setSupplementaryDatasetFormTypes(
+            supplementaryDatasetDTO.getFormTypes());
+        collectionExerciseDTO.setSupplementaryDatasetId(
+            supplementaryDatasetEntity.getSupplementaryDatasetId());
       } catch (JsonProcessingException e) {
         log.with("collection_exercise_id", collectionExercise.getId())
             .error("Unable to map supplementary dataset", e);
