@@ -43,5 +43,4 @@ public class SupplementaryDatasetEntity {
 
   @OneToOne(mappedBy = "supplementaryDatasetEntity")
   private CollectionExercise collectionExercise;
-
 }
