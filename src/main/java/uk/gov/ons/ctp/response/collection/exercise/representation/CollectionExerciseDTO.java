@@ -81,7 +81,9 @@ public class CollectionExerciseDTO {
 
   private List<EventDTO> events;
 
-  private String supplementaryDatasetJson;
+  private UUID supplementaryDatasetId;
+
+  private List<String> supplementaryDatasetFormTypes;
 
   /** Empty interface to use as a marker for validation of POST requests */
   public interface PostValidation {}

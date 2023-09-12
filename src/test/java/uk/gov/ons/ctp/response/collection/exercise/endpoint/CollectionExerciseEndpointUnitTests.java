@@ -44,6 +44,7 @@ import uk.gov.ons.ctp.lib.common.matcher.DateMatcher;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObjectMapper;
@@ -51,12 +52,12 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateF
 import uk.gov.ons.ctp.response.collection.exercise.lib.party.representation.SampleLinkDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
-import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.representation.LinkedSampleSummariesDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
+import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
 /** Collection Exercise Endpoint Unit tests */
 public class CollectionExerciseEndpointUnitTests {
@@ -88,15 +89,20 @@ public class CollectionExerciseEndpointUnitTests {
 
   private static final UUID PARTY_ID_1 = UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
 
+  private static final String SUPPLEMENTARY_DATASET_JSON =
+      "{\"survey_id\":\"001\",\"period_id\":\"220823\",\"form_types\":[\"0001\",\"1234\"],"
+          + "\"title\":\"Testdatasetforsurveyid009period220823\",\"sds_published_at\":\"2023-08-22T14:46:36Z\","
+          + "\"total_reporting_units\":2,\"schema_version\":\"v1.0.0\",\"sds_dataset_version\":4,\"filename\""
+          + ":\"373d9a77-2ee5-4c1f-a6dd-8d07b0ea9793.json\",\"dataset_id\":\"b9a87999-fcc0-4085-979f-06390fb5dddd\"}";
+
   @InjectMocks private CollectionExerciseEndpoint colectionExerciseEndpoint;
-
-  @Mock private CollectionExerciseRepository collectionExerciseRepository;
-
   @Mock private CollectionExerciseService collectionExerciseService;
 
   @Mock private SurveySvcClient surveyService;
 
   @Mock private EventService eventService;
+
+  @Mock private SupplementaryDatasetService supplementaryDatasetService;
 
   private MockMvc mockCollectionExerciseMvc;
   private MockMvc textPlainMock;
@@ -107,6 +113,7 @@ public class CollectionExerciseEndpointUnitTests {
   private List<SampleUnitsRequestDTO> sampleUnitsRequestDTOResults;
   private List<LinkedSampleSummariesDTO> linkedSampleSummaries;
   private List<SampleLink> sampleLink;
+  private List<SupplementaryDatasetEntity> supplementaryDatasetEntity;
 
   /**
    * Set up of tests
@@ -139,6 +146,8 @@ public class CollectionExerciseEndpointUnitTests {
         FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
     this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
     this.sampleLink = FixtureHelper.loadClassFixtures(SampleLink[].class);
+    //    this.supplementaryDatasetResults =
+    // FixtureHelper.loadClassFixtures(SupplementaryDatasetDTO[].class);
   }
 
   /**
@@ -882,5 +891,38 @@ public class CollectionExerciseEndpointUnitTests {
     assertEquals(
         "Collection exercise events must be set sequentially",
         result.getJSONObject("error").get("message"));
+  }
+
+  /**
+   * Tests if collection exercise found for Id and has an SDS.
+   *
+   * @throws Exception exception thrown
+   */
+  @Test
+  public void findCollectionExerciseWithSupplementaryDataset() throws Exception {
+    when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
+        .thenReturn(collectionExerciseResults.get(0));
+    when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
+        .thenReturn(surveyDtoResults.get(0));
+    when(supplementaryDatasetService.findSupplementaryDataset(1))
+        .thenReturn(supplementaryDatasetEntity.get(0));
+
+    MockHttpServletRequestBuilder json =
+        getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_ID1));
+
+    log.info("json: {}", json);
+
+    ResultActions actions = mockCollectionExerciseMvc.perform(json);
+
+    log.info("actions: {}", actions);
+
+    actions
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+        .andExpect(handler().methodName("getCollectionExercise"))
+        .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
+        .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
+        .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
+        .andExpect(jsonPath("$.attributes", is(SUPPLEMENTARY_DATASET_JSON)));
   }
 }

@@ -2,6 +2,8 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import static java.util.stream.Collectors.joining;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import java.net.URI;
@@ -23,6 +25,8 @@ import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -46,6 +50,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.InvalidRequestException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.util.MultiIsoDateFormat;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
+import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
@@ -740,8 +745,17 @@ public class CollectionExerciseEndpoint {
         supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
 
     if (supplementaryDatasetEntity != null) {
-      collectionExerciseDTO.setSupplementaryDatasetJson(
-          supplementaryDatasetEntity.getSupplementaryDatasetJson());
+      ObjectMapper objectMapper = new ObjectMapper();
+      try {
+        SupplementaryDatasetDTO supplementaryDatasetDTO =
+            objectMapper.readValue(supplementaryDatasetEntity.getSupplementaryDatasetJson(), SupplementaryDatasetDTO.class);
+
+        collectionExerciseDTO.setSupplementaryDatasetFormTypes(supplementaryDatasetDTO.getFormTypes());
+        collectionExerciseDTO.setSupplementaryDatasetId(supplementaryDatasetEntity.getSupplementaryDatasetId());
+      } catch (JsonProcessingException e) {
+        log.with("collection_exercise_id", collectionExercise.getId())
+            .error("Unable to map supplementary dataset", e);
+      }
     }
 
     return collectionExerciseDTO;
