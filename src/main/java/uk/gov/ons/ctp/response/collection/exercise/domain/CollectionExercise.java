@@ -97,7 +97,7 @@ public class CollectionExercise {
   private String eqVersion;
 
   // @OneToOne(optional = true) is true by default
-  @OneToOne(mappedBy = "collectionExercise")
-  @JoinColumn(name = "exercise_PK")
+  @OneToOne
+  @JoinColumn(name = "exercise_pk", referencedColumnName = "exercise_fk")
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 }
