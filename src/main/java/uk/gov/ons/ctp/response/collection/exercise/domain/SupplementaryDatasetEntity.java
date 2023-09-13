@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import java.io.Serializable;
 import java.util.UUID;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,7 +41,4 @@ public class SupplementaryDatasetEntity {
   @Column(name = "attributes")
   @Type(type = "io.hypersistence.utils.hibernate.type.json.JsonType")
   private String supplementaryDatasetJson;
-
-  @OneToOne(mappedBy = "supplementaryDatasetEntity")
-  private CollectionExercise collectionExercise;
 }

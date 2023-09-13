@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -98,6 +99,6 @@ public class CollectionExercise {
 
   // @OneToOne(optional = true) is true by default
   @OneToOne
-  @JoinColumn(name = "exercise_pk", referencedColumnName = "exercise_fk")
+  @JoinColumn(name = "exercise_PK", referencedColumnName = "exercise_fk")
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 }
