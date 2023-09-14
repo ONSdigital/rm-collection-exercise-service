@@ -96,7 +96,6 @@ public class CollectionExercise {
   @Column(name = "eq_version")
   private String eqVersion;
 
-  //  @OneToOne(optional = true) is true by default
   @OneToOne(mappedBy = "collectionExercise")
   @JsonManagedReference
   private SupplementaryDatasetEntity supplementaryDatasetEntity;

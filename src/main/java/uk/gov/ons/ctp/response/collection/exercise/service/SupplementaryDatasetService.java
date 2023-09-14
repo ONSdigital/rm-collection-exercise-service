@@ -67,8 +67,8 @@ public class SupplementaryDatasetService {
     }
   }
 
-  public SupplementaryDatasetEntity findSupplementaryDataset(int exercise_pk) {
-    return supplementaryDatasetRepository.findByExerciseFK(exercise_pk);
+  public SupplementaryDatasetEntity findSupplementaryDataset(int exercisePk) {
+    return supplementaryDatasetRepository.findByExerciseFK(exercisePk);
   }
 
   public boolean existsByExerciseFK(int exercisePK) {
