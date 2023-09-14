@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.sql.Timestamp;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -10,7 +10,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -97,8 +96,8 @@ public class CollectionExercise {
   @Column(name = "eq_version")
   private String eqVersion;
 
-  // @OneToOne(optional = true) is true by default
-  @OneToOne
-  @JoinColumn(name = "exercise_PK", referencedColumnName = "exercise_fk")
+  //  @OneToOne(optional = true) is true by default
+  @OneToOne(mappedBy = "collectionExercise")
+  @JsonManagedReference
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 }

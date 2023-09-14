@@ -120,6 +120,7 @@ public class CollectionExerciseClient {
     inputDto.setSurveyId(surveyId.toString());
     inputDto.setExerciseRef(exerciseRef);
     inputDto.setUserDescription(userDescription);
+    inputDto.setSupplementaryDatasetEntity(null);
 
     try {
       HttpResponse<String> createCollexResponse =

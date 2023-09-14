@@ -84,10 +84,6 @@ public class CollectionExerciseDTO {
 
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
-  //  private UUID supplementaryDatasetId;
-  //
-  //  private List<String> supplementaryDatasetFormTypes;
-
   /** Empty interface to use as a marker for validation of POST requests */
   public interface PostValidation {}
 

@@ -50,7 +50,6 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExer
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.service.SampleService;
-import uk.gov.ons.ctp.response.collection.exercise.service.SupplementaryDatasetService;
 
 /** The REST endpoint controller for Collection Exercises. */
 @RestController
@@ -67,7 +66,6 @@ public class CollectionExerciseEndpoint {
   private CollectionExerciseService collectionExerciseService;
   private EventService eventService;
   private SampleService sampleService;
-  private SupplementaryDatasetService supplementaryDatasetService;
   private SurveySvcClient surveyService;
 
   @Autowired private AppConfig appConfig;
@@ -77,13 +75,11 @@ public class CollectionExerciseEndpoint {
       CollectionExerciseService collectionExerciseService,
       SurveySvcClient surveyService,
       SampleService sampleService,
-      EventService eventService,
-      SupplementaryDatasetService supplementaryDatasetService) {
+      EventService eventService) {
     this.collectionExerciseService = collectionExerciseService;
     this.surveyService = surveyService;
     this.sampleService = sampleService;
     this.eventService = eventService;
-    this.supplementaryDatasetService = supplementaryDatasetService;
   }
 
   /**
@@ -734,28 +730,6 @@ public class CollectionExerciseEndpoint {
       log.with("collection_exercise_id", collectionExercise.getId())
           .error("Error retrieving events for collection exercise Id", e);
     }
-    //
-    //    SupplementaryDatasetEntity supplementaryDatasetEntity =
-    //
-    // supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
-    //
-    //    if (supplementaryDatasetEntity != null) {
-    //      ObjectMapper objectMapper = new ObjectMapper();
-    //      try {
-    //        SupplementaryDatasetDTO supplementaryDatasetDTO =
-    //            objectMapper.readValue(
-    //                supplementaryDatasetEntity.getSupplementaryDatasetJson(),
-    //                SupplementaryDatasetDTO.class);
-    //
-    //        collectionExerciseDTO.setSupplementaryDatasetFormTypes(
-    //            supplementaryDatasetDTO.getFormTypes());
-    //        collectionExerciseDTO.setSupplementaryDatasetId(
-    //            supplementaryDatasetEntity.getSupplementaryDatasetId());
-    //      } catch (JsonProcessingException e) {
-    //        log.with("collection_exercise_id", collectionExercise.getId())
-    //            .error("Unable to map supplementary dataset", e);
-    //      }
-    //    }
 
     return collectionExerciseDTO;
   }

@@ -49,6 +49,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition.Sam
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.ResponseEventDTO;
@@ -83,6 +84,8 @@ public class CollectionExerciseEndpointIT {
 
   @Autowired private EventRepository eventRepository;
 
+  @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
+
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -103,6 +106,7 @@ public class CollectionExerciseEndpointIT {
 
     sampleLinkRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
+    supplementaryDatasetRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
 
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
@@ -302,7 +306,17 @@ public class CollectionExerciseEndpointIT {
     String json =
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
-            "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
+            "CollectionExerciseEndpointIT.Supplementary.with-associations.json");
+    this.wireMockRule.stubFor(
+        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
+            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
+  }
+
+  private void stubGetSupplementaryDataServvice() throws IOException {
+    String json =
+        loadResourceAsString(
+            CollectionExerciseEndpointIT.class,
+            "CollectionExerciseEndpointIT.SupplementaryDatasetDTO.with-associations.json");
     this.wireMockRule.stubFor(
         get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
