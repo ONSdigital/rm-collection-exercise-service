@@ -146,8 +146,6 @@ public class CollectionExerciseEndpointUnitTests {
         FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
     this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
     this.sampleLink = FixtureHelper.loadClassFixtures(SampleLink[].class);
-    //    this.supplementaryDatasetResults =
-    // FixtureHelper.loadClassFixtures(SupplementaryDatasetDTO[].class);
   }
 
   /**
