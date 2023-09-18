@@ -1,173 +1,32 @@
-info:
-  name: ${project.artifactId}
-  version: ${project.version}
-  origin: ${scm.url}
-  commit: ${buildNumber}
-  branch: ${scmBranch}
-  built: ${timestamp}
-
-# logging config here as a reminder as to how to override logback from cmd line
-# ie -Dlogging.level.org.springframework=DEBUG
-logging:
-  useJson: false
-  level:
-    uk.gov.ons.ctp: DEBUG
-    org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
-    sql: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-  profile: DEV
-
-
-server:
-  port: 8145
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-
 spring:
-  main:
-    allow-bean-definition-overriding: true
-    allow-circular-references: true
-  output:
-    ansi:
-      enabled: never
-    spring.jpa.show-sql: true
-    # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
+  datasource:
+    url: jdbc:postgresql://localhost:15432/postgres
 
   liquibase:
-    user: postgres
-    password: postgres
-    liquibase-schema: collectionexercise
-    url: jdbc:postgresql://localhost:5432/ras
-    change-log: classpath:/database/changelog-master.yml
-    default-schema: collectionexercise
-    enabled: false
-
-  security:
-    user:
-      name: admin
-      password: secret
-    
-  application:
-    name: ONS CollectionExerciseSvc
-
-  # In spring boot 2.5, schema.sql isn't run on startup anymore.  Because the schema isn't created in the first liquibase
-  # patch; we're overriding how it's handled, so it can be created if it's not there.
-  sql:
-    init:
-      mode: always
-      continue-on-error: true
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/ras
-    username: postgres
-    password: postgres
-    driverClassName: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
-    defer-datasource-initialization: true
-    open-in-view: true
-    hibernate:
-      ddl-auto: none
-      default_schema: sample
-    show-sql: true
-    properties:
-      hibernate:
-        id:
-          new_generator_mappings: false
+    url: jdbc:postgresql://localhost:15432/postgres
 
   cloud:
     gcp:
-      project-id: ras-rm-dev
-
-redis:
-  host: "redis-master"
-  port: 6379
-  db: 3
-
-sample-svc:
-  request-sample-unit-count-path: /samples/count
-  request-sample-units-for-sample-summary-path: /samples/{sampleSummaryId}/sampleunits
-  connection-config:
-    scheme: http
-    host: localhost
-    port: 8125
-    username: admin
-    password: secret
-    # how many times should we attempt connection on failure
-    retry-attempts: 5
-    # sleep between retries
-    retry-pause-milli-seconds: 5000
-    # time to estab connection
-    connect-timeout-milli-seconds: 5000
-    # time to read response
-    read-timeout-milli-seconds: 5000
+      project-id: test
+      pubsub:
+        emulator-host: localhost:18681
 
 survey-svc:
-  request-classifier-types-list-path: /surveys/{surveyId}/classifiertypeselectors
-  request-classifier-types-path: /surveys/{surveyId}/classifiertypeselectors/{selectorId}
-  survey-detail-path: /surveys/{surveyId}
-  survey-ref-path: /surveys/ref/{surveyRef}
   connection-config:
-    scheme: http
-    host: localhost
-    port: 8080
-    username: admin
-    password: secret
-    # how many times should we attempt connection on failure
-    retry-attempts: 5
-    # sleep between retries
-    retry-pause-milli-seconds: 5000
-    # time to estab connection
-    connect-timeout-milli-seconds: 5000
-    # time to read response
-    read-timeout-milli-seconds: 5000
+    port: 18002
 
-case-svc:
-  number-of-cases-path: /casegroups/cases/{collectionExerciseId}/all
-  process-event-path: /process-event
+sample-svc:
   connection-config:
-    scheme: http
-    host: localhost
-    port: 8171
-    username: admin
-    password: secret
-    # how many times should we attempt connection on failure
-    retry-attempts: 10
-    # sleep between retries
-    retry-pause-milli-seconds: 5000
-    # time to estab connection
-    connect-timeout-milli-seconds: 5000
-    # time to read response
-    read-timeout-milli-seconds: 5000
+    port: 18002
 
 collection-instrument-svc:
-  request-collection-instruments-count: /collection-instrument-api/1.0.2/collectioninstrument/count
-  connection-config:
-    scheme: http
-    host: localhost
-    port: 8002
-    username: admin
-    password: secret
-    retry-attempts: 5
-    retry-pause-milli-seconds: 5000
-    connect-timeout-milli-seconds: 5000
-    read-timeout-milli-seconds: 5000
+    connection-config:
+        port: 18002
 
-springdoc:
-  api-docs:
-    path: /api-docs
-    enabled: false
+party-svc:
+    connection-config:
+        port: 18002
 
 gcp:
-  project: ras-rm-sandbox
+  project: "test"
   caseNotificationTopic: "test_topic"
-  sampleSummaryActivationStatusSubscription: "sample-summary-activation-status"
-  sampleSummaryActivationTopic: "sample-summary-activation"
-  collectionExerciseEndTopic: "collect-exercise-end"
-  collectionExerciseEventStatusUpdateSubscription: "event_status_subscription"
-  supplementaryDataServiceTopic: "supplementary-data-service-topic"
-  supplementaryDataServiceSubscription: "supplementary-data-service-subscription"

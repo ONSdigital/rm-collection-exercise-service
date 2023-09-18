@@ -301,13 +301,6 @@
                         <scmCommentPrefix>[ci skip]</scmCommentPrefix>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <fork>false</fork>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
 
