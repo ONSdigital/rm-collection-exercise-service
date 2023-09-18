@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
@@ -82,6 +83,7 @@ public class CollectionExerciseDTO {
 
   private List<EventDTO> events;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
   /** Empty interface to use as a marker for validation of POST requests */
