@@ -10,6 +10,8 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEn
 public interface SupplementaryDatasetRepository
     extends JpaRepository<SupplementaryDatasetEntity, Integer> {
 
+  SupplementaryDatasetEntity findByExerciseFK(int exerciseFk);
+
   boolean existsByExerciseFK(int exerciseFk);
 
   @Modifying

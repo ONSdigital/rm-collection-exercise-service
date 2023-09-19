@@ -46,6 +46,8 @@ public class ObjectConverter {
     collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyId().toString());
     collectionExerciseDTO.setUpdated(collectionExercise.getUpdated());
     collectionExerciseDTO.setUserDescription(collectionExercise.getUserDescription());
+    collectionExerciseDTO.setSupplementaryDatasetEntity(
+        collectionExercise.getSupplementaryDatasetEntity());
 
     return collectionExerciseDTO;
   }

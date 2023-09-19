@@ -70,6 +70,16 @@ public class SupplementaryDatasetServiceTest {
     supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
   }
 
+  @Test
+  public void testFindSupplementaryDataset() throws JsonProcessingException {
+    createSupplementaryDatasetEntity();
+
+    supplementaryDatasetService.findSupplementaryDataset(collectionExercise.getExercisePK());
+
+    verify(supplementaryDatasetRepository, times(1))
+        .findByExerciseFK(collectionExercise.getExercisePK());
+  }
+
   private SupplementaryDatasetDTO createSupplementaryDataSet() {
     UUID datasetId = UUID.randomUUID();
 

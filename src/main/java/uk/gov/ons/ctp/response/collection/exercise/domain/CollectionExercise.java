@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.sql.Timestamp;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -93,4 +95,8 @@ public class CollectionExercise {
 
   @Column(name = "eq_version")
   private String eqVersion;
+
+  @OneToOne(mappedBy = "collectionExercise")
+  @JsonManagedReference
+  private SupplementaryDatasetEntity supplementaryDatasetEntity;
 }

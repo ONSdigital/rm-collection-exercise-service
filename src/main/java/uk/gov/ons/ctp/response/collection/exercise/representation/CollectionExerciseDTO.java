@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 
 /** CollectionExercise API representation. */
 @Data
@@ -80,6 +82,9 @@ public class CollectionExerciseDTO {
   private SampleUnitValidationErrorDTO[] validationErrors;
 
   private List<EventDTO> events;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
   /** Empty interface to use as a marker for validation of POST requests */
   public interface PostValidation {}

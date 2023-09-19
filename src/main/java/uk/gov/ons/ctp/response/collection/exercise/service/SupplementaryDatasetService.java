@@ -30,7 +30,7 @@ public class SupplementaryDatasetService {
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId());
 
     try {
-      if (supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK())) {
+      if (existsByExerciseFK(collectionExercise.getExercisePK())) {
         log.info(
             "Supplementary dataset with exerciseFk {} has been found.",
             collectionExercise.getExercisePK());
@@ -65,5 +65,13 @@ public class SupplementaryDatasetService {
           "Something went wrong deserializing Supplementary Dataset",
           e);
     }
+  }
+
+  public SupplementaryDatasetEntity findSupplementaryDataset(int exercisePk) {
+    return supplementaryDatasetRepository.findByExerciseFK(exercisePk);
+  }
+
+  public boolean existsByExerciseFK(int exercisePK) {
+    return supplementaryDatasetRepository.existsByExerciseFK(exercisePK);
   }
 }

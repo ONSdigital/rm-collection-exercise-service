@@ -1,5 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.UUID;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ public class SupplementaryDatasetEntity {
   @Column(name = "id")
   private Integer id;
 
-  @Column(name = "exercise_FK")
+  @Column(name = "exercise_fk")
   private Integer exerciseFK;
 
   @Column(name = "supplementary_dataset_id")
@@ -40,4 +41,9 @@ public class SupplementaryDatasetEntity {
   @Column(name = "attributes")
   @Type(type = "io.hypersistence.utils.hibernate.type.json.JsonType")
   private String supplementaryDatasetJson;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "exercise_fk", insertable = false, updatable = false)
+  @JsonBackReference
+  private CollectionExercise collectionExercise;
 }
