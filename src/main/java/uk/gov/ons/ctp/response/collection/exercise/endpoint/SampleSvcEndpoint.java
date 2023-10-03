@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SampleSummaryReadinessDTO;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseService;
 
 @RestController
@@ -19,10 +20,14 @@ import uk.gov.ons.ctp.response.collection.exercise.service.CollectionExerciseSer
 public class SampleSvcEndpoint {
   private static final Logger log = LoggerFactory.getLogger(SampleSvcEndpoint.class);
   private CollectionExerciseService collectionExerciseService;
+  private final SampleLinkRepository sampleLinkRepository;
 
   @Autowired
-  public SampleSvcEndpoint(CollectionExerciseService collectionExerciseService) {
+  public SampleSvcEndpoint(
+      CollectionExerciseService collectionExerciseService,
+      SampleLinkRepository sampleLinkRepository) {
     this.collectionExerciseService = collectionExerciseService;
+    this.sampleLinkRepository = sampleLinkRepository;
   }
 
   @RequestMapping(value = "/summary-readiness", method = RequestMethod.POST)
@@ -31,7 +36,12 @@ public class SampleSvcEndpoint {
       throws CTPException {
     log.with(sampleSummaryReadinessDTO.getSampleSummaryId()).info("Sample summary status updated");
 
-    UUID collectionExerciseId = sampleSummaryReadinessDTO.getCollectionExerciseId();
+    UUID sampleSummaryId = sampleSummaryReadinessDTO.getSampleSummaryId();
+    UUID collectionExerciseId =
+        sampleLinkRepository
+            .findBySampleSummaryId(sampleSummaryId)
+            .get(0)
+            .getCollectionExerciseId();
 
     collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
         collectionExerciseId);
