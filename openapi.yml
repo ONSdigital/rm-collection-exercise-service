@@ -706,6 +706,29 @@ paths:
                 type: object
         400:
           description: Bad Request
+  /sample/summary-readiness:
+    post:
+      tags:
+        - sample-service-endpoint
+      summary: POST request to update collection exercise state to READY_FOR_REVIEW
+      operationId: sampleSummaryReadiness
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SampleSummaryReadinessDTO"
+        required: true
+      responses:
+        401:
+          description: Unauthorized
+        201:
+          description: Successfully attempted to updated collection exercise state
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          description: Resource not found
 components:
   schemas:
     SampleUnitsRequestDTO:
@@ -943,3 +966,9 @@ components:
           type: string
         collectionExerciseId:
           type: string
+    SampleSummaryReadinessDTO:
+      type: object
+      properties:
+        sampleSummaryId:
+          type: string
+          format: uuid

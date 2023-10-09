@@ -43,6 +43,13 @@ public class SampleSvcEndpoint {
             .get(0)
             .getCollectionExerciseId();
 
+    if (collectionExerciseId == null) {
+      throw new CTPException(
+          CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "No collection exercise id linked with sample summary %s", sampleSummaryId));
+    }
+
     collectionExerciseService.transitionScheduleCollectionExerciseToReadyToReview(
         collectionExerciseId);
     return ResponseEntity.ok().build();
