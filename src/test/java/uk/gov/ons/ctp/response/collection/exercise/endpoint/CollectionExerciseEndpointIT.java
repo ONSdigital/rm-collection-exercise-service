@@ -194,6 +194,43 @@ public class CollectionExerciseEndpointIT {
         CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
   }
 
+  @Test
+  public void shouldTransitionWhenToldSampleIsReady() throws Exception {
+    // Given
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    stubGetPartyBySampleUnitRef();
+    SampleSummaryDTO sampleSummary = stubSampleSummary();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+
+    // When
+    this.client.sampleSummaryReadiness(sampleSummary.getId());
+
+    // Then
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(
+        CollectionExerciseDTO.CollectionExerciseState.READY_FOR_REVIEW, newCollex.getState());
+  }
+
+  @Test
+  public void shouldNotTransitionWhenSampleIsNotReady() throws Exception {
+    // Given
+    stubSurveyServiceBusiness();
+    stubCollectionInstrumentCount();
+    stubGetPartyBySampleUnitRef();
+    SampleSummaryDTO sampleSummary = stubInitSampleSummary();
+    UUID collectionExerciseId = createScheduledCollectionExercise();
+    this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
+
+    // When
+    this.client.sampleSummaryReadiness(sampleSummary.getId());
+
+    // Then
+    CollectionExerciseDTO newCollex = this.client.getCollectionExercise(collectionExerciseId);
+    assertEquals(CollectionExerciseDTO.CollectionExerciseState.SCHEDULED, newCollex.getState());
+  }
+
   private EventDTO createEventDTO(
       final CollectionExerciseDTO collectionExercise,
       final EventService.Tag tag,
@@ -241,6 +278,19 @@ public class CollectionExerciseEndpointIT {
   private SampleSummaryDTO stubSampleSummary() throws IOException {
     SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
     sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
+    sampleSummary.setId(UUID.randomUUID());
+    this.wireMockRule.stubFor(
+        get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(mapper.writeValueAsString(sampleSummary))));
+    return sampleSummary;
+  }
+
+  private SampleSummaryDTO stubInitSampleSummary() throws IOException {
+    SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
+    sampleSummary.setState(SampleSummaryDTO.SampleState.INIT);
     sampleSummary.setId(UUID.randomUUID());
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
