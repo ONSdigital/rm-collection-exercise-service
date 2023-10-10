@@ -83,6 +83,10 @@ public class CollectionExerciseDTO {
 
   private List<EventDTO> events;
 
+  private Integer sampleSize;
+
+  private List<SampleLinkDTO> sampleLinks;
+
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
