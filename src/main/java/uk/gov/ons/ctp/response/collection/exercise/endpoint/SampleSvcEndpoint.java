@@ -6,10 +6,7 @@ import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SampleSummaryReadinessDTO;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
@@ -30,8 +27,8 @@ public class SampleSvcEndpoint {
     this.sampleLinkRepository = sampleLinkRepository;
   }
 
-  @RequestMapping(value = "/summary-readiness", method = RequestMethod.POST)
-  public ResponseEntity<?> sampleSummaryReadiness(
+  @PostMapping(value = "/summary-readiness")
+  public ResponseEntity<Void> sampleSummaryReadiness(
       final @RequestBody @Valid SampleSummaryReadinessDTO sampleSummaryReadinessDTO)
       throws CTPException {
     log.with(sampleSummaryReadinessDTO.getSampleSummaryId()).info("Sample summary status updated");
