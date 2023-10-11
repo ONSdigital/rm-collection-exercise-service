@@ -28,7 +28,7 @@ public class SampleSvcEndpoint {
   }
 
   @PostMapping(value = "/summary-readiness")
-  public ResponseEntity<Void> sampleSummaryReadiness(
+  public ResponseEntity<String> sampleSummaryReadiness(
       final @RequestBody @Valid SampleSummaryReadinessDTO sampleSummaryReadinessDTO)
       throws CTPException {
     log.with(sampleSummaryReadinessDTO.getSampleSummaryId()).info("Sample summary status updated");
