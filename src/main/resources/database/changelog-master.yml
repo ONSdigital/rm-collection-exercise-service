@@ -66,3 +66,6 @@ databaseChangeLog:
 
   - include:
       file: database/changes/release-20/changelog.yml
+
+  - include:
+      file: database/changes/release-21/changelog.yml
