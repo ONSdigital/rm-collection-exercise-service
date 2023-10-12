@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 21.1
+      author: Jacob Harrison
+      changes:
+        - sqlFile:
+            comment: Add primary key to supplementary table
+            path: add_primary_key_to_supplementary_dataset_table.sql
+            relativeToChangelogFile: true
+            splitStatements: true
