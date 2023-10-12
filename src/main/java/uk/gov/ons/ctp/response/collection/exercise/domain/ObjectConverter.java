@@ -48,6 +48,7 @@ public class ObjectConverter {
     collectionExerciseDTO.setUserDescription(collectionExercise.getUserDescription());
     collectionExerciseDTO.setSupplementaryDatasetEntity(
         collectionExercise.getSupplementaryDatasetEntity());
+    collectionExerciseDTO.setSampleSize(collectionExercise.getSampleSize());
 
     return collectionExerciseDTO;
   }

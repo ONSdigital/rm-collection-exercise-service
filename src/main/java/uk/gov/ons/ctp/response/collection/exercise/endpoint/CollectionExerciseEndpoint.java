@@ -685,7 +685,7 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * adds the case types and surveyId to the CollectionExerciseDTO
+   * adds the case types, surveyId and sample summaries to the CollectionExerciseDTO
    *
    * @param collectionExercise the collection exercise to find the associated case types and
    *     surveyIds for
@@ -700,15 +700,19 @@ public class CollectionExerciseEndpoint {
     CollectionExerciseDTO collectionExerciseDTO =
         ObjectConverter.collectionExerciseDTO(collectionExercise);
 
-    // NOTE: this method used to fail (NPE) if the survey did not exist in the local database.  Now
+    // NOTE: this method used to fail (NPE) if the survey did not exist in the local
+    // database. Now
     // the survey id
     // is not validated and passed on verbatim
     collectionExerciseDTO.setSurveyId(collectionExercise.getSurveyId().toString());
 
-    // If we are in the failed validation state, then there should be validation error so go look
+    // If we are in the failed validation state, then there should be validation
+    // error so go look
     // them up.
-    // We don't do this for all the states as this is a non-trivial database operation.
-    // Note: this code here will suppress any validation errors that are present in the other states
+    // We don't do this for all the states as this is a non-trivial database
+    // operation.
+    // Note: this code here will suppress any validation errors that are present in
+    // the other states
     // (shouldn't happen but ...)
     if (collectionExercise.getState()
         == CollectionExerciseDTO.CollectionExerciseState.FAILEDVALIDATION) {
@@ -730,6 +734,9 @@ public class CollectionExerciseEndpoint {
       log.with("collection_exercise_id", collectionExercise.getId())
           .error("Error retrieving events for collection exercise Id", e);
     }
+
+    collectionExerciseDTO.setSampleLinks(
+        collectionExerciseService.findLinkedSampleSummaries(collectionExercise.getId()));
 
     return collectionExerciseDTO;
   }

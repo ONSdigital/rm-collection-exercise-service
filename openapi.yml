@@ -817,6 +817,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/EventDTO"
+        sampleSize:
+          type: integer
+        sampleLinks:
+          type: array
+          items:
+            $ref: "#/components/schemas/SampleLinkDTO"
     EventDTO:
       required:
         - tag

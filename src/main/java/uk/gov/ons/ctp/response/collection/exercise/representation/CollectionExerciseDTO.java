@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 
 /** CollectionExercise API representation. */
@@ -82,6 +83,10 @@ public class CollectionExerciseDTO {
   private SampleUnitValidationErrorDTO[] validationErrors;
 
   private List<EventDTO> events;
+
+  private Integer sampleSize;
+
+  private List<SampleLink> sampleLinks;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
