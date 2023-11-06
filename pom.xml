@@ -222,10 +222,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy</artifactId>
-			<version>1.14.8</version>
-		</dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.8</version>
+        </dependency>
 
         <dependency>
             <groupId>com.mashape.unirest</groupId>
