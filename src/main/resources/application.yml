@@ -11,7 +11,7 @@ info:
 logging:
   useJson: false
   level:
-    uk.gov.ons.ctp: DEBUG
+    uk.gov.ons.ctp: INFO
     org.springframework.context.annotation.ConfigurationClassPostProcessor: ERROR
   profile: DEV
 
