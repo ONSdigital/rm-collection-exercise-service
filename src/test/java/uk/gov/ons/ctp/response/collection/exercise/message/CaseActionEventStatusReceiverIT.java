@@ -34,6 +34,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
 import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
@@ -65,6 +66,8 @@ public class CaseActionEventStatusReceiverIT {
 
   @Autowired private EventRepository eventRepository;
 
+  @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
+
   @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -84,6 +87,7 @@ public class CaseActionEventStatusReceiverIT {
 
     sampleLinkRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
+    supplementaryDatasetRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
 
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);

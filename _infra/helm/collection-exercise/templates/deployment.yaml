@@ -41,7 +41,9 @@ spec:
           command: ["/cloud_sql_proxy",
                     "-instances=$(SQL_INSTANCE_NAME)=tcp:$(DB_PORT)",
                     "-ip_address_types=PRIVATE",
-                    "-credential_file=/secrets/cloudsql/credentials.json"]
+                    "-credential_file=/secrets/cloudsql/credentials.json",
+                    "-term_timeout=30s",
+                    "-verbose=false"]
           securityContext:
             runAsUser: 2  # non-root user
             allowPrivilegeEscalation: false
@@ -239,6 +241,30 @@ spec:
             value: "{{ .Values.gcp.sampleSummaryActivationTopic }}"
           - name: GCP_COLLECTIONEXERCISEENDTOPIC
             value: "{{ .Values.gcp.collectionExerciseEndTopic }}"
+          - name: GCP_SUPPLEMENTARYDATASERVICETOPIC
+            value: "{{ .Values.gcp.supplementaryDataServiceSubscription }}"
+          - name: GCP_SUPPLEMENTARYDATASERVICESUBSCRIPTION
+            value: "{{ .Values.gcp.supplementaryDataServiceTopic }}"
+          - name: REDIS_HOST
+            {{- if .Values.database.managedRedis }}
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: redis-host
+            {{- else }}
+            value: "$(REDIS_MASTER_SERVICE_HOST)"
+            {{- end }}
+          - name: REDIS_PORT
+            {{- if .Values.database.managedRedis }}
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: redis-port
+            {{- else }}
+            value: "$(REDIS_MASTER_SERVICE_PORT)"
+            {{- end }}
+          - name: REDIS_DB
+            value: "3"
 
           resources:
             {{- toYaml .Values.resources.application | nindent 12 }}

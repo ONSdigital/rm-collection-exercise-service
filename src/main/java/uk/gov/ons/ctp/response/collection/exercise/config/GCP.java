@@ -11,4 +11,6 @@ public class GCP {
   String sampleSummaryActivationTopic;
   String collectionExerciseEndTopic;
   String collectionExerciseEventStatusUpdateSubscription;
+  String supplementaryDataServiceTopic;
+  String supplementaryDataServiceSubscription;
 }

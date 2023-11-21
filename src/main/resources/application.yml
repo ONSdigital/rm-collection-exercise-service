@@ -26,21 +26,21 @@ management:
 
 spring:
   main:
-    # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
     allow-bean-definition-overriding: true
     allow-circular-references: true
+  output:
+    ansi:
+      enabled: never
+    # Added as part of upgrade to 2.1 to quiet an error where the 'restExceptionHandler' bean is defined twice.
 
   liquibase:
     user: postgres
     password: postgres
-    default-schema: collectionexercise
+    liquibase-schema: collectionexercise
     url: jdbc:postgresql://localhost:5432/ras
     change-log: classpath:/database/changelog-master.yml
+    default-schema: collectionexercise
     enabled: false
-
-  output:
-    ansi:
-      enabled: never
 
   security:
     user:
@@ -52,29 +52,36 @@ spring:
 
   # In spring boot 2.5, schema.sql isn't run on startup anymore.  Because the schema isn't created in the first liquibase
   # patch; we're overriding how it's handled, so it can be created if it's not there.
-  sql.init.mode: always
-  sql.init.continue-on-error: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
 
   datasource:
     url: jdbc:postgresql://localhost:5432/ras
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     defer-datasource-initialization: true
-    hibernate:
-      ddl-auto: update
-      default_schema: collectionexercise
-
-    # Used to suppress warning that appeared after upgrade to spring 2.0. It defaults to true, and we weren't setting
-    # it so nothing changed.  Spring boot shows warnings if you don't explicitly set it.
     open-in-view: true
+    hibernate:
+      ddl-auto: none
+      default_schema: sample
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: false
 
   cloud:
     gcp:
       project-id: ras-rm-dev
+
+redis:
+  host: "redis-master"
+  port: 6379
+  db: 3
 
 sample-svc:
   request-sample-unit-count-path: /samples/count
@@ -157,3 +164,5 @@ gcp:
   sampleSummaryActivationTopic: "sample-summary-activation"
   collectionExerciseEndTopic: "collect-exercise-end"
   collectionExerciseEventStatusUpdateSubscription: "event_status_subscription"
+  supplementaryDataServiceTopic: "supplementary-data-service-topic"
+  supplementaryDataServiceSubscription: "supplementary-data-service-subscription"

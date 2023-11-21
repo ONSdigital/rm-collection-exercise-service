@@ -105,6 +105,13 @@ public class CollectionExerciseStateTransitionManagerFactory
         CollectionExerciseEvent.EXECUTE, CollectionExerciseState.EXECUTION_STARTED);
     transitions.put(CollectionExerciseState.FAILEDVALIDATION, transitionForFailedvalidation);
 
+    // FAILEDVALIDATION -SEFT
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForFailedvalidationSeft =
+        new HashMap<>();
+    transitionForFailedvalidationSeft.put(
+        CollectionExerciseEvent.CI_SAMPLE_DELETED, CollectionExerciseState.SCHEDULED);
+    transitions.put(CollectionExerciseState.FAILEDVALIDATION, transitionForFailedvalidationSeft);
+
     // READY_FOR_LIVE
     Map<CollectionExerciseEvent, CollectionExerciseState> transitionForReadyForLive =
         new HashMap<>();

@@ -41,7 +41,6 @@ public class ExceptionHandler {
           CollectionInstrumentMessageDTO dto = (CollectionInstrumentMessageDTO) payload;
 
           result.put(ResultKey.collectionExercise, dto.getExerciseId().toString());
-          result.put(ResultKey.collectionInstrument, dto.getInstrumentId().toString());
         }
       }
       Throwable t = e.getCause();

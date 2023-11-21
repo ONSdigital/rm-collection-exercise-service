@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SampleLink;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 
 /** CollectionExercise API representation. */
 @Data
@@ -24,9 +27,11 @@ public class CollectionExerciseDTO {
   @NotNull(groups = {PutValidation.class})
   private String surveyId;
 
-  // When creating a collection exercise (PostValidation), the survey can either be specified by the
+  // When creating a collection exercise (PostValidation), the survey can either
+  // be specified by the
   // surveyId or
-  // surveyRef.  This field will not be set when returning collection exercises (input field only)
+  // surveyRef. This field will not be set when returning collection exercises
+  // (input field only)
   private String surveyRef;
 
   @Size(
@@ -63,7 +68,6 @@ public class CollectionExerciseDTO {
       groups = {PostValidation.class, PutValidation.class, PatchValidation.class})
   private String exerciseRef;
 
-  @NotNull(groups = {PostValidation.class, PutValidation.class})
   @Size(
       max = 50,
       min = 1,
@@ -79,6 +83,13 @@ public class CollectionExerciseDTO {
   private SampleUnitValidationErrorDTO[] validationErrors;
 
   private List<EventDTO> events;
+
+  private Integer sampleSize;
+
+  private List<SampleLink> sampleLinks;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
   /** Empty interface to use as a marker for validation of POST requests */
   public interface PostValidation {}

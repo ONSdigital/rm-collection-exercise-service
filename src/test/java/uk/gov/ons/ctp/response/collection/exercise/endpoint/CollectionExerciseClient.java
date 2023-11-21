@@ -120,6 +120,7 @@ public class CollectionExerciseClient {
     inputDto.setSurveyId(surveyId.toString());
     inputDto.setExerciseRef(exerciseRef);
     inputDto.setUserDescription(userDescription);
+    inputDto.setSupplementaryDatasetEntity(null);
 
     try {
       HttpResponse<String> createCollexResponse =
@@ -277,6 +278,31 @@ public class CollectionExerciseClient {
           String.format(
               "Could not create collection exercise events colletionExerciseId=%s tag=%s status=%s",
               event.getCollectionExerciseId(), event.getTag(), response.getStatus()));
+    }
+  }
+
+  void sampleSummaryReadiness(final UUID sampleSummaryId) throws CTPException {
+    sampleSummaryReady(sampleSummaryId);
+  }
+
+  private void sampleSummaryReady(final UUID sampleSummaryId) throws CTPException {
+    try {
+      JSONObject jsonPayload = new JSONObject();
+      JSONArray jsonSampleSummaryId = new JSONArray();
+      jsonSampleSummaryId.put(sampleSummaryId);
+      jsonPayload.put("sampleSummaryId", jsonSampleSummaryId);
+
+      Unirest.put("http://localhost:" + this.port + "/sample/summary-readiness")
+          .basicAuth(this.username, this.password)
+          .header("accept", "application/json")
+          .header("Content-Type", "application/json")
+          .body(jsonPayload)
+          .asJson();
+
+    } catch (JSONException e) {
+      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload: %s", e);
+    } catch (UnirestException e) {
+      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload: %s", e);
     }
   }
 }

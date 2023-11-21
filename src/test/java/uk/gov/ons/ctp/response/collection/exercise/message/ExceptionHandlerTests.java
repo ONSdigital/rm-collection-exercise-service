@@ -15,8 +15,6 @@ import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionInstrum
 /** Unit tests for ExceptionHandler class */
 public class ExceptionHandlerTests {
 
-  private static final UUID COLLECTION_INSTRUMENT_ID =
-      UUID.fromString("699632ec-c75b-4454-a0ae-d15c592a6473");
   private static final UUID COLLECTION_EXERCISE_ID =
       UUID.fromString("d42f358c-812c-45f7-a064-39739d0189a6");
 
@@ -35,9 +33,7 @@ public class ExceptionHandlerTests {
   public void setUp() {
     this.exceptionHandler = new ExceptionHandler();
     this.ctpException = new CTPException(EXCEPTION_FAULT, EXCEPTION_MESSAGE);
-    this.messageDto =
-        new CollectionInstrumentMessageDTO(
-            null, COLLECTION_EXERCISE_ID.toString(), COLLECTION_INSTRUMENT_ID.toString());
+    this.messageDto = new CollectionInstrumentMessageDTO("ADD", COLLECTION_EXERCISE_ID.toString());
   }
 
   /** Given null exception When handleException Then empty response */
@@ -57,9 +53,6 @@ public class ExceptionHandlerTests {
     Map<ExceptionHandler.ResultKey, String> result =
         this.exceptionHandler.handleException(exception);
 
-    assertEquals(
-        COLLECTION_INSTRUMENT_ID.toString(),
-        result.get(ExceptionHandler.ResultKey.collectionInstrument));
     assertEquals(
         COLLECTION_EXERCISE_ID.toString(),
         result.get(ExceptionHandler.ResultKey.collectionExercise));
@@ -97,9 +90,6 @@ public class ExceptionHandlerTests {
         this.exceptionHandler.handleException(exception);
 
     assertEquals(
-        COLLECTION_INSTRUMENT_ID.toString(),
-        result.get(ExceptionHandler.ResultKey.collectionInstrument));
-    assertEquals(
         COLLECTION_EXERCISE_ID.toString(),
         result.get(ExceptionHandler.ResultKey.collectionExercise));
     assertNull(result.get(ExceptionHandler.ResultKey.errorType));
@@ -117,9 +107,6 @@ public class ExceptionHandlerTests {
     Map<ExceptionHandler.ResultKey, String> result =
         this.exceptionHandler.handleException(exception);
 
-    assertEquals(
-        COLLECTION_INSTRUMENT_ID.toString(),
-        result.get(ExceptionHandler.ResultKey.collectionInstrument));
     assertEquals(
         COLLECTION_EXERCISE_ID.toString(),
         result.get(ExceptionHandler.ResultKey.collectionExercise));

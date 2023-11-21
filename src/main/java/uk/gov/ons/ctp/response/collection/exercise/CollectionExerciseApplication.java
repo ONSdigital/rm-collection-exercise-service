@@ -99,11 +99,13 @@ public class CollectionExerciseApplication {
     liquibase.setChangeLog(liquibaseProperties.getChangeLog());
     liquibase.setContexts(liquibaseProperties.getContexts());
     liquibase.setDataSource(getDataSource(liquibaseProperties));
-    liquibase.setDefaultSchema(liquibaseProperties.getDefaultSchema());
     liquibase.setDropFirst(liquibaseProperties.isDropFirst());
     liquibase.setShouldRun(true);
     liquibase.setLabels(liquibaseProperties.getLabels());
     liquibase.setChangeLogParameters(liquibaseProperties.getParameters());
+    liquibase.setLiquibaseSchema(liquibaseProperties.getLiquibaseSchema());
+    liquibase.setDatabaseChangeLogLockTable(liquibaseProperties.getDatabaseChangeLogLockTable());
+    liquibase.setDatabaseChangeLogTable(liquibaseProperties.getDatabaseChangeLogTable());
     return new CustomSpringLiquibase(liquibase);
   }
 
@@ -268,6 +270,25 @@ public class CollectionExerciseApplication {
 
   @Bean
   public MessageChannel collectionExerciseEventStatusUpdateChannel() {
+    return new PublishSubscribeChannel();
+  }
+
+  @Bean
+  public PubSubInboundChannelAdapter supplementaryDataServiceInboundChannelAdapter(
+      @Qualifier("supplementaryDataServiceMessageChannel") MessageChannel inputChannel,
+      PubSubTemplate pubSubTemplate) {
+    String subscriptionName = appConfig.getGcp().getSupplementaryDataServiceSubscription();
+    log.info(
+        "Application is listening for Supplementary Data Service requests {}", subscriptionName);
+    PubSubInboundChannelAdapter adapter =
+        new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
+    adapter.setOutputChannel(inputChannel);
+    adapter.setAckMode(AckMode.MANUAL);
+    return adapter;
+  }
+
+  @Bean
+  public MessageChannel supplementaryDataServiceMessageChannel() {
     return new PublishSubscribeChannel();
   }
 }
