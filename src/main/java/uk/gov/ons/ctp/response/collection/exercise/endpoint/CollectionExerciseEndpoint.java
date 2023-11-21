@@ -536,7 +536,7 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   public ResponseEntity<CollectionExercise> deleteCollectionExercise(
       @PathVariable("id") final UUID id) throws CTPException {
-    log.with("collection_exercise_id", id).debug("Deleting collection exercise");
+    log.with("collection_exercise_id", id).info("Deleting collection exercise");
     collectionExerciseService.deleteCollectionExercise(id);
 
     return ResponseEntity.accepted().build();
@@ -746,7 +746,7 @@ public class CollectionExerciseEndpoint {
       @PathVariable("id") final UUID id, final @RequestBody EventDTO eventDto) throws CTPException {
     log.with("collection_exercise_id", id)
         .with("event_tag", eventDto.getTag())
-        .debug("Creating event for collection exercise");
+        .info("Creating event for collection exercise");
 
     eventDto.setCollectionExerciseId(id);
     Event newEvent;
@@ -883,7 +883,7 @@ public class CollectionExerciseEndpoint {
       throws CTPException {
     log.with("event_id", id)
         .with("tag", tag)
-        .debug("Deleting collection exercise event id, event tag ");
+        .info("Deleting collection exercise event id, event tag ");
 
     eventService.deleteEvent(id, tag);
 

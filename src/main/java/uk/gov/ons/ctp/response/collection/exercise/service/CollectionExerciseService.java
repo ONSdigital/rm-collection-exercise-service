@@ -317,7 +317,7 @@ public class CollectionExerciseService {
       CollectionExerciseDTO collex, SurveyDTO survey) {
     log.with("survey_ref", survey.getSurveyRef())
         .with("exercise_ref", collex.getExerciseRef())
-        .debug("Creating collection exercise");
+        .info("Creating collection exercise");
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
     log.with("collection_exercise_id", collectionExercise.getId())
