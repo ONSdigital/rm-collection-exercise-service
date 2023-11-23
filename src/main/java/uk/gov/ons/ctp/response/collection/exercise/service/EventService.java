@@ -441,7 +441,7 @@ public class EventService {
                 }
               } else {
                 log.with("tag", event.getTag())
-                    .debug("Event is not actionable, setting to COMPLETED state");
+                    .info("Event is not actionable, setting to COMPLETED state");
                 event.setStatus(EventDTO.Status.PROCESSED);
               }
               eventRepository.saveAndFlush(event);
