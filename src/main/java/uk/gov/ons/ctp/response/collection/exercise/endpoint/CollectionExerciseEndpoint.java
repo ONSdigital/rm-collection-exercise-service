@@ -695,7 +695,7 @@ public class CollectionExerciseEndpoint {
   private CollectionExerciseDTO getCollectionExerciseDTO(
       final CollectionExercise collectionExercise) {
     log.with("collection_exercise_id", collectionExercise.getId())
-        .debug("Populating data for requested collection exercise");
+        .info("Populating data for requested collection exercise");
 
     CollectionExerciseDTO collectionExerciseDTO =
         ObjectConverter.collectionExerciseDTO(collectionExercise);
