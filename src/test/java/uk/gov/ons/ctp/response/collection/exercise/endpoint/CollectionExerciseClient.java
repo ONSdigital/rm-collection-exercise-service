@@ -6,6 +6,7 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
 import java.time.OffsetDateTime;
@@ -37,10 +38,10 @@ public class CollectionExerciseClient {
   /**
    * Constructor for client - accepts API connection information
    *
-   * @param aPort collection exercise API port
+   * @param aPort     collection exercise API port
    * @param aUsername collection exercise API username
    * @param aPassword collection exercise API password
-   * @param aMapper an object mapper
+   * @param aMapper   an object mapper
    */
   public CollectionExerciseClient(
       final int aPort, final String aUsername, final String aPassword, final ObjectMapper aMapper) {
@@ -71,21 +72,20 @@ public class CollectionExerciseClient {
   }
 
   public HttpResponse updateEvent(final EventDTO event) {
-    final OffsetDateTime offsetDateTime =
-        OffsetDateTime.ofInstant(event.getTimestamp().toInstant(), ZoneOffset.systemDefault());
+    final OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(event.getTimestamp().toInstant(),
+        ZoneOffset.systemDefault());
     final String date = DateTimeFormatter.ISO_DATE_TIME.format(offsetDateTime);
 
     HttpResponse response = null;
     try {
-      response =
-          Unirest.put("http://localhost:" + this.port + "/collectionexercises/{id}/events/{tag}")
-              .routeParam("id", event.getCollectionExerciseId().toString())
-              .routeParam("tag", event.getTag())
-              .basicAuth(this.username, this.password)
-              .header("accept", "application/json")
-              .header("Content-Type", "text/plain")
-              .body(date)
-              .asObject(ResponseEventDTO.class);
+      response = Unirest.put("http://localhost:" + this.port + "/collectionexercises/{id}/events/{tag}")
+          .routeParam("id", event.getCollectionExerciseId().toString())
+          .routeParam("tag", event.getTag())
+          .basicAuth(this.username, this.password)
+          .header("accept", "application/json")
+          .header("Content-Type", "text/plain")
+          .body(date)
+          .asObject(ResponseEventDTO.class);
     } catch (UnirestException e) {
       throw new RuntimeException(
           String.format(
@@ -105,12 +105,14 @@ public class CollectionExerciseClient {
   /**
    * Calls the API to create a collection exercise
    *
-   * @param surveyId survey to create collection exercise for
-   * @param exerciseRef the period of the collection exercise
+   * @param surveyId        survey to create collection exercise for
+   * @param exerciseRef     the period of the collection exercise
    * @param userDescription the description of the collection exercise
-   * @return a Pair of the status code of the operation and the location at which the new resource
-   *     has been created
-   * @throws CTPException thrown if an error occurred creating the collection exercise
+   * @return a Pair of the status code of the operation and the location at which
+   *         the new resource
+   *         has been created
+   * @throws CTPException thrown if an error occurred creating the collection
+   *                      exercise
    */
   public Pair<Integer, String> createCollectionExercise(
       final UUID surveyId, final String exerciseRef, final String userDescription)
@@ -123,13 +125,12 @@ public class CollectionExerciseClient {
     inputDto.setSupplementaryDatasetEntity(null);
 
     try {
-      HttpResponse<String> createCollexResponse =
-          Unirest.post("http://localhost:" + this.port + "/collectionexercises")
-              .basicAuth(this.username, this.password)
-              .header("accept", "application/json")
-              .header("Content-Type", "application/json")
-              .body(inputDto)
-              .asString();
+      HttpResponse<String> createCollexResponse = Unirest.post("http://localhost:" + this.port + "/collectionexercises")
+          .basicAuth(this.username, this.password)
+          .header("accept", "application/json")
+          .header("Content-Type", "application/json")
+          .body(inputDto)
+          .asString();
       int statusCode = createCollexResponse.getStatus();
       List<String> locations = createCollexResponse.getHeaders().get("Location");
       String location = locations != null && locations.size() > 0 ? locations.get(0) : null;
@@ -146,7 +147,8 @@ public class CollectionExerciseClient {
    *
    * @param collexId the uuid of the collection exercise
    * @return the full details of the collection exercise
-   * @throws CTPException thrown if an error occurred retrieving the collection exercise details
+   * @throws CTPException thrown if an error occurred retrieving the collection
+   *                      exercise details
    */
   CollectionExerciseDTO getCollectionExercise(final UUID collexId) throws CTPException {
     try {
@@ -165,11 +167,13 @@ public class CollectionExerciseClient {
   }
 
   /**
-   * Gets a collection exercise given the whole URI (e.g. as returned in a Location header)
+   * Gets a collection exercise given the whole URI (e.g. as returned in a
+   * Location header)
    *
    * @param uriStr the full URI of the collection exercise resource
    * @return a representation of the collection exercise
-   * @throws CTPException thrown if there was an error retrieving the collection exercise
+   * @throws CTPException thrown if there was an error retrieving the collection
+   *                      exercise
    */
   public CollectionExerciseDTO getCollectionExercise(final String uriStr) throws CTPException {
     try {
@@ -187,11 +191,12 @@ public class CollectionExerciseClient {
   /**
    * Calls the API to link a list of sample summaries to a collection exercise
    *
-   * @param collexId the uuid of the collection exercise to link
+   * @param collexId         the uuid of the collection exercise to link
    * @param sampleSummaryIds a list of the uuids of the sample summaries to link
    * @return the http status code of the operation
-   * @throws CTPException thrown if there was an error linking the sample summaries to the
-   *     collection exercise
+   * @throws CTPException thrown if there was an error linking the sample
+   *                      summaries to the
+   *                      collection exercise
    */
   private int linkSampleSummaries(final UUID collexId, final List<UUID> sampleSummaryIds)
       throws CTPException {
@@ -200,17 +205,17 @@ public class CollectionExerciseClient {
       for (UUID ssi : sampleSummaryIds) {
         arrayBuilder.add(ssi.toString());
       }
-      JsonObject jsonPayload =
-          Json.createObjectBuilder().add("sampleSummaryIds", arrayBuilder).build();
+      JsonArray sampleSummaryArray = arrayBuilder.build();
+      JsonObject jsonPayload = Json.createObjectBuilder().add("sampleSummaryIds", sampleSummaryArray).build();
 
-      HttpResponse<JsonNode> linkResponse =
-          Unirest.put("http://localhost:" + this.port + "/collectionexercises/link/{id}")
-              .routeParam("id", collexId.toString())
-              .basicAuth(this.username, this.password)
-              .header("accept", "application/json")
-              .header("Content-Type", "application/json")
-              .body(jsonPayload)
-              .asJson();
+      HttpResponse<JsonNode> linkResponse = Unirest
+          .put("http://localhost:" + this.port + "/collectionexercises/link/{id}")
+          .routeParam("id", collexId.toString())
+          .basicAuth(this.username, this.password)
+          .header("accept", "application/json")
+          .header("Content-Type", "application/json")
+          .body(jsonPayload)
+          .asJson();
 
       return linkResponse.getStatus();
     } catch (UnirestException e) {
@@ -221,10 +226,11 @@ public class CollectionExerciseClient {
   /**
    * Links a sample summary to a collection exercise
    *
-   * @param collexId the uuid of the collection exercise to link
+   * @param collexId        the uuid of the collection exercise to link
    * @param sampleSummaryId the uuid of the sample summary to link
-   * @throws CTPException thrown if there was an error linking the sample summary to the collection
-   *     exercise
+   * @throws CTPException thrown if there was an error linking the sample summary
+   *                      to the collection
+   *                      exercise
    * @see CollectionExerciseClient#linkSampleSummaries
    */
   void linkSampleSummary(final UUID collexId, final UUID sampleSummaryId) throws CTPException {
@@ -240,13 +246,12 @@ public class CollectionExerciseClient {
    */
   List<SampleLinkDTO> getSampleLinks(final UUID collexId) throws CTPException {
     try {
-      SampleLinkDTO[] linkArray =
-          Unirest.get("http://localhost:" + this.port + "/collectionexercises/link/{id}")
-              .routeParam("id", collexId.toString())
-              .basicAuth(this.username, this.password)
-              .header("accept", "application/vnd.ons.sdc.samplelink.v1+json")
-              .asObject(SampleLinkDTO[].class)
-              .getBody();
+      SampleLinkDTO[] linkArray = Unirest.get("http://localhost:" + this.port + "/collectionexercises/link/{id}")
+          .routeParam("id", collexId.toString())
+          .basicAuth(this.username, this.password)
+          .header("accept", "application/vnd.ons.sdc.samplelink.v1+json")
+          .asObject(SampleLinkDTO[].class)
+          .getBody();
 
       return Arrays.asList(linkArray);
     } catch (UnirestException e) {
@@ -258,14 +263,13 @@ public class CollectionExerciseClient {
   public void createCollectionExerciseEvent(EventDTO event) {
     HttpResponse<String> response = null;
     try {
-      response =
-          Unirest.post("http://localhost:" + this.port + "/collectionexercises/{id}/events")
-              .routeParam("id", event.getCollectionExerciseId().toString())
-              .basicAuth(this.username, this.password)
-              .header("accept", "application/json")
-              .header("Content-Type", "application/json")
-              .body(event)
-              .asString();
+      response = Unirest.post("http://localhost:" + this.port + "/collectionexercises/{id}/events")
+          .routeParam("id", event.getCollectionExerciseId().toString())
+          .basicAuth(this.username, this.password)
+          .header("accept", "application/json")
+          .header("Content-Type", "application/json")
+          .body(event)
+          .asString();
     } catch (UnirestException e) {
       throw new RuntimeException(
           String.format(
@@ -289,8 +293,8 @@ public class CollectionExerciseClient {
     try {
       JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
       arrayBuilder.add(sampleSummaryId.toString());
-      JsonObject jsonPayload =
-          Json.createObjectBuilder().add("sampleSummaryIds", arrayBuilder).build();
+      JsonArray sampleSummaryArray = arrayBuilder.build();
+      JsonObject jsonPayload = Json.createObjectBuilder().add("sampleSummaryIds", sampleSummaryArray).build();
 
       Unirest.put("http://localhost:" + this.port + "/sample/summary-readiness")
           .basicAuth(this.username, this.password)
