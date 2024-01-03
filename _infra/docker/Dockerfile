@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17-jre-alpine
 
-RUN apt-get update
+RUN apk update
 COPY target/collectionexercisesvc.jar /opt/collectionexercisesvc.jar
 
 EXPOSE 8145
