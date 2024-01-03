@@ -1,4 +1,4 @@
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jre-alpine
 
 RUN apt-get update
 COPY target/collectionexercisesvc.jar /opt/collectionexercisesvc.jar
