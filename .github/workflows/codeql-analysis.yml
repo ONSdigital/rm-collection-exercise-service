@@ -53,7 +53,10 @@ jobs:
 
 
     - name: Install Project
-      run: mvn clean install
+      run: |
+            sudo apt-get install openjdk-17-jdk
+            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            mvn clean install
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
