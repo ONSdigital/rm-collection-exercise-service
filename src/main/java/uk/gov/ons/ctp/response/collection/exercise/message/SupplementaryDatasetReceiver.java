@@ -31,13 +31,10 @@ public class SupplementaryDatasetReceiver {
       @Header(GcpPubSubHeaders.ORIGINAL_MESSAGE) BasicAcknowledgeablePubsubMessage pubSubMsg)
       throws CTPException {
     log.info(
-        "Receiving message ID from PubSub {}",
-        kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
+            "Receiving message ID from PubSub {}",
+            kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
     String payload = new String((byte[]) message.getPayload());
     log.with("payload", payload).info("New message from Supplementary Data Service");
-
-    // Printing the received message for local testing
-    System.out.println("Received Message: " + payload);
 
     try {
       log.info("Mapping payload to Supplementary Dataset object");
@@ -45,23 +42,25 @@ public class SupplementaryDatasetReceiver {
       supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (CTPException e) {
-      log.error("Error processing message from Supplementary Dataset Service: {}", e.getMessage());
       String surveyId = null;
       String periodId = null;
       try {
         surveyId = getSurveyId(payload);
         periodId = getPeriodId(payload);
       } catch (CTPException ex) {
-        log.error("Error extracting surveyId or periodId from message: {}", ex.getMessage());
-        throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND,
-            String.format(
-                "Cannot find collection exercise for surveyRef=%s and period=%s",
-                surveyId, periodId));
+        log.error("Error extracting surveyRef or period from message: {}", ex.getMessage());
       }
+      log.error("Error processing message from Supplementary Dataset Service for collection exercise period Id {} and surveyId {}: {}", periodId, surveyId, e.getMessage());
+
+      throw new CTPException(
+              CTPException.Fault.RESOURCE_NOT_FOUND,
+              String.format(
+                      "Cannot find collection exercise for surveyRef=%s and period=%s",
+                      surveyId,
+                      periodId));
+    }
       pubSubMsg.nack();
     }
-  }
 
   private String getSurveyId(String payload) throws CTPException {
     try {
