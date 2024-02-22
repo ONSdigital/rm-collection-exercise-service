@@ -31,8 +31,8 @@ public class SupplementaryDatasetReceiver {
       @Header(GcpPubSubHeaders.ORIGINAL_MESSAGE) BasicAcknowledgeablePubsubMessage pubSubMsg)
       throws CTPException {
     log.info(
-            "Receiving message ID from PubSub {}",
-            kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
+        "Receiving message ID from PubSub {}",
+        kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
     String payload = new String((byte[]) message.getPayload());
     log.with("payload", payload).info("New message from Supplementary Data Service");
 
@@ -50,17 +50,20 @@ public class SupplementaryDatasetReceiver {
       } catch (CTPException ex) {
         log.error("Error extracting surveyRef or period from message: {}", ex.getMessage());
       }
-      log.error("Error processing message from Supplementary Dataset Service for collection exercise period Id {} and surveyId {}: {}", periodId, surveyId, e.getMessage());
+      log.error(
+          "Error processing message from Supplementary Dataset Service for collection exercise period Id {} and surveyId {}: {}",
+          periodId,
+          surveyId,
+          e.getMessage());
 
       throw new CTPException(
-              CTPException.Fault.RESOURCE_NOT_FOUND,
-              String.format(
-                      "Cannot find collection exercise for surveyRef=%s and period=%s",
-                      surveyId,
-                      periodId));
+          CTPException.Fault.RESOURCE_NOT_FOUND,
+          String.format(
+              "Cannot find collection exercise for surveyRef=%s and period=%s",
+              surveyId, periodId));
     }
-      pubSubMsg.nack();
-    }
+    pubSubMsg.nack();
+  }
 
   private String getSurveyId(String payload) throws CTPException {
     try {
