@@ -55,6 +55,7 @@ public class SupplementaryDatasetReceiver {
           periodId,
           surveyId,
           e.getMessage());
+      pubSubMsg.nack();
 
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND,
@@ -62,7 +63,6 @@ public class SupplementaryDatasetReceiver {
               "Cannot find collection exercise for surveyRef=%s and period=%s",
               surveyId, periodId));
     }
-    pubSubMsg.nack();
   }
 
   private String getSurveyId(String payload) throws CTPException {
