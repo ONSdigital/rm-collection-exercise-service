@@ -2,6 +2,7 @@ package uk.gov.ons.ctp.response.collection.exercise.message;
 
 import static org.mockito.Mockito.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.pubsub.v1.PubsubMessage;
 import java.util.Arrays;
@@ -53,10 +54,10 @@ public class SupplementaryDatasetReceiverTest {
 
     when(message.getPayload()).thenReturn(payload.getBytes());
     when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
-        .thenReturn(supplementaryDatasetDTO);
+            .thenReturn(supplementaryDatasetDTO);
 
     BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
-        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+            Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
     PubsubMessage pubsubMessage = Mockito.mock(PubsubMessage.class);
 
@@ -91,21 +92,20 @@ public class SupplementaryDatasetReceiverTest {
 
     when(message.getPayload()).thenReturn(payload.getBytes());
     when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
-        .thenThrow(new JsonProcessingException("Error occurred") {});
+            .thenThrow(new JsonProcessingException("Error occurred") {});
 
     BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
-        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+            Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
     PubsubMessage pubsubMessage = Mockito.mock(PubsubMessage.class);
 
     String messageId = "123";
     when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
 
-
- when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
+    when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
 
     supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
 
     verify(basicAcknowledgeablePubsubMessage, times(1)).nack();
   }
- }
+}
