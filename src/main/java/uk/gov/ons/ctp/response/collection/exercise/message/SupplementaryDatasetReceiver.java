@@ -28,8 +28,7 @@ public class SupplementaryDatasetReceiver {
   @ServiceActivator(inputChannel = "supplementaryDataServiceMessageChannel")
   public void messageReceiver(
       Message message,
-      @Header(GcpPubSubHeaders.ORIGINAL_MESSAGE) BasicAcknowledgeablePubsubMessage pubSubMsg)
-      throws CTPException {
+      @Header(GcpPubSubHeaders.ORIGINAL_MESSAGE) BasicAcknowledgeablePubsubMessage pubSubMsg) {
     log.info(
         "Receiving message ID from PubSub {}",
         kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
@@ -42,44 +41,8 @@ public class SupplementaryDatasetReceiver {
       supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
       pubSubMsg.ack();
     } catch (CTPException e) {
-      String surveyId = null;
-      String periodId = null;
-      try {
-        surveyId = getSurveyId(payload);
-        periodId = getPeriodId(payload);
-      } catch (CTPException ex) {
-        log.error("Error extracting surveyRef or period from message: {}", ex.getMessage());
-      }
-      log.error(
-          "Error processing message from Supplementary Dataset Service for collection exercise period Id {} and surveyId {}: {}",
-          periodId,
-          surveyId,
-          e.getMessage());
+      log.error("Error processing message from Supplementary Dataset Service", e);
       pubSubMsg.nack();
-
-      throw new CTPException(
-          CTPException.Fault.RESOURCE_NOT_FOUND,
-          String.format(
-              "Cannot find collection exercise for surveyRef=%s and period=%s",
-              surveyId, periodId));
-    }
-  }
-
-  private String getSurveyId(String payload) throws CTPException {
-    try {
-      return objectMapper.readTree(payload).get("survey_id").asText();
-    } catch (JsonProcessingException e) {
-      throw new CTPException(
-          CTPException.Fault.BAD_REQUEST, "Could not extract survey_id from message");
-    }
-  }
-
-  private String getPeriodId(String payload) throws CTPException {
-    try {
-      return objectMapper.readTree(payload).get("period_id").asText();
-    } catch (JsonProcessingException e) {
-      throw new CTPException(
-          CTPException.Fault.BAD_REQUEST, "Could not extract period_id from message");
     }
   }
 

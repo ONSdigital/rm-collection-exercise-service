@@ -69,44 +69,43 @@ public class SupplementaryDatasetReceiverTest {
 
     verify(basicAcknowledgeablePubsubMessage, times(1)).ack();
   }
-}
 
-//  @Test
-//  public void testMessageNacked() throws Exception {
-//    UUID datasetId = UUID.randomUUID();
-//    String surveyId = "221";
-//    String periodId = "2023";
-//    List<String> formTypes = Arrays.asList("0017", "0023", "0099");
-//
-//    SupplementaryDatasetDTO supplementaryDatasetDTO = new SupplementaryDatasetDTO();
-//
-//    supplementaryDatasetDTO.setDatasetId(datasetId);
-//    supplementaryDatasetDTO.setSurveyId(surveyId);
-//    supplementaryDatasetDTO.setPeriodId(periodId);
-//    supplementaryDatasetDTO.setFormTypes(formTypes);
-//
-//    ObjectMapper mapper = new ObjectMapper();
-//    String payload = mapper.writeValueAsString(supplementaryDatasetDTO);
-//
-//    Message message = Mockito.mock(Message.class);
-//
-//    when(message.getPayload()).thenReturn(payload.getBytes());
-//    when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
-//        .thenThrow(new JsonProcessingException("Error occurred") {});
-//
-//    BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
-//        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
-//
-//    PubsubMessage pubsubMessage = Mockito.mock(PubsubMessage.class);
-//
-//    String messageId = "123";
-//    when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
-//
-//
-// when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
-//
-//    supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
-//
-//    verify(basicAcknowledgeablePubsubMessage, times(1)).nack();
-//  }
-// }
+  @Test
+  public void testMessageNacked() throws Exception {
+    UUID datasetId = UUID.randomUUID();
+    String surveyId = "221";
+    String periodId = "2023";
+    List<String> formTypes = Arrays.asList("0017", "0023", "0099");
+
+    SupplementaryDatasetDTO supplementaryDatasetDTO = new SupplementaryDatasetDTO();
+
+    supplementaryDatasetDTO.setDatasetId(datasetId);
+    supplementaryDatasetDTO.setSurveyId(surveyId);
+    supplementaryDatasetDTO.setPeriodId(periodId);
+    supplementaryDatasetDTO.setFormTypes(formTypes);
+
+    ObjectMapper mapper = new ObjectMapper();
+    String payload = mapper.writeValueAsString(supplementaryDatasetDTO);
+
+    Message message = Mockito.mock(Message.class);
+
+    when(message.getPayload()).thenReturn(payload.getBytes());
+    when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
+        .thenThrow(new JsonProcessingException("Error occurred") {});
+
+    BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+
+    PubsubMessage pubsubMessage = Mockito.mock(PubsubMessage.class);
+
+    String messageId = "123";
+    when(basicAcknowledgeablePubsubMessage.getPubsubMessage()).thenReturn(pubsubMessage);
+
+
+ when(basicAcknowledgeablePubsubMessage.getPubsubMessage().getMessageId()).thenReturn(messageId);
+
+    supplementaryDatasetReceiver.messageReceiver(message, basicAcknowledgeablePubsubMessage);
+
+    verify(basicAcknowledgeablePubsubMessage, times(1)).nack();
+  }
+ }
