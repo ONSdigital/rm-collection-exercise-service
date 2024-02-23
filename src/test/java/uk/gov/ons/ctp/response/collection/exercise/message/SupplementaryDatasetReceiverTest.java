@@ -54,10 +54,10 @@ public class SupplementaryDatasetReceiverTest {
 
     when(message.getPayload()).thenReturn(payload.getBytes());
     when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
-            .thenReturn(supplementaryDatasetDTO);
+        .thenReturn(supplementaryDatasetDTO);
 
     BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
-            Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
     PubsubMessage pubsubMessage = Mockito.mock(PubsubMessage.class);
 
@@ -92,10 +92,10 @@ public class SupplementaryDatasetReceiverTest {
 
     when(message.getPayload()).thenReturn(payload.getBytes());
     when(objectMapper.readValue(payload, SupplementaryDatasetDTO.class))
-            .thenThrow(new JsonProcessingException("Error occurred") {});
+        .thenThrow(new JsonProcessingException("Error occurred") {});
 
     BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage =
-            Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
+        Mockito.mock(BasicAcknowledgeablePubsubMessage.class);
 
     PubsubMessage pubsubMessage = Mockito.mock(PubsubMessage.class);
 

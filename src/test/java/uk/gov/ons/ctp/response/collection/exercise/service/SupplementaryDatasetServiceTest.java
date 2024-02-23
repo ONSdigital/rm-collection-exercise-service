@@ -1,5 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.Test;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -76,7 +76,7 @@ public class SupplementaryDatasetServiceTest {
   public void testFailedToFindCollectionExerciseForSupplementaryDatasetResourceNotFoundException() {
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
-            .thenReturn(null);
+        .thenReturn(null);
     try {
       supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
 

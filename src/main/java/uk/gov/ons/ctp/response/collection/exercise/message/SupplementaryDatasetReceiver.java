@@ -34,7 +34,6 @@ public class SupplementaryDatasetReceiver {
         kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
     String payload = new String((byte[]) message.getPayload());
     log.with("payload", payload).info("New message from Supplementary Data Service");
-
     try {
       log.info("Mapping payload to Supplementary Dataset object");
       SupplementaryDatasetDTO supplementaryDatasetDTO = createSupplementaryDatasetDTO(payload);
