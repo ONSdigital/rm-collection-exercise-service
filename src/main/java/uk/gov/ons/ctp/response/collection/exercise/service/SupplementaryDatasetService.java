@@ -42,8 +42,13 @@ public class SupplementaryDatasetService {
       supplementaryDatasetRepository.save(supplementaryDatasetEntity);
       log.info("Successfully saved the supplementary dataset to the database");
     } catch (Exception e) {
-      throw new CTPException(
-          CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset", e);
+      if (collectionExercise == null) {
+        log.error("Failed to find collection exercise for supplementary dataset. " +
+                "SurveyId: {}, PeriodId: {}", supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId());
+        throw new CTPException(
+                CTPException.Fault.RESOURCE_NOT_FOUND,
+                "Failed to find collection exercise for supplementary dataset");
+      }
     }
   }
 

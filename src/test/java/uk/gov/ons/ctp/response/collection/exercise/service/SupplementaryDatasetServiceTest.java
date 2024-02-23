@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.Test;
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -68,6 +70,21 @@ public class SupplementaryDatasetServiceTest {
         .thenReturn(null);
 
     supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+  }
+
+  @Test
+  public void testFailedToFindCollectionExerciseForSupplementaryDatasetResourceNotFoundException() {
+    when(collectionExerciseService.findCollectionExercise(
+            supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
+            .thenReturn(null);
+    try {
+      supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+
+      fail("Expected CTPException was not thrown");
+    } catch (CTPException e) {
+      assertEquals(CTPException.class, e.getClass());
+      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+    }
   }
 
   @Test
