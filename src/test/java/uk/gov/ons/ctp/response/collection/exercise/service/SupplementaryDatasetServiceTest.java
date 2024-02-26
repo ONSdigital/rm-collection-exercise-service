@@ -92,11 +92,14 @@ public class SupplementaryDatasetServiceTest {
     supplementaryDatasetDTO.setSurveyId("surveyId");
     supplementaryDatasetDTO.setPeriodId("periodId");
 
-    when(collectionExerciseService.findCollectionExercise(anyString(), anyString())).thenReturn(null);
+    when(collectionExerciseService.findCollectionExercise(anyString(), anyString()))
+        .thenReturn(null);
 
-    assertThrows(CTPException.class, () -> {
-      supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
-    });
+    assertThrows(
+        CTPException.class,
+        () -> {
+          supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+        });
 
     verify(collectionExerciseService).findCollectionExercise(anyString(), anyString());
     verifyNoInteractions(supplementaryDatasetRepository);
