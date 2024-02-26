@@ -84,24 +84,6 @@ public class SupplementaryDatasetServiceTest {
       assertEquals("Failed to find collection exercise for supplementary dataset", e.getMessage());
     }
     verify(collectionExerciseService).findCollectionExercise(anyString(), anyString());
-  }
-
-  @Test
-  public void testFailedToSaveSupplementaryDataset() {
-    SupplementaryDatasetDTO supplementaryDatasetDTO = new SupplementaryDatasetDTO();
-    supplementaryDatasetDTO.setSurveyId("surveyId");
-    supplementaryDatasetDTO.setPeriodId("periodId");
-
-    when(collectionExerciseService.findCollectionExercise(anyString(), anyString()))
-        .thenReturn(null);
-
-    assertThrows(
-        CTPException.class,
-        () -> {
-          supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
-        });
-
-    verify(collectionExerciseService).findCollectionExercise(anyString(), anyString());
     verifyNoInteractions(supplementaryDatasetRepository);
   }
 
