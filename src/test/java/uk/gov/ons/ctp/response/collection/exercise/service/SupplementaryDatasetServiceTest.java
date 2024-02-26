@@ -87,7 +87,7 @@ public class SupplementaryDatasetServiceTest {
   }
 
   @Test
-  public void testFailedToFindCollectionExerciseForSupplementaryDatasetLogsError() {
+  public void testFailedToSaveSupplementaryDataset() {
     SupplementaryDatasetDTO supplementaryDatasetDTO = new SupplementaryDatasetDTO();
     supplementaryDatasetDTO.setSurveyId("surveyId");
     supplementaryDatasetDTO.setPeriodId("periodId");
