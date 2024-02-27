@@ -61,15 +61,6 @@ public class SupplementaryDatasetServiceTest {
     verify(supplementaryDatasetRepository, times(1)).save(supplementaryDatasetEntity);
   }
 
-  @Test(expected = CTPException.class)
-  public void testFailedToFindCollectionExerciseForSupplementaryDataset() throws CTPException {
-    when(collectionExerciseService.findCollectionExercise(
-            supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
-        .thenReturn(null);
-
-    supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
-  }
-
   @Test
   public void testFailedToFindCollectionExerciseThrowsResourceNotFoundException() {
     when(collectionExerciseService.findCollectionExercise(
