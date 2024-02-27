@@ -28,7 +28,16 @@ public class SupplementaryDatasetService {
     CollectionExercise collectionExercise =
         collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId());
-
+    if (collectionExercise == null) {
+      log.error(
+              "Failed to find collection exercise for supplementary dataset. "
+                      + "survey_id: {}, period_id: {}",
+              supplementaryDatasetDTO.getSurveyId(),
+              supplementaryDatasetDTO.getPeriodId());
+      throw new CTPException(
+              CTPException.Fault.RESOURCE_NOT_FOUND,
+              "Failed to find collection exercise for supplementary dataset");
+    }
     try {
       if (existsByExerciseFK(collectionExercise.getExercisePK())) {
         log.info(
@@ -42,16 +51,8 @@ public class SupplementaryDatasetService {
       supplementaryDatasetRepository.save(supplementaryDatasetEntity);
       log.info("Successfully saved the supplementary dataset to the database");
     } catch (Exception e) {
-      if (collectionExercise == null) {
-        log.error(
-            "Failed to find collection exercise for supplementary dataset. "
-                + "SurveyId: {}, PeriodId: {}",
-            supplementaryDatasetDTO.getSurveyId(),
-            supplementaryDatasetDTO.getPeriodId());
-        throw new CTPException(
-            CTPException.Fault.RESOURCE_NOT_FOUND,
-            "Failed to find collection exercise for supplementary dataset");
-      }
+      throw new CTPException(
+              CTPException.Fault.SYSTEM_ERROR, "Something went wrong adding dataset", e);
     }
   }
 
