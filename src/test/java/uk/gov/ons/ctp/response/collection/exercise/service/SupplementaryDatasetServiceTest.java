@@ -71,7 +71,7 @@ public class SupplementaryDatasetServiceTest {
   }
 
   @Test
-  public void testFailedToFindCollectionExerciseForSupplementaryDatasetResourceNotFoundException() {
+  public void testFailedToFindCollectionExerciseThrowsResourceNotFoundException() {
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(null);
