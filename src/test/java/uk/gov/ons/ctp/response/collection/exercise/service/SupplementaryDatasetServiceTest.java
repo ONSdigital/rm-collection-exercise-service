@@ -1,8 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,13 +62,24 @@ public class SupplementaryDatasetServiceTest {
     verify(supplementaryDatasetRepository, times(1)).save(supplementaryDatasetEntity);
   }
 
-  @Test(expected = CTPException.class)
-  public void testFailedToFindCollectionExerciseForSupplementaryDataset() throws CTPException {
+  @Test
+  public void testFailedToFindCollectionExerciseThrowsResourceNotFoundException() {
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(null);
-
-    supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+    try {
+      supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
+      fail("Expected CTPException was not thrown");
+    } catch (CTPException e) {
+      assertEquals(CTPException.class, e.getClass());
+      assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
+      assertEquals(
+          "Failed to find collection exercise for supplementary dataset "
+              + "survey_id: 009, period_id: 2013",
+          e.getMessage());
+    }
+    verify(collectionExerciseService).findCollectionExercise(anyString(), anyString());
+    verifyNoInteractions(supplementaryDatasetRepository);
   }
 
   @Test
