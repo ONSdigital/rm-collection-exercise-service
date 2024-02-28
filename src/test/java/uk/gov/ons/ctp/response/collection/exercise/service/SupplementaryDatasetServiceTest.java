@@ -1,6 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -72,7 +73,10 @@ public class SupplementaryDatasetServiceTest {
     } catch (CTPException e) {
       assertEquals(CTPException.class, e.getClass());
       assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
-      assertEquals("Failed to find collection exercise for supplementary dataset", e.getMessage());
+      assertEquals(
+          "Failed to find collection exercise for supplementary dataset "
+              + "survey_id: {}, period_id: {}",
+          e.getMessage());
     }
     verify(collectionExerciseService).findCollectionExercise(anyString(), anyString());
     verifyNoInteractions(supplementaryDatasetRepository);

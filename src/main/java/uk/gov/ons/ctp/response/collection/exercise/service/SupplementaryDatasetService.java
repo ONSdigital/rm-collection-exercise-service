@@ -36,7 +36,8 @@ public class SupplementaryDatasetService {
           supplementaryDatasetDTO.getPeriodId());
       throw new CTPException(
           CTPException.Fault.RESOURCE_NOT_FOUND,
-          "Failed to find collection exercise for supplementary dataset");
+          "Failed to find collection exercise for supplementary dataset "
+              + "survey_id: {}, period_id: {}");
     }
     try {
       if (existsByExerciseFK(collectionExercise.getExercisePK())) {
