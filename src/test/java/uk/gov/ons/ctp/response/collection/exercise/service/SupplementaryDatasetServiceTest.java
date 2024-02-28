@@ -75,7 +75,7 @@ public class SupplementaryDatasetServiceTest {
       assertEquals(CTPException.Fault.RESOURCE_NOT_FOUND, e.getFault());
       assertEquals(
           "Failed to find collection exercise for supplementary dataset "
-              + "survey_id: {}, period_id: {}",
+              + "survey_id: 009, period_id: 2013",
           e.getMessage());
     }
     verify(collectionExerciseService).findCollectionExercise(anyString(), anyString());
