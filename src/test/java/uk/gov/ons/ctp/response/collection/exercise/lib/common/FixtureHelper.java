@@ -102,7 +102,7 @@ public class FixtureHelper {
       File file = new File(ClassLoader.getSystemResource(path).getFile());
       dummies = Arrays.asList(mapper.readValue(file, clazz));
     } catch (Throwable t) {
-      log.debug("Problem loading fixture {} reason {}", path, t.getMessage());
+      log.warn("Problem loading fixture {} reason {}", path, t.getMessage());
       throw t;
     }
     return dummies;

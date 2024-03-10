@@ -5,6 +5,9 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -15,9 +18,6 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import uk.gov.ons.ctp.lib.common.UnirestInitialiser;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
@@ -196,10 +196,12 @@ public class CollectionExerciseClient {
   private int linkSampleSummaries(final UUID collexId, final List<UUID> sampleSummaryIds)
       throws CTPException {
     try {
-      JSONObject jsonPayload = new JSONObject();
-      JSONArray jsonSampleSummaryIds = new JSONArray();
-      sampleSummaryIds.forEach(ssi -> jsonSampleSummaryIds.put(ssi.toString()));
-      jsonPayload.put("sampleSummaryIds", jsonSampleSummaryIds);
+      JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+      for (UUID ssi : sampleSummaryIds) {
+        arrayBuilder.add(ssi.toString());
+      }
+      JsonObject jsonPayload =
+          Json.createObjectBuilder().add("sampleSummaryIds", arrayBuilder).build();
 
       HttpResponse<JsonNode> linkResponse =
           Unirest.put("http://localhost:" + this.port + "/collectionexercises/link/{id}")
@@ -207,12 +209,10 @@ public class CollectionExerciseClient {
               .basicAuth(this.username, this.password)
               .header("accept", "application/json")
               .header("Content-Type", "application/json")
-              .body(jsonPayload)
+              .body(jsonPayload.toString())
               .asJson();
 
       return linkResponse.getStatus();
-    } catch (JSONException e) {
-      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload: %s", e);
     } catch (UnirestException e) {
       throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload: %s", e);
     }
@@ -287,20 +287,18 @@ public class CollectionExerciseClient {
 
   private void sampleSummaryReady(final UUID sampleSummaryId) throws CTPException {
     try {
-      JSONObject jsonPayload = new JSONObject();
-      JSONArray jsonSampleSummaryId = new JSONArray();
-      jsonSampleSummaryId.put(sampleSummaryId);
-      jsonPayload.put("sampleSummaryId", jsonSampleSummaryId);
+      JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+      arrayBuilder.add(sampleSummaryId.toString());
+      JsonObject jsonPayload =
+          Json.createObjectBuilder().add("sampleSummaryIds", arrayBuilder).build();
 
       Unirest.put("http://localhost:" + this.port + "/sample/summary-readiness")
           .basicAuth(this.username, this.password)
           .header("accept", "application/json")
           .header("Content-Type", "application/json")
-          .body(jsonPayload)
+          .body(jsonPayload.toString())
           .asJson();
 
-    } catch (JSONException e) {
-      throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to create payload: %s", e);
     } catch (UnirestException e) {
       throw new CTPException(CTPException.Fault.SYSTEM_ERROR, "Failed to serialize payload: %s", e);
     }
