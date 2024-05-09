@@ -123,6 +123,12 @@ public class CollectionExerciseStateTransitionManagerFactory
     transitionLive.put(CollectionExerciseEvent.END_EXERCISE, CollectionExerciseState.ENDED);
     transitions.put(CollectionExerciseState.LIVE, transitionLive);
 
+    // ENDED
+    Map<CollectionExerciseEvent, CollectionExerciseState> transitionForENDED = new HashMap<>();
+    transitionForENDED.put(
+        CollectionExerciseEvent.CI_SAMPLE_DELETED, CollectionExerciseState.ENDED);
+    transitions.put(CollectionExerciseState.ENDED, transitionForENDED);
+
     return new BasicStateTransitionManager<>(transitions);
   }
 
