@@ -198,7 +198,6 @@ public class CollectionExerciseEndpointIT {
     // Given
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
-    stubGetPartyBySampleUnitRef();
     SampleSummaryDTO sampleSummary = stubSampleSummary();
     UUID collectionExerciseId = createScheduledCollectionExercise();
     this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
@@ -217,7 +216,6 @@ public class CollectionExerciseEndpointIT {
     // Given
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
-    stubGetPartyBySampleUnitRef();
     SampleSummaryDTO sampleSummary = stubInitSampleSummary();
     UUID collectionExerciseId = createScheduledCollectionExercise();
     this.client.linkSampleSummary(collectionExerciseId, sampleSummary.getId());
