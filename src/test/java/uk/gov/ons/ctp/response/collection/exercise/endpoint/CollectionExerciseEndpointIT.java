@@ -180,7 +180,6 @@ public class CollectionExerciseEndpointIT {
     // Given
     stubSurveyServiceBusiness();
     stubCollectionInstrumentCount();
-    stubGetPartyBySampleUnitRef();
     SampleSummaryDTO sampleSummary = stubSampleSummary();
     UUID collectionExerciseId = createScheduledCollectionExercise();
 
@@ -330,46 +329,6 @@ public class CollectionExerciseEndpointIT {
     this.wireMockRule.stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument/count"))
             .willReturn(aResponse().withBody("1")));
-  }
-
-  private void stubGetPartyBySampleUnitRef() throws IOException {
-    String json =
-        loadResourceAsString(
-            CollectionExerciseEndpointIT.class,
-            "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
-    this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
-  }
-
-  private void stubGetPartyNoAssociations() throws IOException {
-    String json =
-        loadResourceAsString(
-            CollectionExerciseEndpointIT.class,
-            "CollectionExerciseEndpointIT.PartyDTO.no-associations.json");
-    this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
-  }
-
-  private void stubGetPartyWithAssociations() throws IOException {
-    String json =
-        loadResourceAsString(
-            CollectionExerciseEndpointIT.class,
-            "CollectionExerciseEndpointIT.Supplementary.with-associations.json");
-    this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
-  }
-
-  private void stubGetSupplementaryDataServvice() throws IOException {
-    String json =
-        loadResourceAsString(
-            CollectionExerciseEndpointIT.class,
-            "CollectionExerciseEndpointIT.SupplementaryDatasetDTO.with-associations.json");
-    this.wireMockRule.stubFor(
-        get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
-            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
 
   private void createSurveyServiceClassifierStubs() throws IOException {
