@@ -7,7 +7,8 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 
 public class ObjectConverter {
 
-  private ObjectConverter() {};
+  private ObjectConverter() {
+  };
 
   public static List<SampleLinkDTO> sampleLinkDTO(List<SampleLink> sampleLinks) {
     List<SampleLinkDTO> mappedSampleLink = new ArrayList<>();
@@ -27,7 +28,6 @@ public class ObjectConverter {
     CollectionExerciseDTO collectionExerciseDTO = new CollectionExerciseDTO();
     collectionExerciseDTO.setExerciseRef(collectionExercise.getExerciseRef());
     collectionExerciseDTO.setCreated(collectionExercise.getCreated());
-    collectionExerciseDTO.setEqVersion(collectionExercise.getEqVersion());
     collectionExerciseDTO.setDeleted(collectionExercise.getDeleted());
     collectionExerciseDTO.setId(collectionExercise.getId());
     collectionExerciseDTO.setActualExecutionDateTime(
