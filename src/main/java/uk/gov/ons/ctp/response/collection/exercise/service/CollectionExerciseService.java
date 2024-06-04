@@ -39,10 +39,7 @@ public class CollectionExerciseService {
 
   private final SurveySvcClient surveyService;
 
-  private final StateTransitionManager<
-          CollectionExerciseDTO.CollectionExerciseState,
-          CollectionExerciseDTO.CollectionExerciseEvent>
-      collectionExerciseTransitionState;
+  private final StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState;
 
   @Autowired
   public CollectionExerciseService(
@@ -51,11 +48,7 @@ public class CollectionExerciseService {
       CollectionInstrumentSvcClient collectionInstrumentSvcClient,
       SampleSvcClient sampleSvcClient,
       SurveySvcClient surveyService,
-      @Qualifier("collectionExercise")
-          StateTransitionManager<
-                  CollectionExerciseDTO.CollectionExerciseState,
-                  CollectionExerciseDTO.CollectionExerciseEvent>
-              collectionExerciseTransitionState) {
+      @Qualifier("collectionExercise") StateTransitionManager<CollectionExerciseDTO.CollectionExerciseState, CollectionExerciseDTO.CollectionExerciseEvent> collectionExerciseTransitionState) {
     this.collectRepo = collectRepo;
     this.sampleLinkRepository = sampleLinkRepository;
     this.collectionInstrumentSvcClient = collectionInstrumentSvcClient;
@@ -65,7 +58,8 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Find a list of collection exercises associated to a survey from the Collection Exercise Service
+   * Find a list of collection exercises associated to a survey from the
+   * Collection Exercise Service
    *
    * @param survey the survey for which to find collection exercises
    * @return the associated collection exercises.
@@ -75,7 +69,8 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Find a list of collection exercises associated with a list of surveys from the Collection
+   * Find a list of collection exercises associated with a list of surveys from
+   * the Collection
    * Exercise Service
    *
    * @param surveyIds the survey UUIDS for which to find collection exercises
@@ -84,14 +79,14 @@ public class CollectionExerciseService {
   public HashMap<UUID, List<CollectionExercise>> findCollectionExercisesForSurveys(
       List<UUID> surveyIds) {
 
-    List<CollectionExercise> collexList =
-        this.collectRepo.findBySurveyIdInOrderBySurveyId(surveyIds);
+    List<CollectionExercise> collexList = this.collectRepo.findBySurveyIdInOrderBySurveyId(surveyIds);
 
     return this.collexListToMap(collexList);
   }
 
   /**
-   * Walks a list of collection exercises and splits them into a HashMap with key of survey id and
+   * Walks a list of collection exercises and splits them into a HashMap with key
+   * of survey id and
    * value of list of collection exercises
    *
    * @param collexList list of collection exercises to split
@@ -137,24 +132,26 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Find a list of collection exercises associated with a list of surveys from the Collection
+   * Find a list of collection exercises associated with a list of surveys from
+   * the Collection
    * Exercise Service
    *
    * @param surveyIds the survey UUIDS for which to find collection exercises
-   * @param state Only return collection exercises in this state
-   * @return the associated collection exercises as a HashMap, key is survey id , value is List of
-   *     collex
+   * @param state     Only return collection exercises in this state
+   * @return the associated collection exercises as a HashMap, key is survey id ,
+   *         value is List of
+   *         collex
    */
   public HashMap<UUID, List<CollectionExercise>> findCollectionExercisesForSurveysByState(
       List<UUID> surveyIds, CollectionExerciseState state) {
-    List<CollectionExercise> collexList =
-        this.collectRepo.findBySurveyIdInAndStateOrderBySurveyId(surveyIds, state);
+    List<CollectionExercise> collexList = this.collectRepo.findBySurveyIdInAndStateOrderBySurveyId(surveyIds, state);
 
     return this.collexListToMap(collexList);
   }
 
   /**
-   * Find a collection exercise associated to a collection exercise Id from the Collection Exercise
+   * Find a collection exercise associated to a collection exercise Id from the
+   * Collection Exercise
    * Service
    *
    * @param id the collection exercise Id for which to find collection exercise
@@ -167,10 +164,11 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Find a collection exercise from a survey ref (e.g. 221) and a collection exercise ref (e.g.
+   * Find a collection exercise from a survey ref (e.g. 221) and a collection
+   * exercise ref (e.g.
    * 201808)
    *
-   * @param surveyRef the survey ref
+   * @param surveyRef   the survey ref
    * @param exerciseRef the collection exercise ref
    * @return the specified collection exercise or null if not found
    */
@@ -186,15 +184,16 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Gets collection exercise with given exerciseRef and survey (should be no more than 1)
+   * Gets collection exercise with given exerciseRef and survey (should be no more
+   * than 1)
    *
    * @param exerciseRef the exerciseRef (period) of the collection exercise
-   * @param survey the survey the collection exercise is associated with
+   * @param survey      the survey the collection exercise is associated with
    * @return the collection exercise if it exists, null otherwise
    */
   public CollectionExercise findCollectionExercise(String exerciseRef, SurveyDTO survey) {
-    List<CollectionExercise> existing =
-        this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, UUID.fromString(survey.getId()));
+    List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef,
+        UUID.fromString(survey.getId()));
 
     switch (existing.size()) {
       case 0:
@@ -205,15 +204,16 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Gets collection exercise with given exerciseRef and survey uuid (should be no more than 1)
+   * Gets collection exercise with given exerciseRef and survey uuid (should be no
+   * more than 1)
    *
    * @param exerciseRef the exerciseRef (period) of the collection exercise
-   * @param surveyId the uuid of the survey the collection exercise is associated with
+   * @param surveyId    the uuid of the survey the collection exercise is
+   *                    associated with
    * @return the collection exercise if it exists, null otherwise
    */
   public CollectionExercise findCollectionExercise(final String exerciseRef, final UUID surveyId) {
-    List<CollectionExercise> existing =
-        this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
+    List<CollectionExercise> existing = this.collectRepo.findByExerciseRefAndSurveyId(exerciseRef, surveyId);
 
     switch (existing.size()) {
       case 0:
@@ -224,12 +224,15 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Delete existing SampleSummary links for input CollectionExercise then link all SampleSummaries
+   * Delete existing SampleSummary links for input CollectionExercise then link
+   * all SampleSummaries
    * in list to CollectionExercise
    *
    * @param collectionExerciseId the Id of the CollectionExercise to link to
-   * @param sampleSummaryIds the list of Ids of the SampleSummaries to be linked
-   * @return linkedSummaries the list of CollectionExercises and the linked SampleSummaries
+   * @param sampleSummaryIds     the list of Ids of the SampleSummaries to be
+   *                             linked
+   * @return linkedSummaries the list of CollectionExercises and the linked
+   *         SampleSummaries
    */
   @Transactional
   public List<SampleLink> linkSampleSummaryToCollectionExercise(
@@ -248,7 +251,7 @@ public class CollectionExerciseService {
   /**
    * Delete SampleSummary link
    *
-   * @param sampleSummaryId a sample summary uuid
+   * @param sampleSummaryId      a sample summary uuid
    * @param collectionExerciseId a collection exercise uuid
    * @throws CTPException thrown if transition fails
    */
@@ -258,8 +261,7 @@ public class CollectionExerciseService {
     sampleLinkRepository.deleteBySampleSummaryIdAndCollectionExerciseId(
         sampleSummaryId, collectionExerciseId);
 
-    List<SampleLink> sampleLinks =
-        this.sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId);
+    List<SampleLink> sampleLinks = this.sampleLinkRepository.findByCollectionExerciseId(collectionExerciseId);
 
     if (sampleLinks.size() == 0) {
       transitionCollectionExercise(
@@ -268,11 +270,13 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Sets the values in a supplied collection exercise from a supplied DTO. WARNING: Mutates
+   * Sets the values in a supplied collection exercise from a supplied DTO.
+   * WARNING: Mutates
    * collection exercise
    *
-   * @param collex the dto containing the data
-   * @param collectionExercise the collection exercise to apply the value from the dto to
+   * @param collex             the dto containing the data
+   * @param collectionExercise the collection exercise to apply the value from the
+   *                           dto to
    */
   private void setCollectionExerciseFromDto(
       CollectionExerciseDTO collex, CollectionExercise collectionExercise) {
@@ -280,9 +284,11 @@ public class CollectionExerciseService {
     collectionExercise.setExerciseRef(collex.getExerciseRef());
     collectionExercise.setSurveyId(UUID.fromString(collex.getSurveyId()));
 
-    // In the strictest sense, some of these dates are mandatory fields for collection exercises.
+    // In the strictest sense, some of these dates are mandatory fields for
+    // collection exercises.
     // However as they
-    // are not supplied at creation time, but later as "events" we will allow them to be null
+    // are not supplied at creation time, but later as "events" we will allow them
+    // to be null
     if (collex.getScheduledStartDateTime() != null) {
       collectionExercise.setScheduledStartDateTime(
           new Timestamp(collex.getScheduledStartDateTime().getTime()));
@@ -338,7 +344,6 @@ public class CollectionExerciseService {
     collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
     collectionExercise.setCreated(new Timestamp(new Date().getTime()));
     collectionExercise.setId(UUID.randomUUID());
-    collectionExercise.setEqVersion(collex.getEqVersion());
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise from DTO");
     return collectionExercise;
@@ -347,7 +352,7 @@ public class CollectionExerciseService {
   /**
    * Patch a collection exercise
    *
-   * @param id the id of the collection exercise to patch
+   * @param id        the id of the collection exercise to patch
    * @param patchData the patch data
    * @return the patched CollectionExercise object
    * @throws CTPException thrown if error occurs
@@ -361,14 +366,13 @@ public class CollectionExerciseService {
           CTPException.Fault.RESOURCE_NOT_FOUND,
           String.format("Collection exercise %s not found", id));
     } else {
-      String proposedPeriod =
-          patchData.getExerciseRef() == null ? collex.getExerciseRef() : patchData.getExerciseRef();
-      UUID proposedSurvey =
-          patchData.getSurveyId() == null
-              ? collex.getSurveyId()
-              : UUID.fromString(patchData.getSurveyId());
+      String proposedPeriod = patchData.getExerciseRef() == null ? collex.getExerciseRef() : patchData.getExerciseRef();
+      UUID proposedSurvey = patchData.getSurveyId() == null
+          ? collex.getSurveyId()
+          : UUID.fromString(patchData.getSurveyId());
 
-      // If period/survey not supplied in patchData then this call will trivially return
+      // If period/survey not supplied in patchData then this call will trivially
+      // return
       validateUniqueness(collex, proposedPeriod, proposedSurvey);
       SurveyDTO survey;
       if (!StringUtils.isBlank(patchData.getSurveyId())) {
@@ -395,31 +399,24 @@ public class CollectionExerciseService {
         collex.setScheduledStartDateTime(
             new Timestamp(patchData.getScheduledStartDateTime().getTime()));
       }
-      if (patchData.getEqVersion() != null) {
-        String eqVersion = patchData.getEqVersion();
-        if (eqVersion.equals("v2") || eqVersion.equals("v3")) {
-          collex.setEqVersion(patchData.getEqVersion());
-        } else {
-          throw new CTPException(
-              CTPException.Fault.BAD_REQUEST,
-              String.format("eQ version %s not supported", eqVersion));
-        }
-      }
       collex.setUpdated(new Timestamp(new Date().getTime()));
       return updateCollectionExercise(collex);
     }
   }
 
   /**
-   * This method checks whether the supplied CollectionExercise (existing) can change it's period to
-   * candidatePeriod and it's survey to candidateSurvey without breaching the uniqueness constraint
+   * This method checks whether the supplied CollectionExercise (existing) can
+   * change it's period to
+   * candidatePeriod and it's survey to candidateSurvey without breaching the
+   * uniqueness constraint
    * on those fields
    *
-   * @param existing the collection exercise that is to be updated
+   * @param existing        the collection exercise that is to be updated
    * @param candidatePeriod the proposed new value for the period (exerciseRef)
    * @param candidateSurvey the proposed new value for the survey
-   * @throws CTPException thrown if there is an existing different collection exercise that already
-   *     uses the proposed combination of period and survey
+   * @throws CTPException thrown if there is an existing different collection
+   *                      exercise that already
+   *                      uses the proposed combination of period and survey
    */
   private void validateUniqueness(
       CollectionExercise existing, String candidatePeriod, UUID candidateSurvey)
@@ -441,7 +438,7 @@ public class CollectionExerciseService {
   /**
    * Update a collection exercise
    *
-   * @param id the id of the collection exercise to update
+   * @param id        the id of the collection exercise to update
    * @param collexDto the updated collection exercise
    * @return the updated CollectionExercise object
    */
@@ -487,8 +484,9 @@ public class CollectionExerciseService {
   /**
    * Utility method to set the deleted flag for a collection exercise
    *
-   * @param id the uuid of the collection exercise to update
-   * @param deleted true if the collection exercise is to be marked as deleted, false otherwise
+   * @param id      the uuid of the collection exercise to update
+   * @param deleted true if the collection exercise is to be marked as deleted,
+   *                false otherwise
    * @return 200 if success, 404 if not found
    * @throws CTPException thrown if specified collection exercise does not exist
    */
@@ -543,15 +541,16 @@ public class CollectionExerciseService {
    * Utility method to transition a collection exercise to a new state
    *
    * @param collex a collection exercise
-   * @param event a collection exercise event
-   * @throws CTPException thrown if the specified event is not valid for the current state
+   * @param event  a collection exercise event
+   * @throws CTPException thrown if the specified event is not valid for the
+   *                      current state
    */
   public void transitionCollectionExercise(
       CollectionExercise collex, CollectionExerciseDTO.CollectionExerciseEvent event)
       throws CTPException {
     CollectionExerciseDTO.CollectionExerciseState oldState = collex.getState();
-    CollectionExerciseDTO.CollectionExerciseState newState =
-        collectionExerciseTransitionState.transition(collex.getState(), event);
+    CollectionExerciseDTO.CollectionExerciseState newState = collectionExerciseTransitionState
+        .transition(collex.getState(), event);
 
     if (oldState == newState) {
       return;
@@ -565,9 +564,10 @@ public class CollectionExerciseService {
    * Utility method to transition a collection exercise to a new state
    *
    * @param collectionExerciseId a collection exercise UUID
-   * @param event a collection exercise event
-   * @throws CTPException thrown if the specified event is not valid for the current state or a
-   *     collection exercise with the given id cannot be found
+   * @param event                a collection exercise event
+   * @throws CTPException thrown if the specified event is not valid for the
+   *                      current state or a
+   *                      collection exercise with the given id cannot be found
    */
   public void transitionCollectionExercise(
       final UUID collectionExerciseId, final CollectionExerciseDTO.CollectionExerciseEvent event)
@@ -587,16 +587,14 @@ public class CollectionExerciseService {
       final CollectionExercise collectionExercise) throws CTPException {
     UUID collexId = collectionExercise.getId();
 
-    Map<String, String> searchStringMap =
-        Collections.singletonMap("COLLECTION_EXERCISE", collectionExercise.getId().toString());
+    Map<String, String> searchStringMap = Collections.singletonMap("COLLECTION_EXERCISE",
+        collectionExercise.getId().toString());
     String searchStringJson = new JSONObject(searchStringMap).toString();
-    Integer numberOfCollectionInstruments =
-        collectionInstrumentSvcClient.countCollectionInstruments(searchStringJson);
+    Integer numberOfCollectionInstruments = collectionInstrumentSvcClient.countCollectionInstruments(searchStringJson);
     boolean allSamplesActive = allSamplesActive(collexId);
-    boolean shouldTransition =
-        allSamplesActive
-            && numberOfCollectionInstruments != null
-            && numberOfCollectionInstruments > 0;
+    boolean shouldTransition = allSamplesActive
+        && numberOfCollectionInstruments != null
+        && numberOfCollectionInstruments > 0;
     log.with("all_samples_active", allSamplesActive)
         .with("number_of_collection_instruments", numberOfCollectionInstruments)
         .with("should_transition", shouldTransition)
@@ -611,7 +609,8 @@ public class CollectionExerciseService {
   }
 
   /**
-   * Transition scheduled collection exercises with collection instruments and samples to {@link
+   * Transition scheduled collection exercises with collection instruments and
+   * samples to {@link
    * CollectionExerciseDTO.CollectionExerciseState#READY_FOR_REVIEW}
    */
   public void transitionScheduleCollectionExerciseToReadyToReview(final UUID collectionExerciseId)
@@ -638,7 +637,7 @@ public class CollectionExerciseService {
   /**
    * Links a sample summary to a collection exercise and stores in db
    *
-   * @param sampleSummaryId the Id of the Sample summary to be linked
+   * @param sampleSummaryId      the Id of the Sample summary to be linked
    * @param collectionExerciseId the Id of the Sample summary to be linked
    * @return sampleLink stored in database
    */
