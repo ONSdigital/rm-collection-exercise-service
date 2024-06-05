@@ -7,8 +7,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.SampleLinkDTO;
 
 public class ObjectConverter {
 
-  private ObjectConverter() {
-  };
+  private ObjectConverter() {};
 
   public static List<SampleLinkDTO> sampleLinkDTO(List<SampleLink> sampleLinks) {
     List<SampleLinkDTO> mappedSampleLink = new ArrayList<>();

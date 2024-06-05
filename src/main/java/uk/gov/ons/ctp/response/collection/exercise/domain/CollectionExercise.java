@@ -30,10 +30,13 @@ public class CollectionExercise {
   private UUID id;
 
   @Id
-  @GenericGenerator(name = "exerciseseq_gen", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-      @Parameter(name = "sequence_name", value = "collectionexercise.exercisepkseq"),
-      @Parameter(name = "increment_size", value = "1")
-  })
+  @GenericGenerator(
+      name = "exerciseseq_gen",
+      strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+      parameters = {
+        @Parameter(name = "sequence_name", value = "collectionexercise.exercisepkseq"),
+        @Parameter(name = "increment_size", value = "1")
+      })
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exerciseseq_gen")
   @Column(name = "exercise_pk")
   private Integer exercisePK;
