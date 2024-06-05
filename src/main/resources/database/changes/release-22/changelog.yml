@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 22.1
+      author: Serena Crocker
+      changes:
+        - sqlFile:
+            comment: Renmove EQ version from collection exercise table
+            path: remove_eq_version.sql
+            relativeToChangelogFile: true
+            splitStatements: true
