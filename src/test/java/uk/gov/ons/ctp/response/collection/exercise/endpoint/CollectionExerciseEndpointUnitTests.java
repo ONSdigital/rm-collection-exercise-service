@@ -703,8 +703,7 @@ public class CollectionExerciseEndpointUnitTests {
         MockMvcRequestBuilders.delete(String.format("/collectionexercises/%s", uuid.toString()));
     ResultActions actions = mockCollectionExerciseMvc.perform(builder);
 
-    // NOTE: delete currently returns 202 Accepted as, while the delete request is
-    // logged, no delete
+    // NOTE: delete currently returns 202 Accepted as, while the delete request is logged, no delete
     // function has been
     // implemented
     actions.andExpect(status().isAccepted());
