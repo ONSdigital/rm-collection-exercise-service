@@ -19,7 +19,7 @@ There are two ways of running this service
 See [openapi.yml](https://github.com/ONSdigital/rm-collection-exercise-service/blob/main/openapi.yml) for API documentation.
 
 # Code Styler
-To use the code styler please goto this url (https://github.com/google/google-java-format) and follow the Intellij
+To use the code styler please goto this url (https://github.com/google/google-java-format) and follow the Intellij.
 instructions or Eclipse depending on what you use
 
 ## Copyright
