@@ -58,8 +58,6 @@ public class CollectionExerciseDTO {
 
   private String executedBy;
 
-  private String eqVersion;
-
   private CollectionExerciseDTO.CollectionExerciseState state;
 
   @NotNull(groups = {PostValidation.class, PutValidation.class})

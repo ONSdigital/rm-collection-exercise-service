@@ -27,7 +27,6 @@ public class ObjectConverter {
     CollectionExerciseDTO collectionExerciseDTO = new CollectionExerciseDTO();
     collectionExerciseDTO.setExerciseRef(collectionExercise.getExerciseRef());
     collectionExerciseDTO.setCreated(collectionExercise.getCreated());
-    collectionExerciseDTO.setEqVersion(collectionExercise.getEqVersion());
     collectionExerciseDTO.setDeleted(collectionExercise.getDeleted());
     collectionExerciseDTO.setId(collectionExercise.getId());
     collectionExerciseDTO.setActualExecutionDateTime(

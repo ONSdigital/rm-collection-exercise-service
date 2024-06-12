@@ -93,9 +93,6 @@ public class CollectionExercise {
   @Column(name = "survey_id")
   private UUID surveyId;
 
-  @Column(name = "eq_version")
-  private String eqVersion;
-
   @OneToOne(mappedBy = "collectionExercise")
   @JsonManagedReference
   private SupplementaryDatasetEntity supplementaryDatasetEntity;

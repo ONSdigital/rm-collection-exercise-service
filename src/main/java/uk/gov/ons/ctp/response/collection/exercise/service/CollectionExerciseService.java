@@ -280,9 +280,11 @@ public class CollectionExerciseService {
     collectionExercise.setExerciseRef(collex.getExerciseRef());
     collectionExercise.setSurveyId(UUID.fromString(collex.getSurveyId()));
 
-    // In the strictest sense, some of these dates are mandatory fields for collection exercises.
+    // In the strictest sense, some of these dates are mandatory fields for
+    // collection exercises.
     // However as they
-    // are not supplied at creation time, but later as "events" we will allow them to be null
+    // are not supplied at creation time, but later as "events" we will allow them
+    // to be null
     if (collex.getScheduledStartDateTime() != null) {
       collectionExercise.setScheduledStartDateTime(
           new Timestamp(collex.getScheduledStartDateTime().getTime()));
@@ -338,7 +340,6 @@ public class CollectionExerciseService {
     collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
     collectionExercise.setCreated(new Timestamp(new Date().getTime()));
     collectionExercise.setId(UUID.randomUUID());
-    collectionExercise.setEqVersion(collex.getEqVersion());
     log.with("collection_exercise_id", collectionExercise.getId())
         .debug("Successfully created collection exercise from DTO");
     return collectionExercise;
@@ -368,7 +369,8 @@ public class CollectionExerciseService {
               ? collex.getSurveyId()
               : UUID.fromString(patchData.getSurveyId());
 
-      // If period/survey not supplied in patchData then this call will trivially return
+      // If period/survey not supplied in patchData then this call will trivially
+      // return
       validateUniqueness(collex, proposedPeriod, proposedSurvey);
       SurveyDTO survey;
       if (!StringUtils.isBlank(patchData.getSurveyId())) {
@@ -394,16 +396,6 @@ public class CollectionExerciseService {
       if (patchData.getScheduledStartDateTime() != null) {
         collex.setScheduledStartDateTime(
             new Timestamp(patchData.getScheduledStartDateTime().getTime()));
-      }
-      if (patchData.getEqVersion() != null) {
-        String eqVersion = patchData.getEqVersion();
-        if (eqVersion.equals("v2") || eqVersion.equals("v3")) {
-          collex.setEqVersion(patchData.getEqVersion());
-        } else {
-          throw new CTPException(
-              CTPException.Fault.BAD_REQUEST,
-              String.format("eQ version %s not supported", eqVersion));
-        }
       }
       collex.setUpdated(new Timestamp(new Date().getTime()));
       return updateCollectionExercise(collex);
