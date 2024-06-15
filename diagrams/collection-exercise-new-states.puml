@@ -23,5 +23,5 @@ VALIDATED --> READY_FOR_LIVE : publish
 VALIDATED --> LIVE : go_live
 READY_FOR_LIVE --> LIVE : go_live
 LIVE --> ENDED : end_exercise
-
+ENDED --> ENDED : ci_sample_deleted
 @enduml
