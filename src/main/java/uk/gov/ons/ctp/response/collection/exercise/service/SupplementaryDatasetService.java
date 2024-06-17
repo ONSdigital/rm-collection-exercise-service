@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
 import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -37,9 +38,9 @@ public class SupplementaryDatasetService {
           supplementaryDatasetDTO.getPeriodId());
     }
     try {
-      if (existsByExerciseFK(collectionExercise.getExercisePK())) {
+      if (collectionExercise.getSupplementaryDatasetEntity() != null) {
         log.info(
-            "Supplementary dataset with exerciseFk {} has been found.",
+            "Supplementary dataset linked to collection exercise {} found.",
             collectionExercise.getExercisePK());
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
         log.info("Supplementary dataset has been removed.");
@@ -76,9 +77,5 @@ public class SupplementaryDatasetService {
 
   public SupplementaryDatasetEntity findSupplementaryDataset(int exercisePk) {
     return supplementaryDatasetRepository.findByExerciseFK(exercisePk);
-  }
-
-  public boolean existsByExerciseFK(int exercisePK) {
-    return supplementaryDatasetRepository.existsByExerciseFK(exercisePK);
   }
 }

@@ -50,8 +50,6 @@ public class SupplementaryDatasetServiceTest {
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(collectionExercise);
-    when(supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK()))
-        .thenReturn(true);
 
     SupplementaryDatasetEntity supplementaryDatasetEntity = createSupplementaryDatasetEntity();
 
