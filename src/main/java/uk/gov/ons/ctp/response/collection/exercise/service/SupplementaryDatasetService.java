@@ -39,8 +39,8 @@ public class SupplementaryDatasetService {
     try {
       if (collectionExercise.getSupplementaryDatasetEntity() != null) {
         log.info(
-            "Supplementary dataset linked to collection exercise with PK {} found.",
-            collectionExercise.getExercisePK());
+            "Supplementary dataset linked to {} collection exercise found.",
+            collectionExercise.getId());
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
         log.info("Supplementary dataset has been removed.");
       }
