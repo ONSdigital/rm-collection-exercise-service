@@ -37,10 +37,12 @@ public class SupplementaryDatasetService {
           supplementaryDatasetDTO.getPeriodId());
     }
     try {
-      if (existsByExerciseFK(collectionExercise.getExercisePK())) {
-        log.info(
-            "Supplementary dataset with exerciseFk {} has been found.",
-            collectionExercise.getExercisePK());
+      if (collectionExercise.getSupplementaryDatasetEntity() != null) {
+        log.with("collectionExerciseId", collectionExercise.getId())
+            .with(
+                "supplementaryDatasetId",
+                collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId())
+            .info("Linked supplementary dataset found");
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
         log.info("Supplementary dataset has been removed.");
       }
@@ -76,9 +78,5 @@ public class SupplementaryDatasetService {
 
   public SupplementaryDatasetEntity findSupplementaryDataset(int exercisePk) {
     return supplementaryDatasetRepository.findByExerciseFK(exercisePk);
-  }
-
-  public boolean existsByExerciseFK(int exercisePK) {
-    return supplementaryDatasetRepository.existsByExerciseFK(exercisePK);
   }
 }
