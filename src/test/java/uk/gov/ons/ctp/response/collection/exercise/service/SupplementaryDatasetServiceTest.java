@@ -47,13 +47,12 @@ public class SupplementaryDatasetServiceTest {
 
   @Test
   public void testDeleteAndSaveSupplementaryDataset() throws CTPException, JsonProcessingException {
+    SupplementaryDatasetEntity supplementaryDatasetEntity = createSupplementaryDatasetEntity();
+    collectionExercise.setSupplementaryDatasetEntity(supplementaryDatasetEntity);
+
     when(collectionExerciseService.findCollectionExercise(
             supplementaryDatasetDTO.getSurveyId(), supplementaryDatasetDTO.getPeriodId()))
         .thenReturn(collectionExercise);
-    when(supplementaryDatasetRepository.existsByExerciseFK(collectionExercise.getExercisePK()))
-        .thenReturn(true);
-
-    SupplementaryDatasetEntity supplementaryDatasetEntity = createSupplementaryDatasetEntity();
 
     supplementaryDatasetService.addSupplementaryDatasetEntity(supplementaryDatasetDTO);
 
