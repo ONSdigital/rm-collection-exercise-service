@@ -7,6 +7,7 @@ spec:
   ports:
   - port: {{ .Values.service.port }}
     targetPort: {{ .Values.container.port }}
+    nodePort: {{ .Values.nodePort.port }}
     protocol: TCP
   selector:
     app: {{ .Chart.Name }}

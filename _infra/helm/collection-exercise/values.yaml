@@ -26,6 +26,8 @@ container:
   port: 8080
 service:
   port: 8080
+nodePort:
+  port: 30009
 
 resources:
   application:
