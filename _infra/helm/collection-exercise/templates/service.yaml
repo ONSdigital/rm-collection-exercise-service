@@ -3,8 +3,7 @@ kind: Service
 metadata:
   name: {{ .Chart.Name }}
 spec:
-  externalTrafficPolicy: Local
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: {{ .Values.service.port }}
     targetPort: {{ .Values.container.port }}
