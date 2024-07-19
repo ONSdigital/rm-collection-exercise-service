@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: service
+metadata:
+  name: collection-exercise-lb
+  annotations:
+    networking.gke.io/load-balancer-type: "Internal"
+    networking.gke.io/load-balancer-ip-addresses: "10.110.0.16"
+
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  loadBalancerIP: "10.110.0.16"
+  selector:
+    app: collection-exercise
+  ports:
+    - name: tcp-port
+      protocol: TCP
+      port: 80
+      targetPort: 8080
