@@ -11,7 +11,7 @@ spec:
   externalTrafficPolicy: Cluster
   loadBalancerIP: "10.110.0.16"
   selector:
-    app: collection-exercise
+    app: {{ .Chart.Name }}
   ports:
     - name: tcp-port
       protocol: TCP
