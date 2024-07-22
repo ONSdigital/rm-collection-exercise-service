@@ -73,3 +73,6 @@ gcp:
   collectionExerciseEventStatusUpdateSubscription: collection-exercise-event-update
   supplementaryDataServiceTopic: supplementary-data-service-topic
   supplementaryDataServiceSubscription: supplementary-data-service-subscription
+
+loadBalancer:
+  ipAddress: "10.110.128.12"
