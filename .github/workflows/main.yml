@@ -57,10 +57,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          ls -l
-          chmod +x docker-compose-down.sh
-          chmod +x docker-compose-up.sh
-          ls -l
           export LD_LIBRARY_PATH=/usr/local/lib
           mvn fmt:check
           mvn clean verify
