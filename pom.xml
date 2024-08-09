@@ -267,6 +267,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -372,39 +380,40 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.dkanejs.maven.plugins</groupId>
-                <artifactId>docker-compose-maven-plugin</artifactId>
-                <version>4.0.0</version>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
                 <executions>
                     <execution>
                         <id>pre-stop</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>down</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <composeFile>${project.basedir}/docker-compose.yml</composeFile>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <executable>docker-compose-down.sh</executable>
                         </configuration>
                     </execution>
                     <execution>
                         <id>up</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>up</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <composeFile>${project.basedir}/docker-compose.yml</composeFile>
-                            <detachedMode>true</detachedMode>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <executable>docker-compose-up.sh</executable>
                         </configuration>
                     </execution>
                     <execution>
                         <id>down</id>
                         <phase>post-integration-test</phase>
                         <goals>
-                            <goal>down</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <composeFile>${project.basedir}/docker-compose.yml</composeFile>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <executable>docker-compose-down.sh</executable>
                         </configuration>
                     </execution>
                 </executions>

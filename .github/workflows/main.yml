@@ -55,6 +55,11 @@ jobs:
         run: |
           gcloud auth configure-docker
 
+      - name: Chmod docker scripts
+        run: |
+          chmod +x docker-compose-down.sh
+          chmod +x docker-compose-up.sh
+
       - name: Run Tests
         run: |
           export LD_LIBRARY_PATH=/usr/local/lib
