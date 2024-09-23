@@ -10,7 +10,7 @@
     <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>2.7.0</springboot.version>
+        <springboot.version>2.7.18</springboot.version>
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
