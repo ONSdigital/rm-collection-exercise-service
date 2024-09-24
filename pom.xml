@@ -11,7 +11,7 @@
 
     <properties>
         <springboot.version>2.7.18</springboot.version>
-        <spring.cloud.gcp.version>4.7.0</spring.cloud.gcp.version>
+        <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
         <java.version>17</java.version>
@@ -113,7 +113,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
-            <version>1.2.8.RELEASE</version>
         </dependency>
 
         <dependency>
