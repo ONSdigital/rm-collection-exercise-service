@@ -111,8 +111,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.cloud</groupId>
+            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+            <version>1.2.8.RELEASE</version>
         </dependency>
 
         <dependency>
