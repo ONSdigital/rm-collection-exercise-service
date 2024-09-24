@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.11.0</version>
+            <version>4.29.2</version>
         </dependency>
 
         <dependency>
@@ -217,7 +217,7 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <version>3.5.0</version>
+            <version>3.8.2</version>
         </dependency>
 
         <!-- Third party end -->
@@ -263,7 +263,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
-            <version>2.27.2</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
 
