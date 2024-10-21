@@ -11,7 +11,7 @@
 
     <properties>
         <springboot.version>2.7.18</springboot.version>
-        <spring.cloud.gcp.version>3.8.10</spring.cloud.gcp.version>
+        <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
         <java.version>17</java.version>
@@ -29,7 +29,7 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>com.google.cloud</groupId>
+                <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-gcp-dependencies</artifactId>
                 <version>${spring.cloud.gcp.version}</version>
                 <type>pom</type>
@@ -88,7 +88,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.cloud</groupId>
+            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
         </dependency>
 
