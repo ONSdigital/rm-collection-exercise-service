@@ -11,7 +11,7 @@
 
     <properties>
         <springboot.version>2.7.18</springboot.version>
-        <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
+        <spring.cloud.gcp.version>3.8.10</spring.cloud.gcp.version>
         <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
         <java.version>17</java.version>
@@ -29,7 +29,7 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
+                <groupId>com.google.cloud</groupId>
                 <artifactId>spring-cloud-gcp-dependencies</artifactId>
                 <version>${spring.cloud.gcp.version}</version>
                 <type>pom</type>
@@ -88,6 +88,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
             <version>2.3.3.RELEASE</version>
@@ -108,11 +113,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
             <version>5.7.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
         </dependency>
 
         <dependency>
@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.11.0</version>
+            <version>4.29.2</version>
         </dependency>
 
         <dependency>
@@ -182,6 +182,12 @@
                     <groupId>com.sun</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.17.0</version>
         </dependency>
 
         <dependency>
