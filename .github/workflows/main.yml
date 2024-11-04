@@ -53,6 +53,7 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
       - run: |
+          gcloud auth configure-docker
           gcloud auth configure-docker "$REGISTRY_HOSTNAME" 
 
       - name: Run Tests
