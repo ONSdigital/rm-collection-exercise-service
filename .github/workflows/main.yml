@@ -54,7 +54,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: Configure GCR
         run: |
-          gcloud auth configure-docker "$REGISTRY_HOSTNAME"
+          gcloud auth configure-docker
 
       - name: Run Tests
         run: |
