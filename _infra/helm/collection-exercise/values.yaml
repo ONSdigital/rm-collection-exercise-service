@@ -76,4 +76,4 @@ gcp:
 
 loadBalancer:
   ipAddress: "10.110.128.12"
-  enabled: true
+  enabled: false
