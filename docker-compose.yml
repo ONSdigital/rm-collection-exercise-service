@@ -13,7 +13,7 @@ services:
      - PUBSUB_PROJECT1=test,sample_unit_topic:sample_unit_subscription,event_status_topic:event_status_subscription
  survey:
    container_name: survey-it
-   image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/survey:pr-159
+   image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/survey
    ports:
     - "18080:8080"
    external_links:
