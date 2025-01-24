@@ -213,7 +213,7 @@ public class CollectionExerciseEndpoint {
       surveyCollexMapWithEvents.put(surveyId, collectionExerciseSummaryDTOList);
     }
 
-    return ResponseEntity.ok(surveyCollexMap);
+    return ResponseEntity.ok(surveyCollexMapWithEvents);
   }
 
   /**
