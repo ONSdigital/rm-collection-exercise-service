@@ -176,7 +176,7 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * Return collection exercises for each of the the surveys in the given list of survey ids. Return
+   * Return collection exercises for each of the surveys in the given list of survey ids. Return
    * data as a Json dictionary.
    *
    * @param surveyIds survey Ids for which to get collection exercises
@@ -190,6 +190,7 @@ public class CollectionExerciseEndpoint {
       @RequestParam("liveOnly") Optional<Boolean> liveOnly) {
 
     HashMap<UUID, List<CollectionExercise>> surveyCollexMap;
+    HashMap<UUID, List<CollectionExerciseDTO>> surveyCollexMapWithEvents = new HashMap<>();
 
     if (liveOnly.isPresent() && liveOnly.get().booleanValue()) {
       surveyCollexMap =
@@ -199,7 +200,30 @@ public class CollectionExerciseEndpoint {
       surveyCollexMap = collectionExerciseService.findCollectionExercisesForSurveys(surveyIds);
     }
 
-    return ResponseEntity.ok(surveyCollexMap);
+    List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
+    boolean hasCollectionExercises = false;
+
+    for (Map.Entry<UUID, List<CollectionExercise>> current : surveyCollexMap.entrySet()) {
+      UUID surveyId = current.getKey();
+      List<CollectionExercise> collectionExerciseList = current.getValue();
+
+      if (!collectionExerciseList.isEmpty()) {
+        hasCollectionExercises = true;
+      }
+
+      collectionExerciseSummaryDTOList =
+          collectionExerciseList
+              .stream()
+              .map(this::getCollectionExerciseDTO)
+              .collect(Collectors.toList());
+      surveyCollexMapWithEvents.put(surveyId, collectionExerciseSummaryDTOList);
+    }
+
+    if (!hasCollectionExercises) {
+      return ResponseEntity.noContent().build();
+    }
+
+    return ResponseEntity.ok(surveyCollexMapWithEvents);
   }
 
   /**
