@@ -201,16 +201,26 @@ public class CollectionExerciseEndpoint {
     }
 
     List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
+    boolean hasCollectionExercises = false;
 
     for (Map.Entry<UUID, List<CollectionExercise>> current : surveyCollexMap.entrySet()) {
       UUID surveyId = current.getKey();
       List<CollectionExercise> collectionExerciseList = current.getValue();
+
+      if (!collectionExerciseList.isEmpty()) {
+        hasCollectionExercises = true;
+      }
+
       collectionExerciseSummaryDTOList =
           collectionExerciseList
               .stream()
               .map(this::getCollectionExerciseDTO)
               .collect(Collectors.toList());
       surveyCollexMapWithEvents.put(surveyId, collectionExerciseSummaryDTOList);
+    }
+
+    if (!hasCollectionExercises) {
+      return ResponseEntity.noContent().build();
     }
 
     return ResponseEntity.ok(surveyCollexMapWithEvents);
