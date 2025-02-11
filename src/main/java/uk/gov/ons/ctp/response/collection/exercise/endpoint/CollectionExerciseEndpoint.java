@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
@@ -186,8 +187,13 @@ public class CollectionExerciseEndpoint {
    */
   @RequestMapping(value = "/surveys", method = RequestMethod.GET, produces = "application/json")
   public ResponseEntity<HashMap> getCollectionExercisesForSurveys(
-      final @RequestParam List<UUID> surveyIds,
+      final @Nullable @RequestParam List<UUID> surveyIds,
       @RequestParam("liveOnly") Optional<Boolean> liveOnly) {
+
+    if (surveyIds == null) {
+      log.debug("No survey ids passed");
+      return ResponseEntity.noContent().build();
+    }
 
     HashMap<UUID, List<CollectionExercise>> surveyCollexMap;
     HashMap<UUID, List<CollectionExerciseDTO>> surveyCollexMapWithEvents = new HashMap<>();
@@ -201,15 +207,10 @@ public class CollectionExerciseEndpoint {
     }
 
     List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
-    boolean hasCollectionExercises = false;
 
     for (Map.Entry<UUID, List<CollectionExercise>> current : surveyCollexMap.entrySet()) {
       UUID surveyId = current.getKey();
       List<CollectionExercise> collectionExerciseList = current.getValue();
-
-      if (!collectionExerciseList.isEmpty()) {
-        hasCollectionExercises = true;
-      }
 
       collectionExerciseSummaryDTOList =
           collectionExerciseList
@@ -217,10 +218,6 @@ public class CollectionExerciseEndpoint {
               .map(this::getCollectionExerciseDTO)
               .collect(Collectors.toList());
       surveyCollexMapWithEvents.put(surveyId, collectionExerciseSummaryDTOList);
-    }
-
-    if (!hasCollectionExercises) {
-      return ResponseEntity.noContent().build();
     }
 
     return ResponseEntity.ok(surveyCollexMapWithEvents);
