@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
@@ -177,7 +176,7 @@ public class CollectionExerciseEndpoint {
   }
 
   /**
-   * Return collection exercises for each of the surveys in the given list of survey ids. Return
+   * Return collection exercises for each of the the surveys in the given list of survey ids. Return
    * data as a Json dictionary.
    *
    * @param surveyIds survey Ids for which to get collection exercises
@@ -187,16 +186,10 @@ public class CollectionExerciseEndpoint {
    */
   @RequestMapping(value = "/surveys", method = RequestMethod.GET, produces = "application/json")
   public ResponseEntity<HashMap> getCollectionExercisesForSurveys(
-      final @Nullable @RequestParam List<UUID> surveyIds,
+      final @RequestParam List<UUID> surveyIds,
       @RequestParam("liveOnly") Optional<Boolean> liveOnly) {
 
-    if (surveyIds == null) {
-      log.debug("No survey ids passed");
-      return ResponseEntity.noContent().build();
-    }
-
     HashMap<UUID, List<CollectionExercise>> surveyCollexMap;
-    HashMap<UUID, List<CollectionExerciseDTO>> surveyCollexMapWithEvents = new HashMap<>();
 
     if (liveOnly.isPresent() && liveOnly.get().booleanValue()) {
       surveyCollexMap =
@@ -206,21 +199,7 @@ public class CollectionExerciseEndpoint {
       surveyCollexMap = collectionExerciseService.findCollectionExercisesForSurveys(surveyIds);
     }
 
-    List<CollectionExerciseDTO> collectionExerciseSummaryDTOList;
-
-    for (Map.Entry<UUID, List<CollectionExercise>> current : surveyCollexMap.entrySet()) {
-      UUID surveyId = current.getKey();
-      List<CollectionExercise> collectionExerciseList = current.getValue();
-
-      collectionExerciseSummaryDTOList =
-          collectionExerciseList
-              .stream()
-              .map(this::getCollectionExerciseDTO)
-              .collect(Collectors.toList());
-      surveyCollexMapWithEvents.put(surveyId, collectionExerciseSummaryDTOList);
-    }
-
-    return ResponseEntity.ok(surveyCollexMapWithEvents);
+    return ResponseEntity.ok(surveyCollexMap);
   }
 
   /**
