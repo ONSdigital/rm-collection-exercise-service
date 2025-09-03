@@ -10,11 +10,11 @@
     <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>2.7.18</springboot.version>
+        <springboot.version>3.4.5</springboot.version>
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -132,6 +132,35 @@
         </dependency>
 
         <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.transaction</groupId>
+            <artifactId>jakarta.transaction-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.eclipse.parsson</groupId>
             <artifactId>parsson</artifactId>
             <version>1.1.5</version>
@@ -140,7 +169,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <version>1.18.30</version>
         </dependency>
 
         <dependency>
@@ -164,12 +193,13 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.9</version>
+            <version>1.7.0</version>
         </dependency>
 
         <dependency>
@@ -222,7 +252,7 @@
 
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <artifactId>hypersistence-utils-hibernate-60</artifactId>
             <version>3.8.2</version>
         </dependency>
 
@@ -292,15 +322,15 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.13.0</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <source>21</source>
+                        <target>21</target>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
-                                <version>1.18.24</version>
+                                <version>1.18.30</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
@@ -320,9 +350,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.11.0</version>
                     <configuration>
                         <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+                        <source>21</source>
+                        <target>21</target>
                     </configuration>
                 </plugin>
             </plugins>

@@ -1,7 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
 import com.godaddy.logging.LoggingConfigs;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
@@ -97,11 +97,9 @@ public class CollectionExerciseApplication {
     LiquibaseProperties liquibaseProperties = liquibaseProperties();
     SpringLiquibase liquibase = new SpringLiquibase();
     liquibase.setChangeLog(liquibaseProperties.getChangeLog());
-    liquibase.setContexts(liquibaseProperties.getContexts());
     liquibase.setDataSource(getDataSource(liquibaseProperties));
     liquibase.setDropFirst(liquibaseProperties.isDropFirst());
     liquibase.setShouldRun(true);
-    liquibase.setLabels(liquibaseProperties.getLabels());
     liquibase.setChangeLogParameters(liquibaseProperties.getParameters());
     liquibase.setLiquibaseSchema(liquibaseProperties.getLiquibaseSchema());
     liquibase.setDatabaseChangeLogLockTable(liquibaseProperties.getDatabaseChangeLogLockTable());

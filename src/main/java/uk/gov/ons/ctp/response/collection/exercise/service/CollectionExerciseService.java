@@ -2,9 +2,9 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
-import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
