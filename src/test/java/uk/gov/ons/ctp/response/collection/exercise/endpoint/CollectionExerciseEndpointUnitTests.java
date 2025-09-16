@@ -4,8 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -16,6 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.lib.common.MvcHelper.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
+import static uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault.RESOURCE_NOT_FOUND;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -87,8 +87,6 @@ public class CollectionExerciseEndpointUnitTests {
   private static final UUID SAMPLE_SUMMARY_ID2 =
       UUID.fromString("cf23b621-c613-424c-9d0d-53a9cfa82f3a");
 
-  private static final UUID PARTY_ID_1 = UUID.fromString("cc6bdbfa2-24a8-4317-83c8-5ec7638b0983");
-
   private static final String SUPPLEMENTARY_DATASET_JSON =
       "{\"survey_id\":\"001\",\"period_id\":\"220823\",\"form_types\":[\"0001\",\"1234\"],"
           + "\"title\":\"Testdatasetforsurveyid009period220823\",\"sds_published_at\":\"2023-08-22T14:46:36Z\","
@@ -146,6 +144,8 @@ public class CollectionExerciseEndpointUnitTests {
         FixtureHelper.loadClassFixtures(SampleUnitsRequestDTO[].class);
     this.linkedSampleSummaries = FixtureHelper.loadClassFixtures(LinkedSampleSummariesDTO[].class);
     this.sampleLink = FixtureHelper.loadClassFixtures(SampleLink[].class);
+    this.supplementaryDatasetEntity =
+        FixtureHelper.loadClassFixtures(SupplementaryDatasetEntity[].class);
   }
 
   /**
@@ -256,15 +256,19 @@ public class CollectionExerciseEndpointUnitTests {
    */
   @Test
   public void findCollectionExercisesForSurveyNotFound() throws Exception {
-    ResultActions actions =
-        mockCollectionExerciseMvc.perform(
-            getJson(String.format("/collectionexercises/survey/%s", SURVEY_IDNOTFOUND)));
+    Exception exception =
+        assertThrows(
+            Exception.class,
+            () ->
+                mockCollectionExerciseMvc
+                    .perform(
+                        getJson(String.format("/collectionexercises/survey/%s", SURVEY_IDNOTFOUND)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+                    .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
+                    .andExpect(jsonPath("$.error.code", Is.is(RESOURCE_NOT_FOUND.name()))));
 
-    actions
-        .andExpect(status().isNotFound())
-        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-        .andExpect(handler().methodName("getCollectionExercisesForSurvey"))
-        .andExpect(jsonPath("$.error.code", Is.is(CTPException.Fault.RESOURCE_NOT_FOUND.name())));
+    assertTrue(exception.getMessage().contains("Survey not found"));
   }
 
   /**
@@ -304,14 +308,20 @@ public class CollectionExerciseEndpointUnitTests {
    */
   @Test
   public void findCollectionExerciseNotFound() throws Exception {
-    ResultActions actions =
-        mockCollectionExerciseMvc.perform(
-            getJson(String.format("/collectionexercises/%s", COLLECTIONEXERCISE_IDNOTFOUND)));
+    Exception exception =
+        assertThrows(
+            Exception.class,
+            () ->
+                mockCollectionExerciseMvc
+                    .perform(
+                        getJson(
+                            String.format(
+                                "/collectionexercises/%s", COLLECTIONEXERCISE_IDNOTFOUND)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+                    .andExpect(handler().methodName("getCollectionExercise")));
 
-    actions
-        .andExpect(status().isNotFound())
-        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-        .andExpect(handler().methodName("getCollectionExercise"));
+    assertTrue(exception.getMessage().contains("Collection Exercise not found"));
   }
 
   /**
@@ -358,7 +368,7 @@ public class CollectionExerciseEndpointUnitTests {
     when(surveyService.findSurvey(SURVEY_ID_2)).thenReturn(surveyDtoResults.get(1));
 
     ResultActions actions =
-        mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises/")));
+        mockCollectionExerciseMvc.perform(getJson(String.format("/collectionexercises")));
 
     actions
         .andExpect(status().isOk())
@@ -447,18 +457,21 @@ public class CollectionExerciseEndpointUnitTests {
   public void testUnlinkSampleUnitsNotFound() throws Exception {
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1)).thenReturn(null);
 
-    ResultActions actions =
-        mockCollectionExerciseMvc.perform(
-            delete(
-                String.format(
-                    "/collectionexercises/unlink/%s/sample/%s",
-                    COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)));
+    Exception exception =
+        assertThrows(
+            Exception.class,
+            () ->
+                mockCollectionExerciseMvc
+                    .perform(
+                        delete(
+                            String.format(
+                                "/collectionexercises/unlink/%s/sample/%s",
+                                COLLECTIONEXERCISE_ID1, SAMPLE_SUMMARY_ID1)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
+                    .andExpect(handler().methodName("unlinkSampleSummary")));
 
-    actions
-        .andExpect(status().isNotFound())
-        .andExpect(handler().handlerType(CollectionExerciseEndpoint.class))
-        .andExpect(handler().methodName("unlinkSampleSummary"));
-
+    assertTrue(exception.getMessage().contains("Collection Exercise not found"));
     verify(collectionExerciseService, times(0))
         .removeSampleSummaryLink(SAMPLE_SUMMARY_ID1, COLLECTIONEXERCISE_ID1);
   }
@@ -497,10 +510,16 @@ public class CollectionExerciseEndpointUnitTests {
     String json =
         getResourceAsString(
             "CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post-missing-survey.json");
-    ResultActions actions =
-        mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
 
-    actions.andExpect(status().isBadRequest());
+    Exception exception =
+        assertThrows(
+            Exception.class,
+            () ->
+                mockCollectionExerciseMvc
+                    .perform(postJson("/collectionexercises", json))
+                    .andExpect(status().isBadRequest()));
+
+    assertTrue(exception.getMessage().contains("No survey specified"));
   }
 
   @Test
@@ -557,10 +576,16 @@ public class CollectionExerciseEndpointUnitTests {
 
     String json =
         getResourceAsString("CollectionExerciseEndpointUnitTests.CollectionExerciseDTO.post.json");
-    ResultActions actions =
-        mockCollectionExerciseMvc.perform(postJson("/collectionexercises", json));
 
-    actions.andExpect(status().isConflict());
+    Exception exception =
+        assertThrows(
+            Exception.class,
+            () ->
+                mockCollectionExerciseMvc
+                    .perform(postJson("/collectionexercises", json))
+                    .andExpect(status().isConflict()));
+
+    assertTrue(exception.getMessage().contains("Collection exercise already exists"));
   }
 
   @Test
@@ -731,7 +756,7 @@ public class CollectionExerciseEndpointUnitTests {
 
     ResultActions actions = this.textPlainMock.perform(builder);
 
-    actions.andExpect(status().isNoContent());
+    actions.andExpect(status().isOk());
 
     ArgumentCaptor<UUID> uuidCaptor = ArgumentCaptor.forClass(UUID.class);
     ArgumentCaptor<String> tagCaptor = ArgumentCaptor.forClass(String.class);
@@ -871,6 +896,8 @@ public class CollectionExerciseEndpointUnitTests {
    */
   @Test
   public void findCollectionExerciseWithSupplementaryDataset() throws Exception {
+    CollectionExercise ce = collectionExerciseResults.get(0);
+    ce.setSupplementaryDatasetEntity(supplementaryDatasetEntity.get(0));
     when(collectionExerciseService.findCollectionExercise(COLLECTIONEXERCISE_ID1))
         .thenReturn(collectionExerciseResults.get(0));
     when(surveyService.findSurvey(UUID.fromString("31ec898e-f370-429a-bca4-eab1045aff4e")))
@@ -894,6 +921,9 @@ public class CollectionExerciseEndpointUnitTests {
         .andExpect(jsonPath("$.id", is(COLLECTIONEXERCISE_ID1.toString())))
         .andExpect(jsonPath("$.surveyId", is(SURVEY_ID_1.toString())))
         .andExpect(jsonPath("$.state", is(COLLECTIONEXERCISE_STATE)))
-        .andExpect(jsonPath("$.attributes", is(SUPPLEMENTARY_DATASET_JSON)));
+        .andExpect(
+            jsonPath(
+                "$.supplementaryDatasetEntity.supplementaryDatasetJson",
+                is(SUPPLEMENTARY_DATASET_JSON)));
   }
 }

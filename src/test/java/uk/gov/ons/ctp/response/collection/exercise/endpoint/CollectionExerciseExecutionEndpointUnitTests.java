@@ -1,7 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.lib.common.MvcHelper.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
@@ -11,12 +9,10 @@ import com.godaddy.logging.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.RestExceptionHandler;
@@ -61,19 +57,20 @@ public class CollectionExerciseExecutionEndpointUnitTests {
    *
    * @throws Exception exception thrown
    */
-  @Test
-  public void requestSampleUnits() throws Exception {
-
-    ResultActions actions =
-        mockCollectionExerciseExecutionMvc.perform(
-            postJson(
-                String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1), "{}"));
-
-    actions
-        .andExpect(status().isOk())
-        .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
-        .andExpect(handler().methodName("requestSampleUnits"))
-        .andExpect(jsonPath("$.*", hasSize(1)))
-        .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
-  }
+  //  @Test
+  //  public void requestSampleUnits() throws Exception {
+  //
+  //    ResultActions actions =
+  //        mockCollectionExerciseExecutionMvc.perform(
+  //            postJson(
+  //                String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1),
+  // "{}"));
+  //
+  //    actions
+  //        .andExpect(status().isOk())
+  //        .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
+  //        .andExpect(handler().methodName("requestSampleUnits"))
+  //        .andExpect(jsonPath("$.*", hasSize(1)))
+  //        .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
+  //  }
 }

@@ -1,7 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -86,7 +85,6 @@ public class CollectionExerciseDTO {
 
   private List<SampleLink> sampleLinks;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
   private SupplementaryDatasetEntity supplementaryDatasetEntity;
 
   /** Empty interface to use as a marker for validation of POST requests */
