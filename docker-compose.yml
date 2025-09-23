@@ -27,8 +27,8 @@ services:
    container_name: wiremock-collex-it
    image: wiremock/wiremock:3.13.0
    ports:
-     - "18003:8080"
+     - "18002:8080"
    environment:
      - WIREMOCK_PORT=8080
      - WIREMOCK_HOST=wiremock-collex-it
-     - WIREMOCK_URL=http://wiremock-collex-it:18003/__admin/mappings
+     - WIREMOCK_URL=http://wiremock-collex-it:18002/__admin/mappings

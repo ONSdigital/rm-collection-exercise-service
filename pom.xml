@@ -16,7 +16,7 @@
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <failsafe.skipITs>true</failsafe.skipITs>
+        <failsafe.skipITs>false</failsafe.skipITs>
     </properties>
 
     <dependencyManagement>
@@ -109,13 +109,13 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-            <version>2.3.3.RELEASE</version>
+            <version>3.3.4</version>
         </dependency>
 
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>3.3.0</version>
+            <version>6.2.0</version>
         </dependency>
 
         <dependency>
@@ -312,7 +312,8 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.3.1</version>
+            <version>3.9.2</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->

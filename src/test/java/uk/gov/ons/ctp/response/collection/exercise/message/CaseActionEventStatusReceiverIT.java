@@ -37,7 +37,7 @@ import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @TestPropertySource(locations = "classpath:/application-test.yml")
-@WireMockTest(httpPort = 18003)
+@WireMockTest(httpPort = 18002)
 public class CaseActionEventStatusReceiverIT {
 
   private static final Logger log = LoggerFactory.getLogger(CaseActionEventStatusReceiverIT.class);
