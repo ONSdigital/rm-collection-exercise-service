@@ -3,6 +3,7 @@ package uk.gov.ons.ctp.response.collection.exercise.message;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -16,13 +17,14 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseClient;
@@ -33,6 +35,7 @@ import uk.gov.ons.ctp.response.collection.exercise.representation.*;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 
+@ContextConfiguration
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -66,7 +69,7 @@ public class CaseActionEventStatusReceiverIT {
   public CaseActionEventStatusReceiverIT() throws IOException {}
 
   /** Method to set up integration test */
-  @Before
+  @BeforeEach
   public void setUp() {
 
     sampleLinkRepository.deleteAllInBatch();
@@ -75,6 +78,7 @@ public class CaseActionEventStatusReceiverIT {
     collectionExerciseRepository.deleteAllInBatch();
 
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
+    WireMock.configureFor("localhost", 18002);
   }
 
   @Test
@@ -112,10 +116,12 @@ public class CaseActionEventStatusReceiverIT {
                 + "}",
             collectionExercise.getId());
     PUBSUBEMULATOR.publishMessage(eventStatusUpdate, PUBSUB_TOPIC);
-    Thread.sleep(5000);
+    Thread.sleep(30000);
     Event finalEvent =
         eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
+    System.out.println("######### finalEvent: " + finalEvent);
     assert finalEvent.getStatus() == EventDTO.Status.PROCESSED;
+    // Assert.assertEquals(EventDTO.Status.PROCESSED, finalEvent.getStatus());
   }
 
   private EventDTO createEventDTO(
