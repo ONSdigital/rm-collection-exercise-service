@@ -17,8 +17,10 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -26,6 +28,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseClient;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseEndpointIT;
@@ -64,12 +68,16 @@ public class CaseActionEventStatusReceiverIT {
 
   @Autowired private SupplementaryDatasetRepository supplementaryDatasetRepository;
 
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
   private CollectionExerciseClient client;
 
   public CaseActionEventStatusReceiverIT() throws IOException {}
 
   /** Method to set up integration test */
-  @BeforeEach
+  @Before
   public void setUp() {
 
     sampleLinkRepository.deleteAllInBatch();
@@ -120,7 +128,7 @@ public class CaseActionEventStatusReceiverIT {
     Event finalEvent =
         eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
     System.out.println("### MESSAGE IS NOT BEING PROCESSED ### finalEvent: " + finalEvent);
-    // assert finalEvent.getStatus() == EventDTO.Status.PROCESSED;
+    //assert finalEvent.getStatus() == EventDTO.Status.PROCESSED;
     assert 1 == 1; // force a pass while we investigate why the message is not being processed
   }
 
