@@ -128,7 +128,7 @@ public class CaseActionEventStatusReceiverIT {
     Event finalEvent =
         eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
     System.out.println("### MESSAGE IS NOT BEING PROCESSED ### finalEvent: " + finalEvent);
-    //assert finalEvent.getStatus() == EventDTO.Status.PROCESSED;
+    // assert finalEvent.getStatus() == EventDTO.Status.PROCESSED;
     assert 1 == 1; // force a pass while we investigate why the message is not being processed
   }
 
