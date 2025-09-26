@@ -11,7 +11,7 @@
 
     <properties>
         <springboot.version>3.4.5</springboot.version>
-        <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
+        <!-- spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version -->
         <jackson.version>2.19.0</jackson.version>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,17 +28,24 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-gcp-dependencies</artifactId>
                 <version>${spring.cloud.gcp.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
+            </dependency -->
             <dependency>
                 <groupId>com.google.cloud</groupId>
                 <artifactId>libraries-bom</artifactId>
                 <version>26.45.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>spring-cloud-gcp-dependencies</artifactId>
+                <version>6.2.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -102,8 +109,14 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
+            <groupId>com.google.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-pubsub</artifactId>
+            <version>1.139.4</version>
         </dependency>
 
         <dependency>

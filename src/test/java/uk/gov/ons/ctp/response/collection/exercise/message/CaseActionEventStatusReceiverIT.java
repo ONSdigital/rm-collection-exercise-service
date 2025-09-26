@@ -1,12 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.message;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -17,13 +19,12 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -53,8 +54,8 @@ public class CaseActionEventStatusReceiverIT {
       UUID.fromString("c23bb1c1-5202-43bb-8357-7a07c844308f");
   private static final String TEST_USERNAME = "admin";
   private static final String TEST_PASSWORD = "secret";
-  private static PubSubEmulator PUBSUBEMULATOR;
-  private static final String PUBSUB_TOPIC = "event_status_topic";
+  private PubSubEmulator PUBSUBEMULATOR = new PubSubEmulator();
+  private static final String PUBSUB_TOPIC = "test_topic";
 
   @LocalServerPort private int port;
 
@@ -76,6 +77,14 @@ public class CaseActionEventStatusReceiverIT {
 
   public CaseActionEventStatusReceiverIT() throws IOException {}
 
+  @TestConfiguration
+  static class MockPubSubConfig {
+    @Bean
+    public PubSubTemplate pubSubTemplate() {
+      return mock(PubSubTemplate.class);
+    }
+  }
+
   /** Method to set up integration test */
   @Before
   public void setUp() {
@@ -84,14 +93,19 @@ public class CaseActionEventStatusReceiverIT {
     eventRepository.deleteAllInBatch();
     supplementaryDatasetRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
+    PUBSUBEMULATOR.testInit();
 
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
     WireMock.configureFor("localhost", 18002);
   }
 
+  @After
+  public void teardown() {
+    PUBSUBEMULATOR.testTeardown();
+  }
+
   @Test
   public void shouldUpdateEventStatus() throws IOException, CTPException, InterruptedException {
-    PUBSUBEMULATOR = new PubSubEmulator();
     stubCollectionInstrumentCount();
     stubSurveyServiceBusiness();
     String exerciseRef = "899990";
