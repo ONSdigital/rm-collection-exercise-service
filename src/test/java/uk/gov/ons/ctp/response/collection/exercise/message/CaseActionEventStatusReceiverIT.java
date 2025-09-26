@@ -1,14 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.message;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
-import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -19,12 +17,13 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,8 +34,12 @@ import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseClient;
 import uk.gov.ons.ctp.response.collection.exercise.endpoint.CollectionExerciseEndpointIT;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
-import uk.gov.ons.ctp.response.collection.exercise.repository.*;
-import uk.gov.ons.ctp.response.collection.exercise.representation.*;
+import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.EventRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
+import uk.gov.ons.ctp.response.collection.exercise.repository.SupplementaryDatasetRepository;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.EventDTO;
 import uk.gov.ons.ctp.response.collection.exercise.service.EventService;
 import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 
@@ -76,15 +79,6 @@ public class CaseActionEventStatusReceiverIT {
   private CollectionExerciseClient client;
 
   public CaseActionEventStatusReceiverIT() throws IOException {}
-
-  @TestConfiguration
-  static class MockPubSubConfig {
-    @Bean
-    public PubSubTemplate pubSubTemplate() {
-      return mock(PubSubTemplate.class);
-    }
-  }
-
   /** Method to set up integration test */
   @Before
   public void setUp() {
@@ -93,15 +87,8 @@ public class CaseActionEventStatusReceiverIT {
     eventRepository.deleteAllInBatch();
     supplementaryDatasetRepository.deleteAllInBatch();
     collectionExerciseRepository.deleteAllInBatch();
-    PUBSUBEMULATOR.testInit();
-
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
     WireMock.configureFor("localhost", 18002);
-  }
-
-  @After
-  public void teardown() {
-    PUBSUBEMULATOR.testTeardown();
   }
 
   @Test
