@@ -30,4 +30,3 @@ party-svc:
 gcp:
   project: "test"
   caseNotificationTopic: "test_topic"
-  collectionExerciseEventStatusUpdateSubscription: "test_subscription"
