@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jre-alpine
 
-COPY ./cacert.pem /usr/local/share/ca-certificates/cacert.pem
+COPY ./Cisco_Umbrella_Root_CA.pem /usr/local/share/ca-certificates/Cisco_Umbrella_Root_CA.pem
 RUN update-ca-certificates
 
 RUN apk update
