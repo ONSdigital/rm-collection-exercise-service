@@ -6,14 +6,14 @@ services:
    - "15432:5432"
  pubsub-emulator:
    container_name: pubsub-emulator-it
-   image: eu.gcr.io/ons-rasrmbs-management/pubsub-emulator
+   image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/pubsub-emulator
    ports:
      - "18681:8681"
    environment:
      - PUBSUB_PROJECT1=test,sample_unit_topic:sample_unit_subscription,event_status_topic:event_status_subscription
  survey:
    container_name: survey-it
-   image: eu.gcr.io/ons-rasrmbs-management/survey
+   image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/survey
    ports:
     - "18080:8080"
    external_links:
