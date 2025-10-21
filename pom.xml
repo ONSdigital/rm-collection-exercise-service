@@ -10,7 +10,7 @@
     <description>CollectionExerciseService</description>
 
     <properties>
-        <springboot.version>2.6.6</springboot.version>
+        <springboot.version>2.7.18</springboot.version>
         <spring.cloud.gcp.version>1.2.8.RELEASE</spring.cloud.gcp.version>
         <jackson.version>2.15.2</jackson.version>
         <jackson.databind.version>2.13.4.2</jackson.databind.version>
@@ -38,7 +38,7 @@
             <dependency>
                 <groupId>com.google.cloud</groupId>
                 <artifactId>libraries-bom</artifactId>
-                <version>20.2.0</version>
+                <version>26.45.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -88,6 +88,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
             <version>2.3.3.RELEASE</version>
@@ -107,12 +112,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>5.7.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+            <version>6.3.8</version>
         </dependency>
 
         <dependency>
@@ -146,13 +146,13 @@
         <dependency>
             <groupId>net.codesup.util</groupId>
             <artifactId>jaxb2-rich-contract-plugin</artifactId>
-            <version>2.1.0</version>
+            <version>4.1.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.11.0</version>
+            <version>4.29.2</version>
         </dependency>
 
         <dependency>
@@ -182,6 +182,12 @@
                     <groupId>com.sun</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.17.0</version>
         </dependency>
 
         <dependency>
@@ -217,7 +223,7 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <version>3.5.0</version>
+            <version>3.8.2</version>
         </dependency>
 
         <!-- Third party end -->
@@ -230,26 +236,19 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.5.0</version>
+            <version>5.13.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.14.8</version>
+            <version>1.15.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.mashape.unirest</groupId>
             <artifactId>unirest-java</artifactId>
             <version>1.4.9</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -271,7 +270,7 @@
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>3.4.1</version>
         </dependency>
 
 

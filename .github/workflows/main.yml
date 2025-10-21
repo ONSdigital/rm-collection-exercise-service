@@ -11,12 +11,17 @@ on:
     branches: [ main ]
     paths-ignore:
       - _infra/spinnaker/**
+  workflow_dispatch:
+    branches: [ main ]
+    paths-ignore:
+      - _infra/spinnaker/**
 
 env:
   IMAGE: collection-exercise
-  REGISTRY_HOSTNAME: eu.gcr.io
-  HOST: ${{ secrets.GOOGLE_PROJECT_ID }}
-  RELEASE_HOST: ${{ secrets.RELEASE_PROJECT_ID }}
+  REGISTRY_HOSTNAME: europe-west2-docker.pkg.dev
+  SPINNAKER_GOOGLE_PROJECT_ID: ${{ secrets.SPINNAKER_GOOGLE_PROJECT_ID }}
+  GAR_REPOSITORY: images
+  GAR_GOOGLE_PROJECT_ID: ${{ secrets.GAR_GOOGLE_PROJECT_ID }}
   CHART_DIRECTORY: _infra/helm/collection-exercise
   SPINNAKER_TOPIC: ${{ secrets.SPINNAKER_TOPIC }}
   ARTIFACT_BUCKET: ${{ secrets.ARTIFACT_BUCKET }}
@@ -28,16 +33,16 @@ jobs:
     name: Build & Package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: '0'
           token: ${{ secrets.BOT_TOKEN }}
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           java-version: 17
-
-      - uses: actions/cache@v1
+          distribution: 'temurin'
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -45,15 +50,17 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Authenticate with Google Cloud
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2.1.10
         with:
           credentials_json: ${{ secrets.GCR_KEY }}
       - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-      - name: Configure GCR
-        run: |
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
+      - run: |
           gcloud auth configure-docker
+          gcloud auth configure-docker "$REGISTRY_HOSTNAME" 
 
       - name: Run Tests
         run: |
@@ -62,7 +69,7 @@ jobs:
           mvn clean verify
 
       - name: pr docker tag
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main' && github.event.pull_request.user.login != 'dependabot[bot]'
         id: tag
         run: |
           PR=$(echo "$GITHUB_REF" | awk -F / '{print $3}')
@@ -70,14 +77,15 @@ jobs:
           echo "pr_number=pr-$PR" >> $GITHUB_ENV
         # Build the Docker image
       - name: Build Docker Image
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main' && github.event.pull_request.user.login != 'dependabot[bot]'
         run: |
-          docker build -f _infra/docker/Dockerfile -t "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":${{ env.pr_number }} .
+          docker build -t "$REGISTRY_HOSTNAME"/"$GAR_GOOGLE_PROJECT_ID"/"$GAR_REPOSITORY"/"$IMAGE":${{ env.pr_number }} -f _infra/docker/Dockerfile .
       - name: Push dev image
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main' && github.event.pull_request.user.login != 'dependabot[bot]'
         run: |
-          docker push "$REGISTRY_HOSTNAME"/"$HOST"/"$IMAGE":${{ env.pr_number }}
+          docker push "$REGISTRY_HOSTNAME"/"$GAR_GOOGLE_PROJECT_ID"/"$GAR_REPOSITORY"/"$IMAGE":${{ env.pr_number }}
       - name: template helm
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         run: |
           helm template $CHART_DIRECTORY
       - name: Set current tag
@@ -161,13 +169,14 @@ jobs:
           echo "version=$(grep -E "appVersion:\s+" $CHART_DIRECTORY/Chart.yaml | cut -d" " -f2 | sed -r 's/"//g')" >> $GITHUB_ENV
     
       - name: package helm
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         run: |
           echo HELM_VERSION=$(grep -E "version:\s+" $CHART_DIRECTORY/Chart.yaml | cut -d" " -f2 | sed -r 's/"//g') >> $GITHUB_ENV
           helm dep up $CHART_DIRECTORY
           helm package $CHART_DIRECTORY
 
       - name: Publish dev Chart
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main' && github.event.pull_request.user.login != 'dependabot[bot]'
         run: |
           mv $IMAGE-${{ env.HELM_VERSION }}.tgz $IMAGE-${{ env.pr_number }}.tgz
           gsutil cp $IMAGE-*.tgz gs://$ARTIFACT_BUCKET/$IMAGE/
@@ -175,12 +184,12 @@ jobs:
       - name: Build Release Image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -f _infra/docker/Dockerfile -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":latest -t "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ env.version }} .
+          docker build -f _infra/docker/Dockerfile -t "$REGISTRY_HOSTNAME"/"$GAR_GOOGLE_PROJECT_ID"/"$GAR_REPOSITORY"/"$IMAGE":latest -t "$REGISTRY_HOSTNAME"/"$GAR_GOOGLE_PROJECT_ID"/"$GAR_REPOSITORY"/"$IMAGE":${{ env.version }} .
       - name: Push Release image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker push "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":${{ env.version }}
-          docker push "$REGISTRY_HOSTNAME"/"$RELEASE_HOST"/"$IMAGE":latest
+          docker push "$REGISTRY_HOSTNAME"/"$GAR_GOOGLE_PROJECT_ID"/"$GAR_REPOSITORY"/"$IMAGE":${{ env.version }}
+          docker push "$REGISTRY_HOSTNAME"/"$GAR_GOOGLE_PROJECT_ID"/"$GAR_REPOSITORY"/"$IMAGE":latest
 
       - name: Publish Charts
         if: github.ref == 'refs/heads/main'
@@ -197,6 +206,6 @@ jobs:
       - name: CD hook
         if: github.ref == 'refs/heads/main'
         run: |
-          gcloud pubsub topics publish $SPINNAKER_TOPIC --project $HOST \
+          gcloud pubsub topics publish $SPINNAKER_TOPIC --project $SPINNAKER_GOOGLE_PROJECT_ID \
           --message "{ \"kind\": \"storage#object\", \"name\": \"$IMAGE/$IMAGE-${{ env.HELM_VERSION }}.tgz\", \"bucket\": \"$ARTIFACT_BUCKET\" }" \
           --attribute cd="actions"
