@@ -55,7 +55,6 @@ jobs:
         if: github.actor != 'anwilkie'
         uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
       - name: Configure Docker
-        if: github.actor != 'anwilkie'
         run: |
           gcloud auth configure-docker
           gcloud auth configure-docker "$REGISTRY_HOSTNAME" 
