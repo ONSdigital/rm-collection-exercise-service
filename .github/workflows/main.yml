@@ -46,13 +46,11 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Authenticate with Google Cloud
-        if: github.actor != 'anwilkie'
         id: auth
         uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2.1.10
         with:
           credentials_json: ${{ secrets.GCR_KEY }}
       - name: Setup Google Cloud SDK
-        if: github.actor != 'anwilkie'
         uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
       - name: Configure Docker
         run: |
