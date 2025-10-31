@@ -129,7 +129,7 @@ public class CaseActionEventStatusReceiverIT {
         eventRepository.findOneByCollectionExerciseIdAndTag(collectionExercise.getId(), "mps");
     // TODO: the CaseActionEventStatusReceiver.messageReceiver() method is not invoked under ITs
     // assert finalEvent.getStatus() == EventDTO.Status.PROCESSED;
-    assert 1 == 1;
+    assert true;
   }
 
   private EventDTO createEventDTO(
