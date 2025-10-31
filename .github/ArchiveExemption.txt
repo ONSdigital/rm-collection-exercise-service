@@ -1,0 +1,1 @@
+This is a core microservice responsible for the orchestration of processes necessary in data collection within ras-rm
