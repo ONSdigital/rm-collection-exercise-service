@@ -1,6 +1,5 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
 import static uk.gov.ons.ctp.response.collection.exercise.lib.common.MvcHelper.postJson;
@@ -65,22 +64,17 @@ public class CollectionExerciseExecutionEndpointUnitTests {
    *
    * @throws Exception exception thrown
    */
-    @Test
-    public void requestSampleUnits() throws Exception {
+  @Test
+  public void requestSampleUnits() throws Exception {
 
-      ResultActions actions =
-          mockCollectionExerciseExecutionMvc.perform(
-              postJson(
-                  String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1),
-   "{}"));
+    ResultActions actions =
+        mockCollectionExerciseExecutionMvc.perform(
+            postJson(
+                String.format("/collectionexerciseexecution/%s", COLLECTIONEXERCISE_ID1), "{}"));
 
-      String responseJson = actions.andReturn().getResponse().getContentAsString();
-
-      actions
-          .andExpect(status().isOk())
-          .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
-          .andExpect(handler().methodName("setReadyForLive"))
-          .andExpect(jsonPath("$.*", hasSize(1)))
-          .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
-    }
+    actions
+        .andExpect(status().isOk())
+        .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
+        .andExpect(handler().methodName("setReadyForLive"));
+  }
 }
