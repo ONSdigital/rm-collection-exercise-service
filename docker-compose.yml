@@ -1,7 +1,7 @@
 services:
  postgres:
   container_name: postgres-it
-  image: sdcplatform/ras-rm-docker-postgres
+  image: postgres:14
   ports:
    - "15432:5432"
  pubsub-emulator:
@@ -16,8 +16,8 @@ services:
    image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/survey
    ports:
     - "18080:8080"
-   external_links:
-    - postgres-it
+#   external_links:
+#    - postgres-it
    environment:
     - DATABASE_URL=postgres://postgres:postgres@postgres-it:5432/postgres?sslmode=disable
     - security_user_name=admin
