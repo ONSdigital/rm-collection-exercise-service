@@ -2,8 +2,8 @@ package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import jakarta.validation.Valid;
 import java.util.UUID;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

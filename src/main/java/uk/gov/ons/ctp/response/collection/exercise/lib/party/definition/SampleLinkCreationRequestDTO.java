@@ -3,9 +3,9 @@ package uk.gov.ons.ctp.response.collection.exercise.lib.party.definition;
 import com.kscs.util.jaxb.Buildable;
 import com.kscs.util.jaxb.PropertyTree;
 import com.kscs.util.jaxb.PropertyTreeUse;
+import jakarta.xml.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.*;
 
 /**
  * Java class for SampleLinkCreationRequestDTO complex type.

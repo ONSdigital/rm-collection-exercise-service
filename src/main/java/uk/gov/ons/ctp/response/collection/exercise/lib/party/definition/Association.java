@@ -3,11 +3,11 @@ package uk.gov.ons.ctp.response.collection.exercise.lib.party.definition;
 import com.kscs.util.jaxb.Buildable;
 import com.kscs.util.jaxb.PropertyTree;
 import com.kscs.util.jaxb.PropertyTreeUse;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * Java class for Association complex type.

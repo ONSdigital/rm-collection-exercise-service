@@ -1,6 +1,6 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.sampleunit.definition;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

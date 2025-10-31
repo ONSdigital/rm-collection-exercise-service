@@ -4,6 +4,11 @@ import static java.util.stream.Collectors.joining;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import jakarta.annotation.Nullable;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidatorFactory;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -18,11 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -304,7 +304,7 @@ public class CollectionExerciseEndpoint {
    * @throws CTPException thrown if constraint violation
    */
   private void validateConstraints(final CollectionExerciseDTO collexDto) throws CTPException {
-    javax.validation.Validator validator = VALIDATOR_FACTORY.getValidator();
+    jakarta.validation.Validator validator = VALIDATOR_FACTORY.getValidator();
     Set<ConstraintViolation<CollectionExerciseDTO>> result =
         validator.validate(collexDto, CollectionExerciseDTO.PatchValidation.class);
 

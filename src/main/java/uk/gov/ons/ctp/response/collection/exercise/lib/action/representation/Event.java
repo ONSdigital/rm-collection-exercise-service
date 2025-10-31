@@ -1,8 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.action.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
-import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

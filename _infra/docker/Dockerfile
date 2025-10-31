@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 RUN apk update
 COPY target/collectionexercisesvc.jar /opt/collectionexercisesvc.jar

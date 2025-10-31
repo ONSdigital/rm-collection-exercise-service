@@ -1,10 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.representation;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.Date;
 import java.util.UUID;
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
