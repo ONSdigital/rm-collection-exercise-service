@@ -1,10 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.ons.ctp.lib.common.MvcHelper.*;
 import static uk.gov.ons.ctp.lib.common.utility.MockMvcControllerAdviceHelper.mockAdviceFor;
+import static uk.gov.ons.ctp.response.collection.exercise.lib.common.MvcHelper.postJson;
 
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
@@ -13,6 +11,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,9 +21,13 @@ import uk.gov.ons.ctp.lib.common.FixtureHelper;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.RestExceptionHandler;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.jackson.CustomObjectMapper;
 import uk.gov.ons.ctp.response.collection.exercise.lib.sample.representation.SampleUnitsRequestDTO;
+import uk.gov.ons.ctp.response.collection.exercise.service.SampleSummaryService;
 
 /** Collection Exercise Endpoint Unit tests */
 public class CollectionExerciseExecutionEndpointUnitTests {
+
+  @Mock private SampleSummaryService sampleSummaryService;
+
   private static final Logger log =
       LoggerFactory.getLogger(CollectionExerciseExecutionEndpointUnitTests.class);
 
@@ -72,8 +75,6 @@ public class CollectionExerciseExecutionEndpointUnitTests {
     actions
         .andExpect(status().isOk())
         .andExpect(handler().handlerType(CollectionExerciseExecutionEndpoint.class))
-        .andExpect(handler().methodName("requestSampleUnits"))
-        .andExpect(jsonPath("$.*", hasSize(1)))
-        .andExpect(jsonPath("$.sampleUnitsTotal", is(SAMPLEUNITSTOTAL)));
+        .andExpect(handler().methodName("setReadyForLive"));
   }
 }

@@ -1,8 +1,8 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.UUID;
-import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

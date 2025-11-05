@@ -1,12 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
-import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -581,7 +582,13 @@ public class CollectionExerciseService {
 
     Map<String, String> searchStringMap =
         Collections.singletonMap("COLLECTION_EXERCISE", collectionExercise.getId().toString());
-    String searchStringJson = new JSONObject(searchStringMap).toString();
+    ObjectMapper mapper = new ObjectMapper();
+    String searchStringJson;
+    try {
+      searchStringJson = mapper.writeValueAsString(searchStringMap);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to convert searchStringMap to JSON", e);
+    }
     Integer numberOfCollectionInstruments =
         collectionInstrumentSvcClient.countCollectionInstruments(searchStringJson);
     boolean allSamplesActive = allSamplesActive(collexId);

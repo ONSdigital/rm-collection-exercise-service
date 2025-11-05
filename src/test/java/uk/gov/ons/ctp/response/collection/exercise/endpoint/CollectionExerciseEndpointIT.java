@@ -1,18 +1,17 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.godaddy.logging.Logger;
 import com.godaddy.logging.LoggerFactory;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.mashape.unirest.http.HttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,12 +19,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -33,10 +27,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -62,6 +61,7 @@ import uk.gov.ons.ctp.response.collection.exercise.utility.PubSubEmulator;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@WireMockTest(httpPort = 18002)
 public class CollectionExerciseEndpointIT {
   private static final Logger log = LoggerFactory.getLogger(CollectionExerciseEndpointIT.class);
 
@@ -90,19 +90,22 @@ public class CollectionExerciseEndpointIT {
 
   @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @ClassRule
-  public static WireMockClassRule wireMockRule =
-      new WireMockClassRule(options().port(18002).bindAddress("localhost"));
-
   private CollectionExerciseClient client;
   private PubSubEmulator pubSubEmulator = new PubSubEmulator();
 
   public CollectionExerciseEndpointIT() throws IOException {}
 
+  @TestConfiguration
+  static class MockPubSubConfig {
+    @Bean
+    public PubSubTemplate pubSubTemplate() {
+      return mock(PubSubTemplate.class);
+    }
+  }
+
   /** Method to set up integration test */
   @Before
   public void setUp() {
-    wireMockRule.resetAll();
 
     sampleLinkRepository.deleteAllInBatch();
     eventRepository.deleteAllInBatch();
@@ -110,6 +113,7 @@ public class CollectionExerciseEndpointIT {
     collectionExerciseRepository.deleteAllInBatch();
 
     client = new CollectionExerciseClient(this.port, TEST_USERNAME, TEST_PASSWORD, this.mapper);
+    WireMock.configureFor("localhost", 18002);
   }
 
   /**
@@ -270,7 +274,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseService.class,
             "ValidateSampleUnitsTest.CollectionInstrumentDTO.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
@@ -279,7 +283,7 @@ public class CollectionExerciseEndpointIT {
     SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
     sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
     sampleSummary.setId(UUID.randomUUID());
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
             .willReturn(
                 aResponse()
@@ -292,7 +296,7 @@ public class CollectionExerciseEndpointIT {
     SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
     sampleSummary.setState(SampleSummaryDTO.SampleState.INIT);
     sampleSummary.setId(UUID.randomUUID());
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
             .willReturn(
                 aResponse()
@@ -305,7 +309,7 @@ public class CollectionExerciseEndpointIT {
     SampleSummaryDTO sampleSummary = new SampleSummaryDTO();
     sampleSummary.setState(SampleSummaryDTO.SampleState.INIT);
     sampleSummary.setId(UUID.randomUUID());
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
             .inScenario("INIT then ACTIVE")
             .whenScenarioStateIs(Scenario.STARTED)
@@ -315,7 +319,7 @@ public class CollectionExerciseEndpointIT {
                     .withHeader("Content-Type", "application/json")
                     .withBody(mapper.writeValueAsString(sampleSummary))));
     sampleSummary.setState(SampleSummaryDTO.SampleState.ACTIVE);
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathEqualTo("/samples/samplesummary/" + sampleSummary.getId()))
             .inScenario("INIT then ACTIVE")
             .whenScenarioStateIs("ACTIVE")
@@ -327,7 +331,7 @@ public class CollectionExerciseEndpointIT {
   }
 
   private void stubCollectionInstrumentCount() throws IOException {
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathEqualTo("/collection-instrument-api/1.0.2/collectioninstrument/count"))
             .willReturn(aResponse().withBody("1")));
   }
@@ -337,7 +341,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.PartyDTO.with-associations.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
@@ -347,7 +351,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.PartyDTO.no-associations.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
@@ -357,7 +361,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.Supplementary.with-associations.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
@@ -367,7 +371,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.SupplementaryDatasetDTO.with-associations.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching("/party-api/v1/businesses/ref/(.*)"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
   }
@@ -377,7 +381,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.SurveyClassifierDTO.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching(
                 "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
                     + "/classifiertypeselectors"))
@@ -386,7 +390,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.SurveyClassifierTypeDTO.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching(
                 "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
                     + "/classifiertypeselectors/"
@@ -401,7 +405,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.SurveyDTO.social.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching(
                 "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));
@@ -414,7 +418,7 @@ public class CollectionExerciseEndpointIT {
         loadResourceAsString(
             CollectionExerciseEndpointIT.class,
             "CollectionExerciseEndpointIT.SurveyDTO.business.json");
-    this.wireMockRule.stubFor(
+    stubFor(
         get(urlPathMatching(
                 "/surveys/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(json)));

@@ -1,15 +1,16 @@
 package uk.gov.ons.ctp.response.collection.exercise.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import java.util.UUID;
-import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sourceforge.cobertura.CoverageIgnore;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 /** Domain model object. */
 @CoverageIgnore
@@ -39,7 +40,7 @@ public class SupplementaryDatasetEntity {
   UUID supplementaryDatasetId;
 
   @Column(name = "attributes")
-  @Type(type = "io.hypersistence.utils.hibernate.type.json.JsonType")
+  @JdbcTypeCode(SqlTypes.JSON)
   private String supplementaryDatasetJson;
 
   @OneToOne(fetch = FetchType.LAZY)

@@ -1,7 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
 import com.godaddy.logging.LoggingConfigs;
-import javax.annotation.PostConstruct;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import com.google.cloud.spring.pubsub.integration.AckMode;
+import com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAdapter;
+import com.google.cloud.spring.pubsub.integration.outbound.PubSubMessageHandler;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +19,6 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
-import org.springframework.cloud.gcp.pubsub.integration.AckMode;
-import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
-import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.DependsOn;
@@ -97,11 +97,9 @@ public class CollectionExerciseApplication {
     LiquibaseProperties liquibaseProperties = liquibaseProperties();
     SpringLiquibase liquibase = new SpringLiquibase();
     liquibase.setChangeLog(liquibaseProperties.getChangeLog());
-    liquibase.setContexts(liquibaseProperties.getContexts());
     liquibase.setDataSource(getDataSource(liquibaseProperties));
     liquibase.setDropFirst(liquibaseProperties.isDropFirst());
     liquibase.setShouldRun(true);
-    liquibase.setLabels(liquibaseProperties.getLabels());
     liquibase.setChangeLogParameters(liquibaseProperties.getParameters());
     liquibase.setLiquibaseSchema(liquibaseProperties.getLiquibaseSchema());
     liquibase.setDatabaseChangeLogLockTable(liquibaseProperties.getDatabaseChangeLogLockTable());

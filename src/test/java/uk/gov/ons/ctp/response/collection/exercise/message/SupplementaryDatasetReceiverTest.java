@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.pubsub.v1.PubsubMessage;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.messaging.Message;
 import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.SupplementaryDatasetDTO;
