@@ -1,7 +1,7 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -287,9 +289,11 @@ public class EventService {
               try {
                 handler.handleEventLifecycle(messageType, event);
               } catch (CTPException e) {
-                log.with("message_type", messageType)
-                    .with("event_id", event.getId())
-                    .error("Failed to handle event change", e);
+                log.error(
+                    "Failed to handle event change",
+                    kv("message_type", messageType),
+                    kv("event_id", event.getId()),
+                    e);
               }
             });
   }
@@ -345,9 +349,10 @@ public class EventService {
         eventRepository.findOneByCollectionExerciseIdAndTag(
             eventStatus.getCollectionExerciseID(), eventStatus.getTag().toString());
     if (null == eventToBeUpdated) {
-      log.with("collectionExerciseId", eventStatus.getCollectionExerciseID().toString())
-          .with("eventTag", eventStatus.getTag().toString())
-          .error("Unable to find an event for the matching combination.");
+      log.error(
+          "Unable to find an event for the matching combination.",
+          kv("collectionExerciseId", eventStatus.getCollectionExerciseID().toString()),
+          kv("eventTag", eventStatus.getTag().toString()));
       return;
     }
     eventToBeUpdated.setStatus(eventStatus.getStatus());
@@ -366,7 +371,7 @@ public class EventService {
           boolean isExerciseActive = isCollectionExerciseActive(exercise);
           boolean isEventInThePast = event.getTimestamp().before(Timestamp.from(Instant.now()));
           if (isExerciseActive && isEventInThePast) {
-            log.with("id", event.getId()).with("tag", event.getTag()).info("Processing event");
+            log.info("Processing event", kv("id", event.getId()), kv("tag", event.getTag()));
 
             /* There is a situation where case could still be processing messages from sample while an event happens
              * if the ready for live button is pressed shortly before an event is meant to trigger.
@@ -378,16 +383,16 @@ public class EventService {
              * we can guarantee case (and action by extension) will have everything set up before anything else happens.
              */
             Long numberOfCases = caseSvcClient.getNumberOfCases(exercise.getId());
-            log.with("collection_exercise_id", exercise.getId())
-                .with("number_of_cases", numberOfCases)
-                .with("sample_size", exercise.getSampleSize())
-                .info(
-                    "About to check that case has every sample in this exercise before processing this event");
+            log.info(
+                "About to check that case has every sample in this exercise before processing this event",
+                kv("collection_exercise_id", exercise.getId()),
+                kv("number_of_cases", numberOfCases),
+                kv("sample_size", exercise.getSampleSize()));
             boolean casesMatchSampleSize;
             if (exercise.getSampleSize() == null) {
-              log.with("collection_exercise_id", exercise.getId())
-                  .info(
-                      "Collection exercise has null value for sample. Setting the match to false");
+              log.info(
+                  "Collection exercise has null value for sample. Setting the match to false",
+                  kv("collection_exercise_id", exercise.getId()));
               casesMatchSampleSize = false;
             } else {
               casesMatchSampleSize = numberOfCases.longValue() == exercise.getSampleSize();
@@ -402,11 +407,14 @@ public class EventService {
                       CollectionExerciseDTO.CollectionExerciseEvent.GO_LIVE);
                   endpointCacheDataDeleter.deleteFrontstageExerciseByIdKey(
                       String.valueOf(event.getCollectionExercise().getSurveyId()));
-                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                      .info("Set collection exercise to LIVE state");
+                  log.info(
+                      "Set collection exercise to LIVE state",
+                      kv("collection_exercise_id", event.getCollectionExercise().getId()));
                 } catch (CTPException e) {
-                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                      .error("Failed to set collection exercise to LIVE state", e);
+                  log.error(
+                      "Failed to set collection exercise to LIVE state",
+                      kv("collection_exercise_id", event.getCollectionExercise().getId()),
+                      e);
                 }
               }
               if (tag == EventService.Tag.exercise_end) {
@@ -414,18 +422,21 @@ public class EventService {
                   collectionExerciseService.transitionCollectionExercise(
                       event.getCollectionExercise(),
                       CollectionExerciseDTO.CollectionExerciseEvent.END_EXERCISE);
-                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                      .info("Set collection exercise to ENDED state");
+                  log.info(
+                      "Set collection exercise to ENDED state",
+                      kv("collection_exercise_id", event.getCollectionExercise().getId()));
                   collectionExerciseEndPublisher.sendCollectionExerciseEnd(
                       event.getCollectionExercise().getId());
                 } catch (CTPException e) {
-                  log.with("collection_exercise_id", event.getCollectionExercise().getId())
-                      .error("Failed to set collection exercise to ENDED state", e);
+                  log.error(
+                      "Failed to set collection exercise to ENDED state",
+                      kv("collection_exercise_id", event.getCollectionExercise().getId()),
+                      e);
                 }
               }
 
               if (tag.isActionable()) {
-                log.with("tag", event.getTag()).info("Event is actionable, beginning processing");
+                log.info("Event is actionable, beginning processing", kv("tag", event.getTag()));
                 boolean success;
                 success = caseSvcClient.processEvent(event.getTag(), exercise.getId());
 
@@ -440,17 +451,18 @@ public class EventService {
                   event.setStatus(EventDTO.Status.SCHEDULED);
                 }
               } else {
-                log.with("tag", event.getTag())
-                    .info("Event is not actionable, setting to COMPLETED state");
+                log.info(
+                    "Event is not actionable, setting to COMPLETED state",
+                    kv("tag", event.getTag()));
                 event.setStatus(EventDTO.Status.PROCESSED);
               }
               eventRepository.saveAndFlush(event);
             } else {
-              log.with("collection_exercise_id", exercise.getId())
-                  .with("number_of_cases", numberOfCases)
-                  .with("sample_size", exercise.getSampleSize())
-                  .info(
-                      "Number of cases does not match the sample size.  Case may still be processing messages from sample");
+              log.info(
+                  "Number of cases does not match the sample size.  Case may still be processing messages from sample",
+                  kv("collection_exercise_id", exercise.getId()),
+                  kv("number_of_cases", numberOfCases),
+                  kv("sample_size", exercise.getSampleSize()));
             }
           }
         });

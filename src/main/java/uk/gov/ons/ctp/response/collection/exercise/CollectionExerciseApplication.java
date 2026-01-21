@@ -1,11 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise;
 
-import com.godaddy.logging.LoggingConfigs;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.integration.AckMode;
 import com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAdapter;
 import com.google.cloud.spring.pubsub.integration.outbound.PubSubMessageHandler;
-import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
@@ -241,13 +239,6 @@ public class CollectionExerciseApplication {
    */
   public static void main(String[] args) {
     SpringApplication.run(CollectionExerciseApplication.class, args);
-  }
-
-  @PostConstruct
-  public void initJsonLogging() {
-    if (appConfig.getLogging().isUseJson()) {
-      LoggingConfigs.setCurrent(LoggingConfigs.getCurrent().useJson());
-    }
   }
 
   @Bean

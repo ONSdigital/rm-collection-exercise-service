@@ -1,10 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
@@ -38,11 +40,12 @@ public class SupplementaryDatasetService {
     }
     try {
       if (collectionExercise.getSupplementaryDatasetEntity() != null) {
-        log.with("collectionExerciseId", collectionExercise.getId())
-            .with(
+        log.info(
+            "Linked supplementary dataset found",
+            kv("collectionExerciseId", collectionExercise.getId()),
+            kv(
                 "supplementaryDatasetId",
-                collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId())
-            .info("Linked supplementary dataset found");
+                collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId()));
         supplementaryDatasetRepository.deleteByExerciseFK(collectionExercise.getExercisePK());
         log.info("Supplementary dataset has been removed.");
       }

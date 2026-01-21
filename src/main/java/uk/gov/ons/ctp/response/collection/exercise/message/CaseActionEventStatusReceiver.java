@@ -4,10 +4,10 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.cloud.spring.pubsub.support.GcpPubSubHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
@@ -30,7 +30,7 @@ public class CaseActionEventStatusReceiver {
         "Receiving message ID from PubSub",
         kv("messageId", pubSubMsg.getPubsubMessage().getMessageId()));
     String payload = new String((byte[]) message.getPayload());
-    log.with("payload", payload).info("New request to update case action event status");
+    log.info("New request to update case action event status", kv("payload", payload));
     try {
       log.info("Mapping payload to CaseActionEventStatus object");
       CaseActionEventStatusDTO eventStatus =
@@ -39,10 +39,9 @@ public class CaseActionEventStatusReceiver {
       eventService.updateEventStatus(eventStatus);
       pubSubMsg.ack();
     } catch (JsonProcessingException e) {
-      log.with(e)
-          .error(
-              "Something went wrong while processing message received from PubSub for updating action event status",
-              e);
+      log.error(
+          "Something went wrong while processing message received from PubSub for updating action event status",
+          e);
       pubSubMsg.nack();
     }
   }

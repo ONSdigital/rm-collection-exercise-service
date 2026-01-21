@@ -1,11 +1,13 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.retry;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import com.google.common.base.Joiner;
 import java.util.Collections;
 import java.util.List;
 import net.sourceforge.cobertura.CoverageIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.context.RetryContextSupport;
@@ -112,8 +114,8 @@ public class CTPRetryPolicy implements RetryPolicy {
         }
       }
     } catch (ClassNotFoundException e) {
-      log.with("class_names", Joiner.on(",").join(retryableExceptions))
-          .error("Invalid classname", e);
+      log.error(
+          "Invalid classname", kv("class_names", Joiner.on(",").join(retryableExceptions)), e);
     }
 
     return false;

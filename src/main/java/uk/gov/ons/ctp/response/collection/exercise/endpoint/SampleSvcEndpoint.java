@@ -1,9 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import jakarta.validation.Valid;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +33,9 @@ public class SampleSvcEndpoint {
   public ResponseEntity<String> sampleSummaryReadiness(
       final @RequestBody @Valid SampleSummaryReadinessDTO sampleSummaryReadinessDTO)
       throws CTPException {
-    log.with(sampleSummaryReadinessDTO.getSampleSummaryId()).info("Sample summary status updated");
+    log.info(
+        "Sample summary status updated",
+        kv("sampleSummaryId", sampleSummaryReadinessDTO.getSampleSummaryId()));
 
     UUID sampleSummaryId = sampleSummaryReadinessDTO.getSampleSummaryId();
     UUID collectionExerciseId =

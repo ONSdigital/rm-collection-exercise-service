@@ -1,7 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.redis;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +24,9 @@ public class EndpointCacheDataDeleter {
     String key = REDIS_KEY_PREFIX + surveyId;
     try {
       Boolean cacheInvalidated = redisUtil.deleteValue(key);
-      log.with("key", key).with("success", cacheInvalidated).info("Cache invalidated with key");
+      log.info("Cache invalidated with key", kv("key", key), kv("success", cacheInvalidated));
     } catch (Exception e) {
-      log.with("key", key).error("Unable to remove key from redis", e);
+      log.error("Unable to remove key from redis", kv("key", key), e);
     }
   }
 }

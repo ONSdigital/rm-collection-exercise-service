@@ -1,12 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.util;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.util.Arrays;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is designed to provide more flexible parsing of dates than the standard DateFormats.
@@ -29,7 +31,7 @@ public class AggregatedDateFormat extends DateFormat {
   @Override
   public StringBuffer format(
       final Date date, final StringBuffer toAppendTo, final FieldPosition fieldPosition) {
-    log.with("date", date).trace("Formatting date to string");
+    log.trace("Formatting date to string", kv("date", date));
     return outputFormat.format(date, toAppendTo, fieldPosition);
   }
 
@@ -49,7 +51,7 @@ public class AggregatedDateFormat extends DateFormat {
 
   @Override
   public Date parse(final String source, final ParsePosition pos) {
-    log.with("string", source).trace("Parsing string to date");
+    log.trace("Parsing string to date", kv("string", source));
     return Arrays.stream(inputFormats).map(d -> d.parse(source, pos)).findFirst().orElse(null);
   }
 }

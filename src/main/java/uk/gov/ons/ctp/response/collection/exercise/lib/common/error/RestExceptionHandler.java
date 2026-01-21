@@ -1,9 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.error;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.util.stream.Collectors;
 import net.sourceforge.cobertura.CoverageIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,9 +35,11 @@ public class RestExceptionHandler {
    */
   @ExceptionHandler(CTPException.class)
   public ResponseEntity<?> handleCTPException(CTPException exception) {
-    log.with("fault", exception.getFault())
-        .with("exception_message", exception.getMessage())
-        .error("Uncaught CTPException", exception);
+    log.error(
+        "Uncaught CTPException",
+        kv("exception_message", exception.getMessage()),
+        kv("fault", exception.getFault()),
+        exception);
 
     HttpStatus status;
     switch (exception.getFault()) {
@@ -93,9 +97,11 @@ public class RestExceptionHandler {
             .map(e -> String.format("field=%s message=%s", e.getField(), e.getDefaultMessage()))
             .collect(Collectors.joining(","));
 
-    log.with("validation_errors", errors)
-        .with("source_message", ex.getSourceMessage())
-        .error("Unhandled InvalidRequestException", ex);
+    log.error(
+        "Unhandled InvalidRequestException",
+        kv("validation_errors", errors),
+        kv("source_message", ex.getSourceMessage()),
+        ex);
     CTPException ourException =
         new CTPException(CTPException.Fault.VALIDATION_FAILED, INVALID_JSON);
     return new ResponseEntity<>(ourException, HttpStatus.BAD_REQUEST);
@@ -132,8 +138,10 @@ public class RestExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<?> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException ex) {
-    log.with("parameter", ex.getParameter().getParameterName())
-        .error("Uncaught MethodArgumentNotValidException", ex);
+    log.error(
+        "Uncaught MethodArgumentNotValidException",
+        kv("parameter", ex.getParameter().getParameterName()),
+        ex);
     CTPException ourException =
         new CTPException(CTPException.Fault.VALIDATION_FAILED, INVALID_JSON);
     return new ResponseEntity<>(ourException, HttpStatus.BAD_REQUEST);
