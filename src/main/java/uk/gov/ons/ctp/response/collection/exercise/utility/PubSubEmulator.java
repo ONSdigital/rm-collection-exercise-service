@@ -89,7 +89,7 @@ public class PubSubEmulator {
       PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
       TopicName topicName = TopicName.of(PROJECT_ID, topicId);
       Publisher publisher = getEmulatorPublisher(topicName);
-      log.info("Publishing message to pubsub emulator", kv("publisher", publisher));
+      log.info("Publishing message to pubsub emulator", kv("publisher", publisher.toString()));
       ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
       String messageId = messageIdFuture.get();
       log.info("Published message to pubsub emulator", kv("messageId", messageId));

@@ -50,9 +50,9 @@ public class BasicStateTransitionManager<S, E> implements StateTransitionManager
     } else {
       log.info(
           "Transitioning state",
-          kv("from", sourceState),
-          kv("to", destinationState),
-          kv("event", event));
+          kv("from", sourceState.toString()),
+          kv("to", destinationState.toString()),
+          kv("event", event.toString()));
     }
     return destinationState;
   }
