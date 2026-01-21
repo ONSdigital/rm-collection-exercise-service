@@ -46,7 +46,7 @@ public class BasicStateTransitionManager<S, E> implements StateTransitionManager
     if (destinationState == null) {
       log.warn(
           "No valid transition",
-          kv("from", sourceState, toString()),
+          kv("from", sourceState.toString()),
           kv("event", event.toString()));
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST, String.format(TRANSITION_ERROR_MSG, sourceState, event));
