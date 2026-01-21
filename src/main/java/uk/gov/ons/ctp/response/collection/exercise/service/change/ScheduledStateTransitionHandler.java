@@ -55,11 +55,19 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
       // checked first) there is a reasonable likelihood that the transition will fail harmlessly.
       // Hence this
       // exception is being logged as a warning minus the stack trace
-      log.warn(
-          "Collection exercise failed to handle state transition",
-          kv("collection_exercise", collectionExercise.getId()),
-          kv("event", ceEvent),
-          e);
+      if (ceEvent != null) {
+        log.warn(
+            "Collection exercise failed to handle state transition",
+            kv("collection_exercise", collectionExercise.getId()),
+            kv("event", ceEvent.toString()),
+            e);
+      } else {
+        log.warn(
+            "Collection exercise failed to handle state transition",
+            kv("collection_exercise", collectionExercise.getId()),
+            kv("event", ceEvent),
+            e);
+      }
     }
   }
 }
