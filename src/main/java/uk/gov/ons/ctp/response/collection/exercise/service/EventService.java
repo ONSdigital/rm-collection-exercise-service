@@ -291,7 +291,7 @@ public class EventService {
               } catch (CTPException e) {
                 log.error(
                     "Failed to handle event change",
-                    kv("message_type", messageType),
+                    kv("message_type", messageType.toString()),
                     kv("event_id", event.getId()),
                     e);
               }
