@@ -65,7 +65,7 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
         log.warn(
             "Collection exercise failed to handle state transition",
             kv("collection_exercise", collectionExercise.getId()),
-            kv("event", ceEvent),
+            kv("event", null),
             e);
       }
     }
