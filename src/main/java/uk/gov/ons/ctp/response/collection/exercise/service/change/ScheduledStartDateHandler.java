@@ -1,7 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.change;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseMessageType.MessageType;
@@ -47,24 +49,27 @@ public final class ScheduledStartDateHandler implements EventChangeHandler {
       if (collex != null) {
         switch (tag) {
           case mps:
-            log.with("collection_exercise_id", collex.getId())
-                .with("event_time", event.getTimestamp())
-                .debug("Setting scheduledStartDate");
+            log.debug(
+                "Setting scheduledStartDate",
+                kv("collection_exercise_id", collex.getId()),
+                kv("event_time", event.getTimestamp()));
             collex.setScheduledStartDateTime(event.getTimestamp());
             collex.setScheduledExecutionDateTime(event.getTimestamp());
             collex.setPeriodStartDateTime(event.getTimestamp());
             break;
           case exercise_end:
-            log.with("collection_exercise_id", collex.getId())
-                .with("event_time", event.getTimestamp())
-                .debug("Setting scheduledEndDate");
+            log.debug(
+                "Setting scheduledEndDate",
+                kv("collection_exercise_id", collex.getId()),
+                kv("event_time", event.getTimestamp()));
             collex.setScheduledEndDateTime(event.getTimestamp());
             collex.setPeriodEndDateTime(event.getTimestamp());
             break;
           case return_by:
-            log.with("collection_exercise_id", collex.getId())
-                .with("event_time", event.getTimestamp())
-                .debug("Setting scheduledReturnDate");
+            log.debug(
+                "Setting scheduledReturnDate",
+                kv("collection_exercise_id", collex.getId()),
+                kv("event_time", event.getTimestamp()));
             collex.setScheduledReturnDateTime(event.getTimestamp());
             break;
           default:

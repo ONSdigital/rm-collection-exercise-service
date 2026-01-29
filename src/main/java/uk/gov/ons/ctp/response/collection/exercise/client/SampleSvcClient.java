@@ -1,9 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -46,7 +48,7 @@ public class SampleSvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public SampleSummaryDTO getSampleSummary(UUID sampleSummaryId) {
-    log.with("sampleSummaryId", sampleSummaryId).debug("Getting sample summary");
+    log.debug("Getting sample summary", kv("sampleSummaryId", sampleSummaryId));
     UriComponents uri =
         restUtility.createUriComponents(
             "/samples/samplesummary/{sampleSummaryId}", null, sampleSummaryId);
@@ -87,7 +89,7 @@ public class SampleSvcClient {
       queryParams.add("state", SampleUnitDTO.SampleUnitState.FAILED.name());
     }
 
-    log.with("sampleSummaryId", sampleSummaryId).debug("request sample units for sample summary");
+    log.debug("request sample units for sample summary", kv("sampleSummaryId", sampleSummaryId));
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSampleSvc().getRequestSampleUnitsForSampleSummaryPath(),

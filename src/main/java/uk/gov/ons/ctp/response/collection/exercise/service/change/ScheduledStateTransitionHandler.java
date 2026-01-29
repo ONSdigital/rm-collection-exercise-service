@@ -1,7 +1,9 @@
 package uk.gov.ons.ctp.response.collection.exercise.service.change;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseMessageType.MessageType;
@@ -53,9 +55,11 @@ public class ScheduledStateTransitionHandler implements EventChangeHandler {
       // checked first) there is a reasonable likelihood that the transition will fail harmlessly.
       // Hence this
       // exception is being logged as a warning minus the stack trace
-      log.with("collection_exercise", collectionExercise.getId())
-          .with("event", ceEvent)
-          .warn("Collection exercise failed to handle state transition", e);
+      log.warn(
+          "Collection exercise failed to handle state transition",
+          kv("collection_exercise", collectionExercise.getId()),
+          kv("event", ceEvent != null ? ceEvent.toString() : null),
+          e);
     }
   }
 }

@@ -1,10 +1,12 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import java.io.IOException;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -61,8 +63,10 @@ public class CaseSvcClient {
       try {
         result = objectMapper.readValue(responseBody, Long.class);
       } catch (final IOException e) {
-        log.with("Collection Exercise", collectionExerciseId)
-            .error("Unable to read no. of cases response", e);
+        log.error(
+            "Unable to read no. of cases response",
+            kv("Collection Exercise", collectionExerciseId),
+            e);
       }
     }
     return result;

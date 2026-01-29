@@ -1,13 +1,15 @@
 package uk.gov.ons.ctp.response.collection.exercise.service;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
 import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -318,13 +320,15 @@ public class CollectionExerciseService {
   @Transactional
   public CollectionExercise createCollectionExercise(
       CollectionExerciseDTO collex, SurveyDTO survey) {
-    log.with("survey_ref", survey.getSurveyRef())
-        .with("exercise_ref", collex.getExerciseRef())
-        .info("Creating collection exercise");
+    log.info(
+        "Creating collection exercise",
+        kv("survey_ref", survey.getSurveyRef()),
+        kv("exercise_ref", collex.getExerciseRef()));
     CollectionExercise collectionExercise = newCollectionExerciseFromDTO(collex);
     collectionExercise = this.collectRepo.saveAndFlush(collectionExercise);
-    log.with("collection_exercise_id", collectionExercise.getId())
-        .debug("Successfully created collection exercise");
+    log.debug(
+        "Successfully created collection exercise",
+        kv("collection_exercise_id", collectionExercise.getId()));
     return collectionExercise;
   }
 
@@ -341,8 +345,9 @@ public class CollectionExerciseService {
     collectionExercise.setState(CollectionExerciseDTO.CollectionExerciseState.CREATED);
     collectionExercise.setCreated(new Timestamp(new Date().getTime()));
     collectionExercise.setId(UUID.randomUUID());
-    log.with("collection_exercise_id", collectionExercise.getId())
-        .debug("Successfully created collection exercise from DTO");
+    log.debug(
+        "Successfully created collection exercise from DTO",
+        kv("collection_exercise_id", collectionExercise.getId()));
     return collectionExercise;
   }
 
@@ -596,10 +601,11 @@ public class CollectionExerciseService {
         allSamplesActive
             && numberOfCollectionInstruments != null
             && numberOfCollectionInstruments > 0;
-    log.with("all_samples_active", allSamplesActive)
-        .with("number_of_collection_instruments", numberOfCollectionInstruments)
-        .with("should_transition", shouldTransition)
-        .info("ready for review transition check");
+    log.info(
+        "ready for review transition check",
+        kv("all_samples_active", allSamplesActive),
+        kv("number_of_collection_instruments", numberOfCollectionInstruments),
+        kv("should_transition", shouldTransition));
     if (shouldTransition) {
       transitionCollectionExercise(
           collectionExercise, CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_ADDED);

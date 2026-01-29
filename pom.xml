@@ -263,9 +263,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.godaddy</groupId>
-            <artifactId>logging</artifactId>
-            <version>1.2.5</version>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.20</version>
         </dependency>
 
         <dependency>

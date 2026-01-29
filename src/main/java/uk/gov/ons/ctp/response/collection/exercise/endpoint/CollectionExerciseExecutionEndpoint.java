@@ -1,8 +1,10 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +39,7 @@ public class CollectionExerciseExecutionEndpoint {
   @RequestMapping(value = "/{id}", method = RequestMethod.POST)
   public ResponseEntity<Void> setReadyForLive(@PathVariable("id") final UUID id)
       throws CTPException {
-    log.with("collection_exercise_id", id).debug("About to set collection exercise to live");
+    log.debug("About to set collection exercise to live", kv("collection_exercise_id", id));
 
     sampleSummaryService.activateSamples(id);
     return ResponseEntity.ok().build();

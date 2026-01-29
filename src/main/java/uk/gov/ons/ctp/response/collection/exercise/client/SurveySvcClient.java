@@ -1,9 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.client;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -58,7 +60,7 @@ public class SurveySvcClient {
       maxAttemptsExpression = "#{${retries.maxAttempts}}",
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public List<SurveyClassifierDTO> requestClassifierTypeSelectors(final UUID surveyId) {
-    log.with("survey_id", surveyId).debug("Retrieving survey");
+    log.debug("Retrieving survey", kv("survey_id", surveyId));
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getRequestClassifierTypesListPath(), null, surveyId);
@@ -85,9 +87,10 @@ public class SurveySvcClient {
       backoff = @Backoff(delayExpression = "#{${retries.backoff}}"))
   public SurveyClassifierTypeDTO requestClassifierTypeSelector(
       final UUID surveyId, final UUID classifierType) {
-    log.with("survey_id", surveyId.toString())
-        .with("classifier_type", classifierType.toString())
-        .debug("Requesting survey classifier type");
+    log.debug(
+        "Requesting survey classifier type",
+        kv("survey_id", surveyId.toString()),
+        kv("classifier_type", classifierType.toString()));
     UriComponents uriComponents =
         restUtility.createUriComponents(
             appConfig.getSurveySvc().getRequestClassifierTypesPath(),
@@ -109,7 +112,7 @@ public class SurveySvcClient {
     HttpEntity<?> httpEntity = restUtility.createHttpEntityWithAuthHeader();
     ResponseEntity<SurveyDTO> responseEntity;
     try {
-      log.with("survey_id", surveyId.toString()).debug("Retrieving survey");
+      log.debug("Retrieving survey", kv("survey_id", surveyId.toString()));
       responseEntity =
           restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, httpEntity, SurveyDTO.class);
     } catch (HttpClientErrorException e) {

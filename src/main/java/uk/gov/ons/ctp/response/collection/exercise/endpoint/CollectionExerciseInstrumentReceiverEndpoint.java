@@ -1,9 +1,11 @@
 package uk.gov.ons.ctp.response.collection.exercise.endpoint;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import jakarta.validation.Valid;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +33,9 @@ public class CollectionExerciseInstrumentReceiverEndpoint {
   public ResponseEntity<?> collectionInstrumentLink(
       final @RequestBody @Valid CollectionInstrumentMessageDTO collectionInstrumentMessageDTO)
       throws CTPException {
-    log.with(collectionInstrumentMessageDTO.getExerciseId()).info("Collection instruments updated");
+    log.info(
+        "Collection instruments updated",
+        kv("collectionExerciseId", collectionInstrumentMessageDTO.getExerciseId()));
 
     UUID collectionExerciseId = collectionInstrumentMessageDTO.getExerciseId();
 

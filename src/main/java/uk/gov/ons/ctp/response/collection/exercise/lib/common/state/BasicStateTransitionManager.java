@@ -1,12 +1,14 @@
 package uk.gov.ons.ctp.response.collection.exercise.lib.common.state;
 
-import com.godaddy.logging.Logger;
-import com.godaddy.logging.LoggerFactory;
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 
 /**
@@ -42,14 +44,16 @@ public class BasicStateTransitionManager<S, E> implements StateTransitionManager
       destinationState = outputMap.get(event);
     }
     if (destinationState == null) {
-      log.with("from", sourceState).with("event", event).warn("No valid transition");
+      log.warn(
+          "No valid transition", kv("from", sourceState.toString()), kv("event", event.toString()));
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST, String.format(TRANSITION_ERROR_MSG, sourceState, event));
     } else {
-      log.with("from", sourceState)
-          .with("to", destinationState)
-          .with("event", event)
-          .info("Transitioning state");
+      log.info(
+          "Transitioning state",
+          kv("from", sourceState.toString()),
+          kv("to", destinationState.toString()),
+          kv("event", event.toString()));
     }
     return destinationState;
   }
