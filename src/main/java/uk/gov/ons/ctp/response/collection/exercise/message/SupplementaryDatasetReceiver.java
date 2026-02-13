@@ -47,14 +47,21 @@ public class SupplementaryDatasetReceiver {
 
   private SupplementaryDatasetDTO createSupplementaryDatasetDTO(String payload)
       throws CTPException {
+    log.info("here1");
     SupplementaryDatasetDTO supplementaryDatasetDTO;
+    log.info("here2");
     try {
+      log.info("here3");
       supplementaryDatasetDTO = objectMapper.readValue(payload, SupplementaryDatasetDTO.class);
+      log.info("here4");
     } catch (JsonProcessingException e) {
+      log.info("here5");
       throw new CTPException(
           CTPException.Fault.BAD_REQUEST, "Could not map message to Supplementary Dataset DTO");
     }
+    log.info("here6");
     log.info("Mapping to Supplementary Dataset object successful {}", supplementaryDatasetDTO);
+    log.info("here7");
     return supplementaryDatasetDTO;
   }
 }
