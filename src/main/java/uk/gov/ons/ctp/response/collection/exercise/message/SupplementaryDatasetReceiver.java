@@ -60,7 +60,9 @@ public class SupplementaryDatasetReceiver {
           CTPException.Fault.BAD_REQUEST, "Could not map message to Supplementary Dataset DTO");
     }
     log.info("here6");
-    log.info("Mapping to Supplementary Dataset object successful {}", kv("supplementaryDatasetDTO", supplementaryDatasetDTO));
+    log.info(
+        "Mapping to Supplementary Dataset object successful {}",
+        kv("supplementaryDatasetDTO", supplementaryDatasetDTO));
     log.info("here7");
     return supplementaryDatasetDTO;
   }
