@@ -16,17 +16,18 @@ services:
      - "18681:8681"
    environment:
      - PUBSUB_PROJECT1=test,sample_unit_topic:sample_unit_subscription,event_status_topic:event_status_subscription
+
  survey:
    container_name: survey-it
-   image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/survey
+   image: europe-west2-docker.pkg.dev/ons-ci-rmrasbs/images/survey:pr-170
    ports:
     - "18080:8080"
-   external_links:
-    - postgres-it
    environment:
     - DATABASE_URL=postgres://postgres:postgres@postgres-it:5432/postgres?sslmode=disable
     - security_user_name=admin
     - security_user_password=secret
+   depends_on:
+     - postgres
 
  wiremock:
    container_name: wiremock-collex-it
