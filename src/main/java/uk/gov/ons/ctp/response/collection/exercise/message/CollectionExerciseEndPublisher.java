@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.CollectionExerciseEndOutboundGateway;
+import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
 
 @Component
@@ -16,14 +18,21 @@ public class CollectionExerciseEndPublisher {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(CollectionExerciseEndPublisher.class);
 
+  @Autowired private SurveySvcClient surveyService;
+
   @Autowired private ObjectMapper objectMapper;
 
   @Autowired private CollectionExerciseEndOutboundGateway messagingGateway;
 
-  public void sendCollectionExerciseEnd(UUID collectionExerciseId) {
+  public void sendCollectionExerciseEnd(UUID collectionExerciseId, String exercise_ref) {
+
+    SurveyDTO survey = this.surveyService.findSurveyByRef(exercise_ref);
+
     CollectionExerciseEndEventDTO collectionExerciseEndEventDTO =
         new CollectionExerciseEndEventDTO();
     collectionExerciseEndEventDTO.setCollectionExerciseId(collectionExerciseId);
+    collectionExerciseEndEventDTO.setPeriod(exercise_ref);
+    collectionExerciseEndEventDTO.setSurveyId(survey.getId());
 
     try {
       String payload = objectMapper.writeValueAsString(collectionExerciseEndEventDTO);

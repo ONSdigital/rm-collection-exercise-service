@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class CollectionExerciseEndEventDTO {
   private UUID collectionExerciseId;
+  private String period;
+  private String surveyId;
 }
