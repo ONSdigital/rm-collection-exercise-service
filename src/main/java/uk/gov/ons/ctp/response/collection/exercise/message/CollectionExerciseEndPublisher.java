@@ -24,14 +24,14 @@ public class CollectionExerciseEndPublisher {
 
   @Autowired private CollectionExerciseEndOutboundGateway messagingGateway;
 
-  public void sendCollectionExerciseEnd(UUID collectionExerciseId, String exercise_ref) {
+  public void sendCollectionExerciseEnd(UUID collectionExerciseId, String exerciseRef, UUID surveyId) {
 
-    SurveyDTO survey = this.surveyService.findSurveyByRef(exercise_ref);
+    SurveyDTO survey = this.surveyService.findSurvey(surveyId);
 
     CollectionExerciseEndEventDTO collectionExerciseEndEventDTO =
         new CollectionExerciseEndEventDTO();
     collectionExerciseEndEventDTO.setCollectionExerciseId(collectionExerciseId);
-    collectionExerciseEndEventDTO.setPeriod(exercise_ref);
+    collectionExerciseEndEventDTO.setPeriod(exerciseRef);
     collectionExerciseEndEventDTO.setSurveyId(survey.getId());
 
     try {

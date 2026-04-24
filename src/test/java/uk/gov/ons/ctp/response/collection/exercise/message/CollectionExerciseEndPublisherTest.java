@@ -29,6 +29,7 @@ public class CollectionExerciseEndPublisherTest {
   @Test
   public void testSendCollectionExerciseEnd() throws Exception {
     UUID collectionExerciseId = UUID.randomUUID();
+    UUID surveyID = UUID.randomUUID();
     String exerciseRef = "0001";
 
     ObjectMapper mapper = new ObjectMapper();
@@ -40,9 +41,9 @@ public class CollectionExerciseEndPublisherTest {
 
     when(objectMapper.writeValueAsString(any(CollectionExerciseEndEventDTO.class)))
         .thenReturn(payload);
-    when(surveyService.findSurveyByRef(anyString())).thenReturn(surveyDTO);
+    when(surveyService.findSurvey(any())).thenReturn(surveyDTO);
 
-    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExerciseId, exerciseRef);
+    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExerciseId, exerciseRef, surveyID);
 
     verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
     verify(messagingGateway, times(1)).sendToPubsub(payload);
