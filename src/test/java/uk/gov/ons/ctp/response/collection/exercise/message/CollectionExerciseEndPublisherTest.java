@@ -34,7 +34,8 @@ public class CollectionExerciseEndPublisherTest {
 
     ObjectMapper mapper = new ObjectMapper();
     String payload =
-        mapper.writeValueAsString(new CollectionExerciseEndEventDTO(collectionExerciseId, "0001","001" ));
+        mapper.writeValueAsString(
+            new CollectionExerciseEndEventDTO(collectionExerciseId, "0001", "001"));
 
     SurveyDTO surveyDTO = new SurveyDTO();
     surveyDTO.setId("001");
