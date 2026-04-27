@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.sql.Timestamp;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,12 +32,15 @@ public class CollectionExerciseEndPublisherTest {
   public void testSendCollectionExerciseEnd() throws Exception {
     UUID collectionExerciseId = UUID.randomUUID();
     UUID surveyID = UUID.randomUUID();
+    UUID supplementaryDatasetID = UUID.randomUUID();
     String exerciseRef = "0001";
+    String surveyRef = "001";
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     ObjectMapper mapper = new ObjectMapper();
     String payload =
         mapper.writeValueAsString(
-            new CollectionExerciseEndEventDTO(collectionExerciseId, "0001", "001"));
+            new CollectionExerciseEndEventDTO(collectionExerciseId,supplementaryDatasetID, exerciseRef, surveyRef, timestamp));
 
     SurveyDTO surveyDTO = new SurveyDTO();
     surveyDTO.setId("001");
@@ -44,7 +49,7 @@ public class CollectionExerciseEndPublisherTest {
         .thenReturn(payload);
     when(surveyService.findSurvey(any())).thenReturn(surveyDTO);
 
-    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExerciseId, exerciseRef, surveyID);
+    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExerciseId, supplementaryDatasetID, exerciseRef, timestamp, surveyID);
 
     verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
     verify(messagingGateway, times(1)).sendToPubsub(payload);
