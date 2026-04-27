@@ -29,11 +29,11 @@ public class CollectionExerciseEndPublisher {
     SurveyDTO survey = this.surveyService.findSurvey(collectionExercise.getSurveyId());
 
     CollectionExerciseEndEventDTO collectionExerciseEndEventDTO =
-            new CollectionExerciseEndEventDTO();
+        new CollectionExerciseEndEventDTO();
 
     if (collectionExercise.getSupplementaryDatasetEntity() != null) {
       collectionExerciseEndEventDTO.setSupplementaryDatasetId(
-              collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId());
+          collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId());
     }
 
     collectionExerciseEndEventDTO.setCollectionExerciseId(collectionExercise.getId());

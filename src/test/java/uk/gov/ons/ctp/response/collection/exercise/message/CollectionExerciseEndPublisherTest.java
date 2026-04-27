@@ -61,4 +61,33 @@ public class CollectionExerciseEndPublisherTest {
     verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
     verify(messagingGateway, times(1)).sendToPubsub(payload);
   }
+
+  @Test
+  public void testSendCollectionExerciseEndNoSupData() throws Exception {
+    UUID collectionExerciseId = UUID.randomUUID();
+    String exerciseRef = "0001";
+    String surveyRef = "001";
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(collectionExerciseId);
+    collectionExercise.setExerciseRef(exerciseRef);
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+    ObjectMapper mapper = new ObjectMapper();
+    String payload =
+        mapper.writeValueAsString(
+            new CollectionExerciseEndEventDTO(
+                collectionExerciseId, null, exerciseRef, surveyRef, timestamp));
+
+    SurveyDTO surveyDTO = new SurveyDTO();
+    surveyDTO.setId("001");
+
+    when(objectMapper.writeValueAsString(any(CollectionExerciseEndEventDTO.class)))
+        .thenReturn(payload);
+    when(surveyService.findSurvey(any())).thenReturn(surveyDTO);
+
+    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExercise);
+
+    verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
+    verify(messagingGateway, times(1)).sendToPubsub(payload);
+  }
 }
