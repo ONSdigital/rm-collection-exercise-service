@@ -2,14 +2,13 @@ package uk.gov.ons.ctp.response.collection.exercise.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Timestamp;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication.CollectionExerciseEndOutboundGateway;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
 
@@ -25,22 +24,18 @@ public class CollectionExerciseEndPublisher {
 
   @Autowired private CollectionExerciseEndOutboundGateway messagingGateway;
 
-  public void sendCollectionExerciseEnd(
-      UUID collectionExerciseId,
-      UUID supplementaryDatasetId,
-      String exerciseRef,
-      Timestamp endDate,
-      UUID surveyId) {
+  public void sendCollectionExerciseEnd(CollectionExercise collectionExercise) {
 
-    SurveyDTO survey = this.surveyService.findSurvey(surveyId);
+    SurveyDTO survey = this.surveyService.findSurvey(collectionExercise.getSurveyId());
 
     CollectionExerciseEndEventDTO collectionExerciseEndEventDTO =
         new CollectionExerciseEndEventDTO();
-    collectionExerciseEndEventDTO.setCollectionExerciseId(collectionExerciseId);
-    collectionExerciseEndEventDTO.setPeriod(exerciseRef);
+    collectionExerciseEndEventDTO.setCollectionExerciseId(collectionExercise.getId());
+    collectionExerciseEndEventDTO.setPeriod(collectionExercise.getExerciseRef());
     collectionExerciseEndEventDTO.setSurveyRef(survey.getId());
-    collectionExerciseEndEventDTO.setSupplementaryDatasetId(supplementaryDatasetId);
-    collectionExerciseEndEventDTO.setEndDate(endDate);
+    collectionExerciseEndEventDTO.setSupplementaryDatasetId(
+        collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId());
+    collectionExerciseEndEventDTO.setEndDate(collectionExercise.getScheduledEndDateTime());
 
     try {
       String payload = objectMapper.writeValueAsString(collectionExerciseEndEventDTO);

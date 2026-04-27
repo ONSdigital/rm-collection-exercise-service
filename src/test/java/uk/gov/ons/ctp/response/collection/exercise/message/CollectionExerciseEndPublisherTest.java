@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication;
 import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
 
@@ -30,10 +32,15 @@ public class CollectionExerciseEndPublisherTest {
   @Test
   public void testSendCollectionExerciseEnd() throws Exception {
     UUID collectionExerciseId = UUID.randomUUID();
-    UUID surveyID = UUID.randomUUID();
     UUID supplementaryDatasetID = UUID.randomUUID();
     String exerciseRef = "0001";
     String surveyRef = "001";
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(collectionExerciseId);
+    collectionExercise.setExerciseRef(exerciseRef);
+    SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
+    supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetID);
+    collectionExercise.setSupplementaryDatasetEntity(supplementaryDatasetEntity);
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     ObjectMapper mapper = new ObjectMapper();
@@ -49,8 +56,7 @@ public class CollectionExerciseEndPublisherTest {
         .thenReturn(payload);
     when(surveyService.findSurvey(any())).thenReturn(surveyDTO);
 
-    collectionExerciseEndPublisher.sendCollectionExerciseEnd(
-        collectionExerciseId, supplementaryDatasetID, exerciseRef, timestamp, surveyID);
+    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExercise);
 
     verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
     verify(messagingGateway, times(1)).sendToPubsub(payload);

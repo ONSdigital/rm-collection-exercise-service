@@ -426,14 +426,7 @@ public class EventService {
                       "Set collection exercise to ENDED state",
                       kv("collection_exercise_id", event.getCollectionExercise().getId()));
                   collectionExerciseEndPublisher.sendCollectionExerciseEnd(
-                      event.getCollectionExercise().getId(),
-                      event
-                          .getCollectionExercise()
-                          .getSupplementaryDatasetEntity()
-                          .getSupplementaryDatasetId(),
-                      event.getCollectionExercise().getExerciseRef(),
-                      event.getCollectionExercise().getScheduledEndDateTime(),
-                      event.getCollectionExercise().getSurveyId());
+                      event.getCollectionExercise());
                 } catch (CTPException e) {
                   log.error(
                       "Failed to set collection exercise to ENDED state",
