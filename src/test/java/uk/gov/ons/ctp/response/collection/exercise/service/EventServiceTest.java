@@ -30,6 +30,7 @@ import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
 import uk.gov.ons.ctp.response.collection.exercise.config.AppConfig;
 import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
 import uk.gov.ons.ctp.response.collection.exercise.domain.Event;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.error.CTPException.Fault;
 import uk.gov.ons.ctp.response.collection.exercise.lib.common.redis.EndpointCacheDataDeleter;
@@ -575,6 +576,9 @@ public class EventServiceTest {
     CollectionExercise collectionExercise = new CollectionExercise();
     collectionExercise.setSampleSize(1);
     collectionExercise.setState(CollectionExerciseState.LIVE);
+    SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
+    supplementaryDatasetEntity.setSupplementaryDatasetId(UUID.randomUUID());
+    collectionExercise.setSupplementaryDatasetEntity(supplementaryDatasetEntity);
     event.setCollectionExercise(collectionExercise);
     list.add(event);
     Stream<Event> eventStream = list.stream();
