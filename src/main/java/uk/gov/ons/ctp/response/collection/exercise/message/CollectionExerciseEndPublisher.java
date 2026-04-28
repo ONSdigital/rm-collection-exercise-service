@@ -34,12 +34,12 @@ public class CollectionExerciseEndPublisher {
     if (collectionExercise.getSupplementaryDatasetEntity() != null) {
       collectionExerciseEndEventDTO.setSupplementaryDatasetId(
           collectionExercise.getSupplementaryDatasetEntity().getSupplementaryDatasetId());
+      collectionExerciseEndEventDTO.setPeriod(collectionExercise.getExerciseRef());
+      collectionExerciseEndEventDTO.setSurveyRef(survey.getId());
+      collectionExerciseEndEventDTO.setEndDate(collectionExercise.getScheduledEndDateTime());
     }
 
     collectionExerciseEndEventDTO.setCollectionExerciseId(collectionExercise.getId());
-    collectionExerciseEndEventDTO.setPeriod(collectionExercise.getExerciseRef());
-    collectionExerciseEndEventDTO.setSurveyRef(survey.getId());
-    collectionExerciseEndEventDTO.setEndDate(collectionExercise.getScheduledEndDateTime());
 
     try {
       String payload = objectMapper.writeValueAsString(collectionExerciseEndEventDTO);
