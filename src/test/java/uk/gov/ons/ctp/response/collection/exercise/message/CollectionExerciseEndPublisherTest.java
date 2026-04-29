@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Timestamp;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +12,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.ctp.response.collection.exercise.CollectionExerciseApplication;
+import uk.gov.ons.ctp.response.collection.exercise.client.SurveySvcClient;
+import uk.gov.ons.ctp.response.collection.exercise.domain.CollectionExercise;
+import uk.gov.ons.ctp.response.collection.exercise.domain.SupplementaryDatasetEntity;
+import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.SurveyDTO;
 import uk.gov.ons.ctp.response.collection.exercise.message.dto.CollectionExerciseEndEventDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollectionExerciseEndPublisherTest {
 
   @Mock private CollectionExerciseApplication.CollectionExerciseEndOutboundGateway messagingGateway;
+
+  @Mock private SurveySvcClient surveyService;
 
   @Mock private ObjectMapper objectMapper;
 
@@ -25,14 +32,60 @@ public class CollectionExerciseEndPublisherTest {
   @Test
   public void testSendCollectionExerciseEnd() throws Exception {
     UUID collectionExerciseId = UUID.randomUUID();
+    UUID supplementaryDatasetID = UUID.randomUUID();
+    String exerciseRef = "0001";
+    String surveyRef = "001";
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(collectionExerciseId);
+    collectionExercise.setExerciseRef(exerciseRef);
+    SupplementaryDatasetEntity supplementaryDatasetEntity = new SupplementaryDatasetEntity();
+    supplementaryDatasetEntity.setSupplementaryDatasetId(supplementaryDatasetID);
+    collectionExercise.setSupplementaryDatasetEntity(supplementaryDatasetEntity);
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     ObjectMapper mapper = new ObjectMapper();
     String payload =
-        mapper.writeValueAsString(new CollectionExerciseEndEventDTO(collectionExerciseId));
+        mapper.writeValueAsString(
+            new CollectionExerciseEndEventDTO(
+                collectionExerciseId, supplementaryDatasetID, exerciseRef, surveyRef, timestamp));
+
+    SurveyDTO surveyDTO = new SurveyDTO();
+    surveyDTO.setId("001");
+
     when(objectMapper.writeValueAsString(any(CollectionExerciseEndEventDTO.class)))
         .thenReturn(payload);
+    when(surveyService.findSurvey(any())).thenReturn(surveyDTO);
 
-    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExerciseId);
+    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExercise);
+
+    verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
+    verify(messagingGateway, times(1)).sendToPubsub(payload);
+  }
+
+  @Test
+  public void testSendCollectionExerciseEndNoSupData() throws Exception {
+    UUID collectionExerciseId = UUID.randomUUID();
+    String exerciseRef = "0001";
+    String surveyRef = "001";
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(collectionExerciseId);
+    collectionExercise.setExerciseRef(exerciseRef);
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+    ObjectMapper mapper = new ObjectMapper();
+    String payload =
+        mapper.writeValueAsString(
+            new CollectionExerciseEndEventDTO(
+                collectionExerciseId, null, exerciseRef, surveyRef, timestamp));
+
+    SurveyDTO surveyDTO = new SurveyDTO();
+    surveyDTO.setId("001");
+
+    when(objectMapper.writeValueAsString(any(CollectionExerciseEndEventDTO.class)))
+        .thenReturn(payload);
+    when(surveyService.findSurvey(any())).thenReturn(surveyDTO);
+
+    collectionExerciseEndPublisher.sendCollectionExerciseEnd(collectionExercise);
 
     verify(objectMapper, times(1)).writeValueAsString(any(CollectionExerciseEndEventDTO.class));
     verify(messagingGateway, times(1)).sendToPubsub(payload);
