@@ -75,5 +75,5 @@ gcp:
   supplementaryDataServiceSubscription: supplementary-data-service-subscription
 
 loadBalancer:
-  ipAddress: "10.110.128.12"
+  ipAddressName: "collection-exercise-ip"
   enabled: false

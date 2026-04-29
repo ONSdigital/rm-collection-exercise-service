@@ -5,11 +5,10 @@ metadata:
   name: collection-exercise-lb
   annotations:
     networking.gke.io/load-balancer-type: "Internal"
-    networking.gke.io/load-balancer-ip-addresses: {{ .Values.loadBalancer.ipAddress }}
+    networking.gke.io/load-balancer-ip-addresses: {{ .Values.loadBalancer.ipAddressName }}
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Cluster
-  loadBalancerIP: {{ .Values.loadBalancer.ipAddress }}
   selector:
     app: collection-exercise
   ports:
