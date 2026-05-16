@@ -25,7 +25,7 @@
    
    It receives data from response operation UI to create a new collection exercise record over the endpoint
    `/collectionexercises`. At this point a service gives a call to survey-svc to retrieve existing survey based on 
-   `surveyId` or `surveyref` present in the reqest body, if the survery exists the service looks for an existing 
+   `surveyId` or `surveyref` present in the request body, if the survery exists the service looks for an existing 
    collection exercise and if not present it creates a record to `collectionexercise` table. 
    
    It receives data from response operation UI to create an event against an existing collection exercise record over 
