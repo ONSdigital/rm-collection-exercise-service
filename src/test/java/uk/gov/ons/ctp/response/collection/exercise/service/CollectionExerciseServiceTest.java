@@ -40,6 +40,7 @@ import uk.gov.ons.ctp.response.collection.exercise.lib.survey.representation.Sur
 import uk.gov.ons.ctp.response.collection.exercise.repository.CollectionExerciseRepository;
 import uk.gov.ons.ctp.response.collection.exercise.repository.SampleLinkRepository;
 import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO;
+import uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseState;
 import uk.gov.ons.ctp.response.collection.exercise.state.CollectionExerciseStateTransitionManagerFactory;
 
 /** UnitTests for CollectionExerciseServiceImpl */
@@ -538,7 +539,7 @@ public class CollectionExerciseServiceTest {
     List<UUID> collectionExerciseIds =
         Arrays.asList(older.getId(), latest.getId(), otherSurvey.getId());
 
-    when(collexRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE"))
+    when(collexRepo.findByIdInAndState(collectionExerciseIds, CollectionExerciseState.LIVE))
         .thenReturn(Arrays.asList(older, latest, otherSurvey));
 
     List<CollectionExercise> result =
@@ -549,7 +550,7 @@ public class CollectionExerciseServiceTest {
     assertEquals(true, result.contains(otherSurvey));
     assertEquals(false, result.contains(older));
 
-    verify(collexRepo).findByIdInAndStateFk(collectionExerciseIds, "LIVE");
+    verify(collexRepo).findByIdInAndState(collectionExerciseIds, CollectionExerciseState.LIVE);
   }
 
   @Test
@@ -563,7 +564,7 @@ public class CollectionExerciseServiceTest {
 
     List<UUID> collectionExerciseIds = Collections.singletonList(collectionExercise.getId());
 
-    when(collexRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE"))
+    when(collexRepo.findByIdInAndState(collectionExerciseIds, CollectionExerciseState.LIVE))
         .thenReturn(Collections.singletonList(collectionExercise));
 
     List<CollectionExercise> result =
@@ -577,7 +578,7 @@ public class CollectionExerciseServiceTest {
   public void testGetLatestLiveCollectionExercisesReturnsEmptyList() {
     List<UUID> collectionExerciseIds = Collections.singletonList(UUID.randomUUID());
 
-    when(collexRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE"))
+    when(collexRepo.findByIdInAndState(collectionExerciseIds, CollectionExerciseState.LIVE))
         .thenReturn(Collections.emptyList());
 
     List<CollectionExercise> result =

@@ -665,7 +665,7 @@ public class CollectionExerciseService {
       final List<UUID> collectionExerciseIds) {
 
     List<CollectionExercise> collectionExercises =
-        collectRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE");
+        collectRepo.findByIdInAndState(collectionExerciseIds, CollectionExerciseState.LIVE);
 
     Map<UUID, CollectionExercise> latestBySurvey = new HashMap<>();
 
