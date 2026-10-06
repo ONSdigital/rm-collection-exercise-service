@@ -653,4 +653,36 @@ public class CollectionExerciseService {
     sampleLink.setCollectionExerciseId(collectionExerciseId);
     return sampleLinkRepository.saveAndFlush(sampleLink);
   }
+
+  /**
+   * Returns the latest live Collection Exercise for each survey from the supplied Collection
+   * Exercise IDs.
+   *
+   * @param collectionExerciseIds collection exercise IDs
+   * @return latest live Collection Exercise for each survey
+   */
+  public List<CollectionExercise> getLatestLiveCollectionExercises(
+      final List<UUID> collectionExerciseIds) {
+
+    List<CollectionExercise> collectionExercises =
+        collectRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE");
+
+    Map<UUID, CollectionExercise> latestBySurvey = new HashMap<>();
+
+    for (CollectionExercise collectionExercise : collectionExercises) {
+      UUID surveyId = collectionExercise.getSurveyId();
+
+      CollectionExercise currentLatest = latestBySurvey.get(surveyId);
+
+      if (currentLatest == null
+          || collectionExercise
+              .getScheduledStartDateTime()
+              .after(currentLatest.getScheduledStartDateTime())) {
+
+        latestBySurvey.put(surveyId, collectionExercise);
+      }
+    }
+
+    return new ArrayList<>(latestBySurvey.values());
+  }
 }

@@ -910,4 +910,26 @@ public class CollectionExerciseEndpoint {
 
     return ResponseEntity.noContent().build();
   }
+
+  /**
+   * Returns the latest live Collection Exercise for each survey from the supplied Collection
+   * Exercise IDs.
+   *
+   * @param collectionExerciseIds collection exercise IDs
+   * @return latest live Collection Exercise for each survey
+   * @throws CTPException on error
+   */
+  @RequestMapping(value = "/latest", method = RequestMethod.POST)
+  public ResponseEntity<List<CollectionExercise>> getLatestLiveCollectionExercises(
+      @RequestBody final List<UUID> collectionExerciseIds) throws CTPException {
+
+    log.info(
+        "Getting latest live collection exercises",
+        kv("collection_exercise_ids", collectionExerciseIds));
+
+    List<CollectionExercise> liveCollectionExercises =
+        collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds);
+
+    return ResponseEntity.ok(liveCollectionExercises);
+  }
 }

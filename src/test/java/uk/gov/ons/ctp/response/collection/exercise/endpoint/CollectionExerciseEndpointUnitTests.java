@@ -926,4 +926,45 @@ public class CollectionExerciseEndpointUnitTests {
                 "$.supplementaryDatasetEntity.supplementaryDatasetJson",
                 is(SUPPLEMENTARY_DATASET_JSON)));
   }
+
+  @Test
+  public void getLatestLiveCollectionExercises() throws Exception {
+    List<UUID> collectionExerciseIds =
+        Arrays.asList(COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2);
+
+    when(collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds))
+        .thenReturn(collectionExerciseResults);
+
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            postJson(
+                "/collectionexercises/latest",
+                String.format("[\"%s\",\"%s\"]", COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2)));
+
+    actions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(
+            jsonPath(
+                "$[*].id",
+                containsInAnyOrder(
+                    COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())));
+  }
+
+  @Test
+  public void getLatestLiveCollectionExercisesReturnsEmptyList() throws Exception {
+    List<UUID> collectionExerciseIds =
+        Arrays.asList(COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2);
+
+    when(collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds))
+        .thenReturn(Collections.emptyList());
+
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            postJson(
+                "/collectionexercises/latest",
+                String.format("[\"%s\",\"%s\"]", COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2)));
+
+    actions.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+  }
 }

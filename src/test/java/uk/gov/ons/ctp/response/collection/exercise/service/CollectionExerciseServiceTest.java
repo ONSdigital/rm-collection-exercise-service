@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.ons.ctp.response.collection.exercise.representation.CollectionExerciseDTO.CollectionExerciseEvent.CI_SAMPLE_DELETED;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -512,5 +513,76 @@ public class CollectionExerciseServiceTest {
         .deleteBySampleSummaryIdAndCollectionExerciseId(sampleSummaryId, collectionExerciseId);
     verify(collectionExerciseService, times(1))
         .transitionCollectionExercise(collectionExerciseId, CI_SAMPLE_DELETED);
+  }
+
+  @Test
+  public void testGetLatestLiveCollectionExercisesReturnsLatestForEachSurvey() {
+    UUID surveyId1 = UUID.randomUUID();
+    UUID surveyId2 = UUID.randomUUID();
+
+    CollectionExercise older = new CollectionExercise();
+    older.setId(UUID.randomUUID());
+    older.setSurveyId(surveyId1);
+    older.setScheduledStartDateTime(Timestamp.valueOf("2026-01-01 09:00:00"));
+
+    CollectionExercise latest = new CollectionExercise();
+    latest.setId(UUID.randomUUID());
+    latest.setSurveyId(surveyId1);
+    latest.setScheduledStartDateTime(Timestamp.valueOf("2026-02-01 09:00:00"));
+
+    CollectionExercise otherSurvey = new CollectionExercise();
+    otherSurvey.setId(UUID.randomUUID());
+    otherSurvey.setSurveyId(surveyId2);
+    otherSurvey.setScheduledStartDateTime(Timestamp.valueOf("2026-03-01 09:00:00"));
+
+    List<UUID> collectionExerciseIds =
+        Arrays.asList(older.getId(), latest.getId(), otherSurvey.getId());
+
+    when(collexRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE"))
+        .thenReturn(Arrays.asList(older, latest, otherSurvey));
+
+    List<CollectionExercise> result =
+        collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds);
+
+    assertEquals(2, result.size());
+    assertEquals(true, result.contains(latest));
+    assertEquals(true, result.contains(otherSurvey));
+    assertEquals(false, result.contains(older));
+
+    verify(collexRepo).findByIdInAndStateFk(collectionExerciseIds, "LIVE");
+  }
+
+  @Test
+  public void testGetLatestLiveCollectionExercisesReturnsSingleExercise() {
+    UUID surveyId = UUID.randomUUID();
+
+    CollectionExercise collectionExercise = new CollectionExercise();
+    collectionExercise.setId(UUID.randomUUID());
+    collectionExercise.setSurveyId(surveyId);
+    collectionExercise.setScheduledStartDateTime(Timestamp.valueOf("2026-01-01 09:00:00"));
+
+    List<UUID> collectionExerciseIds = Collections.singletonList(collectionExercise.getId());
+
+    when(collexRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE"))
+        .thenReturn(Collections.singletonList(collectionExercise));
+
+    List<CollectionExercise> result =
+        collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds);
+
+    assertEquals(1, result.size());
+    assertEquals(collectionExercise, result.get(0));
+  }
+
+  @Test
+  public void testGetLatestLiveCollectionExercisesReturnsEmptyList() {
+    List<UUID> collectionExerciseIds = Collections.singletonList(UUID.randomUUID());
+
+    when(collexRepo.findByIdInAndStateFk(collectionExerciseIds, "LIVE"))
+        .thenReturn(Collections.emptyList());
+
+    List<CollectionExercise> result =
+        collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds);
+
+    assertEquals(0, result.size());
   }
 }

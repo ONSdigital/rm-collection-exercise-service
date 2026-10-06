@@ -53,7 +53,9 @@ public interface CollectionExerciseRepository extends JpaRepository<CollectionEx
    * Query repository for list of collection exercises associated with a certain state.
    *
    * @param state for which to return Collection Exercises.
-   * @return collection exercises in the requested state.
+   * @return collection exercises in the requested state.\
    */
   List<CollectionExercise> findByState(CollectionExerciseDTO.CollectionExerciseState state);
+
+  List<CollectionExercise> findByIdInAndStateFk(List<UUID> ids, String stateFk);
 }
