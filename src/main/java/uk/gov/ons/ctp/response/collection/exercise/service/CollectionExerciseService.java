@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -653,19 +654,32 @@ public class CollectionExerciseService {
     sampleLink.setCollectionExerciseId(collectionExerciseId);
     return sampleLinkRepository.saveAndFlush(sampleLink);
   }
-
   /**
-   * Returns the latest live Collection Exercise for each survey from the supplied Collection
-   * Exercise IDs.
+   * Returns Collection Exercises for the supplied Collection Exercise IDs.
+   *
+   * <p>If surveyLatest is true, only the latest started Collection Exercise for each survey is
+   * returned
    *
    * @param collectionExerciseIds collection exercise IDs
-   * @return latest live Collection Exercise for each survey
+   * @param surveyLatest whether to return only the latest Collection Exercise for each survey
+   * @return Collection Exercises that have started
    */
-  public List<CollectionExercise> getLatestLiveCollectionExercises(
-      final List<UUID> collectionExerciseIds) {
+  public List<CollectionExercise> getCollectionExercises(
+      List<UUID> collectionExerciseIds, boolean surveyLatest) {
+
+    Date now = new Date();
 
     List<CollectionExercise> collectionExercises =
-        collectRepo.findByIdInAndState(collectionExerciseIds, CollectionExerciseState.LIVE);
+        collectRepo
+            .findByIdIn(collectionExerciseIds)
+            .stream()
+            .filter(
+                collectionExercise -> collectionExercise.getScheduledStartDateTime().before(now))
+            .collect(Collectors.toList());
+
+    if (!surveyLatest) {
+      return collectionExercises;
+    }
 
     Map<UUID, CollectionExercise> latestBySurvey = new HashMap<>();
 

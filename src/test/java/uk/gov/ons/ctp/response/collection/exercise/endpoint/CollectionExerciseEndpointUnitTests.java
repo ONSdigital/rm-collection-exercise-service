@@ -928,17 +928,17 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   @Test
-  public void getLatestLiveCollectionExercises() throws Exception {
+  public void getCollectionExercises() throws Exception {
     List<UUID> collectionExerciseIds =
         Arrays.asList(COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2);
 
-    when(collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds))
+    when(collectionExerciseService.getCollectionExercises(collectionExerciseIds, false))
         .thenReturn(collectionExerciseResults);
 
     ResultActions actions =
         mockCollectionExerciseMvc.perform(
             postJson(
-                "/collectionexercises/latest",
+                "/collectionexercises/ids",
                 String.format("[\"%s\",\"%s\"]", COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2)));
 
     actions
@@ -952,17 +952,41 @@ public class CollectionExerciseEndpointUnitTests {
   }
 
   @Test
-  public void getLatestLiveCollectionExercisesReturnsEmptyList() throws Exception {
+  public void getCollectionExercisesWithSurveyLatest() throws Exception {
     List<UUID> collectionExerciseIds =
         Arrays.asList(COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2);
 
-    when(collectionExerciseService.getLatestLiveCollectionExercises(collectionExerciseIds))
+    when(collectionExerciseService.getCollectionExercises(collectionExerciseIds, true))
+        .thenReturn(collectionExerciseResults);
+
+    ResultActions actions =
+        mockCollectionExerciseMvc.perform(
+            postJson(
+                "/collectionexercises/ids?surveyLatest=true",
+                String.format("[\"%s\",\"%s\"]", COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2)));
+
+    actions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(
+            jsonPath(
+                "$[*].id",
+                containsInAnyOrder(
+                    COLLECTIONEXERCISE_ID1.toString(), COLLECTIONEXERCISE_ID2.toString())));
+  }
+
+  @Test
+  public void getCollectionExercisesReturnsEmptyList() throws Exception {
+    List<UUID> collectionExerciseIds =
+        Arrays.asList(COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2);
+
+    when(collectionExerciseService.getCollectionExercises(collectionExerciseIds, false))
         .thenReturn(Collections.emptyList());
 
     ResultActions actions =
         mockCollectionExerciseMvc.perform(
             postJson(
-                "/collectionexercises/latest",
+                "/collectionexercises/ids",
                 String.format("[\"%s\",\"%s\"]", COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2)));
 
     actions.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
