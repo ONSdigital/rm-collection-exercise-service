@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -652,5 +653,50 @@ public class CollectionExerciseService {
     sampleLink.setSampleSummaryId(sampleSummaryId);
     sampleLink.setCollectionExerciseId(collectionExerciseId);
     return sampleLinkRepository.saveAndFlush(sampleLink);
+  }
+  /**
+   * Returns Collection Exercises for the supplied Collection Exercise IDs.
+   *
+   * <p>If surveyLatest is true, only the latest started Collection Exercise for each survey is
+   * returned
+   *
+   * @param collectionExerciseIds collection exercise IDs
+   * @param surveyLatest whether to return only the latest Collection Exercise for each survey
+   * @return Collection Exercises that have started
+   */
+  public List<CollectionExercise> getCollectionExercises(
+      List<UUID> collectionExerciseIds, boolean surveyLatest) {
+
+    Date now = new Date();
+
+    List<CollectionExercise> collectionExercises =
+        collectRepo
+            .findByIdIn(collectionExerciseIds)
+            .stream()
+            .filter(
+                collectionExercise -> collectionExercise.getScheduledStartDateTime().before(now))
+            .collect(Collectors.toList());
+
+    if (!surveyLatest) {
+      return collectionExercises;
+    }
+
+    Map<UUID, CollectionExercise> latestBySurvey = new HashMap<>();
+
+    for (CollectionExercise collectionExercise : collectionExercises) {
+      UUID surveyId = collectionExercise.getSurveyId();
+
+      CollectionExercise currentLatest = latestBySurvey.get(surveyId);
+
+      if (currentLatest == null
+          || collectionExercise
+              .getScheduledStartDateTime()
+              .after(currentLatest.getScheduledStartDateTime())) {
+
+        latestBySurvey.put(surveyId, collectionExercise);
+      }
+    }
+
+    return new ArrayList<>(latestBySurvey.values());
   }
 }
