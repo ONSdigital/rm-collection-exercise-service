@@ -962,7 +962,7 @@ public class CollectionExerciseEndpointUnitTests {
     ResultActions actions =
         mockCollectionExerciseMvc.perform(
             postJson(
-                "/collectionexercises/ids?surveyLatest=true",
+                "/collectionexercises/ids?survey_latest=true",
                 String.format("[\"%s\",\"%s\"]", COLLECTIONEXERCISE_ID1, COLLECTIONEXERCISE_ID2)));
 
     actions

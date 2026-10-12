@@ -713,7 +713,7 @@ paths:
       summary: POST request to retrieve collection exercises for the supplied collection exercise IDs
       operationId: getCollectionExercises
       parameters:
-        - name: surveyLatest
+        - name: survey_latest
           in: query
           required: false
           schema:

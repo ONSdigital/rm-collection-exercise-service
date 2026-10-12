@@ -922,7 +922,7 @@ public class CollectionExerciseEndpoint {
   @RequestMapping(value = "/ids", method = RequestMethod.POST)
   public ResponseEntity<List<CollectionExercise>> getCollectionExercises(
       @RequestBody final List<UUID> collectionExerciseIds,
-      @RequestParam(value = "surveyLatest", defaultValue = "false") final boolean surveyLatest)
+      @RequestParam(value = "survey_latest", defaultValue = "false") final boolean surveyLatest)
       throws CTPException {
 
     log.info(
