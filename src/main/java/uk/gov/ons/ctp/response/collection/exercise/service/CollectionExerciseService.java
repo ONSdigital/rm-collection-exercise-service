@@ -657,8 +657,7 @@ public class CollectionExerciseService {
   /**
    * Returns Collection Exercises for the supplied Collection Exercise IDs.
    *
-   * If surveyLatest is true, only the latest started Collection Exercise for each survey is
-   * returned
+   * If surveyLatest is true, only the latest started Collection Exercise for each survey is returned
    *
    * @param collectionExerciseIds collection exercise IDs
    * @param surveyLatest whether to return only the latest Collection Exercise for each survey
