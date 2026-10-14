@@ -3,6 +3,8 @@ package uk.gov.ons.ctp.response.collection.exercise.service;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -598,8 +600,8 @@ public class CollectionExerciseServiceTest {
         collectionExerciseService.getCollectionExercises(collectionExerciseIds, false);
 
     assertEquals(1, result.size());
-    assertEquals(true, result.contains(started));
-    assertEquals(false, result.contains(future));
+    assertTrue(result.contains(started));
+    assertFalse(result.contains(future));
   }
 
   @Test

@@ -827,6 +827,7 @@ components:
             - VALIDATED
             - FAILEDVALIDATION
             - LIVE
+            - ENDED
         exerciseRef:
           pattern: ^[0-9]{1,6}$
           type: string
@@ -934,6 +935,7 @@ components:
             - VALIDATED
             - FAILEDVALIDATION
             - LIVE
+            - ENDED
         sampleSize:
           type: integer
           format: int32

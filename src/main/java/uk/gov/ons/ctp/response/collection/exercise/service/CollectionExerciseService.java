@@ -654,15 +654,16 @@ public class CollectionExerciseService {
     sampleLink.setCollectionExerciseId(collectionExerciseId);
     return sampleLinkRepository.saveAndFlush(sampleLink);
   }
+
   /**
    * Returns Collection Exercises for the supplied Collection Exercise IDs.
    *
    * <p>If surveyLatest is true, only the latest started Collection Exercise for each survey is
-   * returned
+   * returned.
    *
    * @param collectionExerciseIds collection exercise IDs
    * @param surveyLatest whether to return only the latest Collection Exercise for each survey
-   * @return Collection Exercises that have started
+   * @return Collection Exercises matching the supplied IDs
    */
   public List<CollectionExercise> getCollectionExercises(
       List<UUID> collectionExerciseIds, boolean surveyLatest) {
@@ -679,9 +680,20 @@ public class CollectionExerciseService {
                         && collectionExercise.getScheduledStartDateTime().before(now))
             .collect(Collectors.toList());
 
-    if (!surveyLatest) {
-      return collectionExercises;
-    }
+    return surveyLatest
+        ? getLatestCollectionExercisesBySurvey(collectionExercises)
+        : collectionExercises;
+  }
+
+  /**
+   * Returns the latest started Collection Exercise for each survey from the supplied Collection
+   * Exercises.
+   *
+   * @param collectionExercises Collection Exercises to evaluate
+   * @return the latest started Collection Exercise for each survey
+   */
+  private List<CollectionExercise> getLatestCollectionExercisesBySurvey(
+      List<CollectionExercise> collectionExercises) {
 
     Map<UUID, CollectionExercise> latestBySurvey = new HashMap<>();
 
