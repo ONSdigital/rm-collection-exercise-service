@@ -706,6 +706,39 @@ paths:
                 type: object
         400:
           description: Bad Request
+  /collectionexercises/ids:
+    post:
+      tags:
+        - collection-exercise-endpoint
+      summary: POST request to retrieve collection exercises for the supplied collection exercise IDs
+      operationId: getCollectionExercises
+      parameters:
+        - name: survey_latest
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+      responses:
+        200:
+          description: Successful retrieval of collection exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CollectionExercise"
+        401:
+          description: Unauthorized
   /sample/summary-readiness:
     post:
       tags:
@@ -794,6 +827,7 @@ components:
             - VALIDATED
             - FAILEDVALIDATION
             - LIVE
+            - ENDED
         exerciseRef:
           pattern: ^[0-9]{1,6}$
           type: string
@@ -901,6 +935,7 @@ components:
             - VALIDATED
             - FAILEDVALIDATION
             - LIVE
+            - ENDED
         sampleSize:
           type: integer
           format: int32

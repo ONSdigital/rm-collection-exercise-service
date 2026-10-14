@@ -910,4 +910,30 @@ public class CollectionExerciseEndpoint {
 
     return ResponseEntity.noContent().build();
   }
+
+  /**
+   * Returns Collection Exercises for the supplied Collection Exercise IDs. Due to the amount of IDs
+   * the endpoint has been made a post
+   *
+   * @param collectionExerciseIds collection exercise IDs
+   * @param surveyLatest whether to return only the latest Collection Exercise for each survey
+   * @return Collection Exercises for the supplied IDs
+   * @throws CTPException on error
+   */
+  @RequestMapping(value = "/ids", method = RequestMethod.POST)
+  public ResponseEntity<List<CollectionExercise>> getCollectionExercises(
+      @RequestBody final List<UUID> collectionExerciseIds,
+      @RequestParam(value = "survey_latest", defaultValue = "false") final boolean surveyLatest)
+      throws CTPException {
+
+    List<CollectionExercise> collectionExercises =
+        collectionExerciseService.getCollectionExercises(collectionExerciseIds, surveyLatest);
+
+    log.info(
+        "Retrieved collection exercises",
+        kv("count", collectionExercises.size()),
+        kv("survey_latest", surveyLatest));
+
+    return ResponseEntity.ok(collectionExercises);
+  }
 }
