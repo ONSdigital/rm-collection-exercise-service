@@ -674,7 +674,9 @@ public class CollectionExerciseService {
             .findByIdIn(collectionExerciseIds)
             .stream()
             .filter(
-                collectionExercise -> collectionExercise.getScheduledStartDateTime().before(now))
+                collectionExercise ->
+                    collectionExercise.getScheduledStartDateTime() != null
+                        && collectionExercise.getScheduledStartDateTime().before(now))
             .collect(Collectors.toList());
 
     if (!surveyLatest) {
