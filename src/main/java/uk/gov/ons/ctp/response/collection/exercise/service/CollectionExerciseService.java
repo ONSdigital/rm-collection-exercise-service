@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -678,7 +677,7 @@ public class CollectionExerciseService {
                 collectionExercise ->
                     collectionExercise.getScheduledStartDateTime() != null
                         && collectionExercise.getScheduledStartDateTime().before(now))
-            .collect(Collectors.toList());
+            .toList();
 
     return surveyLatest
         ? getLatestCollectionExercisesBySurvey(collectionExercises)
